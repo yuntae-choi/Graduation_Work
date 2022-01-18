@@ -1,2 +1,2 @@
-# Senier_Project
+# Graduation_Work
  게임이름: WINTER

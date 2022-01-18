@@ -1,3 +1,40 @@
+#####################
+
+#Unreal Generated Files#
+
+####################
+
+*/Build
+
+*/Binaries
+
+*/DerivedDataCache
+
+*/Intermediate
+
+*/Saved
+
+*/Plugins
+
+############
+
+#Asset Files#
+
+###########
+
+*/Content/AssetFolderName1
+
+*/Content/AssetFolderName2
+
+*/Content/AssetFolderName3
+
+##################
+
+#VS Generated Files#
+
+#################
+
+*/.vs
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,visualstudio,unrealengine,c++
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,visualstudio,unrealengine,c++
