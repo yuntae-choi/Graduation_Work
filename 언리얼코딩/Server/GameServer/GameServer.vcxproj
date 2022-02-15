@@ -159,6 +159,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CLIENT.cpp" />
+    <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Obj.cpp" />
+    <ClCompile Include="Overlap.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -168,7 +172,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CLIENT.h" />
+    <ClInclude Include="Enum.h" />
+    <ClInclude Include="Item.h" />
+    <ClInclude Include="Obj.h" />
+    <ClInclude Include="Overlap.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Struct.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lua54.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -11,6 +11,7 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include <concurrent_priority_queue.h>
+#include <windows.h>
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment (lib, "MSWSock.LIB")
 
@@ -22,6 +23,8 @@ using namespace std;
 #define SERVER_PORT		8000
 #define SERVER_IP		"127.0.0.1"
 #define MAX_CLIENTS		100
+const int BUFSIZE = 256;
+
 
 // 소켓 통신 구조체
 struct stSOCKETINFO
@@ -58,7 +61,33 @@ struct Tmp {
 	float x;
 };
 
+class Overlap {
+public:
+	WSAOVERLAPPED   _wsa_over;
+	//COMMAND         _op;
+	WSABUF         _wsa_buf;
+	unsigned char   _net_buf[BUFSIZE];
+	int            _target;
+public:
+	/*Overlap(COMMAND _op, char num_bytes, void* mess) : _op(_op)
+	{
+		ZeroMemory(&_wsa_over, sizeof(_wsa_over));
+		_wsa_buf.buf = reinterpret_cast<char*>(_net_buf);
+		_wsa_buf.len = num_bytes;
+		memcpy(_net_buf, mess, num_bytes);
+	}
 
+	Overlap(COMMAND _op) : _op(_op) {}
+
+	Overlap()
+	{
+		_op = OP_RECV;
+	}*/
+
+	~Overlap()
+	{
+	}
+};
 
 class ARENABATTLE_API ClientSocket : public FRunnable
 {
@@ -88,27 +117,27 @@ public:
 
 	void do_recv()
 	{
-		/*DWORD recv_flag = 0;
-		ZeroMemory(&_recv_over._wsa_over, sizeof(_recv_over._wsa_over));
-		_recv_over._wsa_buf.buf = reinterpret_cast<char*>(_recv_over._net_buf + _prev_size);
-		_recv_over._wsa_buf.len = sizeof(_recv_over._net_buf) - _prev_size;
-		int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, NULL);
-		if (SOCKET_ERROR == ret) {
-			int error_num = WSAGetLastError();
-			if (ERROR_IO_PENDING != error_num)
-				error_display(error_num);
-		}*/
+		DWORD recv_flag = 0;
+		//ZeroMemory(&_recv_over._wsa_over, sizeof(_recv_over._wsa_over));
+		//_recv_over._wsa_buf.buf = reinterpret_cast<char*>(_recv_over._net_buf + _prev_size);
+		//_recv_over._wsa_buf.len = sizeof(_recv_over._net_buf) - _prev_size;
+		//int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, NULL);
+		//if (SOCKET_ERROR == ret) {
+		//	int error_num = WSAGetLastError();
+		//	if (ERROR_IO_PENDING != error_num)
+		//		//error_display(error_num);
+		//}
 	}
 
 	void do_send(int num_bytes, void* mess)
 	{
-		/*Overlap* ex_over = new Overlap(OP_SEND, num_bytes, mess);
-		int ret = WSASend(_socket, &ex_over->_wsa_buf, 1, 0, 0, &ex_over->_wsa_over, NULL);
-		if (SOCKET_ERROR == ret) {
-			int error_num = WSAGetLastError();
-			if (ERROR_IO_PENDING != error_num)
-				error_display(error_num);
-		}*/
+		//Overlap* ex_over = new Overlap(OP_SEND, num_bytes, mess);
+		//int ret = WSASend(_socket, &ex_over->_wsa_buf, 1, 0, 0, &ex_over->_wsa_over, NULL);
+		//if (SOCKET_ERROR == ret) {
+		//	int error_num = WSAGetLastError();
+		//	if (ERROR_IO_PENDING != error_num)
+				//error_display(error_num);
+		//}
 	}
 
 

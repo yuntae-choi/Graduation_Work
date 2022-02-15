@@ -7,6 +7,9 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{2bf9a376-b208-4bf7-b983-424da0c859fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="NewFilter1">
+      <UniqueIdentifier>{b40d05a1-b521-48e9-bcda-a981d8e2a7e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -16,6 +19,24 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Types.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lauxlib.h">
+      <Filter>NewFilter1</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lua.h">
+      <Filter>NewFilter1</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lua.hpp">
+      <Filter>NewFilter1</Filter>
+    </ClInclude>
+    <ClInclude Include="include\luaconf.h">
+      <Filter>NewFilter1</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lualib.h">
+      <Filter>NewFilter1</Filter>
+    </ClInclude>
+    <ClInclude Include="protocol.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
