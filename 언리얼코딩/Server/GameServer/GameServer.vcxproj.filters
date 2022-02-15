@@ -7,6 +7,24 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{b1fdab16-f1e0-45a4-bb9c-1c2f181c7743}</UniqueIdentifier>
     </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{7b26275c-f588-4acf-84cc-966184a6ed40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Exp_Over">
+      <UniqueIdentifier>{fe4e57e7-9dc3-4299-a300-1f70c997e29c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\include">
+      <UniqueIdentifier>{89830157-4e21-44cc-a436-1638968166d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Obj">
+      <UniqueIdentifier>{c2d6d169-d782-4b93-a213-1c7d691fb341}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Obj\Item">
+      <UniqueIdentifier>{ace6e5a9-2d76-44a0-9153-2ececace44bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Obj\Client">
+      <UniqueIdentifier>{e558b900-75ee-4ed6-8e70-495a96aaf8e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameServer.cpp">
@@ -15,10 +33,45 @@
     <ClCompile Include="pch.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Overlap.cpp">
+      <Filter>Exp_Over</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Obj\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="CLIENT.cpp">
+      <Filter>Obj\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Obj.cpp">
+      <Filter>Obj</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Overlap.h">
+      <Filter>Exp_Over</Filter>
+    </ClInclude>
+    <ClInclude Include="Enum.h">
+      <Filter>Utils\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Obj\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.h">
+      <Filter>Utils\include</Filter>
+    </ClInclude>
+    <ClInclude Include="CLIENT.h">
+      <Filter>Obj\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Obj.h">
+      <Filter>Obj</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lua54.lib">
+      <Filter>리소스 파일</Filter>
+    </Library>
   </ItemGroup>
 </Project>

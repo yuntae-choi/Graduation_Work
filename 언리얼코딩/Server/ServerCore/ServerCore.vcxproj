@@ -156,7 +156,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CorePch.h" />
+    <ClInclude Include="include\lauxlib.h" />
+    <ClInclude Include="include\lua.h" />
+    <ClInclude Include="include\lua.hpp" />
+    <ClInclude Include="include\luaconf.h" />
+    <ClInclude Include="include\lualib.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="protocol.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
