@@ -4,6 +4,7 @@
 
 #include "ArenaBattle.h"
 #include "GameFramework/PlayerController.h"
+#include "ClientSocket.h"
 #include "ABPlayerController.generated.h"
 
 /**
@@ -23,4 +24,9 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+
+	ClientSocket*		Socket;			// 서버와 접속할 소켓
+	bool				bIsConnected;	// 서버와 접속 유무
+	int					SessionId;		// 캐릭터의 세션 고유 아이디 (랜덤값)
+	cCharactersInfo*	CharactersInfo;	// 다른 캐릭터의 정보
 };

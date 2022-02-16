@@ -1,21 +1,17 @@
-#pragma once
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "ArenaBattle.h"
 // winsock2 사용을 위해 아래 코멘트 추가
+#pragma comment(lib, "ws2_32.lib")
 #include <WinSock2.h>
 #include <iostream>
 #include <map>
-#include <WS2tcpip.h>
-#include <MSWSock.h>
-#include <concurrent_priority_queue.h>
-#include <windows.h>
-#pragma comment (lib, "WS2_32.LIB")
-#pragma comment (lib, "MSWSock.LIB")
-
 #include "Runtime/Core/Public/HAL/Runnable.h"
+
+class AABGameMode;
+class AABPlayerController;
 
 using namespace std;
 
@@ -23,8 +19,6 @@ using namespace std;
 #define SERVER_PORT		8000
 #define SERVER_IP		"127.0.0.1"
 #define MAX_CLIENTS		100
-const int BUFSIZE = 256;
-
 
 // 소켓 통신 구조체
 struct stSOCKETINFO
@@ -56,94 +50,269 @@ enum EPacketType
 	DESTROY_MONSTER
 };
 
-struct Tmp {
-	EPacketType type;
-	float x;
-};
+// 플레이어 정보
+class cCharacter {
+public:
+	cCharacter() {};
+	~cCharacter() {};
 
-class Overlap {
-public:
-	WSAOVERLAPPED   _wsa_over;
-	//COMMAND         _op;
-	WSABUF         _wsa_buf;
-	unsigned char   _net_buf[BUFSIZE];
-	int            _target;
-public:
-	/*Overlap(COMMAND _op, char num_bytes, void* mess) : _op(_op)
+	// 세션 아이디
+	int SessionId;
+	// 위치
+	float X;
+	float Y;
+	float Z;
+	// 회전값
+	float Yaw;
+	float Pitch;
+	float Roll;
+	// 속도
+	float VX;
+	float VY;
+	float VZ;
+	// 속성
+	bool	IsAlive;	
+	float	HealthValue;
+	bool	IsAttacking;
+
+	friend ostream& operator<<(ostream &stream, cCharacter& info)
 	{
-		ZeroMemory(&_wsa_over, sizeof(_wsa_over));
-		_wsa_buf.buf = reinterpret_cast<char*>(_net_buf);
-		_wsa_buf.len = num_bytes;
-		memcpy(_net_buf, mess, num_bytes);
+		stream << info.SessionId << endl;
+		stream << info.X << endl;
+		stream << info.Y << endl;
+		stream << info.Z << endl;
+		stream << info.VX << endl;
+		stream << info.VY << endl;
+		stream << info.VZ << endl;
+		stream << info.Yaw << endl;
+		stream << info.Pitch << endl;
+		stream << info.Roll << endl;
+		stream << info.IsAlive << endl;		
+		stream << info.HealthValue << endl;
+		stream << info.IsAttacking << endl;
+
+		return stream;
 	}
 
-	Overlap(COMMAND _op) : _op(_op) {}
-
-	Overlap()
+	friend istream& operator>>(istream& stream, cCharacter& info)
 	{
-		_op = OP_RECV;
-	}*/
+		stream >> info.SessionId;
+		stream >> info.X;
+		stream >> info.Y;
+		stream >> info.Z;
+		stream >> info.VX;
+		stream >> info.VY;
+		stream >> info.VZ;
+		stream >> info.Yaw;
+		stream >> info.Pitch;
+		stream >> info.Roll;
+		stream >> info.IsAlive;		
+		stream >> info.HealthValue;
+		stream >> info.IsAttacking;
 
-	~Overlap()
-	{
+		return stream;
 	}
 };
 
+// 플레이어 직렬화/역직렬화 클래스
+class cCharactersInfo
+{
+public:
+	cCharactersInfo() {};
+	~cCharactersInfo() {};
+	
+	map<int, cCharacter> players;
+
+	friend ostream& operator<<(ostream &stream, cCharactersInfo& info)
+	{		
+		stream << info.players.size() << endl;
+		for (auto& kvp : info.players)
+		{
+			stream << kvp.first << endl;
+			stream << kvp.second << endl;
+		}
+
+		return stream;
+	}
+
+	friend istream &operator>>(istream &stream, cCharactersInfo& info)
+	{		
+		int nPlayers = 0;
+		int SessionId = 0;
+		cCharacter Player;
+		info.players.clear();
+
+		stream >> nPlayers;
+		for (int i = 0; i < nPlayers; i++)
+		{
+			stream >> SessionId;
+			stream >> Player;
+			info.players[SessionId] = Player;
+		}
+
+		return stream;
+	}
+};
+
+// 몬스터 정보
+class Monster
+{
+public:
+	float	X;				// X좌표
+	float	Y;				// Y좌표
+	float	Z;				// Z좌표
+	float	Health;			// 체력
+	int		Id;				// 고유 id
+	bool	IsAttacking;		// 타격중인지
+
+	friend ostream& operator<<(ostream &stream, Monster& info)
+	{
+		stream << info.X << endl;
+		stream << info.Y << endl;
+		stream << info.Z << endl;
+		stream << info.Health << endl;
+		stream << info.Id << endl;
+		stream << info.IsAttacking << endl;
+
+		return stream;
+	}
+
+	friend istream& operator>>(istream& stream, Monster& info)
+	{
+		stream >> info.X;
+		stream >> info.Y;
+		stream >> info.Z;
+		stream >> info.Health;
+		stream >> info.Id;
+		stream >> info.IsAttacking;
+
+		return stream;
+	}
+};
+
+// 몬스터 직렬화/역직렬화 클래스
+class MonsterSet
+{
+public:
+	map<int, Monster> monsters;
+
+	friend ostream& operator<<(ostream &stream, MonsterSet& info)
+	{
+		stream << info.monsters.size() << endl;
+		for (auto& kvp : info.monsters)
+		{
+			stream << kvp.first << endl;
+			stream << kvp.second << endl;
+		}
+
+		return stream;
+	}
+
+	friend istream& operator>>(istream& stream, MonsterSet& info)
+	{
+		int nMonsters = 0;
+		int PrimaryId = 0;
+		Monster monster;
+		info.monsters.clear();
+
+		stream >> nMonsters;
+		for (int i = 0; i < nMonsters; i++)
+		{
+			stream >> PrimaryId;
+			stream >> monster;
+			info.monsters[PrimaryId] = monster;
+		}
+
+		return stream;
+	}
+};
+
+/**
+ * 서버와 접속 및 패킷 처리를 담당하는 클래스
+ */
 class ARENABATTLE_API ClientSocket : public FRunnable
 {
 public:
-	char 	recvBuffer[MAX_BUFFER];		// 수신 버퍼 스트림	
-	SOCKET _socket;				// 서버와 연결할 소켓
-
-	//atomic_int    _count;
-	int      _type;  
-
-	//Overlap _recv_over;
-	
-	int      _prev_size;
-	int      last_move_time;
-
-	ClientSocket();
+	ClientSocket();	
 	virtual ~ClientSocket();
 
 	// 소켓 등록 및 설정
 	bool InitSocket();
 	// 서버와 연결
-	bool Connect(const char* pszIP, int nPort);
+	bool Connect(const char * pszIP, int nPort);
 
 	//////////////////////////////////////////////////////////////////////////
 	// 서버와 통신
 	//////////////////////////////////////////////////////////////////////////
 
-	void do_recv()
-	{
-		DWORD recv_flag = 0;
-		//ZeroMemory(&_recv_over._wsa_over, sizeof(_recv_over._wsa_over));
-		//_recv_over._wsa_buf.buf = reinterpret_cast<char*>(_recv_over._net_buf + _prev_size);
-		//_recv_over._wsa_buf.len = sizeof(_recv_over._net_buf) - _prev_size;
-		//int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, NULL);
-		//if (SOCKET_ERROR == ret) {
-		//	int error_num = WSAGetLastError();
-		//	if (ERROR_IO_PENDING != error_num)
-		//		//error_display(error_num);
-		//}
-	}
+	// 회원가입
+//	bool SignUp(const FText & Id, const FText & Pw);
+	// 서버에 로그인
+//	bool Login(const FText & Id, const FText & Pw);
+	// 초기 캐릭터 등록
+//	void EnrollPlayer(cCharacter& info);
+	// 캐릭터 동기화
+	void SendPlayer(cCharacter& info);	
+	// 캐릭터 로그아웃
+//	void LogoutPlayer(const int& SessionId);	
+	// 캐릭터 피격 처리
+//	void HitPlayer(const int& SessionId);
+	// 몬스터 피격 처리
+//	void HitMonster(const int& MonsterId);
+	// 채팅 
+//	void SendChat(const int& SessionId, const string& Chat);	
+	//////////////////////////////////////////////////////////////////////////	
 
-	void do_send(int num_bytes, void* mess)
-	{
-		//Overlap* ex_over = new Overlap(OP_SEND, num_bytes, mess);
-		//int ret = WSASend(_socket, &ex_over->_wsa_buf, 1, 0, 0, &ex_over->_wsa_over, NULL);
-		//if (SOCKET_ERROR == ret) {
-		//	int error_num = WSAGetLastError();
-		//	if (ERROR_IO_PENDING != error_num)
-				//error_display(error_num);
-		//}
-	}
+	// 플레이어 컨트롤러 세팅
+	void SetPlayerController(AABPlayerController* pPlayerController);
 
+	void CloseSocket();
 
 	// FRunnable Thread members	
 	FRunnableThread* Thread;
 	FThreadSafeCounter StopTaskCounter;
 
+	// FRunnable override 함수
+	virtual bool Init();
+	virtual uint32 Run();
+	virtual void Stop();
+	virtual void Exit();
 
+	// 스레드 시작 및 종료
+	bool StartListen();
+	void StopListen();	
+
+	// 싱글턴 객체 가져오기
+	static ClientSocket* GetSingleton()
+	{
+		static ClientSocket ins;
+		return &ins;
+	}
+
+private:
+	SOCKET	ServerSocket;				// 서버와 연결할 소켓	
+	char 	recvBuffer[MAX_BUFFER];		// 수신 버퍼 스트림	
+	
+	AABPlayerController* PlayerController;	// 플레이어 컨트롤러 정보	
+
+	//////////////////////////////////////////////////////////////////////////
+	// 역직렬화
+	//////////////////////////////////////////////////////////////////////////
+	cCharactersInfo CharactersInfo;		// 캐릭터 정보
+//	cCharactersInfo* RecvCharacterInfo(stringstream& RecvStream);
+
+	string sChat;
+//	string* RecvChat(stringstream& RecvStream);
+
+	cCharacter	NewPlayer;
+//	cCharacter* RecvNewPlayer(stringstream& RecvStream);
+
+	MonsterSet	MonsterSetInfo;
+//	MonsterSet* RecvMonsterSet(stringstream& RecvStream);
+
+	Monster		MonsterInfo;
+//	Monster*	RecvMonster(stringstream& RecvStream);
+	//////////////////////////////////////////////////////////////////////////
 };
+
+
