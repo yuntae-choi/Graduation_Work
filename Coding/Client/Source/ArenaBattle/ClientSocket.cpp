@@ -1,375 +1,152 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+#pragma once
+#include "CoreMinimal.h"
 
-#include "ClientSocket.h"
-#include <sstream>
-#include "Runtime/Core/Public/GenericPlatform/GenericPlatformAffinity.h"
-#include "Runtime/Core/Public/HAL/RunnableThread.h"
-#include <algorithm>
-#include <string>
-#include "ABPlayerController.h"
+// winsock2 사용을 위해 아래 코멘트 추가
+#include <WinSock2.h>
+#include <iostream>
+#include <map>
+#include <WS2tcpip.h>
+#include <MSWSock.h>
+#include <concurrent_priority_queue.h>
+#include <windows.h>
+#pragma comment (lib, "WS2_32.LIB")
+#pragma comment (lib, "MSWSock.LIB")
 
-ClientSocket::ClientSocket()
-	:StopTaskCounter(0)
-{		
-}
+#include "Runtime/Core/Public/HAL/Runnable.h"
+
+using namespace std;
+
+#define	MAX_BUFFER		4096
+#define SERVER_PORT		8000
+#define SERVER_IP		"127.0.0.1"
+#define MAX_CLIENTS		100
+const int BUFSIZE = 256;
 
 
-ClientSocket::~ClientSocket()
+// 소켓 통신 구조체
+struct stSOCKETINFO
 {
-	delete Thread;
-	Thread = nullptr;
+	WSAOVERLAPPED	overlapped;
+	WSABUF			dataBuf;
+	SOCKET			socket;
+	char			messageBuffer[MAX_BUFFER];
+	int				recvBytes;
+	int				sendBytes;
+};
 
-	closesocket(ServerSocket);
-	WSACleanup();
-}
-
-bool ClientSocket::InitSocket()
+// 패킷 정보
+enum EPacketType
 {
-	WSADATA wsaData;
-	// 윈속 버전을 2.2로 초기화
-	int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (nRet != 0) {		
-		return false;
-	}
+	LOGIN,
+	ENROLL_PLAYER,
+	SEND_PLAYER,
+	RECV_PLAYER,
+	LOGOUT_PLAYER,
+	HIT_PLAYER,
+	DAMAGED_PLAYER,
+	CHAT,
+	ENTER_NEW_PLAYER,
+	SIGNUP,
+	HIT_MONSTER,
+	SYNC_MONSTER,
+	SPAWN_MONSTER,
+	DESTROY_MONSTER
+};
 
-	// TCP 소켓 생성	
-	ServerSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);	
-	if (ServerSocket == INVALID_SOCKET) {		
-		return false;
-	}
-	
-	return true;
-}
+enum COMMAND {
+	OP_RECV, OP_SEND, OP_ACCEPT, OP_NPC_MOVE, OP_NPC_ATTACK, OP_PLAYER_MOVE, OP_PLAYER_ATTACK, OP_PLAYER_RE
+};
 
-bool ClientSocket::Connect(const char * pszIP, int nPort)
-{
-	// 접속할 서버 정보를 저장할 구조체
-	SOCKADDR_IN stServerAddr;
-
-	stServerAddr.sin_family = AF_INET;
-	// 접속할 서버 포트 및 IP
-	stServerAddr.sin_port = htons(nPort);
-	stServerAddr.sin_addr.s_addr = inet_addr(pszIP);
-
-	ABLOG(Warning, TEXT("Connect test"));
-
-	int nRet = connect(ServerSocket, (sockaddr*)&stServerAddr, sizeof(sockaddr));	
-	if (nRet == SOCKET_ERROR) {		
-		return false;
-	}	
-
-	return true;
-}
-
-//bool ClientSocket::SignUp(const FText & Id, const FText & Pw)
-//{
-//	stringstream SendStream;
-//	// 회원가입 정보를 서버에 보낸다
-//	SendStream << EPacketType::SIGNUP << endl;
-//	SendStream << TCHAR_TO_UTF8(*Id.ToString()) << endl;
-//	SendStream << TCHAR_TO_UTF8(*Pw.ToString()) << endl;
-//
-//	int nSendLen = send(
-//		ServerSocket, (CHAR*)SendStream.str().c_str(), SendStream.str().length(), 0
-//	);
-//
-//	if (nSendLen == -1)
-//		return false;
-//
-//	// 서버로부터 응답 대기
-//	int nRecvLen = recv(
-//		ServerSocket, (CHAR*)&recvBuffer, MAX_BUFFER, 0
-//	);
-//
-//	if (nRecvLen <= 0)
-//		return false;
-//
-//	stringstream RecvStream;
-//	int PacketType;
-//	bool SignUpResult;
-//
-//	RecvStream << recvBuffer;
-//	RecvStream >> PacketType;
-//	RecvStream >> SignUpResult;
-//
-//	if (PacketType != EPacketType::SIGNUP)
-//		return false;
-//
-//	// 회원가입 성공 유무를 반환
-//	return SignUpResult;
-//}
-
-//bool ClientSocket::Login(const FText & Id, const FText & Pw)
-//{
-//	stringstream SendStream;
-//	// 로그인 정보를 서버에 보낸다
-//	SendStream << EPacketType::LOGIN << endl;
-//	SendStream << TCHAR_TO_UTF8(*Id.ToString()) << endl;
-//	SendStream << TCHAR_TO_UTF8(*Pw.ToString()) << endl;
-//
-//	int nSendLen = send(
-//		ServerSocket, (CHAR*)SendStream.str().c_str(), SendStream.str().length(), 0
-//	);
-//
-//	if (nSendLen == -1)
-//		return false;
-//	// 서버로부터 응답 대기
-//	int nRecvLen = recv(
-//		ServerSocket, (CHAR*)&recvBuffer, MAX_BUFFER, 0
-//	);
-//
-//	if (nRecvLen <= 0)
-//		return false;
-//
-//	stringstream RecvStream;
-//	int PacketType;
-//	bool LoginResult;
-//
-//	RecvStream << recvBuffer;
-//	RecvStream >> PacketType;
-//	RecvStream >> LoginResult;
-//
-//	if (PacketType != EPacketType::LOGIN)
-//		return false;
-//	// 로그인 성공 유무를 반환
-//	return LoginResult;
-//}
-
-//void ClientSocket::EnrollPlayer(cCharacter & info)
-//{
-//	// 캐릭터 정보 직렬화
-//	stringstream SendStream;
-//	// 요청 종류
-//	SendStream << EPacketType::ENROLL_PLAYER << endl;;
-//	SendStream << info;
-//
-//	// 캐릭터 정보 전송
-//	int nSendLen = send(
-//		ServerSocket, (CHAR*)SendStream.str().c_str(), SendStream.str().length(), 0
-//	);
-//
-//	if (nSendLen == -1)
-//	{
-//		return;
-//	}
-//}
-
-void ClientSocket::SendPlayer(cCharacter& info)
-{	
-	// 캐릭터 정보 직렬화
-	stringstream SendStream;
-	// 요청 종류
-	SendStream << EPacketType::SEND_PLAYER << endl;;
-	SendStream << info;
-
-	// 캐릭터 정보 전송
-	int nSendLen = send(
-		ServerSocket, (CHAR*)SendStream.str().c_str(), SendStream.str().length(), 0
-	);
-		
-	if (nSendLen == -1)
+class Overlap {
+public:
+	WSAOVERLAPPED   _wsa_over;
+	COMMAND         _op;
+	WSABUF         _wsa_buf;
+	unsigned char   _net_buf[BUFSIZE];
+	int            _target;
+public:
+	Overlap(COMMAND _op, char num_bytes, void* mess) : _op(_op)
 	{
-		return;
-	}		
-}
-
-//cCharactersInfo * ClientSocket::RecvCharacterInfo(stringstream & RecvStream)
-//{	
-//	// 캐릭터 정보를 얻어 반환		
-//	RecvStream >> CharactersInfo;
-//	return &CharactersInfo;		
-//}
-
-//string * ClientSocket::RecvChat(stringstream & RecvStream)
-//{	
-//	// 채팅 정보를 얻어 반환
-//	RecvStream >> sChat;
-//	std::replace(sChat.begin(), sChat.end(), '_', ' ');
-//	return &sChat;
-//}
-
-//cCharacter * ClientSocket::RecvNewPlayer(stringstream & RecvStream)
-//{
-//	// 새 플레이어 정보를 얻어 반환
-//	RecvStream >> NewPlayer;
-//	return &NewPlayer;
-//}
-
-//MonsterSet * ClientSocket::RecvMonsterSet(stringstream & RecvStream)
-//{	
-//	// 몬스터 집합 정보를 얻어 반환
-//	RecvStream >> MonsterSetInfo;
-//	return &MonsterSetInfo;
-//}
-
-//Monster * ClientSocket::RecvMonster(stringstream & RecvStream)
-//{
-//	// 단일 몬스터 정보를 얻어 반환
-//	RecvStream >> MonsterInfo;
-//	return &MonsterInfo;
-//}
-
-//void ClientSocket::LogoutPlayer(const int& SessionId)
-//{
-//	// 서버에게 로그아웃시킬 캐릭터 정보 전송
-//	stringstream SendStream;
-//	SendStream << EPacketType::LOGOUT_PLAYER << endl;
-//	SendStream << SessionId << endl;
-//
-//	int nSendLen = send(
-//		ServerSocket, (CHAR*)SendStream.str().c_str(), SendStream.str().length(), 0
-//	);
-//
-//	if (nSendLen == -1)
-//	{
-//		return;
-//	}
-//	
-//	closesocket(ServerSocket);
-//	WSACleanup();
-//}
-
-//void ClientSocket::HitPlayer(const int& SessionId)
-//{
-//	// 서버에게 데미지를 준 캐릭터 정보 전송
-//	stringstream SendStream;
-//	SendStream << EPacketType::HIT_PLAYER << endl;
-//	SendStream << SessionId << endl;
-//
-//	int nSendLen = send(
-//		ServerSocket, (CHAR*)SendStream.str().c_str(), SendStream.str().length(), 0
-//	);
-//}
-
-//void ClientSocket::HitMonster(const int & MonsterId)
-//{
-//	// 서버에게 데미지를 준 몬스터 정보 전송
-//	stringstream SendStream;
-//	SendStream << EPacketType::HIT_MONSTER << endl;
-//	SendStream << MonsterId << endl;
-//
-//	int nSendLen = send(
-//		ServerSocket, (CHAR*)SendStream.str().c_str(), SendStream.str().length(), 0
-//	);
-//}
-
-//void ClientSocket::SendChat(const int& SessionId, const string & Chat)
-//{
-//	// 서버에게 채팅 전송
-//	stringstream SendStream;
-//	SendStream << EPacketType::CHAT << endl;
-//	SendStream << SessionId << endl;
-//	SendStream << Chat << endl;
-//
-//	int nSendLen = send(
-//		ServerSocket, (CHAR*)SendStream.str().c_str(), SendStream.str().length(), 0
-//	);
-//}
-
-void ClientSocket::SetPlayerController(AABPlayerController * pPlayerController)
-{
-	// 플레이어 컨트롤러 세팅
-	if (pPlayerController)
-	{
-		PlayerController = pPlayerController;
+		ZeroMemory(&_wsa_over, sizeof(_wsa_over));
+		_wsa_buf.buf = reinterpret_cast<char*>(_net_buf);
+		_wsa_buf.len = num_bytes;
+		memcpy(_net_buf, mess, num_bytes);
 	}
-}
 
-void ClientSocket::CloseSocket()
-{	
-	closesocket(ServerSocket);
-	WSACleanup();
-}
+	Overlap(COMMAND _op) : _op(_op) {}
 
-bool ClientSocket::Init()
-{
-	return true;
-}
-
-uint32 ClientSocket::Run()
-{
-	// 초기 init 과정을 기다림
-	FPlatformProcess::Sleep(0.03);	
-	// recv while loop 시작
-	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
-	while (StopTaskCounter.GetValue() == 0 && PlayerController != nullptr)
+	Overlap()
 	{
-		//stringstream RecvStream;
-		//int PacketType;
-		//int nRecvLen = recv(
-		//	ServerSocket, (CHAR*)&recvBuffer, MAX_BUFFER, 0
-		//);
-		//if (nRecvLen > 0)
-		//{
-		//	// 패킷 처리
-		//	RecvStream << recvBuffer;
-		//	RecvStream >> PacketType;
-
-		//	switch (PacketType)
-		//	{
-		//	case EPacketType::RECV_PLAYER:
-		//	{
-		//		PlayerController->RecvWorldInfo(RecvCharacterInfo(RecvStream));
-		//	}
-		//	break;
-		//	case EPacketType::CHAT:
-		//	{
-		//		PlayerController->RecvChat(RecvChat(RecvStream));
-		//	}
-		//	break;
-		//	case EPacketType::ENTER_NEW_PLAYER:
-		//	{
-		//		PlayerController->RecvNewPlayer(RecvNewPlayer(RecvStream));
-		//	}
-		//	break;
-		//	case EPacketType::SYNC_MONSTER:
-		//	{
-		//		PlayerController->RecvMonsterSet(RecvMonsterSet(RecvStream));
-		//	}
-		//	break;
-		//	case EPacketType::SPAWN_MONSTER:
-		//	{
-		//		PlayerController->RecvSpawnMonster(RecvMonster(RecvStream));
-		//	}
-		//	break;
-		//	case EPacketType::DESTROY_MONSTER:
-		//	{
-		//		PlayerController->RecvDestroyMonster(RecvMonster(RecvStream));
-		//	}
-		//	break;
-		//	default:
-		//		break;
-		//	}
-		//}
+		_op = OP_RECV;
 	}
-	return 0;
-}
 
-void ClientSocket::Stop()
-{	
-	// thread safety 변수를 조작해 while loop 가 돌지 못하게 함
-	StopTaskCounter.Increment();
-}
+	~Overlap()
+	{
+	}
+};
 
-void ClientSocket::Exit()
+struct Tmp {
+	EPacketType type;
+	float x;
+};
+
+
+
+class ARENABATTLE_API ClientSocket : public FRunnable
 {
-}
+public:
+	char 	recvBuffer[MAX_BUFFER];		// 수신 버퍼 스트림	
+	SOCKET _socket;				// 서버와 연결할 소켓
 
-bool ClientSocket::StartListen()
-{
-	// 스레드 시작
-	if (Thread != nullptr) return false;
-	Thread = FRunnableThread::Create(this, TEXT("ClientSocket"), 0, TPri_BelowNormal);
-	return (Thread != nullptr);
-}
+	//atomic_int    _count;
+	int      _type;
 
-void ClientSocket::StopListen()
-{	
-	// 스레드 종료
-	Stop();
-	Thread->WaitForCompletion();
-	Thread->Kill();	
-	delete Thread;
-	Thread = nullptr;	
-	StopTaskCounter.Reset();
-}
+	Overlap _recv_over;
+
+	int      _prev_size;
+	int      last_move_time;
+
+	ClientSocket();
+	virtual ~ClientSocket();
+
+	// 소켓 등록 및 설정
+	bool InitSocket();
+	// 서버와 연결
+	bool Connect(const char* pszIP, int nPort);
+
+	//////////////////////////////////////////////////////////////////////////
+	// 서버와 통신
+	//////////////////////////////////////////////////////////////////////////
+
+	void do_recv()
+	{
+		DWORD recv_flag = 0;
+		ZeroMemory(&_recv_over._wsa_over, sizeof(_recv_over._wsa_over));
+		_recv_over._wsa_buf.buf = reinterpret_cast<char*>(_recv_over._net_buf + _prev_size);
+		_recv_over._wsa_buf.len = sizeof(_recv_over._net_buf) - _prev_size;
+		int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, NULL);
+		if (SOCKET_ERROR == ret) {
+			int error_num = WSAGetLastError();
+			//if (ERROR_IO_PENDING != error_num)
+				//error_display(error_num);
+		}
+	}
+
+	void do_send(int num_bytes, void* mess)
+	{
+		Overlap* ex_over = new Overlap(OP_SEND, num_bytes, mess);
+		int ret = WSASend(_socket, &ex_over->_wsa_buf, 1, 0, 0, &ex_over->_wsa_over, NULL);
+		if (SOCKET_ERROR == ret) {
+			int error_num = WSAGetLastError();
+			//if (ERROR_IO_PENDING != error_num)
+				//error_display(error_num);
+		}
+	}
+
+
+	// FRunnable Thread members	
+	FRunnableThread* Thread;
+	FThreadSafeCounter StopTaskCounter;
+
+
+};
