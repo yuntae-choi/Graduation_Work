@@ -4,16 +4,11 @@
 
 AABPlayerController::AABPlayerController()
 {
-	SessionId = FMath::RandRange(0, 10000);
-
 	// 서버와 연결
-	Socket = ClientSocket::GetSingleton();
-	Socket->InitSocket();
-	bIsConnected = Socket->Connect("127.0.0.1", 8000);
+	bIsConnected = Socket->Connect();
 	if (bIsConnected)
 	{
 		ABLOG(Warning, TEXT("IOCP Server connect success!"));
-		Socket->SetPlayerController(this);
 	}
 }
 
