@@ -12,8 +12,8 @@
 #include <map>
 #include "Runtime/Core/Public/HAL/Runnable.h"
 
-class AABGameMode;
-class AABPlayerController;
+class AMyGameMode;
+class AMyPlayerController;
 
 using namespace std;
 
@@ -134,7 +134,7 @@ struct sc_packet_status_change {
 	int		exp;
 };
 
-HANDLE g_hiocp;
+static HANDLE g_hiocp;
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
 
@@ -329,7 +329,6 @@ public:
 
 	};
 	~ClientSocket();
-
 };
 
 
