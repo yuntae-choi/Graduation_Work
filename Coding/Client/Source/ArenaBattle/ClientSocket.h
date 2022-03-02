@@ -1,4 +1,4 @@
-=// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -320,7 +320,7 @@ public:
 	void send_login_packet();
 	bool Connect();
 	void SendPacket(void* packet);
-
+	bool InitSocket();
 	ClientSocket() {
 		wcout.imbue(locale("korean"));
 		WSADATA WSAData;
