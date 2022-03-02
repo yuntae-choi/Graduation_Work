@@ -106,7 +106,6 @@ void ClientSocket::ProcessPacket(char* ptr)
 	{
 	case SC_PACKET_LOGIN_OK:
 	{
-		printf("완료");
 		_login_ok = true;
 		sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
 		_myid = packet->id;
@@ -125,7 +124,6 @@ void ClientSocket::ProcessPacket(char* ptr)
 	case SC_PACKET_LOGIN_FAIL:
 	{
 
-		printf("아이디 다시 입력");
 		send_login_packet();
 	}
 	break;
@@ -161,8 +159,8 @@ void ClientSocket::ProcessPacket(char* ptr)
 		break;
 	}
 
-	default:
-		printf("Unknown PACKET type [%d]\n", ptr[1]);
+
+
 	}
 }
 
