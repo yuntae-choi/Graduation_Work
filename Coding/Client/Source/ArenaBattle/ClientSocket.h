@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+=// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,6 +7,8 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <WinSock2.h>
 #include <iostream>
+#include <chrono>
+#include <string>
 #include <map>
 #include "Runtime/Core/Public/HAL/Runnable.h"
 
@@ -19,36 +21,123 @@ using namespace std;
 #define SERVER_PORT		8000
 #define SERVER_IP		"127.0.0.1"
 #define MAX_CLIENTS		100
-
+const int  MAX_NAME_SIZE = 20;
+const int  MAX_CHAT_SIZE = 100;
+const int BUF_SIZE = 255;
+const static int MAX_PACKET_SIZE = 255;
+const static int MAX_BUFF_SIZE = 255;
 // 소켓 통신 구조체
-struct stSOCKETINFO
-{
-	WSAOVERLAPPED	overlapped;
-	WSABUF			dataBuf;
-	SOCKET			socket;
-	char			messageBuffer[MAX_BUFFER];
-	int				recvBytes;
-	int				sendBytes;
-};
 
 // 패킷 정보
-enum EPacketType
-{
-	LOGIN,
-	ENROLL_PLAYER,
-	SEND_PLAYER,
-	RECV_PLAYER,
-	LOGOUT_PLAYER,
-	HIT_PLAYER,
-	DAMAGED_PLAYER,
-	CHAT,
-	ENTER_NEW_PLAYER,
-	SIGNUP,
-	HIT_MONSTER,
-	SYNC_MONSTER,
-	SPAWN_MONSTER,
-	DESTROY_MONSTER
+const char CS_PACKET_LOGIN = 1;
+const char CS_PACKET_MOVE = 2;
+const char CS_PACKET_ATTACK = 3;
+const char CS_PACKET_CHAT = 4;
+const char CS_PACKET_TELEPORT = 5;
+
+
+const char SC_PACKET_LOGIN_OK = 1;
+const char SC_PACKET_MOVE = 2;
+const char SC_PACKET_PUT_OBJECT = 3;
+const char SC_PACKET_REMOVE_OBJECT = 4;
+const char SC_PACKET_CHAT = 5;
+const char SC_PACKET_LOGIN_FAIL = 6;
+const char SC_PACKET_STATUS_CHANGE = 7;
+
+
+
+// 패킷
+//현재 패킷이 담긴 헤더를 못읽어 와서 일단 여기에 넣음
+#pragma pack (push, 1)
+struct cs_packet_login {
+	unsigned char size;
+	char	type;
+	char	name[MAX_NAME_SIZE];
 };
+
+struct cs_packet_move {
+	unsigned char size;
+	char	type;
+	char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	int		move_time;
+};
+
+struct cs_packet_attack {
+	unsigned char size;
+	char	type;
+};
+
+struct cs_packet_chat {
+	unsigned char size;
+	char	type;
+	char	message[MAX_CHAT_SIZE];
+};
+
+struct cs_packet_teleport {
+	// 서버에서 장애물이 없는 랜덤 좌표로 텔레포트 시킨다.
+	// 더미 클라이언트에서 동접 테스트용으로 사용.
+	unsigned char size;
+	char	type;
+};
+
+struct sc_packet_login_ok {
+	unsigned char size;
+	char type;
+	int		id;
+	short	x, y;
+	short	level;
+	short	hp, maxhp;
+	int		exp;
+};
+
+struct sc_packet_move {
+	unsigned char size;
+	char type;
+	int		id;
+	short  x, y;
+	int		move_time;
+};
+
+struct sc_packet_put_object {
+	unsigned char size;
+	char type;
+	int id;
+	short x, y;
+	char object_type;
+	char	name[MAX_NAME_SIZE];
+};
+
+struct sc_packet_remove_object {
+	unsigned char size;
+	char type;
+	int id;
+};
+
+struct sc_packet_chat {
+	unsigned char size;
+	char type;
+	int id;
+	char message[MAX_CHAT_SIZE];
+};
+
+struct sc_packet_login_fail {
+	unsigned char size;
+	char type;
+	int	 reason;		// 0: 중복 ID,  1:사용자 Full
+};
+
+struct sc_packet_status_change {
+	unsigned char size;
+	char type;
+	short	level;
+	short	hp, maxhp;
+	int		exp;
+};
+
+HANDLE g_hiocp;
+
+enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
+
 
 // 플레이어 정보
 class cCharacter {
@@ -57,11 +146,14 @@ public:
 	~cCharacter() {};
 
 	// 세션 아이디
-	int SessionId;
+	int _Id;
 	// 위치
-	float X;
-	float Y;
-	float Z;
+	int m_x, m_y, m_z;
+	//타입
+	int _type; //오브젝트 타입
+	// 체력
+	int _max_hp; // 최대 체력
+	int _hp; // 체력
 	// 회전값
 	float Yaw;
 	float Pitch;
@@ -71,13 +163,43 @@ public:
 	float VY;
 	float VZ;
 	// 속성
-	bool	IsAlive;	
+	bool	IsAlive;
 	float	HealthValue;
 	bool	IsAttacking;
+	bool    m_showing; //플레이어 시야에 표시여부
+	chrono::system_clock::time_point m_mess_end_time;
 
-	friend ostream& operator<<(ostream &stream, cCharacter& info)
+
+	cCharacter(int x, int y, int z)
 	{
-		stream << info.SessionId << endl;
+		m_showing = false;
+		set_name("NONAME");
+		m_mess_end_time = chrono::system_clock::now();
+	}
+	void set_name(const char str[]) {}
+	void show()
+	{
+		m_showing = true;
+	}
+	void hide()
+	{
+		m_showing = false;
+	}
+
+	void a_move(int x, int y) {
+
+	}
+
+	void a_draw() {
+
+	}
+
+	void move(int x, int y) {
+		;
+	}
+	friend ostream& operator<<(ostream& stream, cCharacter& info)
+	{
+		/*stream << info.SessionId << endl;
 		stream << info.X << endl;
 		stream << info.Y << endl;
 		stream << info.Z << endl;
@@ -87,16 +209,16 @@ public:
 		stream << info.Yaw << endl;
 		stream << info.Pitch << endl;
 		stream << info.Roll << endl;
-		stream << info.IsAlive << endl;		
+		stream << info.IsAlive << endl;
 		stream << info.HealthValue << endl;
-		stream << info.IsAttacking << endl;
+		stream << info.IsAttacking << endl;*/
 
 		return stream;
 	}
 
 	friend istream& operator>>(istream& stream, cCharacter& info)
 	{
-		stream >> info.SessionId;
+		/*stream >> info.SessionId;
 		stream >> info.X;
 		stream >> info.Y;
 		stream >> info.Z;
@@ -106,9 +228,9 @@ public:
 		stream >> info.Yaw;
 		stream >> info.Pitch;
 		stream >> info.Roll;
-		stream >> info.IsAlive;		
+		stream >> info.IsAlive;
 		stream >> info.HealthValue;
-		stream >> info.IsAttacking;
+		stream >> info.IsAttacking;*/
 
 		return stream;
 	}
@@ -120,11 +242,11 @@ class cCharactersInfo
 public:
 	cCharactersInfo() {};
 	~cCharactersInfo() {};
-	
+
 	map<int, cCharacter> players;
 
-	friend ostream& operator<<(ostream &stream, cCharactersInfo& info)
-	{		
+	friend ostream& operator<<(ostream& stream, cCharactersInfo& info)
+	{
 		stream << info.players.size() << endl;
 		for (auto& kvp : info.players)
 		{
@@ -135,8 +257,8 @@ public:
 		return stream;
 	}
 
-	friend istream &operator>>(istream &stream, cCharactersInfo& info)
-	{		
+	friend istream& operator>>(istream& stream, cCharactersInfo& info)
+	{
 		int nPlayers = 0;
 		int SessionId = 0;
 		cCharacter Player;
@@ -154,165 +276,60 @@ public:
 	}
 };
 
-// 몬스터 정보
-class Monster
-{
-public:
-	float	X;				// X좌표
-	float	Y;				// Y좌표
-	float	Z;				// Z좌표
-	float	Health;			// 체력
-	int		Id;				// 고유 id
-	bool	IsAttacking;		// 타격중인지
 
-	friend ostream& operator<<(ostream &stream, Monster& info)
-	{
-		stream << info.X << endl;
-		stream << info.Y << endl;
-		stream << info.Z << endl;
-		stream << info.Health << endl;
-		stream << info.Id << endl;
-		stream << info.IsAttacking << endl;
-
-		return stream;
-	}
-
-	friend istream& operator>>(istream& stream, Monster& info)
-	{
-		stream >> info.X;
-		stream >> info.Y;
-		stream >> info.Z;
-		stream >> info.Health;
-		stream >> info.Id;
-		stream >> info.IsAttacking;
-
-		return stream;
-	}
+struct OverlappedEx {
+	WSAOVERLAPPED over;
+	WSABUF wsabuf;
+	unsigned char IOCP_buf[MAX_BUFF_SIZE];
+	OPTYPE event_type;
+	int event_target;
 };
 
-// 몬스터 직렬화/역직렬화 클래스
-class MonsterSet
-{
-public:
-	map<int, Monster> monsters;
-
-	friend ostream& operator<<(ostream &stream, MonsterSet& info)
-	{
-		stream << info.monsters.size() << endl;
-		for (auto& kvp : info.monsters)
-		{
-			stream << kvp.first << endl;
-			stream << kvp.second << endl;
-		}
-
-		return stream;
-	}
-
-	friend istream& operator>>(istream& stream, MonsterSet& info)
-	{
-		int nMonsters = 0;
-		int PrimaryId = 0;
-		Monster monster;
-		info.monsters.clear();
-
-		stream >> nMonsters;
-		for (int i = 0; i < nMonsters; i++)
-		{
-			stream >> PrimaryId;
-			stream >> monster;
-			info.monsters[PrimaryId] = monster;
-		}
-
-		return stream;
-	}
-};
-
-/**
- * 서버와 접속 및 패킷 처리를 담당하는 클래스
- */
 class ARENABATTLE_API ClientSocket : public FRunnable
 {
 public:
-	ClientSocket();	
-	virtual ~ClientSocket();
+	int _myid;
+	int* _m_hp;
+	int* _hp;
+	int* _level;
+	int* _exp;
+	int _x_origin;
+	int _y_origin;
+	bool _login_ok;
+	char _chat_buf[BUF_SIZE];
+	// 위치
+	int m_x, m_y, m_z;
+	string _name;
 
-	// 소켓 등록 및 설정
-	bool InitSocket();
-	// 서버와 연결
-	bool Connect(const char * pszIP, int nPort);
+	atomic_bool connected;
 
-	//////////////////////////////////////////////////////////////////////////
-	// 서버와 통신
-	//////////////////////////////////////////////////////////////////////////
+	SOCKET _socket;
+	OverlappedEx recv_over;
+	unsigned char packet_buf[MAX_PACKET_SIZE];
+	int prev_packet_data;
+	int curr_packet_size;
+	//high_resolution_clock::time_point last_move_time;
 
-	// 회원가입
-//	bool SignUp(const FText & Id, const FText & Pw);
-	// 서버에 로그인
-//	bool Login(const FText & Id, const FText & Pw);
-	// 초기 캐릭터 등록
-//	void EnrollPlayer(cCharacter& info);
-	// 캐릭터 동기화
-	void SendPlayer(cCharacter& info);	
-	// 캐릭터 로그아웃
-//	void LogoutPlayer(const int& SessionId);	
-	// 캐릭터 피격 처리
-//	void HitPlayer(const int& SessionId);
-	// 몬스터 피격 처리
-//	void HitMonster(const int& MonsterId);
-	// 채팅 
-//	void SendChat(const int& SessionId, const string& Chat);	
-	//////////////////////////////////////////////////////////////////////////	
+	void client_initialize();
+	void client_finish();
+	void ProcessPacket(char* ptr);
+	void process_data(char* net_buf, size_t io_byte);
+	bool client_main();
+	void send_move_packet(char dr);
+	void send_attack_packet();
+	void send_login_packet();
+	bool Connect();
+	void SendPacket(void* packet);
 
-	// 플레이어 컨트롤러 세팅
-	void SetPlayerController(AABPlayerController* pPlayerController);
+	ClientSocket() {
+		wcout.imbue(locale("korean"));
+		WSADATA WSAData;
+		WSAStartup(MAKEWORD(2, 2), &WSAData);
+		_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 
-	void CloseSocket();
+	};
+	~ClientSocket();
 
-	// FRunnable Thread members	
-	FRunnableThread* Thread;
-	FThreadSafeCounter StopTaskCounter;
-
-	// FRunnable override 함수
-	virtual bool Init();
-	virtual uint32 Run();
-	virtual void Stop();
-	virtual void Exit();
-
-	// 스레드 시작 및 종료
-	bool StartListen();
-	void StopListen();	
-
-	// 싱글턴 객체 가져오기
-	static ClientSocket* GetSingleton()
-	{
-		static ClientSocket ins;
-		return &ins;
-	}
-
-private:
-	SOCKET	ServerSocket;				// 서버와 연결할 소켓	
-	char 	recvBuffer[MAX_BUFFER];		// 수신 버퍼 스트림	
-	
-	AABPlayerController* PlayerController;	// 플레이어 컨트롤러 정보	
-
-	//////////////////////////////////////////////////////////////////////////
-	// 역직렬화
-	//////////////////////////////////////////////////////////////////////////
-	cCharactersInfo CharactersInfo;		// 캐릭터 정보
-//	cCharactersInfo* RecvCharacterInfo(stringstream& RecvStream);
-
-	string sChat;
-//	string* RecvChat(stringstream& RecvStream);
-
-	cCharacter	NewPlayer;
-//	cCharacter* RecvNewPlayer(stringstream& RecvStream);
-
-	MonsterSet	MonsterSetInfo;
-//	MonsterSet* RecvMonsterSet(stringstream& RecvStream);
-
-	Monster		MonsterInfo;
-//	Monster*	RecvMonster(stringstream& RecvStream);
-	//////////////////////////////////////////////////////////////////////////
 };
 
 
