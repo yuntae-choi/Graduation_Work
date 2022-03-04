@@ -285,7 +285,7 @@ struct OverlappedEx {
 	int event_target;
 };
 
-class FINAL_PROJECT_API ClientSocket : public FRunnable
+class FINAL_PROJECT_API ClientSocket
 {
 public:
 	int _myid;
@@ -318,8 +318,19 @@ public:
 	void send_move_packet(char dr);
 	void send_attack_packet();
 	void send_login_packet();
-	bool Connect();
+	//bool Connect();
+	bool InitSocket();
+	bool Connect(const char* pszIP, int nPort);
 	void SendPacket(void* packet);
+
+	virtual uint32 Run();
+
+	// ΩÃ±€≈œ ∞¥√º ∞°¡Æø¿±‚
+	static ClientSocket* GetSingleton()
+	{
+		static ClientSocket ins;
+		return &ins;
+	}
 
 	ClientSocket() {
 		wcout.imbue(locale("korean"));

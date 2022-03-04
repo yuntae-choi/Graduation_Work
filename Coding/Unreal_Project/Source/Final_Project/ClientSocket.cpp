@@ -1,3 +1,5 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include "ClientSocket.h"
 #include <sstream>
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformAffinity.h"
@@ -13,22 +15,57 @@ ClientSocket::~ClientSocket()
 	WSACleanup();
 }
 
-
-bool ClientSocket::Connect()
+bool ClientSocket::InitSocket()
 {
-	SOCKADDR_IN server_addr;
-	ZeroMemory(&server_addr, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(SERVER_PORT);
-	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	WSADATA wsaData;
+	// 윈속 버전을 2.2로 초기화
+	int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (nRet != 0) {
+		return false;
+	}
 
-	int nRet = connect(_socket, (sockaddr*)&server_addr, sizeof(sockaddr));
+	// TCP 소켓 생성	
+	_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (_socket == INVALID_SOCKET) {
+		return false;
+	}
+
+	return true;
+}
+
+bool ClientSocket::Connect(const char* pszIP, int nPort)
+{
+	// 접속할 서버 정보를 저장할 구조체
+	SOCKADDR_IN stServerAddr;
+
+	stServerAddr.sin_family = AF_INET;
+	// 접속할 서버 포트 및 IP
+	stServerAddr.sin_port = htons(nPort);
+	stServerAddr.sin_addr.s_addr = inet_addr(pszIP);
+
+	int nRet = connect(_socket, (sockaddr*)&stServerAddr, sizeof(sockaddr));
 	if (nRet == SOCKET_ERROR) {
 		return false;
 	}
 
 	return true;
 }
+
+//bool ClientSocket::Connect()
+//{
+//	SOCKADDR_IN server_addr;
+//	ZeroMemory(&server_addr, sizeof(server_addr));
+//	server_addr.sin_family = AF_INET;
+//	server_addr.sin_port = htons(SERVER_PORT);
+//	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+//
+//	int nRet = connect(_socket, (sockaddr*)&server_addr, sizeof(sockaddr));
+//	if (nRet == SOCKET_ERROR) {
+//		return false;
+//	}
+//
+//	return true;
+//}
 
 void ClientSocket::SendPacket(void* packet) {
 	int psize = reinterpret_cast<unsigned char*>(packet)[0];
@@ -153,4 +190,63 @@ void ClientSocket::ProcessPacket(char* ptr)
 	default:
 		printf("Unknown PACKET type [%d]\n", ptr[1]);
 	}
+}
+
+uint32 ClientSocket::Run()
+{
+	// 초기 init 과정을 기다림
+	FPlatformProcess::Sleep(0.03);
+	// recv while loop 시작
+	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
+	//while (StopTaskCounter.GetValue() == 0 && PlayerController != nullptr)
+	//{
+	//	stringstream RecvStream;
+	//	int PacketType;
+	//	int nRecvLen = recv(
+	//		ServerSocket, (CHAR*)&recvBuffer, MAX_BUFFER, 0
+	//	);
+	//	if (nRecvLen > 0)
+	//	{
+	//		// 패킷 처리
+	//		RecvStream << recvBuffer;
+	//		RecvStream >> PacketType;
+
+	//		switch (PacketType)
+	//		{
+	//		case EPacketType::RECV_PLAYER:
+	//		{
+	//			PlayerController->RecvWorldInfo(RecvCharacterInfo(RecvStream));
+	//		}
+	//		break;
+	//		case EPacketType::CHAT:
+	//		{
+	//			PlayerController->RecvChat(RecvChat(RecvStream));
+	//		}
+	//		break;
+	//		case EPacketType::ENTER_NEW_PLAYER:
+	//		{
+	//			PlayerController->RecvNewPlayer(RecvNewPlayer(RecvStream));
+	//		}
+	//		break;
+	//		case EPacketType::SYNC_MONSTER:
+	//		{
+	//			PlayerController->RecvMonsterSet(RecvMonsterSet(RecvStream));
+	//		}
+	//		break;
+	//		case EPacketType::SPAWN_MONSTER:
+	//		{
+	//			PlayerController->RecvSpawnMonster(RecvMonster(RecvStream));
+	//		}
+	//		break;
+	//		case EPacketType::DESTROY_MONSTER:
+	//		{
+	//			PlayerController->RecvDestroyMonster(RecvMonster(RecvStream));
+	//		}
+	//		break;
+	//		default:
+	//			break;
+	//		}
+	//	}
+	//}
+	return 0;
 }

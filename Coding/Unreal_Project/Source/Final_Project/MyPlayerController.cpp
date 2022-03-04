@@ -6,7 +6,9 @@
 AMyPlayerController::AMyPlayerController()
 {
 	// 서버와 연결
-	bIsConnected = Socket->Connect();
+	Socket = ClientSocket::GetSingleton();
+	//Socket->InitSocket();
+	bIsConnected = Socket->Connect("127.0.0.1", 8000);
 	if (bIsConnected)
 	{
 		MYLOG(Warning, TEXT("IOCP Server connect success!"));
