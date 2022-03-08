@@ -2,15 +2,10 @@
 
 #pragma once
 
-#include <winsock2.h>
-#include <mswsock.h>
-#include <ws2tcpip.h>
-#include <stdlib.h>
+
 #include "Final_Project.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
-
-#pragma comment(lib, "ws2_32.lib")
 
 /**
  * 
