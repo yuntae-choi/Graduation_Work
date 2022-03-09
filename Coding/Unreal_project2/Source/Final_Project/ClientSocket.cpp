@@ -39,14 +39,13 @@ void ClientSocket::SendPacket(void* packet)
 {
 	int psize = reinterpret_cast<unsigned char*>(packet)[0];
 	int ptype = reinterpret_cast<unsigned char*>(packet)[1];
-	OverlappedEx* over = new OverlappedEx;
-	over->event_type = OP_SEND;
-	memcpy(over->IOCP_buf, packet, psize);
-	ZeroMemory(&over->over, sizeof(over->over));
-	over->wsabuf.buf = reinterpret_cast<CHAR*>(over->IOCP_buf);
-	over->wsabuf.len = psize;
-	int ret = WSASend(_socket, &over->wsabuf, 1, NULL, 0,
-		&over->over, NULL);
+	Overlap* ex_over = new Overlap(OP_SEND, psize, packet);
+	int ret = WSASend(_socket, &ex_over->_wsa_buf, 1, 0, 0, &ex_over->_wsa_over, NULL);
+	if (SOCKET_ERROR == ret) {
+		int error_num = WSAGetLastError();
+		//if (ERROR_IO_PENDING != error_num)
+			//error_display(error_num);
+	}
 }
 
 void ClientSocket::ReadyToSend_LoginPacket()
@@ -54,7 +53,8 @@ void ClientSocket::ReadyToSend_LoginPacket()
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
-	strcpy_s(packet.name, _name.c_str());
+	strcpy_s(packet.id, _id);
+	strcpy_s(packet.pw, _pw);
 	size_t sent = 0;
 	SendPacket(&packet);
 };
@@ -68,3 +68,5 @@ void ClientSocket::ReadyToSend_MovePacket(char dr)
 	size_t sent = 0;
 	SendPacket(&packet);
 };
+
+
