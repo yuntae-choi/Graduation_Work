@@ -257,6 +257,12 @@ void process_packet(int pnum, unsigned char* p)
 		cout << packet->id << " 로그인 성공" << endl;
 	   break;
 	}
+	case CS_PACKET_MOVE: {
+		printf("Move\n");
+		
+		break;
+	}
+
 
 	default:
 		printf("Unknown PACKET type\n");
