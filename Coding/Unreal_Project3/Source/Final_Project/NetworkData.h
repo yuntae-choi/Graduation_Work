@@ -21,6 +21,7 @@ const int  MAX_NAME_SIZE = 20;
 const int  MAX_CHAT_SIZE = 100;
 const int BUF_SIZE = 255;
 const static int MAX_BUFF_SIZE = 255;
+
 // 소켓 통신 구조체
 
 // 패킷 정보
@@ -50,7 +51,8 @@ enum SC_PacketType
 struct cs_packet_login {
 	unsigned char size;
 	char	type;
-	char	name[MAX_NAME_SIZE];
+	char	id[MAX_NAME_SIZE];
+	char	pw[MAX_NAME_SIZE];
 };
 
 struct cs_packet_move {
@@ -77,16 +79,27 @@ struct cs_packet_teleport {
 	unsigned char size;
 	char	type;
 };
-
 struct sc_packet_login_ok {
 	unsigned char size;
 	char type;
-	int		id;
-	short	x, y;
-	short	level;
-	short	hp, maxhp;
-	int		exp;
+	char	name[MAX_NAME_SIZE];
+	// 세션 아이디
+	int		pnum;
+	// 위치
+	float	x;
+	float	y;
+	float	z;
+	// 회전값
+	float	Yaw;
+	float	Pitch;
+	float	Roll;
+	// 속도
+	float VX;
+	float VY;
+	float VZ;
+
 };
+
 
 struct sc_packet_move {
 	unsigned char size;
@@ -132,18 +145,37 @@ struct sc_packet_status_change {
 	int		exp;
 };
 
-static HANDLE g_hiocp;
+
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
 
-struct OverlappedEx {
-	WSAOVERLAPPED over;
-	WSABUF wsabuf;
-	unsigned char IOCP_buf[MAX_BUFF_SIZE];
-	OPTYPE event_type;
-	int event_target;
-};
+class Overlap {
+public:
+	WSAOVERLAPPED   _wsa_over;
+	OPTYPE         _op;
+	WSABUF         _wsa_buf;
+	unsigned char   _net_buf[BUF_SIZE];
+	int            _target;
+public:
+	Overlap(OPTYPE _op, char num_bytes, void* mess) : _op(_op)
+	{
+		ZeroMemory(&_wsa_over, sizeof(_wsa_over));
+		_wsa_buf.buf = reinterpret_cast<char*>(_net_buf);
+		_wsa_buf.len = num_bytes;
+		memcpy(_net_buf, mess, num_bytes);
+	}
 
+	Overlap(OPTYPE _op) : _op(_op) {}
+
+	Overlap()
+	{
+		_op = OP_RECV;
+	}
+
+	~Overlap()
+	{
+	}
+};
 
 class FINAL_PROJECT_API NetworkData
 {
