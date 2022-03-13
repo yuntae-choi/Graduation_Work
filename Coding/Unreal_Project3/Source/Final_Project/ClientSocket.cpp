@@ -35,29 +35,95 @@ bool ClientSocket::Connect()
 	return true;
 }
 
-void ClientSocket::SendPacket(void* packet)
+void ClientSocket:: ProcessPacket(unsigned char* ptr)
 {
-	int psize = reinterpret_cast<unsigned char*>(packet)[0];
-	int ptype = reinterpret_cast<unsigned char*>(packet)[1];
-	OverlappedEx* over = new OverlappedEx;
-	over->event_type = OP_SEND;
-	memcpy(over->IOCP_buf, packet, psize);
-	ZeroMemory(&over->over, sizeof(over->over));
-	over->wsabuf.buf = reinterpret_cast<CHAR*>(over->IOCP_buf);
-	over->wsabuf.len = psize;
-	int ret = WSASend(_socket, &over->wsabuf, 1, NULL, 0,
-		&over->over, NULL);
+	static bool first_time = true;
+	switch (ptr[1])
+	{
+	case SC_PACKET_LOGIN_OK:
+	{
+		ReadyToSend_MovePacket(1);
+
+	}
+	break;
+	case SC_PACKET_LOGIN_FAIL:
+	{
+
+	}
+	break;
+
+	case SC_PACKET_PUT_OBJECT:
+	{
+
+		break;
+	}
+	case SC_PACKET_MOVE:
+	{
+		break;
+	}
+
+	case SC_PACKET_REMOVE_OBJECT:
+	{
+
+		break;
+	}
+
+	case SC_PACKET_CHAT:
+	{
+
+		break;
+	}
+	case SC_PACKET_STATUS_CHANGE:
+	{
+		ReadyToSend_StatusPacket();
+
+	}
+	}
 }
+//void process_data(char* net_buf, size_t io_byte)
+//{
+//	char* ptr = net_buf;
+//	static size_t in_packet_size = 0;
+//	static size_t saved_packet_size = 0;
+//	static char packet_buffer[BUF_SIZE];
+//
+//	while (0 != io_byte) {
+//		if (0 == in_packet_size) in_packet_size = ptr[0];
+//		if (io_byte + saved_packet_size >= in_packet_size) {
+//			memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
+//			//ProcessPacket(packet_buffer);
+//			ptr += in_packet_size - saved_packet_size;
+//			io_byte -= in_packet_size - saved_packet_size;
+//			in_packet_size = 0;
+//			saved_packet_size = 0;
+//		}
+//		else {
+//			memcpy(packet_buffer + saved_packet_size, ptr, io_byte);
+//			saved_packet_size += io_byte;
+//			io_byte = 0;
+//		}
+//	}
+//}
 
 void ClientSocket::ReadyToSend_LoginPacket()
 {
+	MYLOG(Warning, TEXT("Connected to Server!"));
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
-	strcpy_s(packet.name, _name.c_str());
+	strcpy_s(packet.id, _id);
+	strcpy_s(packet.pw, _pw);
 	size_t sent = 0;
 	SendPacket(&packet);
 };
+
+void ClientSocket::ReadyToSend_StatusPacket() {
+	sc_packet_status_change packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_STATUS_CHANGE;
+	SendPacket(&packet);
+};
+
 
 void ClientSocket::ReadyToSend_MovePacket(char dr)
 {
@@ -68,3 +134,5 @@ void ClientSocket::ReadyToSend_MovePacket(char dr)
 	size_t sent = 0;
 	SendPacket(&packet);
 };
+
+

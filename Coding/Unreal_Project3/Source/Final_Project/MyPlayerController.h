@@ -2,11 +2,12 @@
 
 #pragma once
 
-
+#include <thread>
 #include "Final_Project.h"
 #include "GameFramework/PlayerController.h"
 #include "ClientSocket.h"
 #include "MyPlayerController.generated.h"
+
 
 /**
  * 
@@ -17,11 +18,16 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	AMyPlayerController();
+	ClientSocket cs;
+	thread th;
 	
 protected:
+	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	void Disconnect();
 
 private:
-	ClientSocket cs;
+	//ClientSocket cs;
+	//HANDLE h_iocp;
 };
