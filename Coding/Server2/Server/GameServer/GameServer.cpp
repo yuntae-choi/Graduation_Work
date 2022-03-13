@@ -70,7 +70,8 @@ int main()
 	GetSystemInfo(&sysInfo);
 	printf_s("[INFO] CPU 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
 	// 적절한 작업 스레드의 갯수는 (CPU * 2) + 1
-	int nThreadCnt = sysInfo.dwNumberOfProcessors * 2;
+	//int nThreadCnt = sysInfo.dwNumberOfProcessors * 2;
+	int nThreadCnt = 5;
 
 	for (int i = 0; i < nThreadCnt; ++i)
 		worker_threads.emplace_back(worker_thread);
@@ -115,6 +116,8 @@ int get_id()
 void send_login_ok_packet(int pnum)
 {
 	sc_packet_login_ok packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_LOGIN_OK;
 	packet.x = clients[pnum].x;
 	packet.y = clients[pnum].y;
 	packet.z = clients[pnum].z;
@@ -172,7 +175,8 @@ void send_chat_packet(int user_id, int my_id, char* mess)
 void send_status_packet(int pnum)
 {
 	sc_packet_status_change packet;
-
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_STATUS_CHANGE;
 	clients[pnum].do_send(sizeof(packet), &packet);
 }
 
@@ -259,10 +263,14 @@ void process_packet(int pnum, unsigned char* p)
 	}
 	case CS_PACKET_MOVE: {
 		printf("Move\n");
-		
+		send_status_packet(pnum);
 		break;
 	}
+	case SC_PACKET_STATUS_CHANGE: {
+		printf("status\n");
+		break;
 
+	}
 
 	default:
 		printf("Unknown PACKET type\n");
