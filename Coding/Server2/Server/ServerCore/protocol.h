@@ -25,6 +25,7 @@ const char SC_PACKET_REMOVE_OBJECT = 4;
 const char SC_PACKET_CHAT = 5;
 const char SC_PACKET_LOGIN_FAIL = 6;
 const char SC_PACKET_STATUS_CHANGE = 7;
+const char SC_PACKET_DISCONNECT = 8;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
