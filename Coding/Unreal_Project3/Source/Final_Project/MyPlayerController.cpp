@@ -9,14 +9,14 @@
 AMyPlayerController::AMyPlayerController()
 {
 	
-	cs = ClientSocket::GetSingleton();
-	cs->h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(cs->_socket), cs->h_iocp, 0, 0);
-	int ret = cs->Connect();
+	_cs = ClientSocket::GetSingleton();
+	_cs->h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_cs->_socket), _cs->h_iocp, 0, 0);
+	int ret = _cs->Connect();
 	if (ret) 
 		{
 			UE_LOG(LogClass, Log, TEXT("IOCP Server connect success!"));
-			cs->SetPlayerController(this);
+			_cs->SetPlayerController(this);
 		}
 	
 
@@ -26,9 +26,18 @@ AMyPlayerController::AMyPlayerController()
 
 void AMyPlayerController::BeginPlay()
 {
-	
-	cs->StartListen();
+
 	//Super::BeginPlay(); //게임 종료가 안됨
+
+	/*auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!m_Player)
+		return;
+	_session_Id = &m_Player->_SessionId;
+	auto MyLocation = m_Player->GetActorLocation();
+	auto MyRotation = m_Player->GetActorRotation();*/
+	
+	_cs->StartListen();
+	
 
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
@@ -38,8 +47,8 @@ void AMyPlayerController::BeginPlay()
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 
-	cs->CloseSocket();
-	cs->StopListen();
+	_cs->CloseSocket();
+	_cs->StopListen();
 	//Super::EndPlay(EndPlayReason);
 }
 
@@ -47,7 +56,15 @@ void AMyPlayerController::Tick(float DeltaTime)
 {
 	
 	Super::Tick(DeltaTime);
-	cs->ReadyToSend_MovePacket(1);
+	
+	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!m_Player)
+		return;
+	_session_Id = &m_Player->_SessionId;
+	auto MyLocation = m_Player->GetActorLocation();
+	auto MyRotation = m_Player->GetActorRotation();
+
+	_cs->ReadyToSend_MovePacket(MyLocation.X, MyLocation.Y,MyLocation.Z);
 	
 }
 

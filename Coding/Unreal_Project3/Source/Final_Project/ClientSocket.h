@@ -33,7 +33,7 @@ public:
 	void ProcessPacket(unsigned char* ptr);
 	void ReadyToSend_LoginPacket();
 	void ReadyToSend_StatusPacket();
-	void ReadyToSend_MovePacket(char dr);
+	void ReadyToSend_MovePacket(float x, float y, float z);
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);

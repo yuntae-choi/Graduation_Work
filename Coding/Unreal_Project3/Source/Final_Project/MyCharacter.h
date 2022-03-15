@@ -42,6 +42,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = Projectile) 
 	TSubclassOf<class AMySnow> ProjectileClass;
+	
+	int		_SessionId;		// 플레이어 고유 아이디
 
 private:
 	void UpDown(float NewAxisValue);

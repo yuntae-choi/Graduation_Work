@@ -4,9 +4,12 @@
 
 #include <thread>
 #include "Final_Project.h"
+#include "MyCharacter.h"
 #include "GameFramework/PlayerController.h"
 #include "ClientSocket.h"
+
 #include "MyPlayerController.generated.h"
+
 
 
 /**
@@ -18,9 +21,9 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	AMyPlayerController();
-	ClientSocket* cs;
-	thread th;
-	
+	ClientSocket* _cs;
+	int*  _session_Id;
+
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
