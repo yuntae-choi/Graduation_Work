@@ -18,7 +18,7 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	AMyPlayerController();
-	ClientSocket cs;
+	ClientSocket* cs;
 	thread th;
 	
 protected:

@@ -11,7 +11,7 @@ class AMyPlayerController;
 
 using namespace std;
 
-class FINAL_PROJECT_API ClientSocket
+class FINAL_PROJECT_API ClientSocket : public FRunnable
 {
 public:
 	ClientSocket() {
@@ -35,6 +35,10 @@ public:
 	void ReadyToSend_StatusPacket();
 	void ReadyToSend_MovePacket(char dr);
 
+	// 플레이어 컨트롤러 세팅
+	void SetPlayerController(AMyPlayerController* pPlayerController);
+
+
 	void RecvPacket()
 	{
 		
@@ -52,7 +56,6 @@ public:
 	{
 		//MYLOG(Warning, TEXT("Send to Server!"));
 		int psize = reinterpret_cast<unsigned char*>(packet)[0];
-		int ptype = reinterpret_cast<unsigned char*>(packet)[1];
 		Overlap* ex_over = new Overlap(OP_SEND, psize, packet);
 		int ret = WSASend(_socket, &ex_over->_wsa_buf, 1, 0, 0, &ex_over->_wsa_over, NULL);
 		if (SOCKET_ERROR == ret) {
@@ -61,6 +64,31 @@ public:
 				//error_display(error_num);
 		}
 	};
+	void CloseSocket();
+
+	// FRunnable Thread members	
+	FRunnableThread* Thread;
+	FThreadSafeCounter StopTaskCounter;
+
+	// FRunnable override 함수
+	virtual bool Init();
+	virtual uint32 Run();
+	virtual void Stop();
+	virtual void Exit();
+
+	// 스레드 시작 및 종료
+	bool StartListen();
+	void StopListen();
+
+
+	// 싱글턴 객체 가져오기
+	static ClientSocket* GetSingleton()
+	{
+		static ClientSocket ins;
+		return &ins;
+	}
+
+	AMyPlayerController* PlayerController;	// 플레이어 컨트롤러 정보	
 
 	HANDLE h_iocp;
 	SOCKET _socket;
@@ -69,4 +97,5 @@ public:
 	char	_pw[MAX_NAME_SIZE];
 	string _name;
 	int      _prev_size = 0;
+	bool _stop = false;
 };
