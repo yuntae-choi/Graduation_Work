@@ -84,30 +84,7 @@ void ClientSocket:: ProcessPacket(unsigned char* ptr)
 	}
 	}
 }
-//void process_data(char* net_buf, size_t io_byte)
-//{
-//	char* ptr = net_buf;
-//	static size_t in_packet_size = 0;
-//	static size_t saved_packet_size = 0;
-//	static char packet_buffer[BUF_SIZE];
-//
-//	while (0 != io_byte) {
-//		if (0 == in_packet_size) in_packet_size = ptr[0];
-//		if (io_byte + saved_packet_size >= in_packet_size) {
-//			memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
-//			//ProcessPacket(packet_buffer);
-//			ptr += in_packet_size - saved_packet_size;
-//			io_byte -= in_packet_size - saved_packet_size;
-//			in_packet_size = 0;
-//			saved_packet_size = 0;
-//		}
-//		else {
-//			memcpy(packet_buffer + saved_packet_size, ptr, io_byte);
-//			saved_packet_size += io_byte;
-//			io_byte = 0;
-//		}
-//	}
-//}
+
 
 void ClientSocket::ReadyToSend_LoginPacket()
 {
@@ -137,12 +114,17 @@ void ClientSocket::SetPlayerController(AMyPlayerController* pPlayerController)
 	}
 }
 
-void ClientSocket::ReadyToSend_MovePacket(char dr)
+void ClientSocket::ReadyToSend_MovePacket(float x, float y, float z)
 {
+	
 	cs_packet_move packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_MOVE;
-	packet.direction = dr;
+	//packet.direction = dr;
+	packet.x = x;
+	packet.y = y;
+	packet.z = z;
+
 	size_t sent = 0;
 	SendPacket(&packet);
 };

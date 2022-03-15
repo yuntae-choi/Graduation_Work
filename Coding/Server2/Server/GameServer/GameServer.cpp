@@ -263,7 +263,9 @@ void process_packet(int pnum, unsigned char* p)
 	}
 	case CS_PACKET_MOVE: {
 		printf("Move\n");
-		send_status_packet(pnum);
+		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
+		cout << "x: " << packet->x << " y: " << packet->y << " z : " << packet->z << endl;
+
 		break;
 	}
 	case SC_PACKET_STATUS_CHANGE: {
