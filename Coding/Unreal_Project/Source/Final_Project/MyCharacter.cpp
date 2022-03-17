@@ -13,8 +13,9 @@ AMyCharacter::AMyCharacter()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
+	check(Camera != nullptr);
 
-	SpringArm->SetupAttachment(GetCapsuleComponent());
+	SpringArm->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	Camera->SetupAttachment(SpringArm);
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
@@ -45,6 +46,8 @@ AMyCharacter::AMyCharacter()
 	IsAttacking = false;
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
+
+	ProjectileClass = AMySnow::StaticClass();
 }
 
 // Called when the game starts or when spawned
@@ -109,8 +112,38 @@ void AMyCharacter::Attack()
 	if (IsAttacking) return;
 
 	MyAnim->PlayAttackMontage();
-	GetWorld()->SpawnActor<AMySnow>(GetActorLocation() + FVector(200.0f, 0.0f, 0.0f), FRotator::ZeroRotator);
 	IsAttacking = true;
+
+	// Attempt to fire a projectile.
+	if (ProjectileClass)
+	{
+		// Get the camera transform.
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetActorEyesViewPoint(CameraLocation, CameraRotation);
+
+		// Set MuzzleOffset to spawn projectiles slightly in front of the camera.
+		MuzzleOffset.Set(100.0f, 50.0f, -100.0f);
+
+		FVector MuzzleLocation = CameraLocation+FTransform(CameraRotation).TransformVector(MuzzleOffset);
+		FRotator MuzzleRotation = CameraRotation;
+
+		MuzzleRotation.Pitch += 10.0f; 
+		UWorld* World = GetWorld();
+
+		if (World)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this; 
+			SpawnParams.Instigator = GetInstigator();
+			AMySnow* Projectile = World->SpawnActor<AMySnow>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+			if (Projectile)
+			{
+				FVector LaunchDirection = MuzzleRotation.Vector(); 
+				Projectile->FireInDirection(LaunchDirection);			
+			}
+		}
+	}
 }
 
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)

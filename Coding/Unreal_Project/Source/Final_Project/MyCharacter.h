@@ -4,6 +4,7 @@
 
 #include "Final_Project.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "MyCharacter.generated.h"
 
 UCLASS()
@@ -19,6 +20,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AMySnow> ProjectileClass;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -32,6 +36,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* Camera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay) 
+	FVector MuzzleOffset; 
 
 private:
 	void UpDown(float NewAxisValue);

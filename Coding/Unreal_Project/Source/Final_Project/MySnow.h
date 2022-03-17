@@ -4,6 +4,8 @@
 
 #include "Final_Project.h"
 #include "GameFramework/Actor.h"
+#include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "MySnow.generated.h"
 
 UCLASS()
@@ -23,7 +25,27 @@ public:
 	// Called every frame
 	//virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, Category = Snow)
-	UStaticMeshComponent* Snow;
+	// Function that is called when the projectile hits something.
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
+	// Sphere collision component
+	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	USphereComponent* CollisionComponent;
+
+	// Projectile movement component
+	UPROPERTY(VisibleAnywhere, Category = Movement)
+	UProjectileMovementComponent* ProjectileMovementComponent;
+
+	// Projectile mesh
+	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	UStaticMeshComponent* ProjectileMeshComponent;
+
+	// Projectile material
+	UPROPERTY(VisibleDefaultsOnly, Category = Movement)
+	UMaterialInstanceDynamic* ProjectileMaterialInstance;
+
+public:
+	// Function that initializes the projectile's velocity in the shoot direction.
+	void FireInDirection(const FVector& ShootDirection);
 };
