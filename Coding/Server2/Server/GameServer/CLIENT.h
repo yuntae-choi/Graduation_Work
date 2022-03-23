@@ -5,7 +5,7 @@
 class CLIENT
 {
 public:
-    int _pnum; //플레이어 배열 넘버
+    int _s_id; //플레이어 배열 넘버
     char name[MAX_NAME_SIZE]; //플레이어 nick
     char _id[MAX_NAME_SIZE]; // id
     char _pw[MAX_NAME_SIZE];  // pw
