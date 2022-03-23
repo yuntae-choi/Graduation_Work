@@ -273,7 +273,11 @@ void process_packet(int pnum, unsigned char* p)
 		break;
 
 	}
+	case CS_PACKET_ATTACK: {
+		printf("attack\n");
+		break;
 
+	}
 	default:
 		printf("Unknown PACKET type\n");
 
