@@ -4,6 +4,7 @@
 #include "MyCharacter.h"
 #include "MyAnimInstance.h"
 #include "MySnow.h"
+#include "MyPlayerController.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -86,11 +87,22 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AMyCharacter::UpDown(float NewAxisValue)
 {
+	if (NewAxisValue != 0)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+	}
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
+	
 }
 
 void AMyCharacter::LeftRight(float NewAxisValue)
 {
+	if (NewAxisValue != 0)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+	}
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
 }
 
@@ -109,8 +121,35 @@ void AMyCharacter::Attack()
 	if (IsAttacking) return;
 
 	MyAnim->PlayAttackMontage();
-	GetWorld()->SpawnActor<AMySnow>(GetActorLocation() + FVector(200.0f, 0.0f, 0.0f), FRotator::ZeroRotator);
+	//GetWorld()->SpawnActor<AMySnow>(GetActorLocation(), FRotator::ZeroRotator);
 	IsAttacking = true;
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+    PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
+	//if (ProjectileClass)
+	{
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetActorEyesViewPoint(CameraLocation, CameraRotation);
+
+		FVector MuzzleLocation = CameraLocation+FTransform(CameraRotation).TransformVector(MuzzleOffset);
+		FRotator MuzzleRotation = CameraRotation;
+
+		MuzzleRotation.Pitch += 10.0f; 
+		UWorld* World = GetWorld();
+
+		if (World)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this; 
+			SpawnParams.Instigator = GetInstigator();
+			AMySnow* Projectile = World->SpawnActor<AMySnow>(MuzzleLocation, MuzzleRotation, SpawnParams);
+			if (Projectile)
+			{
+				FVector LaunchDirection = MuzzleRotation.Vector(); 
+				Projectile->FireInDirection(LaunchDirection);			
+			}
+		}
+	}
 }
 
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)

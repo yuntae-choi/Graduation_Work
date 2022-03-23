@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include <chrono>
@@ -13,7 +11,7 @@ class AMyPlayerController;
 
 using namespace std;
 
-class FINAL_PROJECT_API ClientSocket
+class FINAL_PROJECT_API ClientSocket : public FRunnable
 {
 public:
 	ClientSocket() {
@@ -32,13 +30,20 @@ public:
 	~ClientSocket();
 
 	bool Connect();
-
-	void SendPacket(void* packet);
+	void ProcessPacket(unsigned char* ptr);
 	void ReadyToSend_LoginPacket();
-	void ReadyToSend_MovePacket(char dr);
+	void ReadyToSend_StatusPacket();
+	void ReadyToSend_MovePacket(float x, float y, float z);
+	void ReadyToSend_AttackPacket();
+
+
+	// 플레이어 컨트롤러 세팅
+	void SetPlayerController(AMyPlayerController* pPlayerController);
+
 
 	void RecvPacket()
 	{
+		
 		DWORD recv_flag = 0;
 		ZeroMemory(&_recv_over._wsa_over, sizeof(_recv_over._wsa_over));
 		_recv_over._wsa_buf.buf = reinterpret_cast<char*>(_recv_over._net_buf + _prev_size);
@@ -46,17 +51,53 @@ public:
 		int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, NULL);
 		if (SOCKET_ERROR == ret) {
 			int error_num = WSAGetLastError();
+			
+		}
+	};
+	void SendPacket(void* packet)
+	{
+		//MYLOG(Warning, TEXT("Send to Server!"));
+		int psize = reinterpret_cast<unsigned char*>(packet)[0];
+		Overlap* ex_over = new Overlap(OP_SEND, psize, packet);
+		int ret = WSASend(_socket, &ex_over->_wsa_buf, 1, 0, 0, &ex_over->_wsa_over, NULL);
+		if (SOCKET_ERROR == ret) {
+			int error_num = WSAGetLastError();
 			//if (ERROR_IO_PENDING != error_num)
 				//error_display(error_num);
 		}
 	};
+	void CloseSocket();
+
+	// FRunnable Thread members	
+	FRunnableThread* Thread;
+	FThreadSafeCounter StopTaskCounter;
+
+	// FRunnable override 함수
+	virtual bool Init();
+	virtual uint32 Run();
+	virtual void Stop();
+	virtual void Exit();
+
+	// 스레드 시작 및 종료
+	bool StartListen();
+	void StopListen();
 
 
+	// 싱글턴 객체 가져오기
+	static ClientSocket* GetSingleton()
+	{
+		static ClientSocket ins;
+		return &ins;
+	}
 
+	AMyPlayerController* PlayerController;	// 플레이어 컨트롤러 정보	
+
+	HANDLE h_iocp;
 	SOCKET _socket;
 	Overlap _recv_over;
 	char	_id[MAX_NAME_SIZE];
 	char	_pw[MAX_NAME_SIZE];
 	string _name;
 	int      _prev_size = 0;
+	bool _stop = false;
 };

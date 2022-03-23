@@ -2,6 +2,7 @@
 
 
 #include "MyPawn.h"
+#include "MyPlayerController.h"
 
 // Sets default values
 AMyPawn::AMyPawn()
@@ -66,11 +67,13 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMyPawn::UpDown(float NewAxisValue)
 {
+	
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
 }
 
 void AMyPawn::LeftRight(float NewAxisValue)
 {
+	
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
 }
 

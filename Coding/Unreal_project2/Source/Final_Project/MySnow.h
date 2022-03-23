@@ -23,7 +23,15 @@ public:
 	// Called every frame
 	//virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, Category = Snow)
+	UPROPERTY(VisibleAnywhere, Category = Visual)
 	UStaticMeshComponent* Snow;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = Collision) 
+	USphereComponent* CollisionComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = Movement) 
+	class UProjectileMovementComponent* ProjectileMovementComponent;
+
+public:
+	void FireInDirection(const FVector& ShootDirection);
 };
