@@ -4,7 +4,9 @@
 
 #include "Final_Project.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "MyCharacter.generated.h"
+
 
 UCLASS()
 class FINAL_PROJECT_API AMyCharacter : public ACharacter
@@ -32,6 +34,17 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* Camera;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Projectile") 
+	USphereComponent* CollisionComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay) 
+	FVector MuzzleOffset; 
+	
+	UPROPERTY(EditDefaultsOnly, Category = Projectile) 
+	TSubclassOf<class AMySnow> ProjectileClass;
+	
+	int		_SessionId;		// 플레이어 고유 아이디
 
 private:
 	void UpDown(float NewAxisValue);

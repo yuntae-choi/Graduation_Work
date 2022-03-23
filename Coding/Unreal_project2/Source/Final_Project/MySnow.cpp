@@ -2,6 +2,7 @@
 
 
 #include "MySnow.h"
+#include "Engine/Classes/GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
 AMySnow::AMySnow()
@@ -11,13 +12,29 @@ AMySnow::AMySnow()
 
 	Snow = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SNOW"));
 
-	RootComponent = Snow;
-
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SNOW(TEXT("/Game/NonCharacters/snowball1.snowball1"));
 	if (SM_SNOW.Succeeded())
 	{
 		Snow->SetStaticMesh(SM_SNOW.Object);
 	}
+
+	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent")); 
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+
+	RootComponent = CollisionComponent;
+	Snow->SetupAttachment(CollisionComponent);
+
+	Snow->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+	CollisionComponent->InitSphereRadius(15.0f);
+
+	ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent); 
+	ProjectileMovementComponent->InitialSpeed = 3000.0f; 
+	ProjectileMovementComponent->MaxSpeed = 3000.0f; 
+	ProjectileMovementComponent->bRotationFollowsVelocity = true; 
+	ProjectileMovementComponent->bShouldBounce = true; 
+	ProjectileMovementComponent->Bounciness = 0.3f;
+
+	InitialLifeSpan = 3.0f;
 }
 
 // Called when the game starts or when spawned
@@ -27,3 +44,7 @@ void AMySnow::BeginPlay()
 	
 }
 
+void AMySnow::FireInDirection(const FVector& ShootDirection)
+{ 
+	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed; 
+}

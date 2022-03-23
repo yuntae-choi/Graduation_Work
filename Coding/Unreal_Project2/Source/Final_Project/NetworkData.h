@@ -42,7 +42,14 @@ enum SC_PacketType
 	SC_PACKET_REMOVE_OBJECT,
 	SC_PACKET_CHAT,
 	SC_PACKET_LOGIN_FAIL,
-	SC_PACKET_STATUS_CHANGE
+	SC_PACKET_STATUS_CHANGE,
+	SC_PACKET_DISCONNECT
+};
+
+enum COMMAND_Type
+{
+	COMMAND_ATTACK = 1,
+	COMMAND_MOVE
 };
 
 // ÆÐÅ¶
@@ -58,7 +65,8 @@ struct cs_packet_login {
 struct cs_packet_move {
 	unsigned char size;
 	char	type;
-	char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	float x, y, z;
 	int		move_time;
 };
 
@@ -145,7 +153,7 @@ struct sc_packet_status_change {
 	int		exp;
 };
 
-static HANDLE g_hiocp;
+
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
 
