@@ -8,7 +8,7 @@ const int  ReZone_HEIGHT = 2000;
 const int  ReZone_WIDTH = 2000;
 const int  MAX_NAME_SIZE = 20;
 const int  MAX_CHAT_SIZE = 100;
-const int  MAX_USER = 10;
+const int  MAX_USER = 10000;
 const int  MAX_OBJ = 20;
 
 const char CS_PACKET_LOGIN = 1;
