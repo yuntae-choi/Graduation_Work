@@ -27,9 +27,19 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	bool CanSetItem();
+	void SetItem(class AMyItem* NewItem);
+
+	UPROPERTY(VisibleAnywhere, Category = Item)
+	class AMyItem* CurrentItem;
+
+	UPROPERTY(VisibleAnywhere, Category = Item)
+	USkeletalMeshComponent* Item;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* SpringArm;
@@ -39,6 +49,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay) 
 	FVector MuzzleOffset; 
+
+	int		_SessionId;		// 플레이어 고유 아이디
 
 private:
 	void UpDown(float NewAxisValue);
@@ -57,4 +69,19 @@ private:
 
 	UPROPERTY()
 	class UMyAnimInstance* MyAnim;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
+	bool IsDead;
+
+	UPROPERTY()
+	class USkeletalMesh* bear;
+
+	UPROPERTY()
+	class USkeletalMesh* snowman;
+
+	UPROPERTY()
+	TSubclassOf<class UAnimInstance> bearAnim;
+
+	UPROPERTY()
+	TSubclassOf<class UAnimInstance> snowmanAnim;
 };

@@ -3,12 +3,13 @@
 
 #include "MySnow.h"
 #include "Engine/Classes/GameFramework/ProjectileMovementComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AMySnow::AMySnow()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	if (!RootComponent)
 	{
@@ -90,6 +91,9 @@ AMySnow::AMySnow()
 	//ProjectileMovementComponent->Bounciness = 0.3f;
 
 	//InitialLifeSpan = 3.0f;
+
+	AttackRange = 200.0f;
+	AttackRadius = 50.0f;
 }
 
 // Called when the game starts or when spawned
@@ -102,10 +106,10 @@ void AMySnow::BeginPlay()
 // Function that is called when the projectile hits something.
 void AMySnow::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
-	{
-		OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 10.0f, Hit.ImpactPoint);
-	}
+	//if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
+	//{
+	//	OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 10.0f, Hit.ImpactPoint);
+	//}
 
 	//Destroy();
 }
@@ -113,4 +117,17 @@ void AMySnow::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 void AMySnow::FireInDirection(const FVector& ShootDirection)
 { 
 	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed; 
+}
+
+void AMySnow::Tick(float DeltaTime)
+{
+
+}
+
+void AMySnow::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{  
+	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+
+	FDamageEvent DamageEvent;
+	Other->TakeDamage(50.0f, DamageEvent, false, this);
 }

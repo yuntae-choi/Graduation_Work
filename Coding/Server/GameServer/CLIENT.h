@@ -2,13 +2,25 @@
 #include "pch.h"
 #include "CorePch.h"
 #include "Overlap.h"
-#include "Obj.h"
-
-class CLIENT {
+class CLIENT
+{
 public:
-    char name[MAX_NAME_SIZE]; //플레이어 id
-    int      _id; // array의 저장된 인덱스 <- 서버 관리용
-    short  x, y; // 위치
+    int _s_id; //플레이어 배열 넘버
+    char name[MAX_NAME_SIZE]; //플레이어 nick
+    char _id[MAX_NAME_SIZE]; // id
+    char _pw[MAX_NAME_SIZE];  // pw
+        // 위치
+    float	x;
+    float	y;
+    float	z;
+    // 회전값
+    float	Yaw;
+    float	Pitch;
+    float	Roll;
+    // 속도
+    float VX;
+    float VY;
+    float VZ;
     int _max_hp; // 최대 체력
     int _hp; // 체력
     int _level; // 레벨
@@ -25,7 +37,6 @@ public:
     mutex vl;
 
     mutex lua_lock;
-    lua_State* L;
 
     mutex state_lock;
     CL_STATE _state;
@@ -80,10 +91,7 @@ public:
     }
 
     void Item_Ability(int _iAtt, int _iHp);
-    void Equip_Item(CObj* _pItem);
     void UnEquip_Item(int _iIdx);
 
-
-    CObj* m_pItem[TYPE_END];
 };
 

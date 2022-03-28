@@ -1,17 +1,15 @@
 #pragma once
 
-const short SERVER_PORT = 4000;
 
-const int  WORLD_HEIGHT = 200;
-const int  WORLD_WIDTH = 200;
+const short SERVER_PORT = 8000;
+
+const int BUFSIZE = 256;
+const int  ReZone_HEIGHT = 2000;
+const int  ReZone_WIDTH = 2000;
 const int  MAX_NAME_SIZE = 20;
 const int  MAX_CHAT_SIZE = 100;
-const int  MAX_USER = 10;
+const int  MAX_USER = 10000;
 const int  MAX_OBJ = 20;
-//const int  MAX_NPC = 0;
-
-constexpr int NPC_ID_START = MAX_USER;
-constexpr int NPC_ID_END = MAX_USER + MAX_OBJ - 1;
 
 const char CS_PACKET_LOGIN = 1;
 const char CS_PACKET_MOVE = 2;
@@ -27,6 +25,7 @@ const char SC_PACKET_REMOVE_OBJECT = 4;
 const char SC_PACKET_CHAT = 5;
 const char SC_PACKET_LOGIN_FAIL = 6;
 const char SC_PACKET_STATUS_CHANGE = 7;
+const char SC_PACKET_DISCONNECT = 8;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -41,6 +40,21 @@ struct sc_packet_login_ok {
 	unsigned char size;
 	char type;
 	char	name[MAX_NAME_SIZE];
+	// 세션 아이디
+	int		pnum;
+	// 위치
+	float	x;
+	float	y;
+	float	z;
+	// 회전값
+	float	Yaw;
+	float	Pitch;
+	float	Roll;
+	// 속도
+	float VX;
+	float VY;
+	float VZ;
+
 };
 
 struct cs_packet_start { // 게임 레디 요청
@@ -65,7 +79,8 @@ struct sc_packet_start_ok { // 스폰
 struct cs_packet_move {
 	unsigned char size;
 	char	type;
-	char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	float x, y, z;
 	int		move_time;
 };
 
@@ -94,20 +109,11 @@ struct cs_packet_teleport {
 	char	type;
 };
 
-
-struct sc_packet_move {
-	unsigned char size;
-	char type;
-	int		id;
-	short  x, y;
-	int		move_time;
-};
-
 struct sc_packet_put_object {
 	unsigned char size;
 	char type;
 	int id;
-	short x, y;
+	short x, y, z;
 	char object_type;
 	char	name[MAX_NAME_SIZE];
 };

@@ -10,16 +10,6 @@
 
 #include "CorePch.h"
 #include "Enum.h"
-#include "Struct.h"
-#include <string>
-#pragma comment (lib, "lua54.lib")
-
-const int BUFSIZE = 256;
-const int RANGE = 7;
-const int OG_RANGE = 5;
-
-
-
 
 struct timer_ev {
     int this_id;
@@ -33,5 +23,3 @@ struct timer_ev {
 };
 
 void error_display(int err_no);
-
-

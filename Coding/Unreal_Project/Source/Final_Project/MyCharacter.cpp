@@ -4,6 +4,8 @@
 #include "MyCharacter.h"
 #include "MyAnimInstance.h"
 #include "MySnow.h"
+#include "MyItem.h"
+#include "MyPlayerController.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -20,7 +22,7 @@ AMyCharacter::AMyCharacter()
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 400.0f;
-	SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
+	SpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritRoll = true;
@@ -28,24 +30,40 @@ AMyCharacter::AMyCharacter()
 	SpringArm->bDoCollisionTest = true;
 	bUseControllerRotationYaw = true;
 
+	bear = CreateDefaultSubobject<USkeletalMesh>(TEXT("BEAR"));
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_BEAR(TEXT("/Game/Characters/Bear/bear.bear"));
 	if (SK_BEAR.Succeeded())
 	{
-		GetMesh()->SetSkeletalMesh(SK_BEAR.Object);
+		bear = SK_BEAR.Object;
+		GetMesh()->SetSkeletalMesh(bear);
 	}
 
+	snowman = CreateDefaultSubobject<USkeletalMesh>(TEXT("SNOWMAN"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_SNOWMAN(TEXT("/Game/Characters/Snowman/snowman.snowman"));
+	if (SK_SNOWMAN.Succeeded())
+	{
+		snowman = SK_SNOWMAN.Object;
+	}
+	
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> BEAR_ANIM(TEXT("/Game/Animations/Bear/BearAnimBP.BearAnimBP_C"));
 	if (BEAR_ANIM.Succeeded())
 	{
+		bearAnim = BEAR_ANIM.Class;
 		GetMesh()->SetAnimInstanceClass(BEAR_ANIM.Class);
+	}
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> SNOWMAN_ANIM(TEXT("/Game/Animations/Snowman/SnowMan_AnimBP.SnowMan_AnimBP_C"));
+	if (SNOWMAN_ANIM.Succeeded())
+	{
+		snowmanAnim = SNOWMAN_ANIM.Class;
 	}
 
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	IsAttacking = false;
 
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));   
 
 	ProjectileClass = AMySnow::StaticClass();
 }
@@ -54,7 +72,6 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -87,13 +104,41 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AMyCharacter::Attack);
 }
 
+bool AMyCharacter::CanSetItem()
+{
+	return (nullptr == CurrentItem);
+}
+
+void AMyCharacter::SetItem(AMyItem* NewItem)
+{
+	MYCHECK(nullptr != NewItem && nullptr == CurrentItem);
+	FName ItemSocket(TEXT("hand_rSocket"));
+	auto CurItem = GetWorld()->SpawnActor<AMyItem>(FVector::ZeroVector, FRotator::ZeroRotator);
+	if (nullptr != NewItem)
+	{
+		NewItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemSocket);
+		NewItem->SetOwner(this);
+		CurrentItem = NewItem;
+	}
+}
+
 void AMyCharacter::UpDown(float NewAxisValue)
 {
+	if (NewAxisValue != 0)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+	}
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
 }
 
 void AMyCharacter::LeftRight(float NewAxisValue)
 {
+	if (NewAxisValue != 0)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+	}
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
 }
 
@@ -149,4 +194,34 @@ void AMyCharacter::Attack()
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	IsAttacking = false;
+}
+
+float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	//CharacterStat->SetDamage(FinalDamage);
+	//if (CurrentState == ECharacterState::DEAD)
+	//{
+	//	if (EventInstigator->IsPlayerController())
+	//	{
+	//		auto instigator = Cast<AABPlayerController>(EventInstigator);
+	//		ABCHECK(nullptr != instigator, 0.0f);
+	//		instigator->NPCKill(this);
+	//	}
+	//}
+	MYLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
+	
+	if (FinalDamage > 0.0f)
+	{
+		IsDead = true;
+		if (IsDead)
+		{
+			GetMesh()->SetSkeletalMesh(snowman);
+			GetMesh()->SetAnimInstanceClass(snowmanAnim);
+		}
+		SetActorEnableCollision(false);
+	}
+
+	return FinalDamage;
 }

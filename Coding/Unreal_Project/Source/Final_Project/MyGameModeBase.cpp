@@ -3,10 +3,12 @@
 
 #include "MyGameModeBase.h"
 #include "MyCharacter.h"
+#include "SnowMan.h"
 #include "MyPlayerController.h"
 
 AMyGameModeBase::AMyGameModeBase()
 {
 	DefaultPawnClass = AMyCharacter::StaticClass();
+	//DefaultPawnClass = ASnowMan::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 }

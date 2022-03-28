@@ -1,5 +1,4 @@
 #include "pch.h"
-
 void error_display(int err_no)
 {
     WCHAR* lpMsgBuf;
