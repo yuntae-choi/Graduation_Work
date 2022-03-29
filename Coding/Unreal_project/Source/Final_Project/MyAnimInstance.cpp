@@ -21,7 +21,7 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	auto Pawn = TryGetPawnOwner();
 	if (::IsValid(Pawn))
 	{
-		CurrentPawnSpeed = Pawn->GetVelocity().Size();
+		CurrentPawnSpeed = FVector(Pawn->GetVelocity() * FVector(1.0f, 1.0f, 0.0f)).Size();
 		auto Character = Cast<ACharacter>(Pawn);
 		if (Character)
 		{
