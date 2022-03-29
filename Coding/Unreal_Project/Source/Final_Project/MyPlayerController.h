@@ -19,20 +19,29 @@ UCLASS()
 class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	public:
+	
+public:
 	AMyPlayerController();
 	ClientSocket* _cs;
-	int* _session_Id;
+	int _my_session_id;
+	int _other_session_id;
+	int _other_x;
+	int _other_y;
+	int _other_z;
+
+	// 스폰시킬 다른 캐릭터
+	UPROPERTY(EditAnywhere, Category = "Spawning")
+	TSubclassOf<class ACharacter> WhoToSpawn;
+
+	// 새 플레이어 업데이트
+	void RecvNewPlayer(int sessionID, float x, float y, float z);
+
+	void UpdateNewPlayer();		// 플레이어 동기화
 	void UpdatePlayerInfo(int input);
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-
-	void Disconnect();
-
-private:
-	//ClientSocket cs;
-	//HANDLE h_iocp;
+	bool bNewPlayerEntered;
 };

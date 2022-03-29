@@ -66,6 +66,7 @@ struct cs_packet_move {
 	unsigned char size;
 	char	type;
 	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	int sessionID;
 	float x, y, z;
 	int		move_time;
 };

@@ -33,7 +33,7 @@ public:
 	void ProcessPacket(unsigned char* ptr);
 	void ReadyToSend_LoginPacket();
 	void ReadyToSend_StatusPacket();
-	void ReadyToSend_MovePacket(float x, float y, float z);
+	void ReadyToSend_MovePacket(int sessionID, float x, float y, float z);
 	void ReadyToSend_AttackPacket();
 
 
@@ -90,8 +90,6 @@ public:
 		return &ins;
 	}
 
-	AMyPlayerController* PlayerController;	// 플레이어 컨트롤러 정보	
-
 	HANDLE h_iocp;
 	SOCKET _socket;
 	Overlap _recv_over;
@@ -100,4 +98,7 @@ public:
 	string _name;
 	int      _prev_size = 0;
 	bool _stop = false;
+
+private:
+	AMyPlayerController* PlayerController;	// 플레이어 컨트롤러 정보	
 };
