@@ -25,6 +25,9 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		auto Character = Cast<ACharacter>(Pawn);
 		if (Character)
 		{
+			float MoveForward = Character->GetInputAxisValue(TEXT("UpDown"));
+			float MoveRight = Character->GetInputAxisValue(TEXT("LeftRight"));
+			CurrentPawnDirection = UKismetMathLibrary::DegAtan2(MoveForward, MoveRight);
 			IsInAir = Character->GetMovementComponent()->IsFalling();
 		}
 	}
