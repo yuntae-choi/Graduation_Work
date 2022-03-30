@@ -9,3 +9,5 @@ Saved/*
 *.sln
 *.pdb
 *.idb
+
+Content/Map/tmp_map.umap
