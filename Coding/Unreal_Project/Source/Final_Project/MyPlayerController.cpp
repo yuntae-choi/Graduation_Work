@@ -77,6 +77,18 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 
 }
 
+void AMyPlayerController::UpdatePlayerS_id(int _s_id)
+{
+	_my_session_id = _s_id;
+	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!m_Player)
+		return;
+	m_Player->_SessionId = _s_id;
+
+	
+
+}
+
 void AMyPlayerController::RecvNewPlayer(int sessionID, float x, float y, float z)
 {
 	MYLOG(Warning, TEXT("recv"));

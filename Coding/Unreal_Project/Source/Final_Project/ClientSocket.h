@@ -20,7 +20,7 @@ public:
 			MYLOG(Warning, TEXT("Failed to start wsa"));
 
 		_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-		_login_ok = false;
+		//_login_ok = false;
 
 		/*	if (_socket == INVALID_SOCKET)
 				MYLOG(Warning, TEXT("Failed to start socket"));
