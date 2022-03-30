@@ -166,6 +166,11 @@ uint32 ClientSocket::Run()
 	FPlatformProcess::Sleep(0.03);
 	// recv while loop 시작
 	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
+
+	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
+
+
 	ReadyToSend_LoginPacket();
 	RecvPacket();
 	while (StopTaskCounter.GetValue() == 0 && PlayerController != nullptr)

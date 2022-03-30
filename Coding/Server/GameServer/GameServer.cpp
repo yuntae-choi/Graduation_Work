@@ -329,7 +329,12 @@ void process_packet(int s_id, unsigned char* p)
 		cl.y = packet->y;
 		cl.z = packet->z;
 
-		cout << "x: " << packet->x << " y: " << packet->y << " z : " << packet->z << endl;
+		//cout << "x: " << packet->x << " y: " << packet->y << " z : " << packet->z << endl;
+		//클라 recv 확인용
+		sc_packet_status_change _packet;
+		_packet.size = sizeof(_packet);
+		_packet.type = SC_PACKET_STATUS_CHANGE;
+		cl.do_send(sizeof(_packet), &_packet);
 		printf("Move\n");
 		break;
 	}
