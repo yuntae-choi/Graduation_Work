@@ -39,22 +39,8 @@ struct cs_packet_login {
 struct sc_packet_login_ok {
 	unsigned char size;
 	char type;
-	char	name[MAX_NAME_SIZE];
 	// 세션 아이디
-	int		pnum;
-	// 위치
-	float	x;
-	float	y;
-	float	z;
-	// 회전값
-	float	Yaw;
-	float	Pitch;
-	float	Roll;
-	// 속도
-	float VX;
-	float VY;
-	float VZ;
-
+	int		s_id;
 };
 
 struct cs_packet_start { // 게임 레디 요청
@@ -80,6 +66,7 @@ struct cs_packet_move {
 	unsigned char size;
 	char	type;
 	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	int sessionID;
 	float x, y, z;
 	int		move_time;
 };

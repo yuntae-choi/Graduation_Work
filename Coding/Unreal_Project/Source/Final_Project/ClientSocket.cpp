@@ -47,6 +47,14 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 	case SC_PACKET_LOGIN_OK:
 	{
+		ReadyToSend_StatusPacket();
+		/*sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
+
+		int id = packet->s_id;
+		_login_ok = true;
+		PlayerController->_my_session_id = id;*/
+		
+
 
 	}
 	break;
@@ -88,7 +96,9 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	}
 	case SC_PACKET_STATUS_CHANGE:
 	{
-		ReadyToSend_StatusPacket();
+		//ReadyToSend_LoginPacket();
+
+		//ReadyToSend_StatusPacket();
 
 	}
 	}
@@ -105,6 +115,7 @@ void ClientSocket::ReadyToSend_LoginPacket()
 	strcpy_s(packet.pw, _pw);
 	size_t sent = 0;
 	SendPacket(&packet);
+	
 };
 
 void ClientSocket::ReadyToSend_StatusPacket() {
@@ -125,17 +136,19 @@ void ClientSocket::SetPlayerController(AMyPlayerController* pPlayerController)
 
 void ClientSocket::ReadyToSend_MovePacket(int sessionID, float x, float y, float z)
 {
-	cs_packet_move packet;
-	packet.size = sizeof(packet);
-	packet.type = CS_PACKET_MOVE;
-	//packet.direction = dr;
-	packet.sessionID = sessionID;
-	packet.x = x;
-	packet.y = y;
-	packet.z = z;
+	//if (_login_ok) {
+		cs_packet_move packet;
+		packet.size = sizeof(packet);
+		packet.type = CS_PACKET_MOVE;
+		//packet.direction = dr;
+		packet.sessionID = sessionID;
+		packet.x = x;
+		packet.y = y;
+		packet.z = z;
 
-	size_t sent = 0;
-	SendPacket(&packet);
+		size_t sent = 0;
+		SendPacket(&packet);
+	//}
 };
 
 void ClientSocket::ReadyToSend_AttackPacket()
@@ -166,13 +179,13 @@ uint32 ClientSocket::Run()
 	FPlatformProcess::Sleep(0.03);
 	// recv while loop 시작
 	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
-
+	Connect();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
-
-
-	ReadyToSend_LoginPacket();
+	
 	RecvPacket();
+	ReadyToSend_LoginPacket();
+	FPlatformProcess::Sleep(0.1);
 	while (StopTaskCounter.GetValue() == 0 && PlayerController != nullptr)
 	{
 		DWORD num_byte;
