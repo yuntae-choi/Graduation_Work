@@ -38,6 +38,8 @@ public:
 
 	void UpdateNewPlayer();		// 플레이어 동기화
 	void UpdatePlayerInfo(int input);
+	void UpdatePlayerS_id(int _s_id);
+
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;

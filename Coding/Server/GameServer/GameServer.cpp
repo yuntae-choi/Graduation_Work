@@ -354,7 +354,7 @@ void process_packet(int s_id, unsigned char* p)
 
 		cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
-		//send_status_packet(s_id);
+		send_status_packet(s_id);
 
 
 		unordered_set <int> near_list;
