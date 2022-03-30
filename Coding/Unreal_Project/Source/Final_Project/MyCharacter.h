@@ -41,6 +41,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Item)
 	USkeletalMeshComponent* Item;
 
+	UPROPERTY(VisibleAnywhere, Category = Stat)
+	class UMyCharacterStatComponent* CharacterStat;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* SpringArm;
 
