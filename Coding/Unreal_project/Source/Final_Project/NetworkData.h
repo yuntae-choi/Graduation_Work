@@ -91,23 +91,13 @@ struct cs_packet_teleport {
 struct sc_packet_login_ok {
 	unsigned char size;
 	char type;
-	char	name[MAX_NAME_SIZE];
+	
 	// 세션 아이디
-	int		pnum;
-	// 위치
-	float	x;
-	float	y;
-	float	z;
-	// 회전값
-	float	Yaw;
-	float	Pitch;
-	float	Roll;
-	// 속도
-	float VX;
-	float VY;
-	float VZ;
+	int		s_id;
+
 
 };
+
 
 
 struct sc_packet_move {
