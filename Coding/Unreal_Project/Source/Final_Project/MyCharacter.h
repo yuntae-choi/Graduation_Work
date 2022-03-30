@@ -5,6 +5,7 @@
 #include "Final_Project.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "MySnowball.h"
 #include "MyCharacter.generated.h"
 
 UCLASS()
@@ -21,7 +22,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMySnow> ProjectileClass;
+	TSubclassOf<class AMySnowball> ProjectileClass;
+	//TSubclassOf<class AMySnow> ProjectileClass;
 
 public:	
 	// Called every frame
@@ -55,6 +57,18 @@ public:
 
 	int		_SessionId;		// 플레이어 고유 아이디
 
+	// 현재 손에 들고있는 눈덩이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
+	AMySnowball* Snowball;
+
+	// 현재 소지한 눈덩이 수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
+	int SnowballCount;
+
+	// 보유 가능한 눈덩이 최대 수
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
+	//int SnowballMaxCount;
+
 private:
 	void UpDown(float NewAxisValue);
 	void LeftRight(float NewAxisValue);
@@ -65,6 +79,9 @@ private:
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
+	void ReleaseSnowball();
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
