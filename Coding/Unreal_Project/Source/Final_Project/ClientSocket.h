@@ -20,6 +20,8 @@ public:
 			MYLOG(Warning, TEXT("Failed to start wsa"));
 
 		_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+		_login_ok = false;
+
 		/*	if (_socket == INVALID_SOCKET)
 				MYLOG(Warning, TEXT("Failed to start socket"));
 
@@ -98,6 +100,7 @@ public:
 	string _name;
 	int      _prev_size = 0;
 	bool _stop = false;
+	bool _login_ok;
 
 private:
 	AMyPlayerController* PlayerController;	// 플레이어 컨트롤러 정보	

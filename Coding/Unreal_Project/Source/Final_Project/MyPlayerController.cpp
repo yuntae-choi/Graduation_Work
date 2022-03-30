@@ -12,12 +12,13 @@ AMyPlayerController::AMyPlayerController()
 	_cs = ClientSocket::GetSingleton();
 	/*_cs->h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_cs->_socket), _cs->h_iocp, 0, 0);
-	*/int ret = _cs->Connect();
-	if (ret)
-	{
-		UE_LOG(LogClass, Log, TEXT("IOCP Server connect success!"));
+	*///int ret = _cs->Connect();
+	//if (ret)
+	//{
+		//UE_LOG(LogClass, Log, TEXT("IOCP Server connect success!"));
 		_cs->SetPlayerController(this);
-	}
+		
+	//}
 
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -39,8 +40,6 @@ void AMyPlayerController::BeginPlay()
 	auto MyRotation = m_Player->GetActorRotation();*/
 
 	_cs->StartListen();
-
-
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
 

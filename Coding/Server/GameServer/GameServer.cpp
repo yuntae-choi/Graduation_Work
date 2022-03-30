@@ -30,7 +30,13 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 void process_packet(int _s_id, unsigned char* p);
 void worker_thread();
 void ev_timer();
-
+//근처 객체 판별
+bool is_near(int a, int b)
+{
+	if (RANGE < abs(clients[a].x - clients[b].x)) return false;
+	if (RANGE < abs(clients[a].y - clients[b].y)) return false;
+	return true;
+}
 int main()
 {
 	wcout.imbue(locale("korean"));
@@ -118,12 +124,14 @@ void send_login_ok_packet(int _s_id)
 	sc_packet_login_ok packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_LOGIN_OK;
-	packet.x = clients[_s_id].x;
+	packet.s_id = _s_id;
+	/*packet.x = clients[_s_id].x;
 	packet.y = clients[_s_id].y;
 	packet.z = clients[_s_id].z;
 	packet.Yaw = clients[_s_id].Yaw;
 	packet.Pitch = clients[_s_id].Pitch;
-	packet.Roll = clients[_s_id].Roll;
+	packet.Roll = clients[_s_id].Roll;*/
+	cout << "로그인 허용 전송" << _s_id << endl;
 	clients[_s_id].do_send(sizeof(packet), &packet);
 }
 
@@ -155,6 +163,8 @@ void send_put_object(int _s_id, int target)
 	packet.type = SC_PACKET_PUT_OBJECT;
 	packet.x = clients[target].x;
 	packet.y = clients[target].y;
+	packet.z = clients[target].z;
+
 	strcpy_s(packet.name, clients[target].name);
 	packet.object_type = 0;
 	clients[_s_id].do_send(sizeof(packet), &packet);
@@ -242,7 +252,7 @@ void process_packet(int s_id, unsigned char* p)
 		CLIENT& cl = clients[s_id];
 		printf_s("[INFO] 로그인 시도 {%s}/{%s}\n", packet->id, packet->pw);
 
-		for (int i = 0; i < MAX_USER; ++i) {
+	/*	for (int i = 0; i < MAX_USER; ++i) {
 			clients[i].state_lock.lock();
 			if (ST_INGAME == clients[i]._state) {
 				if (strcmp(packet->id, clients[i]._id) == 0) {
@@ -253,12 +263,25 @@ void process_packet(int s_id, unsigned char* p)
 				}
 			}
 			clients[i].state_lock.unlock();
-		}
+		}*/
 		cl.state_lock.lock();
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
-		send_login_ok_packet(s_id);
-		cout << packet->id << " 로그인 성공" << endl;
+		//send_login_ok_packet(s_id);
+
+		sc_packet_login_ok _packet;
+		_packet.size = sizeof(_packet);
+		_packet.type = SC_PACKET_LOGIN_OK;
+		_packet.s_id = s_id;
+		/*packet.x = clients[_s_id].x;
+		packet.y = clients[_s_id].y;
+		packet.z = clients[_s_id].z;
+		packet.Yaw = clients[_s_id].Yaw;
+		packet.Pitch = clients[_s_id].Pitch;
+		packet.Roll = clients[_s_id].Roll;*/
+		//cout << "로그인 허용 전송" << s_id << endl;
+		cl.do_send(sizeof(_packet), &_packet);
+		cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
 
 		// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
 		for (auto& other : clients) {
@@ -329,17 +352,86 @@ void process_packet(int s_id, unsigned char* p)
 		cl.y = packet->y;
 		cl.z = packet->z;
 
-		//cout << "x: " << packet->x << " y: " << packet->y << " z : " << packet->z << endl;
+		cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
-		sc_packet_status_change _packet;
-		_packet.size = sizeof(_packet);
-		_packet.type = SC_PACKET_STATUS_CHANGE;
-		cl.do_send(sizeof(_packet), &_packet);
+		//send_status_packet(s_id);
+
+
+		unordered_set <int> near_list;
+		for (auto& other : clients) {
+			if (other._s_id == s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			if (false == is_near(s_id, other._s_id))
+				continue;
+			
+			near_list.insert(other._s_id);
+		}
+
+		cl.vl.lock();
+		unordered_set <int> my_vl{ cl.viewlist };
+		cl.vl.unlock();
+
+		//새로 시야에 들어온 플레이어
+		for (auto other_id : near_list) {
+			if (0 == my_vl.count(other_id)) {
+				cl.vl.lock();
+				cl.viewlist.insert(other_id);
+				cl.vl.unlock();
+				send_put_object(cl._s_id, other_id);
+
+
+				clients[other_id].vl.lock();
+				if (0 == clients[other_id].viewlist.count(cl._s_id)) {
+					clients[other_id].viewlist.insert(cl._s_id);
+					clients[other_id].vl.unlock();
+					send_put_object(other_id, cl._s_id);
+				}
+				else {
+					clients[other_id].vl.unlock();
+					send_move_packet(other_id, cl._s_id);
+				}
+			}
+			//시야에 존재하는 플레이어
+			else {
+				clients[other_id].vl.lock();
+				if (0 != clients[other_id].viewlist.count(cl._s_id)) {
+					clients[other_id].vl.unlock();
+					send_move_packet(other_id, cl._s_id);
+				}
+				else {
+					clients[other_id].viewlist.insert(cl._s_id);
+					clients[other_id].vl.unlock();
+					send_put_object(other_id, cl._s_id);
+				}
+			}
+		}
+		// 시야에서 벗어난 플레이어 
+		for (auto other_id : my_vl) {
+			if (0 == near_list.count(other_id)) {
+				cl.vl.lock();
+				cl.viewlist.erase(other_id);
+				cl.vl.unlock();
+				send_remove_object(cl._s_id, other_id);
+				clients[other_id].vl.lock();
+				if (0 != clients[other_id].viewlist.count(cl._s_id)) {
+					clients[other_id].viewlist.erase(cl._s_id);
+					clients[other_id].vl.unlock();
+					send_remove_object(other_id, cl._s_id);
+				}
+				else clients[other_id].vl.unlock();
+			}
+		}
+
+
 		printf("Move\n");
 		break;
 	}
 	case SC_PACKET_STATUS_CHANGE: {
-		printf("status\n");
+		//printf("status\n");
+		printf("클라이언트 recv 성공\n");
+
 		break;
 
 	}
@@ -457,7 +549,19 @@ void worker_thread()
 	
 }
 
-
+//이동
+void send_move_packet(int _id, int target)
+{
+	cs_packet_move packet;
+	packet.sessionID = target;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_MOVE;
+	packet.x = clients[target].x;
+	packet.y = clients[target].y;
+	packet.z = clients[target].z;
+	packet.move_time = clients[target].last_move_time;
+	clients[_id].do_send(sizeof(packet), &packet);
+}
 //타이머
 void ev_timer() 
 {

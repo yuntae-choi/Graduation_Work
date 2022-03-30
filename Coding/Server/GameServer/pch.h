@@ -11,7 +11,10 @@
 #include "CorePch.h"
 #include "Enum.h"
 
+const int RANGE = 7;
+
 struct timer_ev {
+
     int this_id;
     int target_id;
     chrono::system_clock::time_point   start_t;
