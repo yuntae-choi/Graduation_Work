@@ -129,5 +129,5 @@ void AMySnow::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCo
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
 	FDamageEvent DamageEvent;
-	Other->TakeDamage(50.0f, DamageEvent, false, this);
+	Other->TakeDamage(attack, DamageEvent, false, this);
 }
