@@ -80,6 +80,9 @@ private:
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
+	void ReleaseSnowball();
+
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool IsAttacking;

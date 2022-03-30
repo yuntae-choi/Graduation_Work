@@ -70,6 +70,8 @@ AMyCharacter::AMyCharacter()
 	//ProjectileClass = AMySnow::StaticClass();
 	ProjectileClass = AMySnowball::StaticClass();
 
+	Snowball = NULL;
+
 	//SnowballCount = 0;	// 실제 설정값
 	SnowballCount = 10;	// 디버깅용
 }
@@ -178,7 +180,8 @@ void AMyCharacter::Attack()
 
 	MyAnim->PlayAttackMontage();
 	IsAttacking = true;
-	SnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
+	// 디버깅용 - 실제는 주석 해제
+	//SnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
 
 	// Attempt to fire a projectile.
 	if (ProjectileClass)
@@ -264,4 +267,20 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	CharacterStat->SetDamage(FinalDamage);
 
 	return FinalDamage;
+}
+
+void AMyCharacter::ReleaseSnowball()
+{
+	if (IsValid(Snowball))
+	{
+		FDetachmentTransformRules dtr = FDetachmentTransformRules(EDetachmentRule::KeepWorld, false);
+		Snowball->DetachFromActor(dtr);
+
+		if (Snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
+		{
+			II_Throwable::Execute_Throw(Snowball, GetActorForwardVector());
+			Snowball = NULL;
+		}
+
+	}
 }
