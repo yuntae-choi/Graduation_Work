@@ -56,4 +56,9 @@ public:
 public:
 	// Function that initializes the projectile's velocity in the shoot direction.
 	void FireInDirection(const FVector& ShootDirection);
+
+	void SetAttack(int32 newAttack) { attack = newAttack; }
+
+private:
+	int32 attack;
 };
