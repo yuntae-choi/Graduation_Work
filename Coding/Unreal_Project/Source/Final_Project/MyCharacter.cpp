@@ -67,7 +67,11 @@ AMyCharacter::AMyCharacter()
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));   
 
-	ProjectileClass = AMySnow::StaticClass();
+	//ProjectileClass = AMySnow::StaticClass();
+	ProjectileClass = AMySnowball::StaticClass();
+
+	//SnowballCount = 0;	// 실제 설정값
+	SnowballCount = 10;	// 디버깅용
 }
 
 // Called when the game starts or when spawned
@@ -170,42 +174,71 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	if (IsAttacking) return;
+	if (SnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 
 	MyAnim->PlayAttackMontage();
 	IsAttacking = true;
+	SnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
 
 	// Attempt to fire a projectile.
 	if (ProjectileClass)
 	{
-		// Get the camera transform.
-		FVector CameraLocation;
-		FRotator CameraRotation;
-		GetActorEyesViewPoint(CameraLocation, CameraRotation);
-
-		// Set MuzzleOffset to spawn projectiles slightly in front of the camera.
-		MuzzleOffset.Set(100.0f, 50.0f, -100.0f);
-
-		FVector MuzzleLocation = CameraLocation+FTransform(CameraRotation).TransformVector(MuzzleOffset);
-		FRotator MuzzleRotation = CameraRotation;
-
-		MuzzleRotation.Pitch += 10.0f; 
 		UWorld* World = GetWorld();
 
 		if (World)
 		{
 			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this; 
+			SpawnParams.Owner = this;
 			SpawnParams.Instigator = GetInstigator();
-			AMySnow* Projectile = World->SpawnActor<AMySnow>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-			if (Projectile)
-			{
-				FVector LaunchDirection = MuzzleRotation.Vector(); 
-				Projectile->FireInDirection(LaunchDirection);
-				Projectile->SetAttack(CharacterStat->GetAttack());
-			}
+
+			FTransform SnowballSocketTransform = GetMesh()->GetSocketTransform(TEXT("SnowballSocket"));
+			Snowball = World->SpawnActor<AMySnowball>(ProjectileClass, SnowballSocketTransform, SpawnParams);
+			FAttachmentTransformRules atr = FAttachmentTransformRules(
+				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
+			Snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
 		}
 	}
 }
+//void AMyCharacter::Attack()
+//{
+//	if (IsAttacking) return;
+//
+//
+//	MyAnim->PlayAttackMontage();
+//	IsAttacking = true;
+//
+//	// Attempt to fire a projectile.
+//	if (ProjectileClass)
+//	{
+//		// Get the camera transform.
+//		FVector CameraLocation;
+//		FRotator CameraRotation;
+//		GetActorEyesViewPoint(CameraLocation, CameraRotation);
+//
+//		// Set MuzzleOffset to spawn projectiles slightly in front of the camera.
+//		MuzzleOffset.Set(100.0f, 50.0f, -100.0f);
+//
+//		FVector MuzzleLocation = CameraLocation+FTransform(CameraRotation).TransformVector(MuzzleOffset);
+//		FRotator MuzzleRotation = CameraRotation;
+//
+//		MuzzleRotation.Pitch += 10.0f; 
+//		UWorld* World = GetWorld();
+//
+//		if (World)
+//		{
+//			FActorSpawnParameters SpawnParams;
+//			SpawnParams.Owner = this; 
+//			SpawnParams.Instigator = GetInstigator();
+//			AMySnow* Projectile = World->SpawnActor<AMySnow>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+//			if (Projectile)
+//			{
+//				FVector LaunchDirection = MuzzleRotation.Vector(); 
+//				Projectile->FireInDirection(LaunchDirection);
+//				Projectile->SetAttack(CharacterStat->GetAttack());
+//			}
+//		}
+//	}
+//}
 
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
