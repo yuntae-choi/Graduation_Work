@@ -16,5 +16,4 @@ class FINAL_PROJECT_API AMyGameModeBase : public AGameModeBase
 
 public:
 	AMyGameModeBase();
-	
 };

@@ -6,6 +6,7 @@
 #include "MySnow.h"
 #include "MyItem.h"
 #include "MyPlayerController.h"
+#include "MyCharacterStatComponent.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -15,6 +16,7 @@ AMyCharacter::AMyCharacter()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
+	CharacterStat = CreateDefaultSubobject<UMyCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 	check(Camera != nullptr);
 
 	SpringArm->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
@@ -88,6 +90,19 @@ void AMyCharacter::PostInitializeComponents()
 	MYCHECK(nullptr != MyAnim);
 
 	MyAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
+
+	CharacterStat->OnHPIsZero.AddLambda([this]()->void {
+
+		MYLOG(Warning, TEXT("OnHPIsZero"));
+		IsDead = true;
+		if (IsDead)
+		{
+			GetMesh()->SetSkeletalMesh(snowman);
+			GetMesh()->SetAnimInstanceClass(snowmanAnim);
+		}
+		SetActorEnableCollision(false);
+
+		});
 }
 
 // Called to bind functionality to input
@@ -185,7 +200,8 @@ void AMyCharacter::Attack()
 			if (Projectile)
 			{
 				FVector LaunchDirection = MuzzleRotation.Vector(); 
-				Projectile->FireInDirection(LaunchDirection);			
+				Projectile->FireInDirection(LaunchDirection);
+				Projectile->SetAttack(CharacterStat->GetAttack());
 			}
 		}
 	}
@@ -211,17 +227,8 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	//	}
 	//}
 	MYLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
-	
-	if (FinalDamage > 0.0f)
-	{
-		IsDead = true;
-		if (IsDead)
-		{
-			GetMesh()->SetSkeletalMesh(snowman);
-			GetMesh()->SetAnimInstanceClass(snowmanAnim);
-		}
-		SetActorEnableCollision(false);
-	}
+
+	CharacterStat->SetDamage(FinalDamage);
 
 	return FinalDamage;
 }
