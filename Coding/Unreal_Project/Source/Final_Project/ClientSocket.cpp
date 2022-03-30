@@ -48,13 +48,11 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_LOGIN_OK:
 	{
 		ReadyToSend_StatusPacket();
-		/*sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
+		sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
 
 		int id = packet->s_id;
+		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
-		PlayerController->_my_session_id = id;*/
-		
-
 
 	}
 	break;
@@ -96,9 +94,8 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	}
 	case SC_PACKET_STATUS_CHANGE:
 	{
-		//ReadyToSend_LoginPacket();
-
-		//ReadyToSend_StatusPacket();
+		
+		ReadyToSend_StatusPacket();
 
 	}
 	}
@@ -136,7 +133,7 @@ void ClientSocket::SetPlayerController(AMyPlayerController* pPlayerController)
 
 void ClientSocket::ReadyToSend_MovePacket(int sessionID, float x, float y, float z)
 {
-	//if (_login_ok) {
+	if (_login_ok) {
 		cs_packet_move packet;
 		packet.size = sizeof(packet);
 		packet.type = CS_PACKET_MOVE;
@@ -148,7 +145,7 @@ void ClientSocket::ReadyToSend_MovePacket(int sessionID, float x, float y, float
 
 		size_t sent = 0;
 		SendPacket(&packet);
-	//}
+	}
 };
 
 void ClientSocket::ReadyToSend_AttackPacket()
@@ -184,6 +181,7 @@ uint32 ClientSocket::Run()
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
 	
 	RecvPacket();
+	_login_ok = false;
 	ReadyToSend_LoginPacket();
 	FPlatformProcess::Sleep(0.1);
 	while (StopTaskCounter.GetValue() == 0 && PlayerController != nullptr)
