@@ -63,3 +63,18 @@ void AMySnowball::BeginPlay()
 //
 //}
 
+void AMySnowball::Throw_Implementation(FVector Direction)
+{
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	MeshComponent->SetSimulatePhysics(true);
+	FVector ImpulseVector = FVector(Direction * 5000.0f + FVector(0.0f, 0.0f, 200.0f));
+	MeshComponent->AddImpulse(ImpulseVector, NAME_None, true);
+
+	// Delay ÇÔ¼ö
+	FTimerHandle WaitHandle;
+	float WaitTime = 0.1f;
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		}), WaitTime, false);
+}
