@@ -70,20 +70,23 @@ void AMyItemBox::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor*
 
 	if (nullptr != MyCharacter && nullptr != ItemClass)
 	{
-		if (MyCharacter->CanSetItem())
-		{
-			auto NewItem = GetWorld()->SpawnActor<AMyItem>(ItemClass, FVector::ZeroVector, FRotator::ZeroRotator);
-			MyCharacter->SetItem(NewItem);
-			//Effect->Activate(true);
-			Box->SetHiddenInGame(true, true);
-			SetActorEnableCollision(false);
-			//Effect->OnSystemFinished.AddDynamic(this, &AMyItemBox::OnEffectFinished);
-			Destroy();
-		}
-		else
-		{
-			MYLOG(Warning, TEXT("%s can't get item currently."), *MyCharacter->GetName());
-		}
+		MYLOG(Warning, TEXT("%s get item."), *MyCharacter->GetName());
+
+
+		//if (MyCharacter->CanSetItem())
+		//{
+		//	auto NewItem = GetWorld()->SpawnActor<AMyItem>(ItemClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		//	MyCharacter->SetItem(NewItem);
+		//	//Effect->Activate(true);
+		//	Box->SetHiddenInGame(true, true);
+		//	SetActorEnableCollision(false);
+		//	//Effect->OnSystemFinished.AddDynamic(this, &AMyItemBox::OnEffectFinished);
+		//	Destroy();
+		//}
+		//else
+		//{
+		//	MYLOG(Warning, TEXT("%s can't get item currently."), *MyCharacter->GetName());
+		//}
 	}
 }
 
