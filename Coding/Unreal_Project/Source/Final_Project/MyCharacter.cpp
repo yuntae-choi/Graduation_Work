@@ -38,6 +38,7 @@ AMyCharacter::AMyCharacter()
 	{
 		bear = SK_BEAR.Object;
 		GetMesh()->SetSkeletalMesh(bear);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	snowman = CreateDefaultSubobject<USkeletalMesh>(TEXT("SNOWMAN"));
