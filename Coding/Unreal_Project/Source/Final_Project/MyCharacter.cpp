@@ -280,7 +280,11 @@ void AMyCharacter::ReleaseSnowball()
 
 		if (Snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
-			II_Throwable::Execute_Throw(Snowball, GetActorForwardVector());
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+
+			II_Throwable::Execute_Throw(Snowball, cameraRotation.Vector());//GetActorForwardVector());
 			Snowball = NULL;
 		}
 
