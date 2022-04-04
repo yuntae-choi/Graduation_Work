@@ -9,34 +9,23 @@ AMySnowball::AMySnowball()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	if (!RootComponent)
-	{
-		RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSceneComponent"));
-	}
-
-	//if (!CollisionComponent)
+	//if (!RootComponent)
 	//{
-	//	// Use a sphere as a simple collision representation.
-	//	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
-	//	// Set the sphere's collision profile name to "Projectile".
-	//	CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
-	//	// Set the sphere's collision radius.
-	//	CollisionComponent->InitSphereRadius(10.0f);
-	//	//CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//	//CollisionComponent->SetSimulatePhysics(false);
-	//	// Set the root component to be the collision component.
-	//	RootComponent = CollisionComponent;
+	//	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSceneComponent"));
 	//}
 
 	if (!MeshComponent)
 	{
-		MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMeshComponent"));
+		MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SnowballMeshComponent"));
 		static ConstructorHelpers::FObjectFinder<UStaticMesh>Mesh(TEXT("/Game/NonCharacters/snowball1.snowball1"));
 		if (Mesh.Succeeded())
 		{
+			MeshComponent->BodyInstance.SetCollisionProfileName(TEXT("SnowballPreset"));
 			MeshComponent->SetStaticMesh(Mesh.Object);
+			//MeshComponent->SetRelativeScale3D(FVector(3.0f));
 			MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			MeshComponent->SetSimulatePhysics(false);
+			MeshComponent->SetUseCCD(true);
 		}
 
 		static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("/Game/Materials/Mat_Original_Snow.Mat_Original_Snow"));
@@ -45,7 +34,7 @@ AMySnowball::AMySnowball()
 			MaterialInstance = UMaterialInstanceDynamic::Create(Material.Object, MeshComponent);
 		}
 		MeshComponent->SetMaterial(0, MaterialInstance);
-		MeshComponent->SetupAttachment(RootComponent);
+		RootComponent = MeshComponent;
 	}
 }
 
