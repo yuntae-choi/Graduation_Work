@@ -23,7 +23,9 @@ AMySnowball::AMySnowball()
 			MeshComponent->BodyInstance.SetCollisionProfileName(TEXT("SnowballPreset"));
 			MeshComponent->SetStaticMesh(Mesh.Object);
 			//MeshComponent->SetRelativeScale3D(FVector(3.0f));
-			MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			//MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			// ECC_GameTraceChannel1 (MyCharacter) - 생성 시 캐릭터에 대한 콜리전 ignore (release 될 때 block으로 변경)
+			MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
 			MeshComponent->SetSimulatePhysics(false);
 			MeshComponent->SetUseCCD(true);
 		}
@@ -54,16 +56,18 @@ void AMySnowball::BeginPlay()
 
 void AMySnowball::Throw_Implementation(FVector Direction)
 {
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	//MeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	MeshComponent->SetSimulatePhysics(true);
 	FVector ImpulseVector = FVector(Direction * 5000.0f + FVector(0.0f, 0.0f, 200.0f));
 	MeshComponent->AddImpulse(ImpulseVector, NAME_None, true);
 
 	// Delay 함수
 	FTimerHandle WaitHandle;
-	float WaitTime = 0.1f;
+	float WaitTime = 0.05f;
 	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 		{
-			MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			//MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			// release 0.05 후 캐릭터에 대한 콜리전 block으로 변경
+			MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
 		}), WaitTime, false);
 }
