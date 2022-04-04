@@ -23,7 +23,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> ProjectileClass;
-	//TSubclassOf<class AMySnow> ProjectileClass;
 
 public:	
 	// Called every frame

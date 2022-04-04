@@ -18,11 +18,13 @@ AMyCharacter::AMyCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
 	CharacterStat = CreateDefaultSubobject<UMyCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 	check(Camera != nullptr);
-
+	
+	GetCapsuleComponent()->SetCapsuleHalfHeight(80.0f);
+	GetCapsuleComponent()->SetCapsuleRadius(40.0f);
 	SpringArm->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	Camera->SetupAttachment(SpringArm);
 
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -78.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 400.0f;
 	SpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
 	SpringArm->bUsePawnControlRotation = true;
@@ -68,7 +70,6 @@ AMyCharacter::AMyCharacter()
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));   
 
-	//ProjectileClass = AMySnow::StaticClass();
 	ProjectileClass = AMySnowball::StaticClass();
 
 	Snowball = NULL;
