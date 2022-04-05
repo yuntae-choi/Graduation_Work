@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "I_Throwable.h"
+#include "Components/SphereComponent.h"
 #include "MySnowball.generated.h"
 
 UCLASS()
@@ -16,22 +17,25 @@ public:
 	// Sets default values for this actor's properties
 	AMySnowball();
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Throwable 인터페이스에서 Throw 이벤트 발생 시 호출
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Itf")
+	void Throw(FVector Direction);
+	virtual void Throw_Implementation(FVector Direction) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	//virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	USphereComponent* CollisionComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 	UStaticMeshComponent* MeshComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 	UMaterialInstanceDynamic* MaterialInstance;
-
-	// Throwable 인터페이스에서 Throw 이벤트 발생 시 호출
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Itf")
-	void Throw(FVector Direction);
-	virtual void Throw_Implementation(FVector Direction) override;
 };
