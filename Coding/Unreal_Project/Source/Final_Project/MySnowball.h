@@ -35,7 +35,4 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 	UStaticMeshComponent* MeshComponent;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-	UMaterialInstanceDynamic* MaterialInstance;
 };

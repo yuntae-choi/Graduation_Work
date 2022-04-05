@@ -34,16 +34,9 @@ AMySnowball::AMySnowball()
 		if (Mesh.Succeeded())
 		{
 			MeshComponent->SetStaticMesh(Mesh.Object);
-			//MeshComponent->SetRelativeScale3D(FVector(3.0f));
 			MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			//MeshComponent->SetRelativeScale3D(FVector(3.0f));
 		}
-
-		static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("/Game/Materials/Mat_Original_Snow.Mat_Original_Snow"));
-		if (Material.Succeeded())
-		{
-			MaterialInstance = UMaterialInstanceDynamic::Create(Material.Object, MeshComponent);
-		}
-		MeshComponent->SetMaterial(0, MaterialInstance);
 		MeshComponent->SetupAttachment(RootComponent);
 	}
 }
