@@ -74,10 +74,10 @@ int main()
 	// 시스템 정보 가져옴
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
-	printf_s("[INFO] CPU 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
+	printf_s("[INFO] CPU 쓰레드 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
 	// 적절한 작업 스레드의 갯수는 (CPU * 2) + 1
-	//int nThreadCnt = sysInfo.dwNumberOfProcessors * 2;
-	int nThreadCnt = 5;
+	int nThreadCnt = sysInfo.dwNumberOfProcessors;
+	//int nThreadCnt = 5;
 
 	for (int i = 0; i < nThreadCnt; ++i)
 		worker_threads.emplace_back(worker_thread);
@@ -158,7 +158,7 @@ void send_remove_object(int _s_id, int victim)
 void send_put_object(int _s_id, int target)
 {
 	sc_packet_put_object packet;
-	packet.id = target;
+	packet.s_id = target;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_PUT_OBJECT;
 	packet.x = clients[target].x;
@@ -268,6 +268,10 @@ void process_packet(int s_id, unsigned char* p)
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
 		//send_login_ok_packet(s_id);
+		cl.x = packet->x;
+		cl.y = packet->y;
+		cl.z = packet->z;
+
 
 		sc_packet_login_ok _packet;
 		_packet.size = sizeof(_packet);
@@ -300,7 +304,7 @@ void process_packet(int s_id, unsigned char* p)
 			//other.viewlist.insert(s_id);
 			//other.vl.unlock();
 			sc_packet_put_object packet;
-			packet.id = s_id;
+			packet.s_id = s_id;
 			strcpy_s(packet.name, cl.name);
 			packet.object_type = 0;
 			packet.size = sizeof(packet);
@@ -330,7 +334,7 @@ void process_packet(int s_id, unsigned char* p)
 			//clients[s_id].vl.unlock();
 
 			sc_packet_put_object packet;
-			packet.id = other._s_id;
+			packet.s_id = other._s_id;
 			strcpy_s(packet.name, other.name);
 			packet.object_type = 0;
 			packet.size = sizeof(packet);
@@ -437,6 +441,17 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case CS_PACKET_ATTACK: {
 		printf("attack\n");
+		break;
+
+	}
+
+	case CS_PACKET_CHAT: {
+		cs_packet_chat* packet = reinterpret_cast<cs_packet_chat*>(p);
+		int p_s_id = packet->s_id;
+		float x = packet->x;
+		float y = packet->y;
+		float z = packet->z;
+		cout << "플레이어[" << s_id << "]가  받음" << "[" << p_s_id << "] " << x << " " << y << " " << z << endl;
 		break;
 
 	}
