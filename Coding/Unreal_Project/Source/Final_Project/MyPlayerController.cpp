@@ -38,7 +38,14 @@ void AMyPlayerController::BeginPlay()
 	_session_Id = &m_Player->_SessionId;
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();*/
-
+	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!m_Player)
+		return;
+	auto MyLocation = m_Player->GetActorLocation();
+	auto MyRotation = m_Player->GetActorRotation();
+	_cs->_my_x = MyLocation.X;
+	_cs->_my_y = MyLocation.Y; 
+	_cs->_my_z = MyLocation.Z;
 	_cs->StartListen();
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
@@ -59,6 +66,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	if (bNewPlayerEntered)
 		UpdateNewPlayer();
+
+	UpdateRotation();
 }
 
 
@@ -158,3 +167,11 @@ void AMyPlayerController::UpdateNewPlayer()
 	bNewPlayerEntered = false;
 }
 
+void AMyPlayerController::UpdateRotation()
+{
+	float pitch, yaw, roll;
+	UKismetMathLibrary::BreakRotator(GetControlRotation(), roll, pitch, yaw);
+	pitch = UKismetMathLibrary::ClampAngle(pitch, -15.0f, 30.0f);
+	FRotator newRotator = UKismetMathLibrary::MakeRotator(roll, pitch, yaw);
+	SetControlRotation(newRotator);
+}

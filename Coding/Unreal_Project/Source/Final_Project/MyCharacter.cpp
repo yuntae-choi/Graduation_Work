@@ -18,18 +18,22 @@ AMyCharacter::AMyCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
 	CharacterStat = CreateDefaultSubobject<UMyCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 	check(Camera != nullptr);
-
+	
+	GetCapsuleComponent()->SetCapsuleHalfHeight(80.0f);
+	GetCapsuleComponent()->SetCapsuleRadius(38.0f);
 	SpringArm->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	Camera->SetupAttachment(SpringArm);
 
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
-	SpringArm->TargetArmLength = 400.0f;
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -79.0f), FRotator(0.0f, -90.0f, 0.0f));
+	SpringArm->TargetArmLength = 220.0f;
 	SpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritRoll = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bDoCollisionTest = true;
+	SpringArm->SocketOffset.Y = 35.0f;
+	SpringArm->SocketOffset.Z = 35.0f;
 	bUseControllerRotationYaw = true;
 
 	bear = CreateDefaultSubobject<USkeletalMesh>(TEXT("BEAR"));
@@ -68,7 +72,6 @@ AMyCharacter::AMyCharacter()
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));   
 
-	//ProjectileClass = AMySnow::StaticClass();
 	ProjectileClass = AMySnowball::StaticClass();
 
 	Snowball = NULL;
@@ -87,7 +90,6 @@ void AMyCharacter::BeginPlay()
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -279,7 +281,11 @@ void AMyCharacter::ReleaseSnowball()
 
 		if (Snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
-			II_Throwable::Execute_Throw(Snowball, GetActorForwardVector());
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+
+			II_Throwable::Execute_Throw(Snowball, cameraRotation.Vector());
 			Snowball = NULL;
 		}
 

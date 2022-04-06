@@ -47,12 +47,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 	case SC_PACKET_LOGIN_OK:
 	{
-		ReadyToSend_StatusPacket();
-		sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
 
+		sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
 		int id = packet->s_id;
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
+		ReadyToSend_StatusPacket();
+		ReadyToSend_MovePacket(packet->s_id, _my_x, _my_y, _my_z);
 
 	}
 	break;
@@ -64,6 +65,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 	case SC_PACKET_PUT_OBJECT:
 	{
+		
+		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
+		int s_id = packet->s_id;
+		short x = packet->x;
+		short y = packet->y;
+		short z = packet->z;
+		ReadyToSend_ChatPacket(packet->s_id, x, y, z);
 
 		break;
 	}
@@ -76,7 +84,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		float y = packet->y;
 		float z = packet->z;
 
-		PlayerController->RecvNewPlayer(id, x, y, z);
+		//PlayerController->RecvNewPlayer(id, x, y, z);
 
 		break;
 	}
@@ -110,6 +118,9 @@ void ClientSocket::ReadyToSend_LoginPacket()
 	packet.type = CS_PACKET_LOGIN;
 	strcpy_s(packet.id, _id);
 	strcpy_s(packet.pw, _pw);
+	packet.x = _my_x;
+	packet.y = _my_y;
+	packet.z = _my_z;
 	size_t sent = 0;
 	SendPacket(&packet);
 	
@@ -154,6 +165,22 @@ void ClientSocket::ReadyToSend_AttackPacket()
 	cs_packet_attack packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_ATTACK;
+	//packet.direction = dr;
+	size_t sent = 0;
+	SendPacket(&packet);
+};
+
+void ClientSocket::ReadyToSend_ChatPacket(int sessionID, float x, float y, float z)
+{
+
+	cs_packet_chat packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_CHAT;
+	packet.s_id = sessionID;
+	packet.x = x;
+	packet.y = y;
+	packet.z = z;
+
 	//packet.direction = dr;
 	size_t sent = 0;
 	SendPacket(&packet);
