@@ -15,6 +15,11 @@ SOCKET sever_socket;
 concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
 
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+
 void show_err();
 int get_id();
 void send_login_ok_packet(int _s_id);
@@ -357,8 +362,12 @@ void process_packet(int s_id, unsigned char* p)
 		cl.y = packet->y;
 		cl.z = packet->z;
 
-		cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
+		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
+
+		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		cout << millisec_since_epoch - packet->move_time << endl;
+
 		send_status_packet(s_id);
 
 
@@ -435,7 +444,7 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case SC_PACKET_STATUS_CHANGE: {
 		//printf("status\n");
-		printf("클라이언트 recv 성공\n");
+		//printf("클라이언트 recv 성공\n");
 
 		break;
 
