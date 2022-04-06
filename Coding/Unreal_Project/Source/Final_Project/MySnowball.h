@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Final_Project.h"
 #include "GameFramework/Actor.h"
 #include "I_Throwable.h"
 #include "MySnowball.generated.h"
@@ -16,13 +16,24 @@ public:
 	// Sets default values for this actor's properties
 	AMySnowball();
 
+	// Throwable 인터페이스에서 Throw 이벤트 발생 시 호출
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Itf")
+	void Throw(FVector Direction);
+	virtual void Throw_Implementation(FVector Direction) override;
+
+	// Function that is called when the projectile hits something.
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	//virtual void Tick(float DeltaTime) override;
+public:
+
+	//// Sphere collision component
+	//UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	//USphereComponent* CollisionComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 	UStaticMeshComponent* MeshComponent;
@@ -30,8 +41,6 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 	UMaterialInstanceDynamic* MaterialInstance;
 
-	// Throwable 인터페이스에서 Throw 이벤트 발생 시 호출
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Itf")
-	void Throw(FVector Direction);
-	virtual void Throw_Implementation(FVector Direction) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	float fAttack;
 };

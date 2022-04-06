@@ -14,60 +14,24 @@ class FINAL_PROJECT_API AMyCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AMyCharacter();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMySnowball> ProjectileClass;
-	//TSubclassOf<class AMySnow> ProjectileClass;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
 
-	UPROPERTY(VisibleAnywhere, Category = Item)
-	class AMyItem* CurrentItem;
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
-	UPROPERTY(VisibleAnywhere, Category = Item)
-	USkeletalMeshComponent* Item;
+	void SetDamage(float newDamage);
 
-	UPROPERTY(VisibleAnywhere, Category = Stat)
-	class UMyCharacterStatComponent* CharacterStat;
 
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-	USpringArmComponent* SpringArm;
-
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-	UCameraComponent* Camera;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay) 
-	FVector MuzzleOffset; 
-
-	int		_SessionId;		// 플레이어 고유 아이디
-
-	// 현재 손에 들고있는 눈덩이
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
-	AMySnowball* Snowball;
-
-	// 현재 소지한 눈덩이 수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
-	int SnowballCount;
-
-	// 보유 가능한 눈덩이 최대 수
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
-	//int SnowballMaxCount;
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	void UpDown(float NewAxisValue);
@@ -83,15 +47,68 @@ private:
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void ReleaseSnowball();
 
+	/////////////////////////////////////////////////////////////////////////////
+public:	
+
+	UPROPERTY(VisibleAnywhere, Category = Item)
+	class AMyItem* CurrentItem;
+
+	UPROPERTY(VisibleAnywhere, Category = Item)
+	USkeletalMeshComponent* Item;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	USpringArmComponent* SpringArm;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UCameraComponent* Camera;
+
+	// 현재 손에 들고있는 눈덩이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
+	AMySnowball* Snowball;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iSessionID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float fMaxHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float fCurrentHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float fAttack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iMaxSnowballCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iCurrentSnowballCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iPlusMaxSnowballCountByABag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool hasUmbrella;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool hasBag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iMaxMatchCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iCurrentMatchCount;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AMySnowball> ProjectileClass;
+
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool IsAttacking;
 
 	UPROPERTY()
 	class UMyAnimInstance* MyAnim;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
-	bool IsDead;
 
 	UPROPERTY()
 	class USkeletalMesh* bear;

@@ -3,10 +3,8 @@
 
 #include "MyCharacter.h"
 #include "MyAnimInstance.h"
-#include "MySnow.h"
 #include "MyItem.h"
 #include "MyPlayerController.h"
-#include "MyCharacterStatComponent.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -16,12 +14,16 @@ AMyCharacter::AMyCharacter()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
-	CharacterStat = CreateDefaultSubobject<UMyCharacterStatComponent>(TEXT("CHARACTERSTAT"));
+	//CharacterStat = CreateDefaultSubobject<UMyCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 	check(Camera != nullptr);
 
 	SpringArm->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	Camera->SetupAttachment(SpringArm);
 
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
+	//GetCapsuleComponent()->SetCapsuleHalfHeight(74.0f);
+	//GetCapsuleComponent()->SetCapsuleRadius(37.0f);
+	//GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 400.0f;
 	SpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
@@ -65,15 +67,21 @@ AMyCharacter::AMyCharacter()
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	IsAttacking = false;
 
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));   
-
 	//ProjectileClass = AMySnow::StaticClass();
 	ProjectileClass = AMySnowball::StaticClass();
 
 	Snowball = NULL;
-
-	//SnowballCount = 0;	// 실제 설정값
-	SnowballCount = 10;	// 디버깅용
+	iSessionID = 0;
+	fMaxHP = 120.0f;
+	fCurrentHP = fMaxHP;
+	fAttack = 10.0f;
+	iMaxSnowballCount = 3;
+	iCurrentSnowballCount = 0; 
+	iPlusMaxSnowballCountByABag = 2;
+	hasUmbrella = false;
+	hasBag = false;
+	iMaxMatchCount = 3;
+	iCurrentMatchCount = 0; 
 }
 
 // Called when the game starts or when spawned
@@ -96,19 +104,6 @@ void AMyCharacter::PostInitializeComponents()
 	MYCHECK(nullptr != MyAnim);
 
 	MyAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
-
-	CharacterStat->OnHPIsZero.AddLambda([this]()->void {
-
-		MYLOG(Warning, TEXT("OnHPIsZero"));
-		IsDead = true;
-		if (IsDead)
-		{
-			GetMesh()->SetSkeletalMesh(snowman);
-			GetMesh()->SetAnimInstanceClass(snowmanAnim);
-		}
-		SetActorEnableCollision(false);
-
-		});
 }
 
 // Called to bind functionality to input
@@ -176,7 +171,7 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	if (IsAttacking) return;
-	if (SnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
+	//if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 
 	MyAnim->PlayAttackMontage();
 	IsAttacking = true;
@@ -199,6 +194,7 @@ void AMyCharacter::Attack()
 			FAttachmentTransformRules atr = FAttachmentTransformRules(
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 			Snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
+			Snowball->fAttack = fAttack;
 		}
 	}
 }
@@ -252,19 +248,9 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	//CharacterStat->SetDamage(FinalDamage);
-	//if (CurrentState == ECharacterState::DEAD)
-	//{
-	//	if (EventInstigator->IsPlayerController())
-	//	{
-	//		auto instigator = Cast<AABPlayerController>(EventInstigator);
-	//		ABCHECK(nullptr != instigator, 0.0f);
-	//		instigator->NPCKill(this);
-	//	}
-	//}
-	MYLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
+	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %f"), *GetName(), FinalDamage, fCurrentHP);
 
-	CharacterStat->SetDamage(FinalDamage);
+	SetDamage(FinalDamage);
 
 	return FinalDamage;
 }
@@ -282,5 +268,29 @@ void AMyCharacter::ReleaseSnowball()
 			Snowball = NULL;
 		}
 
+	}
+}
+
+void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	//auto MySnowball = Cast<AMySnowball>(OtherActor);
+
+	//if (nullptr != MySnowball)
+	//{
+	//	MYLOG(Warning, TEXT("snowball hit."));
+	//}
+}
+
+void AMyCharacter::SetDamage(float NewDamage)
+{
+	//SetHP(FMath::Clamp<float>(fCurrentHP - NewDamage, 0.0f, fMaxHP));
+	fCurrentHP = FMath::Clamp<float>(fCurrentHP - NewDamage, 0.0f, fMaxHP);
+	//OnHPChanged.Broadcast();
+	if (fCurrentHP < KINDA_SMALL_NUMBER)
+	{
+		fCurrentHP = 0.0f;
+		MyAnim->SetDead();
+		GetMesh()->SetSkeletalMesh(snowman);
+		GetMesh()->SetAnimInstanceClass(snowmanAnim);
 	}
 }

@@ -69,14 +69,15 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	}
 	case SC_PACKET_MOVE:
 	{
-		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(ptr);
+		MYLOG(Warning, TEXT("move recv test"));
+
+		sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
 
 		int id = packet->sessionID;
 		float x = packet->x;
 		float y = packet->y;
-		float z = packet->z;
 
-		PlayerController->RecvNewPlayer(id, x, y, z);
+		PlayerController->RecvNewPlayer(id, x, y, 0.0f);
 
 		break;
 	}
@@ -104,7 +105,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 void ClientSocket::ReadyToSend_LoginPacket()
 {
-	MYLOG(Warning, TEXT("Connected to Server!"));
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
@@ -227,8 +227,6 @@ uint32 ClientSocket::Run()
 			break;
 		}
 		case OP_SEND: {
-
-			MYLOG(Warning, TEXT("test"));
 
 			if (num_byte != exp_over->_wsa_buf.len) {
 				//Disconnect();

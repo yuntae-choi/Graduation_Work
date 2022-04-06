@@ -3,7 +3,6 @@
 
 #include "MyGameModeBase.h"
 #include "MyCharacter.h"
-#include "SnowMan.h"
 #include "MyPlayerController.h"
 #include "MyHUD.h"
 

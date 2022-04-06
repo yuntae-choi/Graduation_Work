@@ -67,7 +67,7 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!m_Player)
 		return;
-	_my_session_id = m_Player->_SessionId;
+	_my_session_id = m_Player->iSessionID;
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
 	if (input == COMMAND_MOVE)
@@ -83,7 +83,7 @@ void AMyPlayerController::UpdatePlayerS_id(int _s_id)
 	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!m_Player)
 		return;
-	m_Player->_SessionId = _s_id;
+	m_Player->iSessionID = _s_id;
 
 	
 
@@ -128,7 +128,7 @@ void AMyPlayerController::UpdateNewPlayer()
 
 	AMyCharacter* SpawnCharacter = world->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, FRotator::ZeroRotator, SpawnParams);
 	SpawnCharacter->SpawnDefaultController();
-	SpawnCharacter->_SessionId = _other_session_id;
+	SpawnCharacter->iSessionID = _other_session_id;
 	//SpawnCharacter->HealthValue = NewPlayer->HealthValue;
 
 	//// 필드의 플레이어 정보에 추가

@@ -103,7 +103,7 @@ struct sc_packet_login_ok {
 struct sc_packet_move {
 	unsigned char size;
 	char type;
-	int		id;
+	int sessionID;
 	short  x, y;
 	int		move_time;
 };
