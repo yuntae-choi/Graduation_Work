@@ -60,6 +60,8 @@ struct cs_packet_login {
 	char	type;
 	char	id[MAX_NAME_SIZE];
 	char	pw[MAX_NAME_SIZE];
+	float x, y, z;
+
 };
 
 struct cs_packet_move {
@@ -79,6 +81,8 @@ struct cs_packet_attack {
 struct cs_packet_chat {
 	unsigned char size;
 	char	type;
+	int s_id;
+	float x, y, z;
 	char	message[MAX_CHAT_SIZE];
 };
 
@@ -95,7 +99,9 @@ struct sc_packet_login_ok {
 	// 세션 아이디
 	int		s_id;
 
-
+	float x;
+	float y;
+	float z;
 };
 
 
@@ -103,7 +109,7 @@ struct sc_packet_login_ok {
 struct sc_packet_move {
 	unsigned char size;
 	char type;
-	int sessionID;
+	int		id;
 	short  x, y;
 	int		move_time;
 };
@@ -111,8 +117,9 @@ struct sc_packet_move {
 struct sc_packet_put_object {
 	unsigned char size;
 	char type;
-	int id;
+	int s_id;
 	short x, y;
+	short z;
 	char object_type;
 	char	name[MAX_NAME_SIZE];
 };

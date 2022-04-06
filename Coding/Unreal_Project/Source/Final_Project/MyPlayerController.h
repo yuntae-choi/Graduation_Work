@@ -7,6 +7,7 @@
 #include "MyCharacter.h"
 #include "GameFramework/PlayerController.h"
 #include "ClientSocket.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include "MyPlayerController.generated.h"
 
@@ -23,12 +24,15 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 public:
 	AMyPlayerController();
 
-	// 새 플레이어 업데이트
+	// ???뚮젅?댁뼱 ?낅뜲?댄듃
 	void RecvNewPlayer(int sessionID, float x, float y, float z);
+	void UpdateNewPlayer();		// ?뚮젅?댁뼱 ?숆린??
 
-	void UpdateNewPlayer();		// 플레이어 동기화
+	void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);		// ?뚮젅?댁뼱 ?숆린??
 	void UpdatePlayerInfo(int input);
 	void UpdatePlayerS_id(int _s_id);
+
+	//void UpdateRotation();	// 移대찓???쇱묶(?곹븯) ?쒗븳
 
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -37,13 +41,17 @@ protected:
 
 public:
 	ClientSocket* _cs;
+
 	int _my_session_id;
+	int _my_x;
+	int _my_y;
+	int _my_z;
 	int _other_session_id;
 	int _other_x;
 	int _other_y;
 	int _other_z;
 
-	// 스폰시킬 다른 캐릭터
+	// ?ㅽ룿?쒗궗 ?ㅻⅨ 罹먮┃??
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<class ACharacter> WhoToSpawn;
 
