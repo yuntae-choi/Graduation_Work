@@ -24,14 +24,14 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 public:
 	AMyPlayerController();
 
-	// »õ ÇÃ·¹ÀÌ¾î ¾÷µ¥ÀÌÆ®
+	// ìƒˆ í”Œë ˆì´ì–´ ì—…ë°ì´íŠ¸
 	void RecvNewPlayer(int sessionID, float x, float y, float z);
 
-	void UpdateNewPlayer();		// ÇÃ·¹ÀÌ¾î µ¿±âÈ­
+	void UpdateNewPlayer();		// í”Œë ˆì´ì–´ ë™ê¸°í™”
 	void UpdatePlayerInfo(int input);
 	void UpdatePlayerS_id(int _s_id);
 
-	void UpdateRotation();	// Ä«¸Ş¶ó ÇÇÄª(»óÇÏ) Á¦ÇÑ
+	void UpdateRotation();	// ì¹´ë©”ë¼ í”¼ì¹­(ìƒí•˜) ì œí•œ
 
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -40,13 +40,17 @@ protected:
 
 public:
 	ClientSocket* _cs;
+
 	int _my_session_id;
+	int _my_x;
+	int _my_y;
+	int _my_z;
 	int _other_session_id;
 	int _other_x;
 	int _other_y;
 	int _other_z;
 
-	// ½ºÆù½ÃÅ³ ´Ù¸¥ Ä³¸¯ÅÍ
+	// ìŠ¤í°ì‹œí‚¬ ë‹¤ë¥¸ ìºë¦­í„°
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<class ACharacter> WhoToSpawn;
 
