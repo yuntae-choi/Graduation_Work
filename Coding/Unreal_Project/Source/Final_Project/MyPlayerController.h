@@ -40,7 +40,11 @@ protected:
 
 public:
 	ClientSocket* _cs;
+
 	int _my_session_id;
+	int _my_x;
+	int _my_y;
+	int _my_z;
 	int _other_session_id;
 	int _other_x;
 	int _other_y;
