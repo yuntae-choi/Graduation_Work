@@ -38,7 +38,14 @@ void AMyPlayerController::BeginPlay()
 	_session_Id = &m_Player->_SessionId;
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();*/
-
+	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!m_Player)
+		return;
+	auto MyLocation = m_Player->GetActorLocation();
+	auto MyRotation = m_Player->GetActorRotation();
+	_cs->_my_x = MyLocation.X;
+	_cs->_my_y = MyLocation.Y; 
+	_cs->_my_z = MyLocation.Z;
 	_cs->StartListen();
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);

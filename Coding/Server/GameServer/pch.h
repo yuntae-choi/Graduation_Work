@@ -11,7 +11,7 @@
 #include "CorePch.h"
 #include "Enum.h"
 
-const int RANGE = 7;
+const int RANGE = 100;
 
 struct timer_ev {
 

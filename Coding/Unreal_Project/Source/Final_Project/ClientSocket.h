@@ -37,7 +37,7 @@ public:
 	void ReadyToSend_StatusPacket();
 	void ReadyToSend_MovePacket(int sessionID, float x, float y, float z);
 	void ReadyToSend_AttackPacket();
-
+	void ReadyToSend_ChatPacket(int sessionID, float x, float y, float z);
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);
@@ -97,6 +97,10 @@ public:
 	Overlap _recv_over;
 	char	_id[MAX_NAME_SIZE];
 	char	_pw[MAX_NAME_SIZE];
+	float	_my_x;
+	float	_my_y;
+	float	_my_z;
+
 	string _name;
 	int      _prev_size = 0;
 	bool _stop = false;
