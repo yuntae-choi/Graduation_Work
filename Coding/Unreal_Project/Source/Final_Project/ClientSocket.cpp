@@ -50,6 +50,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
 		int id = packet->s_id;
+		_my_s_id = packet->s_id;
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
 		ReadyToSend_StatusPacket();
