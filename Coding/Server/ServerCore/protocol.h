@@ -33,6 +33,8 @@ struct cs_packet_login {
 	char	type;
 	char	id[MAX_NAME_SIZE];
 	char	pw[MAX_NAME_SIZE];
+	float x, y, z;
+
 
 };
 
@@ -41,6 +43,8 @@ struct sc_packet_login_ok {
 	char type;
 	// 세션 아이디
 	int		s_id;
+	float x, y, z;
+
 };
 
 struct cs_packet_start { // 게임 레디 요청
@@ -86,6 +90,8 @@ struct cs_packet_get_item {
 struct cs_packet_chat {
 	unsigned char size;
 	char	type;
+	int s_id;
+	float x, y, z;
 	char	message[MAX_CHAT_SIZE];
 };
 
@@ -99,7 +105,7 @@ struct cs_packet_teleport {
 struct sc_packet_put_object {
 	unsigned char size;
 	char type;
-	int id;
+	int s_id;
 	short x, y, z;
 	char object_type;
 	char	name[MAX_NAME_SIZE];
