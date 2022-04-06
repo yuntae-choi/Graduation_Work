@@ -43,6 +43,8 @@ struct sc_packet_login_ok {
 	char type;
 	// 세션 아이디
 	int		s_id;
+	float x, y, z;
+
 };
 
 struct cs_packet_start { // 게임 레디 요청
