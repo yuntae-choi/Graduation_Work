@@ -72,7 +72,7 @@ struct cs_packet_move {
 	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
 	int sessionID;
 	float x, y, z;
-	int		move_time;
+	long long		move_time;
 };
 
 struct cs_packet_attack {
