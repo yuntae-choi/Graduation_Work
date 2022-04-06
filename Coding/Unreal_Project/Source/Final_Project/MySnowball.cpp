@@ -57,8 +57,8 @@ void AMySnowball::Tick(float DeltaTime)
 
 void AMySnowball::Throw_Implementation(FVector Direction)
 {
-	FVector ImpulseVector = FVector((Direction * 15000.0f) + FVector(0.0f, 0.0f, 1200.0f));
-	
+	FVector ImpulseVector = FVector((Direction * 15000.0f) + FVector(0.0f, 0.0f, 1700.0f));
+
 	CollisionComponent->SetSimulatePhysics(true);
 	CollisionComponent->AddImpulse(ImpulseVector);
 	// release 시 캐릭터에 대한 콜리전 block으로 변경

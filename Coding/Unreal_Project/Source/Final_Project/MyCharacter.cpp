@@ -21,7 +21,7 @@ AMyCharacter::AMyCharacter()
 	check(Camera != nullptr);
 	
 	GetCapsuleComponent()->SetCapsuleHalfHeight(80.0f);
-	GetCapsuleComponent()->SetCapsuleRadius(38.0f);
+	GetCapsuleComponent()->SetCapsuleRadius(35.0f);
 	SpringArm->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	Camera->SetupAttachment(SpringArm);
 
@@ -33,7 +33,7 @@ AMyCharacter::AMyCharacter()
 	SpringArm->bInheritRoll = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bDoCollisionTest = true;
-	SpringArm->SocketOffset.Y = 35.0f;
+	SpringArm->SocketOffset.Y = 30.0f;
 	SpringArm->SocketOffset.Z = 35.0f;
 	bUseControllerRotationYaw = true;
 
@@ -97,6 +97,11 @@ void AMyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	UpdateFarming(DeltaTime);
+
+	FVector cameraLocation;
+	FRotator cameraRotation;
+	GetActorEyesViewPoint(cameraLocation, cameraRotation);
+	//UE_LOG(LogTemp, Warning, TEXT("%f %f %f"), cameraRotation.Vector().X, cameraRotation.Vector().Y, cameraRotation.Vector().Z);
 }
 
 void AMyCharacter::PostInitializeComponents()
