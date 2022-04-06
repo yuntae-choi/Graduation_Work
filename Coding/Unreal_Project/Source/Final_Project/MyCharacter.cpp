@@ -7,6 +7,7 @@
 #include "MyItem.h"
 #include "MyPlayerController.h"
 #include "MyCharacterStatComponent.h"
+#include "Snowdrift.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -76,8 +77,12 @@ AMyCharacter::AMyCharacter()
 
 	Snowball = NULL;
 
-	//SnowballCount = 0;	// 실제 설정값
-	SnowballCount = 10;	// 디버깅용
+	//iSnowballCount = 0;	// 실제 설정값
+	iSnowballCount = 10;	// 디버깅용
+	iSnowballMaxCount = 30;	// 임시값
+
+	canFarmItem = NULL;
+	bIsFarming = false;
 }
 
 // Called when the game starts or when spawned
@@ -90,6 +95,8 @@ void AMyCharacter::BeginPlay()
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	UpdateFarming(DeltaTime);
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -126,6 +133,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AMyCharacter::Attack);
+	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Pressed, this, &AMyCharacter::StartFarming);
+	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Released, this, &AMyCharacter::EndFarming);
 }
 
 bool AMyCharacter::CanSetItem()
@@ -179,12 +188,12 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	if (IsAttacking) return;
-	if (SnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
+	if (iSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 
 	MyAnim->PlayAttackMontage();
 	IsAttacking = true;
 	// 디버깅용 - 실제는 주석 해제
-	//SnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
+	//iSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
 
 	// Attempt to fire a projectile.
 	if (ProjectileClass)
@@ -289,5 +298,57 @@ void AMyCharacter::ReleaseSnowball()
 			Snowball = NULL;
 		}
 
+	}
+}
+
+void AMyCharacter::StartFarming()
+{
+	if (IsValid(canFarmItem))
+	{
+		ASnowdrift* snowdrift = Cast<ASnowdrift>(canFarmItem);
+		if (snowdrift)
+		{
+			bIsFarming = true;
+		}
+	}
+}
+
+void AMyCharacter::EndFarming()
+{
+	if (IsValid(canFarmItem))
+	{
+		ASnowdrift* snowdrift = Cast<ASnowdrift>(canFarmItem);
+		if (snowdrift)
+		{	// F키로 눈 무더기 파밍 중 F키 release 시 눈 무더기 duration 초기화
+			snowdrift->SetFarmDuration(ASnowdrift::fFarmDurationMax);
+			bIsFarming = false;
+		}
+	}
+}
+
+void AMyCharacter::UpdateFarming(float deltaTime)
+{
+	if (bIsFarming)
+	{
+		if (IsValid(canFarmItem))
+		{
+			ASnowdrift* snowdrift = Cast<ASnowdrift>(canFarmItem);
+			if (snowdrift)
+			{	// 눈 무더기 duration 만큼 F키를 누르고 있으면 캐릭터의 눈덩이 추가 
+				float lastFarmDuration = snowdrift->GetFarmDuration();
+				float newFarmDuration = lastFarmDuration - deltaTime;
+				snowdrift->SetFarmDuration(newFarmDuration);
+
+				if (newFarmDuration <= 0)
+				{
+					iSnowballCount += 10;
+					if (iSnowballCount >= iSnowballMaxCount)
+					{
+						iSnowballCount = iSnowballMaxCount;
+					}
+					snowdrift->Destroy();
+				}
+			}
+		}
 	}
 }

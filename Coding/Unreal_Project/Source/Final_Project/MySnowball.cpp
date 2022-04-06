@@ -19,7 +19,8 @@ AMySnowball::AMySnowball()
 		CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 		CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("SnowballPreset"));
 		CollisionComponent->InitSphereRadius(10.0f);
-		// ECC_GameTraceChannel1 (MyCharacter) - 생성 시 캐릭터에 대한 콜리전 ignore (release 될 때 block으로 변경) (자기 자신과의 충돌 방지용)
+		// ECC_GameTraceChannel1 - MyCharacter 
+		// 생성 시 캐릭터에 대한 콜리전 ignore (release 될 때 block으로 변경) (자기 자신과의 충돌 방지용)
 		CollisionComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
 		CollisionComponent->SetSimulatePhysics(false);
 		CollisionComponent->SetUseCCD(true);	// 연속 충돌 검사 (눈덩이가 빠른 이동으로 콜리전 무시하는 오류 방지)
