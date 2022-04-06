@@ -366,7 +366,7 @@ void process_packet(int s_id, unsigned char* p)
 		//클라 recv 확인용
 
 		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		cout << millisec_since_epoch - packet->move_time << endl;
+		cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		send_status_packet(s_id);
 
@@ -384,59 +384,71 @@ void process_packet(int s_id, unsigned char* p)
 		}
 
 		cl.vl.lock();
+		
 		unordered_set <int> my_vl{ cl.viewlist };
+		
 		cl.vl.unlock();
 
+		for (auto& other : clients) {
+			if (other._s_id == s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			send_move_packet( other._s_id, cl._s_id);
+			cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+					
+		}
+
 		//새로 시야에 들어온 플레이어
-		for (auto other_id : near_list) {
-			if (0 == my_vl.count(other_id)) {
-				cl.vl.lock();
-				cl.viewlist.insert(other_id);
-				cl.vl.unlock();
-				send_put_object(cl._s_id, other_id);
+		//for (auto other_id : near_list) {
+		//	if (0 == my_vl.count(other_id)) {
+		//		cl.vl.lock();
+		//		cl.viewlist.insert(other_id);
+		//		cl.vl.unlock();
+		//		send_put_object(cl._s_id, other_id);
 
 
-				clients[other_id].vl.lock();
-				if (0 == clients[other_id].viewlist.count(cl._s_id)) {
-					clients[other_id].viewlist.insert(cl._s_id);
-					clients[other_id].vl.unlock();
-					send_put_object(other_id, cl._s_id);
-				}
-				else {
-					clients[other_id].vl.unlock();
-					send_move_packet(other_id, cl._s_id);
-				}
-			}
-			//시야에 존재하는 플레이어
-			else {
-				clients[other_id].vl.lock();
-				if (0 != clients[other_id].viewlist.count(cl._s_id)) {
-					clients[other_id].vl.unlock();
-					send_move_packet(other_id, cl._s_id);
-				}
-				else {
-					clients[other_id].viewlist.insert(cl._s_id);
-					clients[other_id].vl.unlock();
-					send_put_object(other_id, cl._s_id);
-				}
-			}
-		}
-		// 시야에서 벗어난 플레이어 
-		for (auto other_id : my_vl) {
-			if (0 == near_list.count(other_id)) {
-				cl.vl.lock();
-				cl.viewlist.erase(other_id);
-				cl.vl.unlock();
-				send_remove_object(cl._s_id, other_id);
-				clients[other_id].vl.lock();
-				if (0 != clients[other_id].viewlist.count(cl._s_id)) {
-					clients[other_id].viewlist.erase(cl._s_id);
-					clients[other_id].vl.unlock();
-					send_remove_object(other_id, cl._s_id);
-				}
-				else clients[other_id].vl.unlock();
-			}
-		}
+		//		clients[other_id].vl.lock();
+		//		if (0 == clients[other_id].viewlist.count(cl._s_id)) {
+		//			clients[other_id].viewlist.insert(cl._s_id);
+		//			clients[other_id].vl.unlock();
+		//			send_put_object(other_id, cl._s_id);
+		//		}
+		//		else {
+		//			clients[other_id].vl.unlock();
+		//			send_move_packet(other_id, cl._s_id);
+		//		}
+		//	}
+		//	//시야에 존재하는 플레이어
+		//	else {
+		//		clients[other_id].vl.lock();
+		//		if (0 != clients[other_id].viewlist.count(cl._s_id)) {
+		//			clients[other_id].vl.unlock();
+		//			send_move_packet(other_id, cl._s_id);
+		//		}
+		//		else {
+		//			clients[other_id].viewlist.insert(cl._s_id);
+		//			clients[other_id].vl.unlock();
+		//			send_put_object(other_id, cl._s_id);
+		//		}
+		//	}
+		//}
+		//// 시야에서 벗어난 플레이어 
+		//for (auto other_id : my_vl) {
+		//	if (0 == near_list.count(other_id)) {
+		//		cl.vl.lock();
+		//		cl.viewlist.erase(other_id);
+		//		cl.vl.unlock();
+		//		send_remove_object(cl._s_id, other_id);
+		//		clients[other_id].vl.lock();
+		//		if (0 != clients[other_id].viewlist.count(cl._s_id)) {
+		//			clients[other_id].viewlist.erase(cl._s_id);
+		//			clients[other_id].vl.unlock();
+		//			send_remove_object(other_id, cl._s_id);
+		//		}
+		//		else clients[other_id].vl.unlock();
+		//	}
+		//}
 
 
 		printf("Move\n");
