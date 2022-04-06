@@ -26,8 +26,9 @@ public:
 
 	// 새 플레이어 업데이트
 	void RecvNewPlayer(int sessionID, float x, float y, float z);
-
 	void UpdateNewPlayer();		// 플레이어 동기화
+
+	void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);		// 플레이어 동기화
 	void UpdatePlayerInfo(int input);
 	void UpdatePlayerS_id(int _s_id);
 

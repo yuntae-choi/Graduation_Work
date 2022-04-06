@@ -68,10 +68,14 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
 		int s_id = packet->s_id;
-		short x = packet->x;
-		short y = packet->y;
-		short z = packet->z;
+		float x = packet->x;
+		float y = packet->y;
+		float z = packet->z;
 		ReadyToSend_ChatPacket(packet->s_id, x, y, z);
+
+		MYLOG(Warning, TEXT("x: %f, y: %f, z: %f"), x, y, z);
+
+		//PlayerController->UpdateNewPlayer(packet->s_id, x, y, z);
 
 		break;
 	}
