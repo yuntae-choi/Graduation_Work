@@ -66,6 +66,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	if (bNewPlayerEntered)
 		UpdateNewPlayer();
+
+	UpdateRotation();
 }
 
 
@@ -165,3 +167,11 @@ void AMyPlayerController::UpdateNewPlayer()
 	bNewPlayerEntered = false;
 }
 
+void AMyPlayerController::UpdateRotation()
+{
+	float pitch, yaw, roll;
+	UKismetMathLibrary::BreakRotator(GetControlRotation(), roll, pitch, yaw);
+	pitch = UKismetMathLibrary::ClampAngle(pitch, -15.0f, 30.0f);
+	FRotator newRotator = UKismetMathLibrary::MakeRotator(roll, pitch, yaw);
+	SetControlRotation(newRotator);
+}
