@@ -17,14 +17,6 @@ public:
 	// Sets default values for this character's properties
 	AMyCharacter();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMySnowball> ProjectileClass;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override;
@@ -36,6 +28,35 @@ public:
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
 
+	void SetIsFarming(bool value) { bIsFarming = value; };
+	void SetCanFarmItem(AActor* item) { canFarmItem = item; };
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AMySnowball> ProjectileClass;
+
+private:
+	void UpDown(float NewAxisValue);
+	void LeftRight(float NewAxisValue);
+	void LookUp(float NewAxisValue);
+	void Turn(float NewAxisValue);
+
+	void Attack();
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
+	void ReleaseSnowball();
+
+	void StartFarming();
+	void EndFarming();
+	void UpdateFarming(float deltaTime);
+
+public:	
 	UPROPERTY(VisibleAnywhere, Category = Item)
 	class AMyItem* CurrentItem;
 
@@ -57,30 +78,16 @@ public:
 	int		_SessionId;		// 플레이어 고유 아이디
 
 	// 현재 손에 들고있는 눈덩이
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	AMySnowball* Snowball;
 
 	// 현재 소지한 눈덩이 수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
-	int SnowballCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	int iSnowballCount;
 
 	// 보유 가능한 눈덩이 최대 수
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
-	//int SnowballMaxCount;
-
-private:
-	void UpDown(float NewAxisValue);
-	void LeftRight(float NewAxisValue);
-	void LookUp(float NewAxisValue);
-	void Turn(float NewAxisValue);
-
-	void Attack();
-
-	UFUNCTION()
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-	UFUNCTION(BlueprintCallable, Category = GamePlay)
-	void ReleaseSnowball();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	int iSnowballMaxCount;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
@@ -103,4 +110,12 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<class UAnimInstance> snowmanAnim;
+
+	// 캐릭터가 아이템의 트리거 안에 들어와서 현재 파밍할 수 있는 아이템
+	UPROPERTY(VisibleAnywhere, Category = Farm)
+	AActor* canFarmItem;
+
+	// 현재 파밍중인지
+	UPROPERTY(VisibleAnywhere, Category = Farm)
+	bool bIsFarming;
 };
