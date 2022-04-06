@@ -15,6 +15,11 @@ SOCKET sever_socket;
 concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
 
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+
 void show_err();
 int get_id();
 void send_login_ok_packet(int _s_id);
@@ -125,12 +130,12 @@ void send_login_ok_packet(int _s_id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_LOGIN_OK;
 	packet.s_id = _s_id;
-	/*packet.x = clients[_s_id].x;
+	packet.x = clients[_s_id].x;
 	packet.y = clients[_s_id].y;
 	packet.z = clients[_s_id].z;
-	packet.Yaw = clients[_s_id].Yaw;
-	packet.Pitch = clients[_s_id].Pitch;
-	packet.Roll = clients[_s_id].Roll;*/
+	//packet.Yaw = clients[_s_id].Yaw;
+	//packet.Pitch = clients[_s_id].Pitch;
+	//packet.Roll = clients[_s_id].Roll;*/
 	cout << "로그인 허용 전송" << _s_id << endl;
 	clients[_s_id].do_send(sizeof(packet), &packet);
 }
@@ -267,16 +272,16 @@ void process_packet(int s_id, unsigned char* p)
 		cl.state_lock.lock();
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
-		//send_login_ok_packet(s_id);
-		cl.x = packet->x;
+		
+		cl.x = packet->x + (s_id*200);
 		cl.y = packet->y;
 		cl.z = packet->z;
 
 
-		sc_packet_login_ok _packet;
-		_packet.size = sizeof(_packet);
-		_packet.type = SC_PACKET_LOGIN_OK;
-		_packet.s_id = s_id;
+		//sc_packet_login_ok _packet;
+		//_packet.size = sizeof(_packet);
+		//_packet.type = SC_PACKET_LOGIN_OK;
+		//_packet.s_id = s_id;
 		/*packet.x = clients[_s_id].x;
 		packet.y = clients[_s_id].y;
 		packet.z = clients[_s_id].z;
@@ -284,7 +289,8 @@ void process_packet(int s_id, unsigned char* p)
 		packet.Pitch = clients[_s_id].Pitch;
 		packet.Roll = clients[_s_id].Roll;*/
 		//cout << "로그인 허용 전송" << s_id << endl;
-		cl.do_send(sizeof(_packet), &_packet);
+		//cl.do_send(sizeof(_packet), &_packet);
+		send_login_ok_packet(s_id);
 		cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
 
 		// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
@@ -356,8 +362,12 @@ void process_packet(int s_id, unsigned char* p)
 		cl.y = packet->y;
 		cl.z = packet->z;
 
-		cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
+		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
+
+		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		cout << millisec_since_epoch - packet->move_time << endl;
+
 		send_status_packet(s_id);
 
 
@@ -434,7 +444,7 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case SC_PACKET_STATUS_CHANGE: {
 		//printf("status\n");
-		printf("클라이언트 recv 성공\n");
+		//printf("클라이언트 recv 성공\n");
 
 		break;
 

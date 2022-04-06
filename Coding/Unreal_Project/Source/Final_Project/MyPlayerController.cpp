@@ -119,6 +119,9 @@ void AMyPlayerController::UpdateNewPlayer()
 		return;
 	}
 
+	bNewPlayerEntered = true;
+
+
 	// 새로운 플레이어를 필드에 스폰
 	FVector SpawnLocation_;
 	SpawnLocation_.X = _other_x;
@@ -165,6 +168,46 @@ void AMyPlayerController::UpdateNewPlayer()
 	//	}
 
 	bNewPlayerEntered = false;
+}
+
+
+
+void AMyPlayerController::UpdateNewPlayer(int new_s_id,float new_x, float new_y, float new_z)
+{
+	UWorld* const world = GetWorld();
+
+	// 새로운 플레이어가 자기 자신이면 무시
+	if (new_s_id == _my_session_id)
+	{
+		bNewPlayerEntered = false;
+		
+		return;
+	}
+	bNewPlayerEntered = true;
+
+	// 새로운 플레이어를 필드에 스폰
+	FVector SpawnLocation_;
+	SpawnLocation_.X = new_x;
+	SpawnLocation_.Y = new_y;
+	SpawnLocation_.Z = new_z;
+
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+	//SpawnParams.Name = FName(*FString(to_string(NewPlayer->SessionId).c_str()));
+	
+	AMyCharacter* SpawnCharacter = world->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, FRotator::ZeroRotator, SpawnParams);
+	//SpawnCharacter->SpawnDefaultController();
+	SpawnCharacter->_SessionId = new_s_id;
+
+	
+
+	UE_LOG(LogClass, Log, TEXT("other player spawned."));
+
+	bNewPlayerEntered = false;
+	
+
 }
 
 void AMyPlayerController::UpdateRotation()

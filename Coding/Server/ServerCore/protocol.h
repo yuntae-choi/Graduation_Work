@@ -43,6 +43,8 @@ struct sc_packet_login_ok {
 	char type;
 	// 세션 아이디
 	int		s_id;
+	float x, y, z;
+
 };
 
 struct cs_packet_start { // 게임 레디 요청
@@ -70,7 +72,7 @@ struct cs_packet_move {
 	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
 	int sessionID;
 	float x, y, z;
-	int		move_time;
+	long long		move_time;
 };
 
 struct cs_packet_attack {
