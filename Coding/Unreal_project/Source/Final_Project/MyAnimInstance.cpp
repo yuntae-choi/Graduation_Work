@@ -8,7 +8,8 @@ UMyAnimInstance::UMyAnimInstance()
 	fCurrentPawnSpeed = 0.0f;
 	isInAir = false;
 	isDead = false;
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> ATTACK_MONTAGE(TEXT("/Game/Animations/Bear/bear_Skeleton_Montage.bear_Skeleton_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ATTACK_MONTAGE(TEXT("/Game/Animations/Bear/BearThrowMontage.BearThrowMontage"));
+
 	if (ATTACK_MONTAGE.Succeeded())
 	{
 		AttackMontage = ATTACK_MONTAGE.Object;

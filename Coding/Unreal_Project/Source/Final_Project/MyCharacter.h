@@ -21,17 +21,20 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	bool CanSetItem();
-	void SetItem(class AMyItem* NewItem);
-
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
+	bool CanSetItem();
+	void SetItem(class AMyItem* NewItem);
 	void SetDamage(float newDamage);
-
+	void SetIsFarming(bool value) { bIsFarming = value; };
+	void SetCanFarmItem(AActor* item) { canFarmItem = item; };
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AMySnowball> ProjectileClass;
 
 private:
 	void UpDown(float NewAxisValue);
@@ -47,7 +50,10 @@ private:
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void ReleaseSnowball();
 
-	/////////////////////////////////////////////////////////////////////////////
+	void StartFarming();
+	void EndFarming();
+	void UpdateFarming(float deltaTime);
+
 public:	
 
 	//UPROPERTY(VisibleAnywhere, Category = Item)
@@ -63,7 +69,7 @@ public:
 	UCameraComponent* Camera;
 
 	// 현재 손에 들고있는 눈덩이
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	AMySnowball* Snowball;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -121,4 +127,12 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<class UAnimInstance> snowmanAnim;
+
+	// 캐릭터가 아이템의 트리거 안에 들어와서 현재 파밍할 수 있는 아이템
+	UPROPERTY(VisibleAnywhere, Category = Farm)
+	AActor* canFarmItem;
+
+	// 현재 파밍중인지
+	UPROPERTY(VisibleAnywhere, Category = Farm)
+	bool bIsFarming;
 };

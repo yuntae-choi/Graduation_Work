@@ -5,6 +5,7 @@
 #include "MyAnimInstance.h"
 #include "MyItem.h"
 #include "MyPlayerController.h"
+#include "Snowdrift.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -14,24 +15,27 @@ AMyCharacter::AMyCharacter()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
-	//CharacterStat = CreateDefaultSubobject<UMyCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 	check(Camera != nullptr);
-
+	
+	GetCapsuleComponent()->SetCapsuleHalfHeight(80.0f);
+	GetCapsuleComponent()->SetCapsuleRadius(38.0f);
 	SpringArm->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	Camera->SetupAttachment(SpringArm);
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
-	//GetCapsuleComponent()->SetCapsuleHalfHeight(74.0f);
-	//GetCapsuleComponent()->SetCapsuleRadius(37.0f);
+	GetCapsuleComponent()->SetCapsuleHalfHeight(74.0f);
+	GetCapsuleComponent()->SetCapsuleRadius(37.0f);
 	//GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
-	SpringArm->TargetArmLength = 400.0f;
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -74.0f), FRotator(0.0f, -90.0f, 0.0f));
+	SpringArm->TargetArmLength = 220.0f;
 	SpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritRoll = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bDoCollisionTest = true;
+	SpringArm->SocketOffset.Y = 35.0f;
+	SpringArm->SocketOffset.Z = 35.0f;
 	bUseControllerRotationYaw = true;
 
 	bear = CreateDefaultSubobject<USkeletalMesh>(TEXT("BEAR"));
@@ -40,6 +44,7 @@ AMyCharacter::AMyCharacter()
 	{
 		bear = SK_BEAR.Object;
 		GetMesh()->SetSkeletalMesh(bear);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	snowman = CreateDefaultSubobject<USkeletalMesh>(TEXT("SNOWMAN"));
@@ -67,7 +72,6 @@ AMyCharacter::AMyCharacter()
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	IsAttacking = false;
 
-	//ProjectileClass = AMySnow::StaticClass();
 	ProjectileClass = AMySnowball::StaticClass();
 
 	Snowball = nullptr;
@@ -81,7 +85,9 @@ AMyCharacter::AMyCharacter()
 	hasUmbrella = false;
 	hasBag = false;
 	iMaxMatchCount = 3;
-	iCurrentMatchCount = 0; 
+	iCurrentMatchCount = 0;
+	canFarmItem = NULL;
+	bIsFarming = false;
 }
 
 // Called when the game starts or when spawned
@@ -94,7 +100,8 @@ void AMyCharacter::BeginPlay()
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
+	UpdateFarming(DeltaTime);
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -118,6 +125,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AMyCharacter::Attack);
+	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Pressed, this, &AMyCharacter::StartFarming);
+	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Released, this, &AMyCharacter::EndFarming);
 }
 
 bool AMyCharacter::CanSetItem()
@@ -172,12 +181,12 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	if (IsAttacking) return;
-	//if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
+	if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 
 	MyAnim->PlayAttackMontage();
 	IsAttacking = true;
 	// 디버깅용 - 실제는 주석 해제
-	//SnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
+	//iSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
 
 	// Attempt to fire a projectile.
 	if (ProjectileClass)
@@ -196,32 +205,6 @@ void AMyCharacter::Attack()
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 			Snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
 			Snowball->fAttack = fAttack;
-
-
-			//FVector SpawnLocation_;
-			//SpawnLocation_.X = GetActorLocation().X + 200.0f;
-			//SpawnLocation_.Y = GetActorLocation().Y + 200.0f;
-			//SpawnLocation_.Z = GetActorLocation().Z;
-
-			//FRotator SpawnRotation;
-			//SpawnRotation.Yaw = 0.0f;
-			//SpawnRotation.Pitch = 0.0f;
-			//SpawnRotation.Roll = 0.0f;
-
-			////FActorSpawnParameters SpawnParams;
-			////SpawnParams.Owner = this;
-			////SpawnParams.Instigator = GetInstigator();
-			////SpawnParams.Name = FName(*FString(to_string(_other_session_id).c_str()));
-
-			//TSubclassOf<class AMyCharacter> WhoToSpawn;
-			//WhoToSpawn = AMyCharacter::StaticClass();
-			//AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
-
-			//if (nullptr == SpawnCharacter)
-			//{
-			//	MYLOG(Warning, TEXT("spawn fail"));
-			//	return;
-			//}
 		}
 	}
 }
@@ -291,7 +274,11 @@ void AMyCharacter::ReleaseSnowball()
 
 		if (Snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
-			II_Throwable::Execute_Throw(Snowball, GetActorForwardVector());
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+
+			II_Throwable::Execute_Throw(Snowball, cameraRotation.Vector());
 			Snowball = NULL;
 		}
 
@@ -319,5 +306,57 @@ void AMyCharacter::SetDamage(float NewDamage)
 		MyAnim->SetDead();
 		GetMesh()->SetSkeletalMesh(snowman);
 		GetMesh()->SetAnimInstanceClass(snowmanAnim);
+	}
+}
+
+void AMyCharacter::StartFarming()
+{
+	if (IsValid(canFarmItem))
+	{
+		ASnowdrift* snowdrift = Cast<ASnowdrift>(canFarmItem);
+		if (snowdrift)
+		{
+			bIsFarming = true;
+		}
+	}
+}
+
+void AMyCharacter::EndFarming()
+{
+	if (IsValid(canFarmItem))
+	{
+		ASnowdrift* snowdrift = Cast<ASnowdrift>(canFarmItem);
+		if (snowdrift)
+		{	// F키로 눈 무더기 파밍 중 F키 release 시 눈 무더기 duration 초기화
+			snowdrift->SetFarmDuration(ASnowdrift::fFarmDurationMax);
+			bIsFarming = false;
+		}
+	}
+}
+
+void AMyCharacter::UpdateFarming(float deltaTime)
+{
+	if (bIsFarming)
+	{
+		if (IsValid(canFarmItem))
+		{
+			ASnowdrift* snowdrift = Cast<ASnowdrift>(canFarmItem);
+			if (snowdrift)
+			{	// 눈 무더기 duration 만큼 F키를 누르고 있으면 캐릭터의 눈덩이 추가 
+				float lastFarmDuration = snowdrift->GetFarmDuration();
+				float newFarmDuration = lastFarmDuration - deltaTime;
+				snowdrift->SetFarmDuration(newFarmDuration);
+
+				if (newFarmDuration <= 0)
+				{
+					iCurrentSnowballCount += 10;
+					if (iCurrentSnowballCount >= iMaxSnowballCount)
+					{
+						iCurrentSnowballCount = iMaxSnowballCount;
+					}
+					snowdrift->Destroy();
+				}
+			}
+		}
 	}
 }
