@@ -11,36 +11,36 @@ AMyItemBox::AMyItemBox()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("TRIGGER"));
-	Box = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BOX"));
-	Effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EFFECT"));
+	trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("TRIGGER"));
+	box = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BOX"));
+	effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EFFECT"));
 
-	RootComponent = Trigger;
-	Box->SetupAttachment(RootComponent);
-	Effect->SetupAttachment(RootComponent);
+	RootComponent = trigger;
+	box->SetupAttachment(RootComponent);
+	effect->SetupAttachment(RootComponent);
 
-	Trigger->SetBoxExtent(FVector(27.0f, 42.0f, 15.0f));
+	trigger->SetBoxExtent(FVector(27.0f, 42.0f, 15.0f));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BOX(TEXT("/Game/NonCharacters/itembox_down.itembox_down"));
 
 	if (SM_BOX.Succeeded())
 	{
-		Box->SetStaticMesh(SM_BOX.Object);
+		box->SetStaticMesh(SM_BOX.Object);
 	}
 
 	//static ConstructorHelpers::FObjectFinder<UParticleSystem> P_CHESTOPEN(TEXT("/Game/Effects/FX_Treasure/Chest/P_TreasureChest_Open_Mesh.P_TreasureChest_Open_Mesh"));
 
 	//if (P_CHESTOPEN.Succeeded())
 	//{
-	//	Effect->SetTemplate(P_CHESTOPEN.Object);
-	//	Effect->bAutoActivate = false;
+	//	effect->SetTemplate(P_CHESTOPEN.Object);
+	//	effect->bAutoActivate = false;
 	//}
 
-	Box->SetRelativeLocation(FVector(0.0f, 0.0f, -15.0f));
+	box->SetRelativeLocation(FVector(0.0f, 0.0f, -15.0f));
 
-	Trigger->SetCollisionProfileName(TEXT("ItemBox"));
-	Box->SetCollisionProfileName(TEXT("NoCollision"));
+	trigger->SetCollisionProfileName(TEXT("ItemBox"));
+	box->SetCollisionProfileName(TEXT("NoCollision"));
 
-	ItemClass = AMyItem::StaticClass();
+	itemClass = AMyItem::StaticClass();
 }
 
 // Called when the game starts or when spawned
@@ -53,7 +53,7 @@ void AMyItemBox::BeginPlay()
 void AMyItemBox::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	Trigger->OnComponentBeginOverlap.AddDynamic(this, &AMyItemBox::OnCharacterOverlap);
+	trigger->OnComponentBeginOverlap.AddDynamic(this, &AMyItemBox::OnCharacterOverlap);
 }
 
 // Called every frame
@@ -68,19 +68,19 @@ void AMyItemBox::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor*
 	auto MyCharacter = Cast<AMyCharacter>(OtherActor);
 	MYCHECK(nullptr != MyCharacter);
 
-	if (nullptr != MyCharacter && nullptr != ItemClass)
+	if (nullptr != MyCharacter && nullptr != itemClass)
 	{
 		MYLOG(Warning, TEXT("%s get item."), *MyCharacter->GetName());
 
 
 		//if (MyCharacter->CanSetItem())
 		//{
-		//	auto NewItem = GetWorld()->SpawnActor<AMyItem>(ItemClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		//	auto NewItem = GetWorld()->SpawnActor<AMyItem>(itemClass, FVector::ZeroVector, FRotator::ZeroRotator);
 		//	MyCharacter->SetItem(NewItem);
-		//	//Effect->Activate(true);
-		//	Box->SetHiddenInGame(true, true);
+		//	//effect->Activate(true);
+		//	box->SetHiddenInGame(true, true);
 		//	SetActorEnableCollision(false);
-		//	//Effect->OnSystemFinished.AddDynamic(this, &AMyItemBox::OnEffectFinished);
+		//	//effect->OnSystemFinished.AddDynamic(this, &AMyItemBox::OnEffectFinished);
 		//	Destroy();
 		//}
 		//else

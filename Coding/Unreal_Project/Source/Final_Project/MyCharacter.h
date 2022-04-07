@@ -14,59 +14,27 @@ class FINAL_PROJECT_API AMyCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AMyCharacter();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMySnowball> ProjectileClass;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
+	void ReleaseSnowball();
 
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
+	void SetDamage(float newDamage);
+	void SetIsFarming(bool value) { bIsFarming = value; };
+	void SetCanFarmItem(AActor* item) { farmingItem = item; };
 
-	UPROPERTY(VisibleAnywhere, Category = Item)
-	class AMyItem* CurrentItem;
-
-	UPROPERTY(VisibleAnywhere, Category = Item)
-	USkeletalMeshComponent* Item;
-
-	UPROPERTY(VisibleAnywhere, Category = Stat)
-	class UMyCharacterStatComponent* CharacterStat;
-
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-	USpringArmComponent* SpringArm;
-
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-	UCameraComponent* Camera;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay) 
-	FVector MuzzleOffset; 
-
-	int		_SessionId;		// 플레이어 고유 아이디
-
-	// 현재 손에 들고있는 눈덩이
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
-	AMySnowball* Snowball;
-
-	// 현재 소지한 눈덩이 수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
-	int SnowballCount;
-
-	// 보유 가능한 눈덩이 최대 수
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GamePlay)
-	//int SnowballMaxCount;
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	void UpDown(float NewAxisValue);
@@ -79,18 +47,71 @@ private:
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	UFUNCTION(BlueprintCallable, Category = GamePlay)
-	void ReleaseSnowball();
+	void StartFarming();
+	void EndFarming();
+	void UpdateFarming(float deltaTime);
+
+public:	
+
+	//UPROPERTY(VisibleAnywhere, Category = Item)
+	//class AMyItem* CurrentItem;
+
+	//UPROPERTY(VisibleAnywhere, Category = Item)
+	//USkeletalMeshComponent* Item;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	USpringArmComponent* springArm;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UCameraComponent* camera;
+
+	// 현재 손에 들고있는 눈덩이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	AMySnowball* snowball;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iSessionID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float fMaxHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float fCurrentHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float fAttack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iMaxSnowballCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iCurrentSnowballCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iPlusMaxSnowballCountByABag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bHasUmbrella;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bHasBag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iMaxMatchCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iCurrentMatchCount;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AMySnowball> projectileClass;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	bool IsAttacking;
+	bool isAttacking;
 
 	UPROPERTY()
-	class UMyAnimInstance* MyAnim;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
-	bool IsDead;
+	class UMyAnimInstance* myAnim;
 
 	UPROPERTY()
 	class USkeletalMesh* bear;
@@ -103,4 +124,12 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<class UAnimInstance> snowmanAnim;
+
+	// 캐릭터가 아이템의 트리거 안에 들어와서 현재 파밍할 수 있는 아이템
+	UPROPERTY(VisibleAnywhere, Category = Farm)
+	AActor* farmingItem;
+
+	// 현재 파밍중인지
+	UPROPERTY(VisibleAnywhere, Category = Farm)
+	bool bIsFarming;
 };

@@ -50,11 +50,16 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
 		int id = packet->s_id;
-		_my_s_id = packet->s_id;
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
 		ReadyToSend_StatusPacket();
-		ReadyToSend_MovePacket(packet->s_id, _my_x, _my_y, _my_z);
+		ReadyToSend_MovePacket(packet->s_id, fMy_x, fMy_y, fMy_z);
+
+		float x = packet->x;
+		float y = packet->y;
+		float z = packet->z;
+
+		MYLOG(Warning, TEXT("i'm player%d init spawn : (%f, %f, %f)"), id, x, y, z);
 
 	}
 	break;
@@ -66,16 +71,15 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 	case SC_PACKET_PUT_OBJECT:
 	{
-
+		
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
-		int s_id = packet->s_id;
+		int id = packet->s_id;
 		float x = packet->x;
 		float y = packet->y;
 		float z = packet->z;
 		ReadyToSend_ChatPacket(packet->s_id, x, y, z);
 
-		MYLOG(Warning, TEXT("x: %f, y: %f, z: %f"), x, y, z);
-		//PlayerController->RecvNewPlayer(s_id, x, y, z);
+		PlayerController->RecvNewPlayer(id, x, y, z);
 		//PlayerController->UpdateNewPlayer(packet->s_id, x, y, z);
 
 		break;
@@ -88,18 +92,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		float x = packet->x;
 		float y = packet->y;
 		float z = packet->z;
-
-		if (id == _my_s_id)
-		{
-			break;
-		}
-		else
-		{
-			MYLOG(Warning, TEXT("player[ %d ] x: %f, y: %f, z: %f"), id, x, y, z);
-			//ReadyToSend_ChatPacket(packet->sessionID, x, y, z);
-
-		}
-		//PlayerController->RecvNewPlayer(id, x, y, z);
 
 		break;
 	}
@@ -117,7 +109,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	}
 	case SC_PACKET_STATUS_CHANGE:
 	{
-
+		
 		ReadyToSend_StatusPacket();
 
 	}
@@ -133,12 +125,12 @@ void ClientSocket::ReadyToSend_LoginPacket()
 	packet.type = CS_PACKET_LOGIN;
 	strcpy_s(packet.id, _id);
 	strcpy_s(packet.pw, _pw);
-	packet.x = _my_x;
-	packet.y = _my_y;
-	packet.z = _my_z;
+	packet.x = fMy_x;
+	packet.y = fMy_y;
+	packet.z = fMy_z;
 	size_t sent = 0;
 	SendPacket(&packet);
-
+	
 };
 
 void ClientSocket::ReadyToSend_StatusPacket() {
@@ -168,6 +160,8 @@ void ClientSocket::ReadyToSend_MovePacket(int sessionID, float x, float y, float
 		packet.x = x;
 		packet.y = y;
 		packet.z = z;
+
+		size_t sent = 0;
 		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		packet.move_time = millisec_since_epoch;
 		SendPacket(&packet);
@@ -221,7 +215,7 @@ uint32 ClientSocket::Run()
 	Connect();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
-
+	
 	RecvPacket();
 	_login_ok = false;
 	ReadyToSend_LoginPacket();
@@ -235,7 +229,7 @@ uint32 ClientSocket::Run()
 		BOOL ret = GetQueuedCompletionStatus(h_iocp, &num_byte, (PULONG_PTR)&iocp_key, &p_over, INFINITE);
 
 		Overlap* exp_over = reinterpret_cast<Overlap*>(p_over);
-
+		
 		if (FALSE == ret) {
 			int err_no = WSAGetLastError();
 			if (exp_over->_op == OP_SEND)
@@ -269,9 +263,6 @@ uint32 ClientSocket::Run()
 			break;
 		}
 		case OP_SEND: {
-
-			MYLOG(Warning, TEXT("test"));
-
 			if (num_byte != exp_over->_wsa_buf.len) {
 				//Disconnect();
 			}

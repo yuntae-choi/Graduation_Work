@@ -29,8 +29,6 @@ const int  MAX_CHAT_SIZE = 100;
 const int BUF_SIZE = 255;
 const static int MAX_BUFF_SIZE = 255;
 
-
-
 // 소켓 통신 구조체
 
 // 패킷 정보
@@ -79,7 +77,6 @@ struct cs_packet_move {
 	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
 	int sessionID;
 	float x, y, z;
-	//int		move_time;
 	long long move_time;
 };
 
@@ -105,11 +102,13 @@ struct cs_packet_teleport {
 struct sc_packet_login_ok {
 	unsigned char size;
 	char type;
-
+	
 	// 세션 아이디
 	int		s_id;
 
-
+	float x;
+	float y;
+	float z;
 };
 
 

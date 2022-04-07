@@ -24,15 +24,14 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 public:
 	AMyPlayerController();
 
-	// 새 플레이어 업데이트
 	void RecvNewPlayer(int sessionID, float x, float y, float z);
-	void UpdateNewPlayer();		// 플레이어 동기화
+	void UpdateNewPlayer();
 
-	void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);		// 플레이어 동기화
+	//void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
 	void UpdatePlayerInfo(int input);
 	void UpdatePlayerS_id(int _s_id);
 
-	void UpdateRotation();	// 카메라 피칭(상하) 제한
+	//void UpdateRotation();
 
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -40,20 +39,19 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	ClientSocket* _cs;
+	ClientSocket* myClientSocket;
 
-	int _my_session_id;
-	int _my_x;
-	int _my_y;
-	int _my_z;
-	int _other_session_id;
-	int _other_x;
-	int _other_y;
-	int _other_z;
+	int32 iMySessionId;
+	float fMy_x;
+	float fMy_y;
+	float fMy_z;
+	int32 iOtherSessionId;
+	float fOther_x;
+	float fOther_y;
+	float fOther_z;
 
-	// 스폰시킬 다른 캐릭터
-	UPROPERTY(EditAnywhere, Category = "Spawning")
-	TSubclassOf<class ACharacter> WhoToSpawn;
+	//UPROPERTY(EditAnywhere, Category = "Spawning")
+	//TSubclassOf<class AMyCharacter> WhoToSpawn;
 
 protected:
 	bool bNewPlayerEntered;
