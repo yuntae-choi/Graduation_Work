@@ -55,7 +55,7 @@ void AMySnowball::Throw_Implementation(FVector Direction)
 	meshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	meshComponent->SetSimulatePhysics(true);
 
-	FVector ImpulseVector = FVector(Direction * 5000.0f + FVector(0.0f, 0.0f, 200.0f));
+	FVector ImpulseVector = FVector(Direction * 15000.0f + FVector(0.0f, 0.0f, 1700.0f));
 	meshComponent->AddImpulse(ImpulseVector, NAME_None, true);
 
 	 //Delay ÇÔ¼ö

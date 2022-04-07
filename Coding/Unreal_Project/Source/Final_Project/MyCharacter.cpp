@@ -16,15 +16,13 @@ AMyCharacter::AMyCharacter()
 	springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
 	check(camera != nullptr);
-	
-	GetCapsuleComponent()->SetCapsuleHalfHeight(80.0f);
-	GetCapsuleComponent()->SetCapsuleRadius(38.0f);
+
 	springArm->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	camera->SetupAttachment(springArm);
 
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
 	GetCapsuleComponent()->SetCapsuleHalfHeight(74.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(37.0f);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
 	GetCapsuleComponent()->SetUseCCD(true);
 	//GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -74.0f), FRotator(0.0f, -90.0f, 0.0f));
@@ -35,7 +33,7 @@ AMyCharacter::AMyCharacter()
 	springArm->bInheritRoll = true;
 	springArm->bInheritYaw = true;
 	springArm->bDoCollisionTest = true;
-	springArm->SocketOffset.Y = 35.0f;
+	springArm->SocketOffset.Y = 30.0f;
 	springArm->SocketOffset.Z = 35.0f;
 	bUseControllerRotationYaw = true;
 
@@ -103,6 +101,10 @@ void AMyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	UpdateFarming(DeltaTime);
+
+	FVector cameraLocation;
+	FRotator cameraRotation;
+	GetActorEyesViewPoint(cameraLocation, cameraRotation);
 }
 
 void AMyCharacter::PostInitializeComponents()
