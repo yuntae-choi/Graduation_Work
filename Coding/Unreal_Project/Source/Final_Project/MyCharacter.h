@@ -28,13 +28,10 @@ public:
 	void SetItem(class AMyItem* NewItem);
 	void SetDamage(float newDamage);
 	void SetIsFarming(bool value) { bIsFarming = value; };
-	void SetCanFarmItem(AActor* item) { canFarmItem = item; };
+	void SetCanFarmItem(AActor* item) { farmingItem = item; };
 
 protected:
 	virtual void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMySnowball> ProjectileClass;
 
 private:
 	void UpDown(float NewAxisValue);
@@ -63,14 +60,14 @@ public:
 	//USkeletalMeshComponent* Item;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	USpringArmComponent* SpringArm;
+	USpringArmComponent* springArm;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	UCameraComponent* Camera;
+	UCameraComponent* camera;
 
 	// 현재 손에 들고있는 눈덩이
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
-	AMySnowball* Snowball;
+	AMySnowball* snowball;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iSessionID;
@@ -94,10 +91,10 @@ public:
 	int32 iPlusMaxSnowballCountByABag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool hasUmbrella;
+	bool bHasUmbrella;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool hasBag;
+	bool bHasBag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iMaxMatchCount;
@@ -107,14 +104,14 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMySnowball> ProjectileClass;
+	TSubclassOf<class AMySnowball> projectileClass;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	bool IsAttacking;
+	bool isAttacking;
 
 	UPROPERTY()
-	class UMyAnimInstance* MyAnim;
+	class UMyAnimInstance* myAnim;
 
 	UPROPERTY()
 	class USkeletalMesh* bear;
@@ -130,7 +127,7 @@ private:
 
 	// 캐릭터가 아이템의 트리거 안에 들어와서 현재 파밍할 수 있는 아이템
 	UPROPERTY(VisibleAnywhere, Category = Farm)
-	AActor* canFarmItem;
+	AActor* farmingItem;
 
 	// 현재 파밍중인지
 	UPROPERTY(VisibleAnywhere, Category = Farm)

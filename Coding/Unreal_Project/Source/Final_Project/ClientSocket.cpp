@@ -53,7 +53,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
 		ReadyToSend_StatusPacket();
-		ReadyToSend_MovePacket(packet->s_id, _my_x, _my_y, _my_z);
+		ReadyToSend_MovePacket(packet->s_id, fMy_x, fMy_y, fMy_z);
 
 		float x = packet->x;
 		float y = packet->y;
@@ -125,9 +125,9 @@ void ClientSocket::ReadyToSend_LoginPacket()
 	packet.type = CS_PACKET_LOGIN;
 	strcpy_s(packet.id, _id);
 	strcpy_s(packet.pw, _pw);
-	packet.x = _my_x;
-	packet.y = _my_y;
-	packet.z = _my_z;
+	packet.x = fMy_x;
+	packet.y = fMy_y;
+	packet.z = fMy_z;
 	size_t sent = 0;
 	SendPacket(&packet);
 	

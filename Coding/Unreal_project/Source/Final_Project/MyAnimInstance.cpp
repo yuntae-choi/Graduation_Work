@@ -6,13 +6,13 @@
 UMyAnimInstance::UMyAnimInstance()
 {
 	fCurrentPawnSpeed = 0.0f;
-	isInAir = false;
-	isDead = false;
+	bIsInAir = false;
+	bIsDead = false;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> ATTACK_MONTAGE(TEXT("/Game/Animations/Bear/BearThrowMontage.BearThrowMontage"));
 
 	if (ATTACK_MONTAGE.Succeeded())
 	{
-		AttackMontage = ATTACK_MONTAGE.Object;
+		attackMontage = ATTACK_MONTAGE.Object;
 	}
 }
 
@@ -23,7 +23,7 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	auto Pawn = TryGetPawnOwner();
 	if (!::IsValid(Pawn)) return;
 
-	if (!isDead)
+	if (!bIsDead)
 	{
 		fCurrentPawnSpeed = FVector(Pawn->GetVelocity() * FVector(1.0f, 1.0f, 0.0f)).Size();
 		auto Character = Cast<ACharacter>(Pawn);
@@ -32,13 +32,13 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			float MoveForward = Character->GetInputAxisValue(TEXT("UpDown"));
 			float MoveRight = Character->GetInputAxisValue(TEXT("LeftRight"));
 			fCurrentPawnDirection = UKismetMathLibrary::DegAtan2(MoveForward, MoveRight);
-			isInAir = Character->GetMovementComponent()->IsFalling();
+			bIsInAir = Character->GetMovementComponent()->IsFalling();
 		}
 	}
 }
 
 void UMyAnimInstance::PlayAttackMontage()
 {
-	if (!isDead)
-		Montage_Play(AttackMontage, 1.0f);
+	if (!bIsDead)
+		Montage_Play(attackMontage, 1.0f);
 }

@@ -10,43 +10,29 @@ AMySnowball::AMySnowball()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	//// Use a sphere as a simple collision representation.
-	//CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
-	//// Set the sphere's collision profile name to "Projectile".
-	//CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
-	//CollisionComponent->BodyInstance.bNotifyRigidBodyCollision = true;
-	//// Event called when component hits something.
-	//CollisionComponent->OnComponentHit.AddDynamic(this, &AMySnowball::OnHit);
-	//// Set the sphere's collision radius.
-	//CollisionComponent->InitSphereRadius(10.0f);
-
-	//CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//CollisionComponent->SetSimulatePhysics(false);
-	//// Set the root component to be the collision component.
-	//RootComponent = CollisionComponent;
-
-	if (!MeshComponent)
+	if (!meshComponent)
 	{
-		MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMeshComponent"));
+		meshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMeshComponent"));
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SNOWBALL(TEXT("/Game/NonCharacters/snowball1.snowball1"));
 		if (SM_SNOWBALL.Succeeded())
 		{
-			MeshComponent->SetStaticMesh(SM_SNOWBALL.Object);
-			MeshComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
-			MeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
-			MeshComponent->OnComponentHit.AddDynamic(this, &AMySnowball::OnHit);
-			MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			MeshComponent->SetSimulatePhysics(false);
-			RootComponent = MeshComponent;
+			meshComponent->SetStaticMesh(SM_SNOWBALL.Object);
+			meshComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
+			meshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
+			meshComponent->OnComponentHit.AddDynamic(this, &AMySnowball::OnHit);
+			meshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			meshComponent->SetSimulatePhysics(false);
+			meshComponent->SetUseCCD(true);
+			RootComponent = meshComponent;
 		}
 
 		static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("/Game/Materials/Mat_Original_Snow.Mat_Original_Snow"));
 		if (Material.Succeeded())
 		{
-			MaterialInstance = UMaterialInstanceDynamic::Create(Material.Object, MeshComponent);
+			materialInstance = UMaterialInstanceDynamic::Create(Material.Object, meshComponent);
 		}
-		MeshComponent->SetMaterial(0, MaterialInstance);
-		MeshComponent->SetupAttachment(RootComponent);
+		meshComponent->SetMaterial(0, materialInstance);
+		meshComponent->SetupAttachment(RootComponent);
 	}
 }
 
@@ -66,18 +52,19 @@ void AMySnowball::BeginPlay()
 
 void AMySnowball::Throw_Implementation(FVector Direction)
 {
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	MeshComponent->SetSimulatePhysics(true);
-	FVector ImpulseVector = FVector(Direction * 3000.0f + FVector(0.0f, 0.0f, 200.0f));
-	MeshComponent->AddImpulse(ImpulseVector, NAME_None, true);
+	meshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	meshComponent->SetSimulatePhysics(true);
 
-	// Delay 함수
-	//FTimerHandle WaitHandle;
-	//float WaitTime = 0.1f;
-	//GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
-	//	{
-	//		
-	//	}), WaitTime, false);
+	FVector ImpulseVector = FVector(Direction * 5000.0f + FVector(0.0f, 0.0f, 200.0f));
+	meshComponent->AddImpulse(ImpulseVector, NAME_None, true);
+
+	 //Delay 함수
+	FTimerHandle WaitHandle;
+	float WaitTime = 0.1f;
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			meshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		}), WaitTime, false);
 }
 
 // Function that is called when the projectile hits something.

@@ -39,16 +39,16 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	ClientSocket* _cs;
+	ClientSocket* myClientSocket;
 
-	int32 _my_session_id;
-	float _my_x;
-	float _my_y;
-	float _my_z;
-	int32 _other_session_id;
-	float _other_x;
-	float _other_y;
-	float _other_z;
+	int32 iMySessionId;
+	float fMy_x;
+	float fMy_y;
+	float fMy_z;
+	int32 iOtherSessionId;
+	float fOther_x;
+	float fOther_y;
+	float fOther_z;
 
 	//UPROPERTY(EditAnywhere, Category = "Spawning")
 	//TSubclassOf<class AMyCharacter> WhoToSpawn;

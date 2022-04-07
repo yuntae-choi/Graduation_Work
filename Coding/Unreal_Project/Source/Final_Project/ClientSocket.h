@@ -97,9 +97,9 @@ public:
 	Overlap _recv_over;
 	char	_id[MAX_NAME_SIZE];
 	char	_pw[MAX_NAME_SIZE];
-	float	_my_x;
-	float	_my_y;
-	float	_my_z;
+	float	fMy_x;
+	float	fMy_y;
+	float	fMy_z;
 
 	string _name;
 	int      _prev_size = 0;

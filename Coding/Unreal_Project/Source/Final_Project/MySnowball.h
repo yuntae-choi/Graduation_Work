@@ -31,15 +31,11 @@ protected:
 
 public:
 
-	//// Sphere collision component
-	//UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-	//USphereComponent* CollisionComponent;
+	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	UStaticMeshComponent* meshComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-	UStaticMeshComponent* MeshComponent;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-	UMaterialInstanceDynamic* MaterialInstance;
+	UMaterialInstanceDynamic* materialInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 	float fAttack;

@@ -1,0 +1,18 @@
+클래스.h 구조
+public
+-함수
+protected
+-함수
+private
+-함수
+
+public
+-변수
+protected
+-변수
+private
+-변수
+
+모든 변수 lowerCamelCase
+모든 함수 UpperCamelCase
+int, float, bool 타입 변수는 소문자 i f b 붙이기 (ex iBallCount)
