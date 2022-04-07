@@ -23,6 +23,10 @@ public:
 	void SetDead() { bIsDead = true; }
 
 private:
+	UFUNCTION()
+	void AnimNotify_SnowballRelease();
+
+private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	float fCurrentPawnSpeed;
 

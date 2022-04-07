@@ -2,6 +2,7 @@
 
 
 #include "MyAnimInstance.h"
+#include "MyCharacter.h"
 
 UMyAnimInstance::UMyAnimInstance()
 {
@@ -41,4 +42,15 @@ void UMyAnimInstance::PlayAttackMontage()
 {
 	if (!bIsDead)
 		Montage_Play(attackMontage, 1.0f);
+}
+
+void UMyAnimInstance::AnimNotify_SnowballRelease()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
+
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	MyCharacter->ReleaseSnowball();
 }

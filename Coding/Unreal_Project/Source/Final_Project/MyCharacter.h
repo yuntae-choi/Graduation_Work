@@ -24,6 +24,9 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
+	void ReleaseSnowball();
+
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
 	void SetDamage(float newDamage);
@@ -43,9 +46,6 @@ private:
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-	UFUNCTION(BlueprintCallable, Category = GamePlay)
-	void ReleaseSnowball();
 
 	void StartFarming();
 	void EndFarming();
