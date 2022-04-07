@@ -50,11 +50,11 @@ private:
 	/////////////////////////////////////////////////////////////////////////////
 public:	
 
-	UPROPERTY(VisibleAnywhere, Category = Item)
-	class AMyItem* CurrentItem;
+	//UPROPERTY(VisibleAnywhere, Category = Item)
+	//class AMyItem* CurrentItem;
 
-	UPROPERTY(VisibleAnywhere, Category = Item)
-	USkeletalMeshComponent* Item;
+	//UPROPERTY(VisibleAnywhere, Category = Item)
+	//USkeletalMeshComponent* Item;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* SpringArm;

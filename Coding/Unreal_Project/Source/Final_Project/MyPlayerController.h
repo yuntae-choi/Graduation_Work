@@ -24,15 +24,14 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 public:
 	AMyPlayerController();
 
-	// ???åÎ†à?¥Ïñ¥ ?ÖÎç∞?¥Ìä∏
 	void RecvNewPlayer(int sessionID, float x, float y, float z);
-	void UpdateNewPlayer();		// ?åÎ†à?¥Ïñ¥ ?ôÍ∏∞??
+	void UpdateNewPlayer();
 
-	void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);		// ?åÎ†à?¥Ïñ¥ ?ôÍ∏∞??
+	//void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
 	void UpdatePlayerInfo(int input);
 	void UpdatePlayerS_id(int _s_id);
 
-	//void UpdateRotation();	// Ïπ¥Î©î???ºÏπ≠(?ÅÌïò) ?úÌïú
+	//void UpdateRotation();
 
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -42,18 +41,17 @@ protected:
 public:
 	ClientSocket* _cs;
 
-	int _my_session_id;
-	int _my_x;
-	int _my_y;
-	int _my_z;
-	int _other_session_id;
-	int _other_x;
-	int _other_y;
-	int _other_z;
+	int32 _my_session_id;
+	float _my_x;
+	float _my_y;
+	float _my_z;
+	int32 _other_session_id;
+	float _other_x;
+	float _other_y;
+	float _other_z;
 
-	// ?§Ìè∞?úÌÇ¨ ?§Î•∏ Ï∫êÎ¶≠??
-	UPROPERTY(EditAnywhere, Category = "Spawning")
-	TSubclassOf<class ACharacter> WhoToSpawn;
+	//UPROPERTY(EditAnywhere, Category = "Spawning")
+	//TSubclassOf<class AMyCharacter> WhoToSpawn;
 
 protected:
 	bool bNewPlayerEntered;

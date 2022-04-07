@@ -59,7 +59,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		float y = packet->y;
 		float z = packet->z;
 
-		MYLOG(Warning, TEXT("x: %f, y: %f, z: %f"), x, y, z);
+		MYLOG(Warning, TEXT("i'm player%d init spawn : (%f, %f, %f)"), id, x, y, z);
 
 	}
 	break;
@@ -73,14 +73,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
-		int s_id = packet->s_id;
+		int id = packet->s_id;
 		float x = packet->x;
 		float y = packet->y;
 		float z = packet->z;
 		ReadyToSend_ChatPacket(packet->s_id, x, y, z);
 
-		MYLOG(Warning, TEXT("x: %f, y: %f, z: %f"), x, y, z);
-
+		PlayerController->RecvNewPlayer(id, x, y, z);
 		//PlayerController->UpdateNewPlayer(packet->s_id, x, y, z);
 
 		break;
@@ -93,8 +92,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		float x = packet->x;
 		float y = packet->y;
 		float z = packet->z;
-
-		//PlayerController->RecvNewPlayer(id, x, y, z);
 
 		break;
 	}
@@ -165,6 +162,8 @@ void ClientSocket::ReadyToSend_MovePacket(int sessionID, float x, float y, float
 		packet.z = z;
 
 		size_t sent = 0;
+		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		packet.move_time = millisec_since_epoch;
 		SendPacket(&packet);
 	}
 };
@@ -264,9 +263,6 @@ uint32 ClientSocket::Run()
 			break;
 		}
 		case OP_SEND: {
-
-			MYLOG(Warning, TEXT("test"));
-
 			if (num_byte != exp_over->_wsa_buf.len) {
 				//Disconnect();
 			}

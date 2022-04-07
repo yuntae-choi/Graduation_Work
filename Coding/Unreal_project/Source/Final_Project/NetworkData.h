@@ -9,6 +9,8 @@
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <map>
+#include <vector>
+#include <chrono>
 
 #include "Final_Project.h"
 
@@ -16,6 +18,11 @@
 #define SERVER_PORT		8000
 #define SERVER_IP		"127.0.0.1"
 #define MAX_CLIENTS		100
+
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
 
 const int  MAX_NAME_SIZE = 20;
 const int  MAX_CHAT_SIZE = 100;
@@ -70,7 +77,7 @@ struct cs_packet_move {
 	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
 	int sessionID;
 	float x, y, z;
-	int		move_time;
+	long long move_time;
 };
 
 struct cs_packet_attack {
@@ -111,7 +118,7 @@ struct sc_packet_move {
 	char type;
 	int		id;
 	short  x, y;
-	int		move_time;
+	char move_time[MAX_CHAT_SIZE];
 };
 
 struct sc_packet_put_object {

@@ -29,7 +29,6 @@ AMyPlayerController::AMyPlayerController()
 
 void AMyPlayerController::BeginPlay()
 {
-
 	//Super::BeginPlay(); //게임 종료가 안됨
 
 	/*auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
@@ -38,6 +37,8 @@ void AMyPlayerController::BeginPlay()
 	_session_Id = &m_Player->_SessionId;
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();*/
+
+
 	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!m_Player)
 		return;
@@ -49,12 +50,10 @@ void AMyPlayerController::BeginPlay()
 	_cs->StartListen();
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
-
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-
 	_cs->CloseSocket();
 	_cs->StopListen();
 	//Super::EndPlay(EndPlayReason);
@@ -86,21 +85,22 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 
 }
 
-void AMyPlayerController::UpdatePlayerS_id(int _s_id)
+void AMyPlayerController::UpdatePlayerS_id(int id)
 {
-	_my_session_id = _s_id;
+	_my_session_id = id;
 	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!m_Player)
 		return;
-	m_Player->iSessionID = _s_id;
-
-	
-
+	m_Player->iSessionID = id;
+	m_Player->SetActorLocationAndRotation(FVector(id * 100.0f, id * 100.0f, m_Player->GetActorLocation().Z), FRotator(0.0f, -90.0f, 0.0f));
 }
 
 void AMyPlayerController::RecvNewPlayer(int sessionID, float x, float y, float z)
 {
-	MYLOG(Warning, TEXT("recv"));
+	MYLOG(Warning, TEXT("recv ok player%d : %f, %f, %f"), sessionID, x, y, z);
+
+	UWorld* World = GetWorld();
+
 	bNewPlayerEntered = true;
 	_other_session_id = sessionID;
 	_other_x = x;
@@ -110,7 +110,7 @@ void AMyPlayerController::RecvNewPlayer(int sessionID, float x, float y, float z
 
 void AMyPlayerController::UpdateNewPlayer()
 {
-	UWorld* const world = GetWorld();
+	UWorld* const World = GetWorld();
 
 	// 새로운 플레이어가 자기 자신이면 무시
 	if (_other_session_id == _my_session_id)
@@ -121,93 +121,37 @@ void AMyPlayerController::UpdateNewPlayer()
 
 	bNewPlayerEntered = true;
 
-
 	// 새로운 플레이어를 필드에 스폰
 	FVector SpawnLocation_;
 	SpawnLocation_.X = _other_x;
 	SpawnLocation_.Y = _other_y;
 	SpawnLocation_.Z = _other_z;
 
-	//FRotator SpawnRotation;
-	//SpawnRotation.Yaw = NewPlayer->Yaw;
-	//SpawnRotation.Pitch = NewPlayer->Pitch;
-	//SpawnRotation.Roll = NewPlayer->Roll;
+	FRotator SpawnRotation;
+	SpawnRotation.Yaw = 0.0f;
+	SpawnRotation.Pitch = 0.0f;
+	SpawnRotation.Roll = 0.0f;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = GetInstigator();
-	SpawnParams.Name = FName(*FString(to_string(_other_session_id).c_str()));
+	//SpawnParams.Name = FName(*FString(to_string(_other_session_id).c_str()));
 
-	AMyCharacter* SpawnCharacter = world->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, FRotator::ZeroRotator, SpawnParams);
-	SpawnCharacter->SpawnDefaultController();
-	SpawnCharacter->iSessionID = _other_session_id;
-	//SpawnCharacter->HealthValue = NewPlayer->HealthValue;
+	TSubclassOf<class AMyCharacter> WhoToSpawn;
+	WhoToSpawn = AMyCharacter::StaticClass();
+	AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 
-	//// 필드의 플레이어 정보에 추가
-	//if (CharactersInfo != nullptr)
-	//{
-	//	cCharacter player;
-	//	player.SessionId = NewPlayer->SessionId;
-	//	player.X = NewPlayer->X;
-	//	player.Y = NewPlayer->Y;
-	//	player.Z = NewPlayer->Z;
-
-	//	player.Yaw = NewPlayer->Yaw;
-	//	player.Pitch = NewPlayer->Pitch;
-	//	player.Roll = NewPlayer->Roll;
-
-	//	player.VX = NewPlayer->VX;
-	//	player.VY = NewPlayer->VY;
-	//	player.VZ = NewPlayer->VZ;
-
-	//	player.IsAlive = NewPlayer->IsAlive;
-	//	player.HealthValue = NewPlayer->HealthValue;
-	//	player.IsAttacking = NewPlayer->IsAttacking;
-
-	//	CharactersInfo->players[NewPlayer->SessionId] = player;
-	//	}
-
-	bNewPlayerEntered = false;
-}
-
-
-
-void AMyPlayerController::UpdateNewPlayer(int new_s_id,float new_x, float new_y, float new_z)
-{
-	UWorld* const world = GetWorld();
-
-	// 새로운 플레이어가 자기 자신이면 무시
-	if (new_s_id == _my_session_id)
+	if (nullptr == SpawnCharacter)
 	{
-		bNewPlayerEntered = false;
-		
+		MYLOG(Warning, TEXT("spawn fail"));
 		return;
 	}
-	bNewPlayerEntered = true;
+	MYLOG(Warning, TEXT("spawn ok player%d : %f, %f, %f"), _other_session_id, _other_x, _other_y, _other_z);
 
-	// 새로운 플레이어를 필드에 스폰
-	FVector SpawnLocation_;
-	SpawnLocation_.X = new_x;
-	SpawnLocation_.Y = new_y;
-	SpawnLocation_.Z = new_z;
-
-	
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
-	//SpawnParams.Name = FName(*FString(to_string(NewPlayer->SessionId).c_str()));
-	
-	AMyCharacter* SpawnCharacter = world->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, FRotator::ZeroRotator, SpawnParams);
-	//SpawnCharacter->SpawnDefaultController();
-	SpawnCharacter->iSessionID = new_s_id;
-
-	
-
-	UE_LOG(LogClass, Log, TEXT("other player spawned."));
+	SpawnCharacter->SpawnDefaultController();
+	SpawnCharacter->iSessionID = _other_session_id;
 
 	bNewPlayerEntered = false;
-	
-
 }
 
 //void AMyPlayerController::UpdateRotation()

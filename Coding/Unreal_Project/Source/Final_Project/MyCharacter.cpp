@@ -70,7 +70,7 @@ AMyCharacter::AMyCharacter()
 	//ProjectileClass = AMySnow::StaticClass();
 	ProjectileClass = AMySnowball::StaticClass();
 
-	Snowball = NULL;
+	Snowball = nullptr;
 	iSessionID = 0;
 	fMaxHP = 120.0f;
 	fCurrentHP = fMaxHP;
@@ -122,20 +122,21 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 bool AMyCharacter::CanSetItem()
 {
-	return (nullptr == CurrentItem);
+	//return (nullptr == CurrentItem);
+	return 0;
 }
 
 void AMyCharacter::SetItem(AMyItem* NewItem)
 {
-	MYCHECK(nullptr != NewItem && nullptr == CurrentItem);
-	FName ItemSocket(TEXT("hand_rSocket"));
-	auto CurItem = GetWorld()->SpawnActor<AMyItem>(FVector::ZeroVector, FRotator::ZeroRotator);
-	if (nullptr != NewItem)
-	{
-		NewItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemSocket);
-		NewItem->SetOwner(this);
-		CurrentItem = NewItem;
-	}
+	//MYCHECK(nullptr != NewItem && nullptr == CurrentItem);
+	//FName ItemSocket(TEXT("hand_rSocket"));
+	//auto CurItem = GetWorld()->SpawnActor<AMyItem>(FVector::ZeroVector, FRotator::ZeroRotator);
+	//if (nullptr != NewItem)
+	//{
+	//	NewItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemSocket);
+	//	NewItem->SetOwner(this);
+	//	CurrentItem = NewItem;
+	//}
 }
 
 void AMyCharacter::UpDown(float NewAxisValue)
@@ -195,6 +196,32 @@ void AMyCharacter::Attack()
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 			Snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
 			Snowball->fAttack = fAttack;
+
+
+			//FVector SpawnLocation_;
+			//SpawnLocation_.X = GetActorLocation().X + 200.0f;
+			//SpawnLocation_.Y = GetActorLocation().Y + 200.0f;
+			//SpawnLocation_.Z = GetActorLocation().Z;
+
+			//FRotator SpawnRotation;
+			//SpawnRotation.Yaw = 0.0f;
+			//SpawnRotation.Pitch = 0.0f;
+			//SpawnRotation.Roll = 0.0f;
+
+			////FActorSpawnParameters SpawnParams;
+			////SpawnParams.Owner = this;
+			////SpawnParams.Instigator = GetInstigator();
+			////SpawnParams.Name = FName(*FString(to_string(_other_session_id).c_str()));
+
+			//TSubclassOf<class AMyCharacter> WhoToSpawn;
+			//WhoToSpawn = AMyCharacter::StaticClass();
+			//AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
+
+			//if (nullptr == SpawnCharacter)
+			//{
+			//	MYLOG(Warning, TEXT("spawn fail"));
+			//	return;
+			//}
 		}
 	}
 }
