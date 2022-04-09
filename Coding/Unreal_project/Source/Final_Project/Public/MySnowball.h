@@ -34,9 +34,6 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 	UStaticMeshComponent* meshComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-	UMaterialInstanceDynamic* materialInstance;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 	float fAttack;
 };

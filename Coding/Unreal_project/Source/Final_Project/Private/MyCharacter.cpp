@@ -308,6 +308,7 @@ void AMyCharacter::SetDamage(float NewDamage)
 		fCurrentHP = 0.0f;
 		myAnim->SetDead();
 		GetMesh()->SetSkeletalMesh(snowman);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetAnimInstanceClass(snowmanAnim);
 	}
 }

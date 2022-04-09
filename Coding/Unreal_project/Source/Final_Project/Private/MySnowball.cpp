@@ -25,14 +25,6 @@ AMySnowball::AMySnowball()
 			meshComponent->SetUseCCD(true);
 			RootComponent = meshComponent;
 		}
-
-		static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("/Game/Materials/Mat_Original_Snow.Mat_Original_Snow"));
-		if (Material.Succeeded())
-		{
-			materialInstance = UMaterialInstanceDynamic::Create(Material.Object, meshComponent);
-		}
-		meshComponent->SetMaterial(0, materialInstance);
-		meshComponent->SetupAttachment(RootComponent);
 	}
 }
 
