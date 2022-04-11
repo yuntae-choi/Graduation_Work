@@ -72,8 +72,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iSessionID;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	float fMaxHP;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
+	static const float fMaxHP;	// 모든 캐릭터 동일 & 변경될 일 x
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
+	static const float fMinHP;	// 모든 캐릭터 동일 & 변경될 일 x
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	float fCurrentHP;

@@ -7,6 +7,9 @@
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
 
+const float AMyCharacter::fMaxHP = 39.0f;
+const float AMyCharacter::fMinHP = 27.0f;
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -75,9 +78,8 @@ AMyCharacter::AMyCharacter()
 
 	snowball = nullptr;
 	iSessionID = 0;
-	fMaxHP = 120.0f;
 	fCurrentHP = fMaxHP;
-	fAttack = 10.0f;
+	fAttack = 1.0f;
 	iMaxSnowballCount = 3;
 	iCurrentSnowballCount = 0; 
 	iPlusMaxSnowballCountByABag = 2;
@@ -101,10 +103,6 @@ void AMyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	UpdateFarming(DeltaTime);
-
-	FVector cameraLocation;
-	FRotator cameraRotation;
-	GetActorEyesViewPoint(cameraLocation, cameraRotation);
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -211,46 +209,6 @@ void AMyCharacter::Attack()
 		}
 	}
 }
-//void AMyCharacter::Attack()
-//{
-//	if (isAttacking) return;
-//
-//
-//	myAnim->PlayAttackMontage();
-//	isAttacking = true;
-//
-//	// Attempt to fire a projectile.
-//	if (projectileClass)
-//	{
-//		// Get the camera transform.
-//		FVector CameraLocation;
-//		FRotator CameraRotation;
-//		GetActorEyesViewPoint(CameraLocation, CameraRotation);
-//
-//		// Set MuzzleOffset to spawn projectiles slightly in front of the camera.
-//		MuzzleOffset.Set(100.0f, 50.0f, -100.0f);
-//
-//		FVector MuzzleLocation = CameraLocation+FTransform(CameraRotation).TransformVector(MuzzleOffset);
-//		FRotator MuzzleRotation = CameraRotation;
-//
-//		MuzzleRotation.Pitch += 10.0f; 
-//		UWorld* World = GetWorld();
-//
-//		if (World)
-//		{
-//			FActorSpawnParameters SpawnParams;
-//			SpawnParams.Owner = this; 
-//			SpawnParams.Instigator = GetInstigator();
-//			AMySnow* Projectile = World->SpawnActor<AMySnow>(projectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-//			if (Projectile)
-//			{
-//				FVector LaunchDirection = MuzzleRotation.Vector(); 
-//				Projectile->FireInDirection(LaunchDirection);
-//				Projectile->SetAttack(CharacterStat->GetAttack());
-//			}
-//		}
-//	}
-//}
 
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
@@ -301,7 +259,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 void AMyCharacter::SetDamage(float NewDamage)
 {
 	//SetHP(FMath::Clamp<float>(fCurrentHP - NewDamage, 0.0f, fMaxHP));
-	fCurrentHP = FMath::Clamp<float>(fCurrentHP - NewDamage, 0.0f, fMaxHP);
+	fCurrentHP = FMath::Clamp<float>(fCurrentHP - NewDamage, fMinHP, fMaxHP);
 	//OnHPChanged.Broadcast();
 	if (fCurrentHP < KINDA_SMALL_NUMBER)
 	{
