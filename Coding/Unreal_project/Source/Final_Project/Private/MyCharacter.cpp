@@ -103,6 +103,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	UpdateFarming(DeltaTime);
+	UpdateHP();
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -219,7 +220,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	SetDamage(FinalDamage);
+	fCurrentHP = FMath::Clamp<float>(fCurrentHP - FinalDamage, fMinHP, fMaxHP);
 
 	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %f"), *GetName(), FinalDamage, fCurrentHP);
 
@@ -254,21 +255,6 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	//{
 	//	MYLOG(Warning, TEXT("snowball hit."));
 	//}
-}
-
-void AMyCharacter::SetDamage(float NewDamage)
-{
-	//SetHP(FMath::Clamp<float>(fCurrentHP - NewDamage, 0.0f, fMaxHP));
-	fCurrentHP = FMath::Clamp<float>(fCurrentHP - NewDamage, fMinHP, fMaxHP);
-	//OnHPChanged.Broadcast();
-	if (fCurrentHP < KINDA_SMALL_NUMBER)
-	{
-		fCurrentHP = 0.0f;
-		myAnim->SetDead();
-		GetMesh()->SetSkeletalMesh(snowman);
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		GetMesh()->SetAnimInstanceClass(snowmanAnim);
-	}
 }
 
 void AMyCharacter::StartFarming()
@@ -321,4 +307,21 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 			}
 		}
 	}
+}
+
+void AMyCharacter::UpdateHP()
+{
+	if (fCurrentHP < fMinHP + KINDA_SMALL_NUMBER)
+	{
+		ChangeSnowman();
+	}
+}
+
+void AMyCharacter::ChangeSnowman()
+{
+	fCurrentHP = fMinHP;
+	myAnim->SetDead();
+	GetMesh()->SetSkeletalMesh(snowman);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetAnimInstanceClass(snowmanAnim);
 }

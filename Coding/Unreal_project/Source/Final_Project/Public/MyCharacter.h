@@ -29,7 +29,6 @@ public:
 
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
-	void SetDamage(float newDamage);
 	void SetIsFarming(bool value) { bIsFarming = value; };
 	void SetCanFarmItem(AActor* item) { farmingItem = item; };
 
@@ -50,6 +49,8 @@ private:
 	void StartFarming();
 	void EndFarming();
 	void UpdateFarming(float deltaTime);
+	void UpdateHP();
+	void ChangeSnowman();
 
 public:	
 
@@ -72,11 +73,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iSessionID;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
-	static const float fMaxHP;	// 모든 캐릭터 동일 & 변경될 일 x
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
-	static const float fMinHP;	// 모든 캐릭터 동일 & 변경될 일 x
+	// 모든 캐릭터 동일 & 변경될 일 x
+	static const float fMaxHP;
+	static const float fMinHP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	float fCurrentHP;
