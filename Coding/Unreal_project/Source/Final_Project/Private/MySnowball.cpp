@@ -26,6 +26,8 @@ AMySnowball::AMySnowball()
 			RootComponent = meshComponent;
 		}
 	}
+
+	fDamage = 1.0f;
 }
 
 // Called when the game starts or when spawned
@@ -69,7 +71,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	if (nullptr != MyCharacter)
 	{
 		FDamageEvent DamageEvent;
-		MyCharacter->TakeDamage(fAttack, DamageEvent, false, this);
+		MyCharacter->TakeDamage(fDamage, DamageEvent, false, this);
 	}
 
 	Destroy();

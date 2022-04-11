@@ -4,7 +4,6 @@
 
 #include "Final_Project.h"
 #include "GameFramework/Character.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "MySnowball.h"
 #include "MyCharacter.generated.h"
 
@@ -79,9 +78,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	float fCurrentHP;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	float fAttack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iMaxSnowballCount;

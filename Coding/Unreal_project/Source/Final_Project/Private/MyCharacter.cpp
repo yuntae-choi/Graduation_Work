@@ -79,7 +79,6 @@ AMyCharacter::AMyCharacter()
 	snowball = nullptr;
 	iSessionID = 0;
 	fCurrentHP = fMaxHP;
-	fAttack = 1.0f;
 	iMaxSnowballCount = 3;
 	iCurrentSnowballCount = 0; 
 	iPlusMaxSnowballCountByABag = 2;
@@ -87,7 +86,7 @@ AMyCharacter::AMyCharacter()
 	bHasBag = false;
 	iMaxMatchCount = 3;
 	iCurrentMatchCount = 0;
-	farmingItem = NULL;
+	farmingItem = nullptr;
 	bIsFarming = false;
 }
 
@@ -206,7 +205,6 @@ void AMyCharacter::Attack()
 			FAttachmentTransformRules atr = FAttachmentTransformRules(
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 			snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
-			snowball->fAttack = fAttack;
 		}
 	}
 }
@@ -241,7 +239,7 @@ void AMyCharacter::ReleaseSnowball()
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
 
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
-			snowball = NULL;
+			snowball = nullptr;
 		}
 
 	}
