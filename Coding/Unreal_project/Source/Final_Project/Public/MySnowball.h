@@ -25,7 +25,7 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
-	float GetDamage() { return fDamage; };
+	int GetDamage() { return iDamage; };
 
 protected:
 	// Called when the game starts or when spawned
@@ -38,5 +38,5 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)
-	float fDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
+	int iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
 };
