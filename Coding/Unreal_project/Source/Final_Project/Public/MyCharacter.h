@@ -4,7 +4,6 @@
 
 #include "Final_Project.h"
 #include "GameFramework/Character.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "MySnowball.h"
 #include "MyCharacter.generated.h"
 
@@ -29,9 +28,13 @@ public:
 
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
-	void SetDamage(float newDamage);
 	void SetIsFarming(bool value) { bIsFarming = value; };
 	void SetCanFarmItem(AActor* item) { farmingItem = item; };
+
+	bool GetIsInsideOfBonfire() { return bIsInsideOfBonfire; };
+	void SetIsInsideOfBonfire(bool value) { bIsInsideOfBonfire = value; };
+	void UpdateTemperatureState();
+	//void UpdateTemperatureByMatch();
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,6 +53,9 @@ private:
 	void StartFarming();
 	void EndFarming();
 	void UpdateFarming(float deltaTime);
+	void UpdateHP();
+	void ChangeSnowman();
+	void WaitForStartGame();
 
 public:	
 
@@ -72,14 +78,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iSessionID;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	float fMaxHP;
+	// 모든 캐릭터 동일 & 변경될 일 x
+	static const int iMaxHP;
+	static const int iMinHP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	float fCurrentHP;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	float fAttack;
+	int32 iCurrentHP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iMaxSnowballCount;
@@ -132,4 +136,16 @@ private:
 	// 현재 파밍중인지
 	UPROPERTY(VisibleAnywhere, Category = Farm)
 	bool bIsFarming;
+
+	// 현재 모닥불 내부인지 외부인지
+	UPROPERTY(VisibleAnywhere, Category = Temperature)
+	bool bIsInsideOfBonfire;
+
+	// 초당 체온 증감시키는 타이머 핸들러
+	FTimerHandle temperatureHandle;
+
+	//UPROPERTY(VisibleAnywhere, Category = Temperature)
+	//float fMatchDuration;	// 후에 성냥 클래스 생성하면 성냥 클래스 변수로 옮기기
+
+	//bool match;
 };

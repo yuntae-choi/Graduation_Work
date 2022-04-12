@@ -25,6 +25,8 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
+	int GetDamage() { return iDamage; };
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -34,6 +36,7 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 	UStaticMeshComponent* meshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
-	float fAttack;
+private:
+	UPROPERTY(VisibleAnywhere, Category = Projectile)
+	int iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
 };

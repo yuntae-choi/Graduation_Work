@@ -7,6 +7,9 @@
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
 
+const int AMyCharacter::iMaxHP = 390;
+const int AMyCharacter::iMinHP = 270;
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -75,9 +78,7 @@ AMyCharacter::AMyCharacter()
 
 	snowball = nullptr;
 	iSessionID = 0;
-	fMaxHP = 120.0f;
-	fCurrentHP = fMaxHP;
-	fAttack = 10.0f;
+	iCurrentHP = iMaxHP;
 	iMaxSnowballCount = 3;
 	iCurrentSnowballCount = 0; 
 	iPlusMaxSnowballCountByABag = 2;
@@ -85,14 +86,20 @@ AMyCharacter::AMyCharacter()
 	bHasBag = false;
 	iMaxMatchCount = 3;
 	iCurrentMatchCount = 0;
-	farmingItem = NULL;
+	farmingItem = nullptr;
 	bIsFarming = false;
+	bIsInsideOfBonfire = false;	// 초기값 : true로 설정해야함,  캐릭터 초기 생성위치 모닥불 내부여야 함
+
+	//fMatchDuration = 3.0f;
+	//match = true;
 }
 
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	WaitForStartGame();
 }
 
 // Called every frame
@@ -101,10 +108,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	UpdateFarming(DeltaTime);
-
-	FVector cameraLocation;
-	FRotator cameraRotation;
-	GetActorEyesViewPoint(cameraLocation, cameraRotation);
+	UpdateHP();
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -207,50 +211,9 @@ void AMyCharacter::Attack()
 			FAttachmentTransformRules atr = FAttachmentTransformRules(
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 			snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
-			snowball->fAttack = fAttack;
 		}
 	}
 }
-//void AMyCharacter::Attack()
-//{
-//	if (isAttacking) return;
-//
-//
-//	myAnim->PlayAttackMontage();
-//	isAttacking = true;
-//
-//	// Attempt to fire a projectile.
-//	if (projectileClass)
-//	{
-//		// Get the camera transform.
-//		FVector CameraLocation;
-//		FRotator CameraRotation;
-//		GetActorEyesViewPoint(CameraLocation, CameraRotation);
-//
-//		// Set MuzzleOffset to spawn projectiles slightly in front of the camera.
-//		MuzzleOffset.Set(100.0f, 50.0f, -100.0f);
-//
-//		FVector MuzzleLocation = CameraLocation+FTransform(CameraRotation).TransformVector(MuzzleOffset);
-//		FRotator MuzzleRotation = CameraRotation;
-//
-//		MuzzleRotation.Pitch += 10.0f; 
-//		UWorld* World = GetWorld();
-//
-//		if (World)
-//		{
-//			FActorSpawnParameters SpawnParams;
-//			SpawnParams.Owner = this; 
-//			SpawnParams.Instigator = GetInstigator();
-//			AMySnow* Projectile = World->SpawnActor<AMySnow>(projectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-//			if (Projectile)
-//			{
-//				FVector LaunchDirection = MuzzleRotation.Vector(); 
-//				Projectile->FireInDirection(LaunchDirection);
-//				Projectile->SetAttack(CharacterStat->GetAttack());
-//			}
-//		}
-//	}
-//}
 
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
@@ -261,9 +224,9 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	SetDamage(FinalDamage);
+	iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
 
-	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %f"), *GetName(), FinalDamage, fCurrentHP);
+	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
 
 	return FinalDamage;
 }
@@ -282,7 +245,7 @@ void AMyCharacter::ReleaseSnowball()
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
 
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
-			snowball = NULL;
+			snowball = nullptr;
 		}
 
 	}
@@ -296,21 +259,6 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	//{
 	//	MYLOG(Warning, TEXT("snowball hit."));
 	//}
-}
-
-void AMyCharacter::SetDamage(float NewDamage)
-{
-	//SetHP(FMath::Clamp<float>(fCurrentHP - NewDamage, 0.0f, fMaxHP));
-	fCurrentHP = FMath::Clamp<float>(fCurrentHP - NewDamage, 0.0f, fMaxHP);
-	//OnHPChanged.Broadcast();
-	if (fCurrentHP < KINDA_SMALL_NUMBER)
-	{
-		fCurrentHP = 0.0f;
-		myAnim->SetDead();
-		GetMesh()->SetSkeletalMesh(snowman);
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		GetMesh()->SetAnimInstanceClass(snowmanAnim);
-	}
 }
 
 void AMyCharacter::StartFarming()
@@ -364,3 +312,71 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 		}
 	}
 }
+
+void AMyCharacter::UpdateHP()
+{
+	if (iCurrentHP <= iMinHP)
+	{
+		ChangeSnowman();
+	}
+}
+
+void AMyCharacter::ChangeSnowman()
+{
+	iCurrentHP = iMinHP;
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
+	myAnim->SetDead();
+	GetMesh()->SetSkeletalMesh(snowman);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetAnimInstanceClass(snowmanAnim);
+}
+
+void AMyCharacter::WaitForStartGame()
+{
+	//Delay 함수
+	FTimerHandle WaitHandle;
+	float WaitTime = 3.0f;
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			UpdateTemperatureState();
+		}), WaitTime, false);
+}
+
+void AMyCharacter::UpdateTemperatureState()
+{
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+	//if (match)
+	//{
+	//	GetWorldTimerManager().SetTimer(temperatureHandle, this, &AMyCharacter::UpdateTemperatureByMatch, 1.0f, true);
+	//}
+	//else
+	//{
+		if (bIsInsideOfBonfire)
+		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP += 10;
+				}), 1.0f, true);
+		}
+		else
+		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP -= 1;
+				}), 1.0f, true);
+		}
+	//}
+}
+
+//void AMyCharacter::UpdateTemperatureByMatch()
+//{
+//	fMatchDuration -= 1.0f;
+//	iCurrentHP += 1.0f;
+//
+//	if (fMatchDuration <= 0.0f)
+//	{
+//		match = false;
+//		fMatchDuration = 3.0f;
+//		UpdateTemperatureState();
+//	}
+//}

@@ -66,6 +66,7 @@ void ASnowdrift::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp
 	AMyCharacter* mycharacter = Cast<AMyCharacter>(OtherActor);
 	if (mycharacter)
 	{
-		mycharacter->SetCanFarmItem(NULL);
+		mycharacter->SetCanFarmItem(nullptr);
+		mycharacter->SetIsFarming(false);
 	}
 }

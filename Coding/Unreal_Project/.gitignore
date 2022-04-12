@@ -10,4 +10,6 @@ Saved/*
 *.pdb
 *.idb
 
+Content/Map/map1.umap
 Content/Map/tmp_map.umap
+Content/Map/DevelopSH.umap
