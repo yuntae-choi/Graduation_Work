@@ -83,7 +83,6 @@ AMyCharacter::AMyCharacter()
 	iCurrentHP = iMaxHP;
 	iMaxSnowballCount = 3;
 	iCurrentSnowballCount = 0; 
-	iPlusMaxSnowballCountByABag = 2;
 	bHasUmbrella = false;
 	bHasBag = false;
 	iMaxMatchCount = 3;
@@ -271,11 +270,49 @@ void AMyCharacter::StartFarming()
 {
 	if (IsValid(farmingItem))
 	{
-		ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
-		if (snowdrift)
+		if (Cast<ASnowdrift>(farmingItem))
 		{
 			bIsFarming = true;
 		}
+		else if (Cast<AItembox>(farmingItem))
+		{
+			AItembox* itembox = Cast<AItembox>(farmingItem);
+			switch (itembox->GetItemboxState())
+			{
+			case ItemboxState::Closed:
+				itembox->SetItemboxState(ItemboxState::Opening);
+				break;
+			case ItemboxState::Opened:
+				// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
+				if (GetItem(itembox->GetItemType())) { itembox->DeleteItem(); }
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+bool AMyCharacter::GetItem(int itemType)
+{
+	switch (itemType) {
+	case ItemTypeList::Match:
+		return true;
+		break;
+	case ItemTypeList::Umbrella:
+		if (bHasUmbrella) return false;	// 우산을 소유 중이면 우산 파밍 못하도록
+		bHasUmbrella = true;
+		return true;
+		break;
+	case ItemTypeList::Bag:
+		if (bHasBag) return false;	// 가방을 소유 중이면 가방 파밍 못하도록
+		bHasBag = true;
+		// 눈덩이 최대 보유량 증가 (성냥도 증가하도록?)
+		return true;
+		break;
+	default:
+		return false;
+		break;
 	}
 }
 
@@ -283,9 +320,9 @@ void AMyCharacter::EndFarming()
 {
 	if (IsValid(farmingItem))
 	{
-		ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
-		if (snowdrift)
+		if (Cast<ASnowdrift>(farmingItem))
 		{	// F키로 눈 무더기 파밍 중 F키 release 시 눈 무더기 duration 초기화
+			ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
 			snowdrift->SetFarmDuration(ASnowdrift::fFarmDurationMax);
 			bIsFarming = false;
 		}

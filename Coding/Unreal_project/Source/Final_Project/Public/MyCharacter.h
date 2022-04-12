@@ -5,6 +5,7 @@
 #include "Final_Project.h"
 #include "GameFramework/Character.h"
 #include "MySnowball.h"
+#include "Itembox.h"
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -62,6 +63,7 @@ private:
 	void UpdateHP();
 	void ChangeSnowman();
 	void WaitForStartGame();
+	bool GetItem(int itemType);
 
 public:	
 
@@ -96,9 +98,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iCurrentSnowballCount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	int32 iPlusMaxSnowballCountByABag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bHasUmbrella;
