@@ -43,6 +43,7 @@ void ABonfire::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp
 	if (mycharacter)
 	{
 		mycharacter->SetIsInsideOfBonfire(true);
+		mycharacter->UpdateTemperatureState();
 	}
 }
 
@@ -52,5 +53,6 @@ void ABonfire::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 	if (mycharacter)
 	{
 		mycharacter->SetIsInsideOfBonfire(false);
+		mycharacter->UpdateTemperatureState();
 	}
 }

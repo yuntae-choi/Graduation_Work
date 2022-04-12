@@ -7,6 +7,10 @@
 #include "MySnowball.h"
 #include "MyCharacter.generated.h"
 
+enum CharacterState {
+	Normal, Slow, Snowman
+};
+
 UCLASS()
 class FINAL_PROJECT_API AMyCharacter : public ACharacter
 {
@@ -35,6 +39,8 @@ public:
 	void SetIsInsideOfBonfire(bool value) { bIsInsideOfBonfire = value; };
 	void UpdateTemperatureState();
 	//void UpdateTemperatureByMatch();
+	void UpdateSpeed();
+	int GetCharacterState() { return iCharacterState; };
 
 protected:
 	virtual void BeginPlay() override;
@@ -138,7 +144,7 @@ private:
 	bool bIsFarming;
 
 	// 현재 모닥불 내부인지 외부인지
-	UPROPERTY(VisibleAnywhere, Category = Temperature)
+	UPROPERTY(VisibleAnywhere, Category = State)
 	bool bIsInsideOfBonfire;
 
 	// 초당 체온 증감시키는 타이머 핸들러
@@ -148,4 +154,7 @@ private:
 	//float fMatchDuration;	// 후에 성냥 클래스 생성하면 성냥 클래스 변수로 옮기기
 
 	//bool match;
+
+	UPROPERTY(VisibleAnywhere, Category = State)
+	int32 iCharacterState;
 };

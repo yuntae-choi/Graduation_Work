@@ -9,7 +9,9 @@
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
-
+const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
+const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
+const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -92,6 +94,9 @@ AMyCharacter::AMyCharacter()
 
 	//fMatchDuration = 3.0f;
 	//match = true;
+
+	iCharacterState = CharacterState::Normal;
+	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
 }
 
 // Called when the game starts or when spawned
@@ -99,7 +104,7 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	WaitForStartGame();
+	WaitForStartGame();	// 대기시간
 }
 
 // Called every frame
@@ -109,6 +114,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	
 	UpdateFarming(DeltaTime);
 	UpdateHP();
+	UpdateSpeed();
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -302,10 +308,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 				if (newFarmDuration <= 0)
 				{
 					iCurrentSnowballCount += 10;
-					if (iCurrentSnowballCount >= iMaxSnowballCount)
-					{
-						iCurrentSnowballCount = iMaxSnowballCount;
-					}
+					iCurrentSnowballCount = iCurrentSnowballCount > iMaxSnowballCount ? iMaxSnowballCount : iCurrentSnowballCount;
 					snowdrift->Destroy();
 				}
 			}
@@ -321,6 +324,30 @@ void AMyCharacter::UpdateHP()
 	}
 }
 
+void AMyCharacter::UpdateSpeed()
+{
+	switch (iCharacterState) {
+	case CharacterState::Normal:
+		if (iCurrentHP <= iBeginSlowHP)
+		{
+			iCharacterState = CharacterState::Slow;
+			GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;
+		}
+		break;
+	case CharacterState::Slow:
+		if (iCurrentHP > iBeginSlowHP)
+		{
+			iCharacterState = CharacterState::Normal;
+			GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
+		}
+		break;
+	case CharacterState::Snowman:
+		break;
+	default:
+		break;
+	}
+}
+
 void AMyCharacter::ChangeSnowman()
 {
 	iCurrentHP = iMinHP;
@@ -329,6 +356,8 @@ void AMyCharacter::ChangeSnowman()
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
+
+	GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;	// 눈사람의 이동속도는 슬로우 상태인 캐릭터와 동일하게 설정
 }
 
 void AMyCharacter::WaitForStartGame()
@@ -356,6 +385,7 @@ void AMyCharacter::UpdateTemperatureState()
 			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
 				{
 					iCurrentHP += 10;
+					iCurrentHP = iCurrentHP > iMaxHP ? iMaxHP : iCurrentHP;
 				}), 1.0f, true);
 		}
 		else
