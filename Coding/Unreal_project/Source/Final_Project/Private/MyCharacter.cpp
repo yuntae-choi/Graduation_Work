@@ -7,8 +7,8 @@
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
 
-const float AMyCharacter::fMaxHP = 39.0f;
-const float AMyCharacter::fMinHP = 27.0f;
+const int AMyCharacter::iMaxHP = 390;
+const int AMyCharacter::iMinHP = 270;
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -78,7 +78,7 @@ AMyCharacter::AMyCharacter()
 
 	snowball = nullptr;
 	iSessionID = 0;
-	fCurrentHP = fMaxHP;
+	iCurrentHP = iMaxHP;
 	iMaxSnowballCount = 3;
 	iCurrentSnowballCount = 0; 
 	iPlusMaxSnowballCountByABag = 2;
@@ -88,12 +88,18 @@ AMyCharacter::AMyCharacter()
 	iCurrentMatchCount = 0;
 	farmingItem = nullptr;
 	bIsFarming = false;
+	bIsInsideOfBonfire = false;	// 초기값 : true로 설정해야함,  캐릭터 초기 생성위치 모닥불 내부여야 함
+
+	//fMatchDuration = 3.0f;
+	//match = true;
 }
 
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	WaitForStartGame();
 }
 
 // Called every frame
@@ -218,9 +224,9 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	fCurrentHP = FMath::Clamp<float>(fCurrentHP - FinalDamage, fMinHP, fMaxHP);
+	iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
 
-	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %f"), *GetName(), FinalDamage, fCurrentHP);
+	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
 
 	return FinalDamage;
 }
@@ -309,7 +315,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 
 void AMyCharacter::UpdateHP()
 {
-	if (fCurrentHP < fMinHP + KINDA_SMALL_NUMBER)
+	if (iCurrentHP <= iMinHP)
 	{
 		ChangeSnowman();
 	}
@@ -317,9 +323,60 @@ void AMyCharacter::UpdateHP()
 
 void AMyCharacter::ChangeSnowman()
 {
-	fCurrentHP = fMinHP;
+	iCurrentHP = iMinHP;
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 	myAnim->SetDead();
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
 }
+
+void AMyCharacter::WaitForStartGame()
+{
+	//Delay 함수
+	FTimerHandle WaitHandle;
+	float WaitTime = 3.0f;
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			UpdateTemperatureState();
+		}), WaitTime, false);
+}
+
+void AMyCharacter::UpdateTemperatureState()
+{
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+	//if (match)
+	//{
+	//	GetWorldTimerManager().SetTimer(temperatureHandle, this, &AMyCharacter::UpdateTemperatureByMatch, 1.0f, true);
+	//}
+	//else
+	//{
+		if (bIsInsideOfBonfire)
+		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP += 10;
+				}), 1.0f, true);
+		}
+		else
+		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP -= 1;
+				}), 1.0f, true);
+		}
+	//}
+}
+
+//void AMyCharacter::UpdateTemperatureByMatch()
+//{
+//	fMatchDuration -= 1.0f;
+//	iCurrentHP += 1.0f;
+//
+//	if (fMatchDuration <= 0.0f)
+//	{
+//		match = false;
+//		fMatchDuration = 3.0f;
+//		UpdateTemperatureState();
+//	}
+//}
