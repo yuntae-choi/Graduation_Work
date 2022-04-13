@@ -403,6 +403,7 @@ void process_packet(int s_id, unsigned char* p)
 		
 		if (true == is_bonfire(cl._s_id))
 		{
+			cout << "모닥불 지역" << endl;
 			if (false == cl.is_bone) {
 				cl.is_bone = true;
 				player_heal(cl._s_id);
