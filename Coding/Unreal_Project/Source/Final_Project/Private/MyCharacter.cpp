@@ -204,6 +204,10 @@ void AMyCharacter::Attack()
 	// 디버깅용 - 실제는 주석 해제
 	//iSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
 
+
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	PlayerController->UpdatePlayerInfo(COMMAND_ATACK);
+
 	// Attempt to fire a projectile.
 	if (projectileClass)
 	{
