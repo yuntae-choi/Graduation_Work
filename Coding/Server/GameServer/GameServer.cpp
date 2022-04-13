@@ -94,7 +94,7 @@ int main()
 
 	vector <thread> worker_threads;
 
-	//thread timer_thread{ ev_timer };
+	thread timer_thread{ ev_timer };
 
 	// 시스템 정보 가져옴
 	SYSTEM_INFO sysInfo;
@@ -104,7 +104,7 @@ int main()
 	int nThreadCnt = sysInfo.dwNumberOfProcessors;
 	//int nThreadCnt = 5;
 
-	for (int i = 0; i < nThreadCnt; ++i)
+	for (int i = 0; i < 10; ++i)
 		worker_threads.emplace_back(worker_thread);
 
 	for (auto& th : worker_threads)
