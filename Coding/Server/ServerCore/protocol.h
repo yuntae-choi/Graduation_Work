@@ -26,7 +26,6 @@ const char SC_PACKET_CHAT = 5;
 const char SC_PACKET_LOGIN_FAIL = 6;
 const char SC_PACKET_STATUS_CHANGE = 7;
 const char SC_PACKET_DISCONNECT = 8;
-const char SC_PACKET_HP = 9;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -137,13 +136,6 @@ struct sc_packet_status_change {
 	short   state;
 	short	hp, maxhp;
 	bool ice[4]; // 사지분해
-};
-
-struct sc_packet_hp_change {
-	unsigned char size;
-	char type;
-	int target;
-	int	hp;
 };
 
 #pragma pack(pop)
