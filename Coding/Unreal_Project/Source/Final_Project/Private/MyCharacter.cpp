@@ -7,9 +7,11 @@
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
 
-const float AMyCharacter::fMaxHP = 39.0f;
-const float AMyCharacter::fMinHP = 27.0f;
-
+const int AMyCharacter::iMaxHP = 390;
+const int AMyCharacter::iMinHP = 270;
+const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
+const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
+const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -78,22 +80,30 @@ AMyCharacter::AMyCharacter()
 
 	snowball = nullptr;
 	iSessionID = 0;
-	fCurrentHP = fMaxHP;
+	iCurrentHP = iMaxHP;
 	iMaxSnowballCount = 3;
 	iCurrentSnowballCount = 0; 
-	iPlusMaxSnowballCountByABag = 2;
 	bHasUmbrella = false;
 	bHasBag = false;
 	iMaxMatchCount = 3;
 	iCurrentMatchCount = 0;
 	farmingItem = nullptr;
 	bIsFarming = false;
+	bIsInsideOfBonfire = false;	// 초기값 : true로 설정해야함,  캐릭터 초기 생성위치 모닥불 내부여야 함
+
+	//fMatchDuration = 3.0f;
+	//match = true;
+
+	iCharacterState = CharacterState::Normal;
+	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
 }
 
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	WaitForStartGame();	// 대기시간
 }
 
 // Called every frame
@@ -103,6 +113,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	
 	UpdateFarming(DeltaTime);
 	UpdateHP();
+	UpdateSpeed();
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -218,9 +229,9 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	fCurrentHP = FMath::Clamp<float>(fCurrentHP - FinalDamage, fMinHP, fMaxHP);
+	iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
 
-	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %f"), *GetName(), FinalDamage, fCurrentHP);
+	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
 
 	return FinalDamage;
 }
@@ -259,11 +270,49 @@ void AMyCharacter::StartFarming()
 {
 	if (IsValid(farmingItem))
 	{
-		ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
-		if (snowdrift)
+		if (Cast<ASnowdrift>(farmingItem))
 		{
 			bIsFarming = true;
 		}
+		else if (Cast<AItembox>(farmingItem))
+		{
+			AItembox* itembox = Cast<AItembox>(farmingItem);
+			switch (itembox->GetItemboxState())
+			{
+			case ItemboxState::Closed:
+				itembox->SetItemboxState(ItemboxState::Opening);
+				break;
+			case ItemboxState::Opened:
+				// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
+				if (GetItem(itembox->GetItemType())) { itembox->DeleteItem(); }
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+bool AMyCharacter::GetItem(int itemType)
+{
+	switch (itemType) {
+	case ItemTypeList::Match:
+		return true;
+		break;
+	case ItemTypeList::Umbrella:
+		if (bHasUmbrella) return false;	// 우산을 소유 중이면 우산 파밍 못하도록
+		bHasUmbrella = true;
+		return true;
+		break;
+	case ItemTypeList::Bag:
+		if (bHasBag) return false;	// 가방을 소유 중이면 가방 파밍 못하도록
+		bHasBag = true;
+		// 눈덩이 최대 보유량 증가 (성냥도 증가하도록?)
+		return true;
+		break;
+	default:
+		return false;
+		break;
 	}
 }
 
@@ -271,9 +320,9 @@ void AMyCharacter::EndFarming()
 {
 	if (IsValid(farmingItem))
 	{
-		ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
-		if (snowdrift)
+		if (Cast<ASnowdrift>(farmingItem))
 		{	// F키로 눈 무더기 파밍 중 F키 release 시 눈 무더기 duration 초기화
+			ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
 			snowdrift->SetFarmDuration(ASnowdrift::fFarmDurationMax);
 			bIsFarming = false;
 		}
@@ -296,10 +345,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 				if (newFarmDuration <= 0)
 				{
 					iCurrentSnowballCount += 10;
-					if (iCurrentSnowballCount >= iMaxSnowballCount)
-					{
-						iCurrentSnowballCount = iMaxSnowballCount;
-					}
+					iCurrentSnowballCount = iCurrentSnowballCount > iMaxSnowballCount ? iMaxSnowballCount : iCurrentSnowballCount;
 					snowdrift->Destroy();
 				}
 			}
@@ -309,17 +355,95 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 
 void AMyCharacter::UpdateHP()
 {
-	if (fCurrentHP < fMinHP + KINDA_SMALL_NUMBER)
+	if (iCurrentHP <= iMinHP)
 	{
 		ChangeSnowman();
 	}
 }
 
+void AMyCharacter::UpdateSpeed()
+{
+	switch (iCharacterState) {
+	case CharacterState::Normal:
+		if (iCurrentHP <= iBeginSlowHP)
+		{
+			iCharacterState = CharacterState::Slow;
+			GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;
+		}
+		break;
+	case CharacterState::Slow:
+		if (iCurrentHP > iBeginSlowHP)
+		{
+			iCharacterState = CharacterState::Normal;
+			GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
+		}
+		break;
+	case CharacterState::Snowman:
+		break;
+	default:
+		break;
+	}
+}
+
 void AMyCharacter::ChangeSnowman()
 {
-	fCurrentHP = fMinHP;
+	iCurrentHP = iMinHP;
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 	myAnim->SetDead();
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
+
+	GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;	// 눈사람의 이동속도는 슬로우 상태인 캐릭터와 동일하게 설정
 }
+
+void AMyCharacter::WaitForStartGame()
+{
+	//Delay 함수
+	FTimerHandle WaitHandle;
+	float WaitTime = 3.0f;
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			UpdateTemperatureState();
+		}), WaitTime, false);
+}
+
+void AMyCharacter::UpdateTemperatureState()
+{
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+	//if (match)
+	//{
+	//	GetWorldTimerManager().SetTimer(temperatureHandle, this, &AMyCharacter::UpdateTemperatureByMatch, 1.0f, true);
+	//}
+	//else
+	//{
+		if (bIsInsideOfBonfire)
+		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP += 10;
+					iCurrentHP = iCurrentHP > iMaxHP ? iMaxHP : iCurrentHP;
+				}), 1.0f, true);
+		}
+		else
+		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP -= 1;
+				}), 1.0f, true);
+		}
+	//}
+}
+
+//void AMyCharacter::UpdateTemperatureByMatch()
+//{
+//	fMatchDuration -= 1.0f;
+//	iCurrentHP += 1.0f;
+//
+//	if (fMatchDuration <= 0.0f)
+//	{
+//		match = false;
+//		fMatchDuration = 3.0f;
+//		UpdateTemperatureState();
+//	}
+//}
