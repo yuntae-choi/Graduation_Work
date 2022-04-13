@@ -206,7 +206,7 @@ void AMyCharacter::Attack()
 
 
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	PlayerController->UpdatePlayerInfo(COMMAND_ATACK);
+	PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
 
 	// Attempt to fire a projectile.
 	if (projectileClass)
