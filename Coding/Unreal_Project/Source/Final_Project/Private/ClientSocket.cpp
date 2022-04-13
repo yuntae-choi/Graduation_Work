@@ -96,18 +96,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		break;
 	}
 
-	case SC_PACKET_HP:
-	{
-		sc_packet_hp_change* packet = reinterpret_cast<sc_packet_hp_change*>(ptr);
-		int target = packet->target;
-		
-		//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
-		//clients[target].hp = packet->hp;
-
-
-	}
-
-
 	case SC_PACKET_REMOVE_OBJECT:
 	{
 

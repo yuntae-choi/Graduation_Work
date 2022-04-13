@@ -139,11 +139,11 @@ struct sc_packet_status_change {
 	bool ice[4]; // 사지분해
 };
 
+
 struct sc_packet_hp_change {
 	unsigned char size;
 	char type;
 	int target;
 	int	hp;
 };
-
 #pragma pack(pop)

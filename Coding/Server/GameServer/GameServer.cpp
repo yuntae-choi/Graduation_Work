@@ -35,25 +35,29 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 void process_packet(int _s_id, unsigned char* p);
 void worker_thread();
 void ev_timer();
-void player_heal(int s_id);
-bool is_bonfire(int a);
-void send_hp_packet(int _id, int target);
 
-//플레이어 이벤트 등록
-void Player_Event(int target, int player_id, COMMAND type)
+//이동
+void send_hp_packet(int _id, int target)
 {
-	Overlap* exp_over = new Overlap;
-	exp_over->_op = type;
-	exp_over->_target = player_id;
-	PostQueuedCompletionStatus(g_h_iocp, 1, target, &exp_over->_wsa_over);
+	sc_packet_hp_change packet;
+	packet.target = target;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_HP;
+	packet.hp = clients[target]._hp;
+	clients[_id].do_send(sizeof(packet), &packet);
 }
-//근처 객체 판별
-bool is_near(int a, int b)
+
+void player_heal(int s_id)
 {
-	if (RANGE < abs(clients[a].x - clients[b].x)) return false;
-	if (RANGE < abs(clients[a].y - clients[b].y)) return false;
-	return true;
+	Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
 }
+
+//플레이어 판별
+bool is_player(int id)
+{
+	return (id >= 0) && (id < MAX_USER);
+}
+
 //모닥불 범위 판정
 bool is_bonfire(int a)
 {
@@ -62,6 +66,13 @@ bool is_bonfire(int a)
 	return true;
 }
 
+//근처 객체 판별
+bool is_near(int a, int b)
+{
+	if (RANGE < abs(clients[a].x - clients[b].x)) return false;
+	if (RANGE < abs(clients[a].y - clients[b].y)) return false;
+	return true;
+}
 int main()
 {
 	wcout.imbue(locale("korean"));
@@ -97,12 +108,12 @@ int main()
 	thread timer_thread{ ev_timer };
 
 	// 시스템 정보 가져옴
-	SYSTEM_INFO sysInfo;
-	GetSystemInfo(&sysInfo);
-	printf_s("[INFO] CPU 쓰레드 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
+	//SYSTEM_INFO sysInfo;
+	//GetSystemInfo(&sysInfo);
+	//printf_s("[INFO] CPU 쓰레드 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
 	// 적절한 작업 스레드의 갯수는 (CPU * 2) + 1
-	int nThreadCnt = sysInfo.dwNumberOfProcessors;
-	//int nThreadCnt = 5;
+	//int nThreadCnt = sysInfo.dwNumberOfProcessors;
+	int nThreadCnt = 5;
 
 	for (int i = 0; i < 10; ++i)
 		worker_threads.emplace_back(worker_thread);
@@ -243,6 +254,14 @@ void Disconnect(int _s_id)
 	cout << "------------연결 종료------------" << endl;
 }
 
+//플레이어 이벤트 등록
+void Player_Event(int target, int player_id, COMMAND type)
+{
+	Overlap* exp_over = new Overlap;
+	exp_over->_op = type;
+	exp_over->_target = player_id;
+	PostQueuedCompletionStatus(g_h_iocp, 1, target, &exp_over->_wsa_over);
+}
 
 //타이머 큐 등록
 void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseconds ms)
@@ -374,11 +393,22 @@ void process_packet(int s_id, unsigned char* p)
 		cl.y = packet->y;
 		cl.z = packet->z;
 
+		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
+		//클라 recv 확인용
+
 		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
-		//send_status_packet(s_id);
+		send_status_packet(s_id);
+		
+		if (true == is_bonfire(cl._s_id))
+		{
+			if (false == cl.is_bone) {
+				cl.is_bone = true;
+				player_heal(cl._s_id);
 
+			}
+		}
 
 		unordered_set <int> near_list;
 		for (auto& other : clients) {
@@ -406,19 +436,6 @@ void process_packet(int s_id, unsigned char* p)
 			send_move_packet( other._s_id, cl._s_id);
 			cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 					
-		}
-
-		if (true == is_bonfire(cl._s_id))
-		{
-			if (false == cl.is_bone) {
-				cl.is_bone = true;
-				player_heal(cl._s_id);
-
-			}
-		}
-		else
-		{
-			cl.is_bone = false;
 		}
 
 		//새로 시야에 들어온 플레이어
@@ -565,12 +582,12 @@ void worker_thread()
 		case OP_ACCEPT: {
 			cout << "Accept Completed.\n";
 			SOCKET c_socket = *(reinterpret_cast<SOCKET*>(exp_over->_net_buf));
-			int new_s_id = get_id();
-			if (-1 == new_s_id) {
+			int n__s_id = get_id();
+			if (-1 == n__s_id) {
 				cout << "user over.\n";
 			}
 			else {
-				CLIENT& cl = clients[new_s_id];
+				CLIENT& cl = clients[n__s_id];
 				cl.x = rand() % ReZone_WIDTH;
 				cl.y = rand() % ReZone_HEIGHT;
 				cl.z = 0;
@@ -580,7 +597,7 @@ void worker_thread()
 				//cl.x = 200;
 				//cl.y = 200;
 				cl.state_lock.lock();
-				cl._s_id = new_s_id;
+				cl._s_id = n__s_id;
 				cl._state = ST_ACCEPT;
 				cl.state_lock.unlock();
 				cl._prev_size = 0;
@@ -590,7 +607,7 @@ void worker_thread()
 				ZeroMemory(&cl._recv_over._wsa_over, sizeof(cl._recv_over._wsa_over));
 				cl._socket = c_socket;
 				
-				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), g_h_iocp, new_s_id, 0);
+				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), g_h_iocp, n__s_id, 0);
 				cl.do_recv();
 			}
 
@@ -600,36 +617,24 @@ void worker_thread()
 			AcceptEx(sever_socket, c_socket, exp_over->_net_buf + 8, 0, sizeof(SOCKADDR_IN) + 16,
 				sizeof(SOCKADDR_IN) + 16, NULL, &exp_over->_wsa_over);
 		}
-
+		break;
 		case OP_PLAYER_HEAL: {
-			clients[_s_id].hp_lock.lock();
+		
 			clients[_s_id]._hp += 1;
 			if (clients[_s_id].is_bone == true) player_heal(_s_id);
-			clients[_s_id].hp_lock.unlock();
 			send_hp_packet(_s_id, _s_id);
+			cout << "hp +1" << endl;
 			delete exp_over;
 			break;
 		}
-
-		break;
-
-		
 		}
+	
+	
 	}
 	
 }
 
 //이동
-void send_hp_packet(int _id, int target)
-{
-	sc_packet_hp_change packet;
-	packet.target = target;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_HP;
-	packet.hp = clients[target]._hp;
-	clients[_id].do_send(sizeof(packet), &packet);
-}
-
 void send_move_packet(int _id, int target)
 {
 	cs_packet_move packet;
@@ -642,12 +647,6 @@ void send_move_packet(int _id, int target)
 	packet.move_time = clients[target].last_move_time;
 	clients[_id].do_send(sizeof(packet), &packet);
 }
-
-void player_heal(int s_id)
-{
-	Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
-}
-
 //타이머
 void ev_timer() 
 {
@@ -657,6 +656,7 @@ void ev_timer()
 		timer_q.try_pop(order);
 		//auto t = order.start_t - chrono::system_clock::now();
 		int s_id = order.this_id;
+		if (false == is_player(s_id)) continue;
 		if (clients[s_id]._state != ST_INGAME) continue;
 		if (clients[s_id]._is_active == false) continue;
 		if (order.start_t <= chrono::system_clock::now()) {
