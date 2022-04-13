@@ -35,6 +35,37 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 void process_packet(int _s_id, unsigned char* p);
 void worker_thread();
 void ev_timer();
+
+//이동
+void send_hp_packet(int _id, int target)
+{
+	sc_packet_hp_change packet;
+	packet.target = target;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_HP;
+	packet.hp = clients[target]._hp;
+	clients[_id].do_send(sizeof(packet), &packet);
+}
+
+void player_heal(int s_id)
+{
+	Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
+}
+
+//플레이어 판별
+bool is_player(int id)
+{
+	return (id >= 0) && (id < MAX_USER);
+}
+
+//모닥불 범위 판정
+bool is_bonfire(int a)
+{
+	if (BONFIRE_RANGE < abs(clients[a].x)) return false;
+	if (BONFIRE_RANGE < abs(clients[a].y)) return false;
+	return true;
+}
+
 //근처 객체 판별
 bool is_near(int a, int b)
 {
@@ -77,12 +108,12 @@ int main()
 	thread timer_thread{ ev_timer };
 
 	// 시스템 정보 가져옴
-	SYSTEM_INFO sysInfo;
-	GetSystemInfo(&sysInfo);
-	printf_s("[INFO] CPU 쓰레드 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
+	//SYSTEM_INFO sysInfo;
+	//GetSystemInfo(&sysInfo);
+	//printf_s("[INFO] CPU 쓰레드 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
 	// 적절한 작업 스레드의 갯수는 (CPU * 2) + 1
-	int nThreadCnt = sysInfo.dwNumberOfProcessors;
-	//int nThreadCnt = 5;
+	//int nThreadCnt = sysInfo.dwNumberOfProcessors;
+	int nThreadCnt = 5;
 
 	for (int i = 0; i < 10; ++i)
 		worker_threads.emplace_back(worker_thread);
@@ -369,7 +400,15 @@ void process_packet(int s_id, unsigned char* p)
 		cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		send_status_packet(s_id);
+		
+		if (true == is_bonfire(cl._s_id))
+		{
+			if (false == cl.is_bone) {
+				cl.is_bone = true;
+				player_heal(cl._s_id);
 
+			}
+		}
 
 		unordered_set <int> near_list;
 		for (auto& other : clients) {
@@ -579,9 +618,18 @@ void worker_thread()
 				sizeof(SOCKADDR_IN) + 16, NULL, &exp_over->_wsa_over);
 		}
 		break;
-
+		case OP_PLAYER_HEAL: {
 		
+			clients[_s_id]._hp += 1;
+			if (clients[_s_id].is_bone == true) player_heal(_s_id);
+			send_hp_packet(_s_id, _s_id);
+			cout << "hp +1" << endl;
+			delete exp_over;
+			break;
 		}
+		}
+	
+	
 	}
 	
 }
@@ -602,6 +650,30 @@ void send_move_packet(int _id, int target)
 //타이머
 void ev_timer() 
 {
+
+	while (true) {
+		timer_ev order;
+		timer_q.try_pop(order);
+		//auto t = order.start_t - chrono::system_clock::now();
+		int s_id = order.this_id;
+		if (false == is_player(s_id)) continue;
+		if (clients[s_id]._state != ST_INGAME) continue;
+		if (clients[s_id]._is_active == false) continue;
+		if (order.start_t <= chrono::system_clock::now()) {
+			if (order.order == CL_BONEFIRE) {
+				Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
+				this_thread::sleep_for(50ms);
+			}
+
+		}
+		else {
+			timer_q.push(order);
+			this_thread::sleep_for(10ms);
+
+		}
+
+
+	}
 
 }
 
