@@ -100,16 +100,16 @@ public:
 	int32 iCurrentSnowballCount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool bHasUmbrella;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool bHasBag;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iMaxMatchCount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iCurrentMatchCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bHasUmbrella;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bHasBag;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)

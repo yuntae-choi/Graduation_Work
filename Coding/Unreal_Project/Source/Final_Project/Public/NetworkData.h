@@ -50,7 +50,9 @@ enum SC_PacketType
 	SC_PACKET_CHAT,
 	SC_PACKET_LOGIN_FAIL,
 	SC_PACKET_STATUS_CHANGE,
-	SC_PACKET_DISCONNECT
+	SC_PACKET_DISCONNECT,
+	SC_PACKET_HP
+
 };
 
 enum COMMAND_Type
@@ -156,6 +158,14 @@ struct sc_packet_status_change {
 	short	level;
 	short	hp, maxhp;
 	int		exp;
+};
+
+
+struct sc_packet_hp_change {
+	unsigned char size;
+	char type;
+	int target;
+	int	hp;
 };
 
 

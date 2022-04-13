@@ -32,15 +32,18 @@ public:
     int _gold;
     int _at_range = 1; // 기본 공격 범위
     int _sk_range = 2; // 스킬 범위
+    bool is_bone = false;
+
+
 
     unordered_set   <int>  viewlist; // 시야 안 오브젝트
     mutex vl;
-
+    mutex hp_lock;
     mutex lua_lock;
 
     mutex state_lock;
     CL_STATE _state;
-    atomic_bool   _is_active;
+    atomic_bool   _is_active = false;
 
     COMBAT _combat;
 

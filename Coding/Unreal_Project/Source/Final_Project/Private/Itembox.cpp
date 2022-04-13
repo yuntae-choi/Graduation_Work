@@ -25,7 +25,7 @@ AItembox::AItembox()
 	{
 		boxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComponent"));
 		boxComponent->BodyInstance.SetCollisionProfileName(TEXT("Trigger"));
-		boxComponent->SetBoxExtent(FVector(50.0f, 60.0f, 17.0f));
+		boxComponent->SetBoxExtent(FVector(60.0f, 70.0f, 20.0f));
 
 		RootComponent = boxComponent;
 	}
@@ -38,7 +38,7 @@ AItembox::AItembox()
 		{
 			meshComponentDown->SetStaticMesh(MeshDown.Object);
 		}
-		meshComponentDown->SetRelativeLocation(FVector(0.0f, 0.0f, -17.0f));
+		meshComponentDown->SetRelativeLocation(FVector(0.0f, 0.0f, -20.0f));
 		meshComponentDown->SetupAttachment(RootComponent);
 	}
 
@@ -50,7 +50,7 @@ AItembox::AItembox()
 		{
 			meshComponentUp->SetStaticMesh(MeshUp.Object);
 		}
-		meshComponentUp->SetRelativeLocation(FVector(-25.0f, 0.0f, 10.0f));
+		meshComponentUp->SetRelativeLocation(FVector(-25.0f, 0.0f, 7.0f));
 		meshComponentUp->SetupAttachment(RootComponent);
 	}
 
@@ -72,7 +72,7 @@ AItembox::AItembox()
 			break;
 		case ItemTypeList::Umbrella:
 			if (ItemMesh2.Succeeded()) { itemMeshComponent->SetStaticMesh(ItemMesh2.Object); }
-			itemMeshComponent->SetRelativeLocation(FVector(0.0f, 31.0f, 0.0f));
+			itemMeshComponent->SetRelativeLocation(FVector(0.0f, 31.0f, -3.0f));
 			itemMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
 			itemMeshComponent->SetRelativeScale3D(FVector(0.5f, 0.25f, 0.75f));
 			break;
