@@ -78,17 +78,21 @@ AMyCharacter::AMyCharacter()
 
 	projectileClass = AMySnowball::StaticClass();
 
-	snowball = nullptr;
 	iSessionID = 0;
 	iCurrentHP = iMaxHP;
-	iMaxSnowballCount = 3;
+
+	snowball = nullptr;
+	
+	iMaxSnowballCount = 10;
 	iCurrentSnowballCount = 0; 
+	iMaxMatchCount = 2;
+	iCurrentMatchCount = 0;
 	bHasUmbrella = false;
 	bHasBag = false;
-	iMaxMatchCount = 3;
-	iCurrentMatchCount = 0;
+
 	farmingItem = nullptr;
 	bIsFarming = false;
+	
 	bIsInsideOfBonfire = false;	// 초기값 : true로 설정해야함,  캐릭터 초기 생성위치 모닥불 내부여야 함
 
 	//fMatchDuration = 3.0f;
@@ -272,6 +276,7 @@ void AMyCharacter::StartFarming()
 	{
 		if (Cast<ASnowdrift>(farmingItem))
 		{
+			if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
 			bIsFarming = true;
 		}
 		else if (Cast<AItembox>(farmingItem))
@@ -297,6 +302,8 @@ bool AMyCharacter::GetItem(int itemType)
 {
 	switch (itemType) {
 	case ItemTypeList::Match:
+		if (iCurrentMatchCount >= iMaxMatchCount) return false;	// 성냥 최대보유량을 넘어서 파밍하지 못하도록
+		iCurrentMatchCount += 1;
 		return true;
 		break;
 	case ItemTypeList::Umbrella:
@@ -307,7 +314,8 @@ bool AMyCharacter::GetItem(int itemType)
 	case ItemTypeList::Bag:
 		if (bHasBag) return false;	// 가방을 소유 중이면 가방 파밍 못하도록
 		bHasBag = true;
-		// 눈덩이 최대 보유량 증가 (성냥도 증가하도록?)
+		iMaxSnowballCount += 5;	// 눈덩이 10 -> 15 까지 보유 가능
+		iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
 		return true;
 		break;
 	default:
