@@ -43,7 +43,7 @@ public:
 
     mutex state_lock;
     CL_STATE _state;
-    atomic_bool   _is_active;
+    atomic_bool   _is_active = false;
 
     COMBAT _combat;
 

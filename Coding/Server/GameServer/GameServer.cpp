@@ -303,7 +303,6 @@ void process_packet(int s_id, unsigned char* p)
 		cl.state_lock.lock();
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
-		
 		cl.x = packet->x + (s_id*200);
 		cl.y = packet->y;
 		cl.z = packet->z;
@@ -406,9 +405,15 @@ void process_packet(int s_id, unsigned char* p)
 			cout << "모닥불 지역" << endl;
 			if (false == cl.is_bone) {
 				cl.is_bone = true;
+				cl._is_active = true;
 				player_heal(cl._s_id);
 
 			}
+		}
+		else
+		{
+			cl.is_bone = false;
+			cl._is_active = false;
 		}
 
 		unordered_set <int> near_list;
@@ -621,8 +626,10 @@ void worker_thread()
 		break;
 		case OP_PLAYER_HEAL: {
 		
-			clients[_s_id]._hp += 1;
-			if (clients[_s_id].is_bone == true) player_heal(_s_id);
+			if (clients[_s_id].is_bone == true) { 
+				clients[_s_id]._hp += 1;
+				player_heal(_s_id); 
+			}
 			send_hp_packet(_s_id, _s_id);
 			cout << "hp +1" << endl;
 			delete exp_over;
