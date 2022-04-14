@@ -61,14 +61,14 @@ AMyCharacter::AMyCharacter()
 	
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> BEAR_ANIM(TEXT("/Game/Animations/Bear/BearAnimBP.BearAnimBP_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> BEAR_ANIM(TEXT("/Game/Animations/Bear/BearAnimBP.BearAnimBP_C"));	// _C 붙이기
 	if (BEAR_ANIM.Succeeded())
 	{
 		bearAnim = BEAR_ANIM.Class;
 		GetMesh()->SetAnimInstanceClass(BEAR_ANIM.Class);
 	}
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> SNOWMAN_ANIM(TEXT("/Game/Animations/Snowman/SnowMan_AnimBP.SnowMan_AnimBP_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> SNOWMAN_ANIM(TEXT("/Game/Animations/Snowman/SnowmanAnimBP.SnowmanAnimBP_C"));
 	if (SNOWMAN_ANIM.Succeeded())
 	{
 		snowmanAnim = SNOWMAN_ANIM.Class;
@@ -80,7 +80,8 @@ AMyCharacter::AMyCharacter()
 	projectileClass = AMySnowball::StaticClass();
 
 	iSessionID = 0;
-	iCurrentHP = iMaxHP;
+	iCurrentHP = iMaxHP;	// 실제 설정값
+	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
 	
@@ -376,6 +377,8 @@ void AMyCharacter::UpdateHP()
 
 void AMyCharacter::UpdateSpeed()
 {
+	if (iCharacterState == CharacterState::Snowman) return;	// 눈사람인 경우에는 매번 스피드를 갱신할 필요 x (노멀-슬로우 상태가 없으므로)
+
 	switch (iCharacterState) {
 	case CharacterState::Normal:
 		if (iCurrentHP <= iBeginSlowHP)
@@ -391,8 +394,6 @@ void AMyCharacter::UpdateSpeed()
 			GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
 		}
 		break;
-	case CharacterState::Snowman:
-		break;
 	default:
 		break;
 	}
@@ -400,6 +401,7 @@ void AMyCharacter::UpdateSpeed()
 
 void AMyCharacter::ChangeSnowman()
 {
+	iCharacterState = CharacterState::Snowman;
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 	myAnim->SetDead();
