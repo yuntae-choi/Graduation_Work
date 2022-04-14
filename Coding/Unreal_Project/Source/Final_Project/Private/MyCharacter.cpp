@@ -345,24 +345,21 @@ void AMyCharacter::EndFarming()
 
 void AMyCharacter::UpdateFarming(float deltaTime)
 {
-	if (bIsFarming)
-	{
-		if (IsValid(farmingItem))
-		{
-			ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
-			if (snowdrift)
-			{	// 눈 무더기 duration 만큼 F키를 누르고 있으면 캐릭터의 눈덩이 추가 
-				float lastFarmDuration = snowdrift->GetFarmDuration();
-				float newFarmDuration = lastFarmDuration - deltaTime;
-				snowdrift->SetFarmDuration(newFarmDuration);
+	if (!bIsFarming) return;
+	if (!IsValid(farmingItem)) return;
 
-				if (newFarmDuration <= 0)
-				{
-					iCurrentSnowballCount += 10;
-					iCurrentSnowballCount = iCurrentSnowballCount > iMaxSnowballCount ? iMaxSnowballCount : iCurrentSnowballCount;
-					snowdrift->Destroy();
-				}
-			}
+	ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
+	if (snowdrift)
+	{	// 눈 무더기 duration 만큼 F키를 누르고 있으면 캐릭터의 눈덩이 추가 
+		float lastFarmDuration = snowdrift->GetFarmDuration();
+		float newFarmDuration = lastFarmDuration - deltaTime;
+		snowdrift->SetFarmDuration(newFarmDuration);
+
+		if (newFarmDuration <= 0)
+		{
+			iCurrentSnowballCount += 10;
+			iCurrentSnowballCount = iCurrentSnowballCount > iMaxSnowballCount ? iMaxSnowballCount : iCurrentSnowballCount;
+			snowdrift->Destroy();
 		}
 	}
 }
@@ -401,15 +398,33 @@ void AMyCharacter::UpdateSpeed()
 
 void AMyCharacter::ChangeSnowman()
 {
-	iCharacterState = CharacterState::Snowman;
-	iCurrentHP = iMinHP;
-	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
+	// 스켈레탈메시, 애니메이션 블루프린트 변경
 	myAnim->SetDead();
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
 
+	iCurrentHP = iMinHP;
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
+
 	GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;	// 눈사람의 이동속도는 슬로우 상태인 캐릭터와 동일하게 설정
+	
+	// 플레이어의 입력을 무시하도록 (움직일 수 없음, 시야도 고정, 상태 - CharacterFreeze)
+	APlayerController* playerController = Cast<APlayerController>(GetController());
+	if (playerController)
+	{
+		iCharacterState = CharacterState::CharacterFreeze;
+		DisableInput(playerController);
+
+		// x초 후에 다시 입력을 받을 수 있도록 (움직임과 시야 제한 해제, 상태 - Snowman)
+		FTimerHandle WaitHandle;
+		float WaitTime = 10.0f;
+		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+			{
+				iCharacterState = CharacterState::Snowman;
+				EnableInput(playerController);
+			}), WaitTime, false);
+	}
 }
 
 void AMyCharacter::WaitForStartGame()

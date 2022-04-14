@@ -9,7 +9,7 @@
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
-	Normal, Slow, Snowman
+	Normal, Slow, CharacterFreeze, Snowman
 };
 
 UCLASS()
