@@ -25,11 +25,20 @@ public:
 	AMyPlayerController();
 
 	void RecvNewPlayer(int sessionID, float x, float y, float z);
-	void UpdateNewPlayer();
 
 	//void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
 	void UpdatePlayerInfo(int input);
+	
+	void SendPlayerInfo();		// 플레이어 위치 송신
+	bool UpdateWorldInfo();		// 월드 동기화
+	void UpdatePlayerInfo(const cCharacter& info);		// 플레이어 동기화	
+
+	
 	void UpdatePlayerS_id(int _s_id);
+
+	// 스폰시킬 다른 캐릭터
+	UPROPERTY(EditAnywhere, Category = "Spawning")
+		TSubclassOf<class ACharacter> WhoToSpawn;
 
 	//void UpdateRotation();
 
@@ -40,7 +49,23 @@ protected:
 
 public:
 	ClientSocket* myClientSocket;
+	cCharactersInfo* CharactersInfo;	// 다른 캐릭터의 정보
 
+	// 새 플레이어 입장
+	int	nPlayers;
+	bool bNewPlayerEntered;
+	cCharacter* NewPlayer;
+	void UpdateNewPlayer();
+	void RecvWorldInfo(cCharactersInfo* ci_)
+	{
+		if (ci_ != nullptr)
+		{
+			CharactersInfo = ci_;
+		}
+
+	}
+	bool				bIsConnected;	// 서버와 접속 유무
+	
 	int32 iMySessionId;
 	float fMy_x;
 	float fMy_y;
@@ -53,6 +78,4 @@ public:
 	//UPROPERTY(EditAnywhere, Category = "Spawning")
 	//TSubclassOf<class AMyCharacter> WhoToSpawn;
 
-protected:
-	bool bNewPlayerEntered;
 };

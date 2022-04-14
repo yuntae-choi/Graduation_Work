@@ -43,6 +43,10 @@ public:
 	void UpdateSpeed();
 	int GetCharacterState() { return iCharacterState; };
 
+	int		SessionId;		// 플레이어 고유 아이디
+	bool	IsAlive;		// 살아있는지
+	bool	IsAttacking;	// 공격중인지
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -55,11 +55,16 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		ReadyToSend_StatusPacket();
 		ReadyToSend_MovePacket(packet->s_id, fMy_x, fMy_y, fMy_z);
 
-		float x = packet->x;
-		float y = packet->y;
-		float z = packet->z;
+				// 캐릭터 정보
+		cCharacter p;
+		p.SessionId = packet->s_id;
+		p.X = packet->x;;
+		p.Y = packet->y;
+		p.Z = packet->z;
+		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
+		PlayerController->RecvWorldInfo(&CharactersInfo);
 
-		MYLOG(Warning, TEXT("i'm player%d init spawn : (%f, %f, %f)"), id, x, y, z);
+		//MYLOG(Warning, TEXT("i'm player%d init spawn : (%f, %f, %f)"), id, x, y, z);
 
 	}
 	break;
