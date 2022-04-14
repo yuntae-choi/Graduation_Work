@@ -4,6 +4,7 @@
 
 #include "Final_Project.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "I_Throwable.h"
 #include "MySnowball.generated.h"
 
@@ -15,6 +16,8 @@ class FINAL_PROJECT_API AMySnowball : public AActor, public II_Throwable
 public:	
 	// Sets default values for this actor's properties
 	AMySnowball();
+
+	virtual void Tick(float DeltaTime) override;
 
 	// Throwable 인터페이스에서 Throw 이벤트 발생 시 호출
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Itf")
@@ -32,11 +35,19 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	USphereComponent* collisionComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UStaticMeshComponent* meshComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UProjectileMovementComponent* projectileMovementComponent;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)
 	int iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
+
+	// 디버깅용 (true - 날아가는 궤적 로그 띄우기)
+	bool bCheckTrajectory;
 };
