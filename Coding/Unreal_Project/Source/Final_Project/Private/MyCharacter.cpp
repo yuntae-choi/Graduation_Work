@@ -278,28 +278,27 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 
 void AMyCharacter::StartFarming()
 {
-	if (IsValid(farmingItem))
+	if (!IsValid(farmingItem)) return;
+
+	if (Cast<ASnowdrift>(farmingItem))
 	{
-		if (Cast<ASnowdrift>(farmingItem))
+		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
+		bIsFarming = true;
+	}
+	else if (Cast<AItembox>(farmingItem))
+	{
+		AItembox* itembox = Cast<AItembox>(farmingItem);
+		switch (itembox->GetItemboxState())
 		{
-			if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
-			bIsFarming = true;
-		}
-		else if (Cast<AItembox>(farmingItem))
-		{
-			AItembox* itembox = Cast<AItembox>(farmingItem);
-			switch (itembox->GetItemboxState())
-			{
-			case ItemboxState::Closed:
-				itembox->SetItemboxState(ItemboxState::Opening);
-				break;
-			case ItemboxState::Opened:
-				// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
-				if (GetItem(itembox->GetItemType())) { itembox->DeleteItem(); }
-				break;
-			default:
-				break;
-			}
+		case ItemboxState::Closed:
+			itembox->SetItemboxState(ItemboxState::Opening);
+			break;
+		case ItemboxState::Opened:
+			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
+			if (GetItem(itembox->GetItemType())) { itembox->DeleteItem(); }
+			break;
+		default:
+			break;
 		}
 	}
 }
@@ -415,6 +414,7 @@ void AMyCharacter::ChangeSnowman()
 	{
 		iCharacterState = CharacterState::CharacterFreeze;
 		DisableInput(playerController);
+		GetMesh()->bPauseAnims = true;	// 캐릭터 애니메이션도 정지
 
 		// x초 후에 다시 입력을 받을 수 있도록 (움직임과 시야 제한 해제, 상태 - Snowman)
 		FTimerHandle WaitHandle;
@@ -423,6 +423,7 @@ void AMyCharacter::ChangeSnowman()
 			{
 				iCharacterState = CharacterState::Snowman;
 				EnableInput(playerController);
+				GetMesh()->bPauseAnims = false;
 			}), WaitTime, false);
 	}
 }
