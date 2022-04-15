@@ -47,6 +47,7 @@ public:
 	bool IsSnowman() { return bIsSnowman; };
 	void StartStun(float waitTime);
 	void EndStun(float waitTime);
+	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 
 	int		SessionId;		// 플레이어 고유 아이디
 	bool	IsAlive;		// 살아있는지

@@ -14,6 +14,8 @@ const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
 const float fChangeSnowmanStunTime = 10.0f;	// 동물에서 눈사람으로 변할 때 스턴 시간
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
+const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
+const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -82,14 +84,14 @@ AMyCharacter::AMyCharacter()
 	projectileClass = AMySnowball::StaticClass();
 
 	iSessionID = 0;
-	//iCurrentHP = iMaxHP;	// 실제 설정값
-	iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
+	iCurrentHP = iMaxHP;	// 실제 설정값
+	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
 	
-	iMaxSnowballCount = 10;
+	iMaxSnowballCount = iOriginMaxSnowballCount;
 	iCurrentSnowballCount = 0; 
-	iMaxMatchCount = 2;
+	iMaxMatchCount = iOriginMaxMatchCount;
 	iCurrentMatchCount = 0;
 	bHasUmbrella = false;
 	bHasBag = false;
@@ -429,6 +431,8 @@ void AMyCharacter::ChangeSnowman()
 	GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;	// 눈사람의 이동속도는 슬로우 상태인 캐릭터와 동일하게 설정
 	
 	StartStun(fChangeSnowmanStunTime);
+
+	ResetHasItems();
 }
 
 void AMyCharacter::WaitForStartGame()
@@ -514,4 +518,14 @@ void AMyCharacter::EndStun(float waitTime)
 			EnableInput(playerController);
 			GetMesh()->bPauseAnims = false;
 		}), waitTime, false);
+}
+
+void AMyCharacter::ResetHasItems()
+{
+	iCurrentSnowballCount = 0;
+	iMaxSnowballCount = iOriginMaxSnowballCount;
+	iCurrentMatchCount = 0;
+	iMaxMatchCount = iOriginMaxMatchCount;
+	bHasUmbrella = false;
+	bHasBag = false;
 }
