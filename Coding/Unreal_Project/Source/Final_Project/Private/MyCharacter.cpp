@@ -102,7 +102,8 @@ AMyCharacter::AMyCharacter()
 	//fMatchDuration = 3.0f;
 	//match = true;
 
-	iCharacterState = CharacterState::Normal;
+	iCharacterState = CharacterState::AnimalNormal;
+	bIsSnowman = false;
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
 
 	//playerController = Cast<APlayerController>(GetController());
@@ -123,9 +124,12 @@ void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	UpdateFarming(DeltaTime);
-	UpdateHP();
-	UpdateSpeed();
+	if (!bIsSnowman)
+	{
+		UpdateFarming(DeltaTime);
+		UpdateHP();
+		UpdateSpeed();
+	}
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -205,6 +209,7 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	if (isAttacking) return;
+	if (bIsSnowman) return;
 	//if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 
 	myAnim->PlayAttackMontage();
@@ -245,10 +250,17 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
+	if (!bIsSnowman)
+	{	// 동물인 경우 체력 감소
+		iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
 
-	MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
-
+		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
+	}
+	else
+	{	// 눈사람인 경우 스턴
+		StartStun(fStunTime);
+		MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
+	}
 	return FinalDamage;
 }
 
@@ -285,6 +297,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 void AMyCharacter::StartFarming()
 {
 	if (!IsValid(farmingItem)) return;
+	if (bIsSnowman) return;
 
 	if (Cast<ASnowdrift>(farmingItem))
 	{
@@ -337,6 +350,8 @@ bool AMyCharacter::GetItem(int itemType)
 
 void AMyCharacter::EndFarming()
 {
+	if (bIsSnowman) return;
+
 	if (IsValid(farmingItem))
 	{
 		if (Cast<ASnowdrift>(farmingItem))
@@ -371,8 +386,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 
 void AMyCharacter::UpdateHP()
 {
-	// 체력이 최저체력 && 현재 눈사람이 아닌경우 -> 눈사람으로 변경
-	if (iCurrentHP <= iMinHP && iCharacterState != CharacterState::Snowman && iCharacterState != CharacterState::Stunned)
+	if (iCurrentHP <= iMinHP)
 	{
 		ChangeSnowman();
 	}
@@ -380,21 +394,18 @@ void AMyCharacter::UpdateHP()
 
 void AMyCharacter::UpdateSpeed()
 {
-	// 눈사람인 경우에는 매번 스피드를 갱신할 필요 x (노멀-슬로우 상태가 없으므로)
-	if (iCharacterState == CharacterState::Snowman || iCharacterState == CharacterState::Stunned) return;
-
 	switch (iCharacterState) {
-	case CharacterState::Normal:
+	case CharacterState::AnimalNormal:
 		if (iCurrentHP <= iBeginSlowHP)
 		{
-			iCharacterState = CharacterState::Slow;
+			iCharacterState = CharacterState::AnimalSlow;
 			GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;
 		}
 		break;
-	case CharacterState::Slow:
+	case CharacterState::AnimalSlow:
 		if (iCurrentHP > iBeginSlowHP)
 		{
-			iCharacterState = CharacterState::Normal;
+			iCharacterState = CharacterState::AnimalNormal;
 			GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
 		}
 		break;
@@ -411,6 +422,7 @@ void AMyCharacter::ChangeSnowman()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
 
+	bIsSnowman = true;
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 
@@ -432,6 +444,8 @@ void AMyCharacter::WaitForStartGame()
 
 void AMyCharacter::UpdateTemperatureState()
 {
+	if (bIsSnowman) return;
+
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
 	//if (match)
 	//{
@@ -474,15 +488,15 @@ void AMyCharacter::UpdateTemperatureState()
 
 void AMyCharacter::StartStun(float waitTime)
 {
-	if (!playerController) return;
+	//if (!playerController) return;	// 다른 플레이어의 캐릭터는 플레이어 컨트롤러가 존재 x?
 
-	if (iCharacterState == CharacterState::Stunned)
+	if (iCharacterState == CharacterState::SnowmanStunned)
 	{	// 스턴 상태에서 또 맞으면 기존에 실행중이던 stunhandle 초기화 (핸들러 새로 갱신하도록)
 		GetWorldTimerManager().ClearTimer(stunHandle);
 	}
 
 	// 플레이어의 입력을 무시하도록 (움직일 수 없음, 시야도 고정, 상태 - Stunned)
-	iCharacterState = CharacterState::Stunned;
+	iCharacterState = CharacterState::SnowmanStunned;
 	DisableInput(playerController);
 	GetMesh()->bPauseAnims = true;	// 캐릭터 애니메이션도 정지
 
@@ -491,12 +505,12 @@ void AMyCharacter::StartStun(float waitTime)
 
 void AMyCharacter::EndStun(float waitTime)
 {
-	if (!playerController) return;
+	//if (!playerController) return;
 
 	// x초 후에 다시 입력을 받을 수 있도록 (움직임과 시야 제한 해제, 상태 - Snowman)
 	GetWorld()->GetTimerManager().SetTimer(stunHandle, FTimerDelegate::CreateLambda([&]()
 		{
-			iCharacterState = CharacterState::Snowman;
+			iCharacterState = CharacterState::SnowmanNormal;
 			EnableInput(playerController);
 			GetMesh()->bPauseAnims = false;
 		}), waitTime, false);

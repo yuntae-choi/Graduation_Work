@@ -10,8 +10,8 @@
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
-	// 동물, 동물, 눈사람, 눈사람
-	Normal, Slow, Stunned, Snowman
+	// 동물,		동물,		눈사람,			눈사람
+	AnimalNormal, AnimalSlow, SnowmanNormal, SnowmanStunned
 };
 
 UCLASS()
@@ -44,6 +44,7 @@ public:
 	//void UpdateTemperatureByMatch();
 	void UpdateSpeed();
 	int GetCharacterState() { return iCharacterState; };
+	bool IsSnowman() { return bIsSnowman; };
 	void StartStun(float waitTime);
 	void EndStun(float waitTime);
 
@@ -163,8 +164,11 @@ private:
 	//bool match;
 
 	UPROPERTY(VisibleAnywhere, Category = State)
-	int32 iCharacterState;	// 현재 캐릭터의 상태
+	int32 iCharacterState;	// 현재 캐릭터의 상태 (AnimalNormal, AnimalSlow, SnowmanNormal, SnowmanStunned)
 
+	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
+
+	UPROPERTY(VisibleAnywhere, Category = "Data")
 	APlayerController* playerController;
 
 	// 스턴 관리하는 타이머 핸들러
