@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
-#include "MyCharacter.h"
 #include "Bonfire.generated.h"
 
 UCLASS()
@@ -31,7 +30,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-
+	// 내부 - 회복량, 외부 - 피해량
+	static const int iHealAmount;
+	static const int iDamageAmount;
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	USphereComponent* sphereComponent;

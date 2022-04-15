@@ -2,6 +2,10 @@
 
 
 #include "Bonfire.h"
+#include "MyCharacter.h"
+
+const int ABonfire::iHealAmount = 10;
+const int ABonfire::iDamageAmount = 1;
 
 // Sets default values
 ABonfire::ABonfire()

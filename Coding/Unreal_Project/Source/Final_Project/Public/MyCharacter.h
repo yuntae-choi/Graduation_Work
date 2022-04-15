@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "MySnowball.h"
 #include "Itembox.h"
+#include "Bonfire.h"
 #include "MyCharacter.generated.h"
 
 enum CharacterState {

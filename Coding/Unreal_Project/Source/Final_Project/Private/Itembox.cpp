@@ -2,6 +2,7 @@
 
 
 #include "Itembox.h"
+#include "MyCharacter.h"
 
 int RandomItemType()
 {

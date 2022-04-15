@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
-#include "MyCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Itembox.generated.h"
 

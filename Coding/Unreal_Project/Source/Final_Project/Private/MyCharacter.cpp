@@ -356,8 +356,8 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 
 		if (newFarmDuration <= 0)
 		{
-			iCurrentSnowballCount += 10;
-			iCurrentSnowballCount = iCurrentSnowballCount > iMaxSnowballCount ? iMaxSnowballCount : iCurrentSnowballCount;
+			iCurrentSnowballCount += ASnowdrift::iNumOfSnowball;
+			iCurrentSnowballCount = FMath::Clamp<int>(iCurrentSnowballCount, 0, iMaxSnowballCount);
 			snowdrift->Destroy();
 		}
 	}
@@ -452,15 +452,17 @@ void AMyCharacter::UpdateTemperatureState()
 		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
 			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
 				{
-					iCurrentHP += 10;
-					iCurrentHP = iCurrentHP > iMaxHP ? iMaxHP : iCurrentHP;
+					iCurrentHP += ABonfire::iHealAmount;
+					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+
 				}), 1.0f, true);
 		}
 		else
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
 			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
 				{
-					iCurrentHP -= 1;
+					iCurrentHP -= ABonfire::iDamageAmount;
+					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
 				}), 1.0f, true);
 		}
 	//}

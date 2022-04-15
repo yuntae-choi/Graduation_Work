@@ -33,7 +33,7 @@ protected:
 
 public:
 	static const float fFarmDurationMax;	// 눈 무더기 파밍에 걸리는 시간
-
+	static const int iNumOfSnowball;		// 획득할 수 있는 눈덩이 수
 private:	
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UBoxComponent* boxComponent;

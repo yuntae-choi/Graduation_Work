@@ -5,6 +5,7 @@
 #include "MyCharacter.h"
 
 const float ASnowdrift::fFarmDurationMax = 3.0f;
+const int ASnowdrift::iNumOfSnowball = 10;
 
 // Sets default values
 ASnowdrift::ASnowdrift()
