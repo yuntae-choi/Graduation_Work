@@ -10,7 +10,8 @@
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
-	Normal, Slow, CharacterFreeze, Snowman
+	// 동물, 동물, 눈사람, 눈사람
+	Normal, Slow, Stunned, Snowman
 };
 
 UCLASS()
@@ -43,6 +44,8 @@ public:
 	//void UpdateTemperatureByMatch();
 	void UpdateSpeed();
 	int GetCharacterState() { return iCharacterState; };
+	void StartStun(float waitTime);
+	void EndStun(float waitTime);
 
 	int		SessionId;		// 플레이어 고유 아이디
 	bool	IsAlive;		// 살아있는지
@@ -160,5 +163,10 @@ private:
 	//bool match;
 
 	UPROPERTY(VisibleAnywhere, Category = State)
-	int32 iCharacterState;
+	int32 iCharacterState;	// 현재 캐릭터의 상태
+
+	APlayerController* playerController;
+
+	// 스턴 관리하는 타이머 핸들러
+	FTimerHandle stunHandle;
 };

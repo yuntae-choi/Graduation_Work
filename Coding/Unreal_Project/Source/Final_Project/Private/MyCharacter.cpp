@@ -12,6 +12,8 @@ const int AMyCharacter::iMinHP = 270;
 const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
+const float fChangeSnowmanStunTime = 10.0f;	// 동물에서 눈사람으로 변할 때 스턴 시간
+const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -80,8 +82,8 @@ AMyCharacter::AMyCharacter()
 	projectileClass = AMySnowball::StaticClass();
 
 	iSessionID = 0;
-	iCurrentHP = iMaxHP;	// 실제 설정값
-	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
+	//iCurrentHP = iMaxHP;	// 실제 설정값
+	iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
 	
@@ -102,12 +104,16 @@ AMyCharacter::AMyCharacter()
 
 	iCharacterState = CharacterState::Normal;
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
+
+	//playerController = Cast<APlayerController>(GetController());
 }
 
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
 
 	WaitForStartGame();	// 대기시간
 }
@@ -365,7 +371,8 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 
 void AMyCharacter::UpdateHP()
 {
-	if (iCurrentHP <= iMinHP)
+	// 체력이 최저체력 && 현재 눈사람이 아닌경우 -> 눈사람으로 변경
+	if (iCurrentHP <= iMinHP && iCharacterState != CharacterState::Snowman && iCharacterState != CharacterState::Stunned)
 	{
 		ChangeSnowman();
 	}
@@ -373,7 +380,8 @@ void AMyCharacter::UpdateHP()
 
 void AMyCharacter::UpdateSpeed()
 {
-	if (iCharacterState == CharacterState::Snowman) return;	// 눈사람인 경우에는 매번 스피드를 갱신할 필요 x (노멀-슬로우 상태가 없으므로)
+	// 눈사람인 경우에는 매번 스피드를 갱신할 필요 x (노멀-슬로우 상태가 없으므로)
+	if (iCharacterState == CharacterState::Snowman || iCharacterState == CharacterState::Stunned) return;
 
 	switch (iCharacterState) {
 	case CharacterState::Normal:
@@ -408,24 +416,7 @@ void AMyCharacter::ChangeSnowman()
 
 	GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;	// 눈사람의 이동속도는 슬로우 상태인 캐릭터와 동일하게 설정
 	
-	// 플레이어의 입력을 무시하도록 (움직일 수 없음, 시야도 고정, 상태 - CharacterFreeze)
-	APlayerController* playerController = Cast<APlayerController>(GetController());
-	if (playerController)
-	{
-		iCharacterState = CharacterState::CharacterFreeze;
-		DisableInput(playerController);
-		GetMesh()->bPauseAnims = true;	// 캐릭터 애니메이션도 정지
-
-		// x초 후에 다시 입력을 받을 수 있도록 (움직임과 시야 제한 해제, 상태 - Snowman)
-		FTimerHandle WaitHandle;
-		float WaitTime = 10.0f;
-		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
-			{
-				iCharacterState = CharacterState::Snowman;
-				EnableInput(playerController);
-				GetMesh()->bPauseAnims = false;
-			}), WaitTime, false);
-	}
+	StartStun(fChangeSnowmanStunTime);
 }
 
 void AMyCharacter::WaitForStartGame()
@@ -480,3 +471,33 @@ void AMyCharacter::UpdateTemperatureState()
 //		UpdateTemperatureState();
 //	}
 //}
+
+void AMyCharacter::StartStun(float waitTime)
+{
+	if (!playerController) return;
+
+	if (iCharacterState == CharacterState::Stunned)
+	{	// 스턴 상태에서 또 맞으면 기존에 실행중이던 stunhandle 초기화 (핸들러 새로 갱신하도록)
+		GetWorldTimerManager().ClearTimer(stunHandle);
+	}
+
+	// 플레이어의 입력을 무시하도록 (움직일 수 없음, 시야도 고정, 상태 - Stunned)
+	iCharacterState = CharacterState::Stunned;
+	DisableInput(playerController);
+	GetMesh()->bPauseAnims = true;	// 캐릭터 애니메이션도 정지
+
+	EndStun(waitTime);	// waitTime이 지나면 stun이 끝나도록
+}
+
+void AMyCharacter::EndStun(float waitTime)
+{
+	if (!playerController) return;
+
+	// x초 후에 다시 입력을 받을 수 있도록 (움직임과 시야 제한 해제, 상태 - Snowman)
+	GetWorld()->GetTimerManager().SetTimer(stunHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			iCharacterState = CharacterState::Snowman;
+			EnableInput(playerController);
+			GetMesh()->bPauseAnims = false;
+		}), waitTime, false);
+}
