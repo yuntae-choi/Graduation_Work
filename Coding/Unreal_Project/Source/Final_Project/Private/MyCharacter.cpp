@@ -84,8 +84,8 @@ AMyCharacter::AMyCharacter()
 	projectileClass = AMySnowball::StaticClass();
 
 	iSessionID = 0;
-	//iCurrentHP = iMaxHP;	// 실제 설정값
-	iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
+	iCurrentHP = iMaxHP;	// 실제 설정값
+	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
 	
@@ -309,18 +309,6 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 			otherCharacter->ChangeSnowman();
 			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
 			return;
-		}
-	}
-
-	// 자신 - 동물
-	// 상대 - 눈사람, 스턴상태 x
-	if (!bIsSnowman)
-	{
-		if ((otherCharacter->GetIsSnowman()) && (otherCharacter->GetCharacterState() != CharacterState::SnowmanStunned))
-		{	// 본인 눈사람화(사망), 상대 캐릭터 동물화(부활)
-			ChangeSnowman();
-			otherCharacter->ChangeAnimal();
-			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *(otherCharacter->GetName()), *GetName());
 		}
 	}
 }
