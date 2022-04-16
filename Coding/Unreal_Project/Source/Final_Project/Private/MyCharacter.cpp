@@ -34,7 +34,7 @@ AMyCharacter::AMyCharacter()
 	GetCapsuleComponent()->SetCapsuleRadius(37.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
 	GetCapsuleComponent()->SetUseCCD(true);
-	//GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -74.0f), FRotator(0.0f, -90.0f, 0.0f));
 	springArm->TargetArmLength = 220.0f;
 	springArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
@@ -99,7 +99,7 @@ AMyCharacter::AMyCharacter()
 	farmingItem = nullptr;
 	bIsFarming = false;
 	
-	bIsInsideOfBonfire = false;	// 초기값 : true로 설정해야함,  캐릭터 초기 생성위치 모닥불 내부여야 함
+	bIsInsideOfBonfire = false;
 
 	//fMatchDuration = 3.0f;
 	//match = true;
@@ -107,8 +107,6 @@ AMyCharacter::AMyCharacter()
 	iCharacterState = CharacterState::AnimalNormal;
 	bIsSnowman = false;
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
-
-	//playerController = Cast<APlayerController>(GetController());
 }
 
 // Called when the game starts or when spawned
@@ -288,12 +286,14 @@ void AMyCharacter::ReleaseSnowball()
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//auto MySnowball = Cast<AMySnowball>(OtherActor);
-
-	//if (nullptr != MySnowball)
-	//{
-	//	MYLOG(Warning, TEXT("snowball hit."));
-	//}
+	if (bIsSnowman)	// 자신이 눈사람인 경우에만 hit 확인
+	{
+		AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
+		if (otherCharacter && !(otherCharacter->GetIsSnowman()))
+		{	// hit가 발생한 액터가 캐릭터이고, 그 캐릭터가 동물인 경우
+			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
+		}
+	}
 }
 
 void AMyCharacter::StartFarming()
