@@ -3,6 +3,7 @@
 #pragma once
 
 #include <thread>
+#include <queue>
 #include "Final_Project.h"
 #include "MyCharacter.h"
 #include "GameFramework/PlayerController.h"
@@ -10,7 +11,6 @@
 #include "Kismet/KismetMathLibrary.h"
 
 #include "MyPlayerController.generated.h"
-
 
 
 /**
@@ -24,7 +24,8 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 public:
 	AMyPlayerController();
 
-	void RecvNewPlayer(int sessionID, float x, float y, float z);
+	void RecvNewPlayer(const cCharacter& info);
+
 
 	//void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
 	void UpdatePlayerInfo(int input);
@@ -56,6 +57,8 @@ public:
 	bool bNewPlayerEntered;
 	cCharacter* NewPlayer;
 	void UpdateNewPlayer();
+	void StartPlayerInfo(const cCharacter& info);
+
 	void RecvWorldInfo(cCharactersInfo* ci_)
 	{
 		if (ci_ != nullptr)
@@ -74,7 +77,8 @@ public:
 	float fOther_x;
 	float fOther_y;
 	float fOther_z;
-
+	bool bSetPlayer = false;
+	queue <int> iNewPlayers;
 	//UPROPERTY(EditAnywhere, Category = "Spawning")
 	//TSubclassOf<class AMyCharacter> WhoToSpawn;
 

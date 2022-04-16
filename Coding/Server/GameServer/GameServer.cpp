@@ -167,7 +167,7 @@ void send_login_ok_packet(int _s_id)
 	//packet.Yaw = clients[_s_id].Yaw;
 	//packet.Pitch = clients[_s_id].Pitch;
 	//packet.Roll = clients[_s_id].Roll;*/
-	cout << "로그인 허용 전송" << _s_id << endl;
+	cout << "로그인 허용 전송" << "[" << _s_id <<"]" << " " << packet.x << " " << packet.y << " " << packet.z << endl;
 	clients[_s_id].do_send(sizeof(packet), &packet);
 }
 
@@ -303,8 +303,8 @@ void process_packet(int s_id, unsigned char* p)
 		cl.state_lock.lock();
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
-		cl.x = packet->x + (s_id*200);
-		cl.y = packet->y;
+		cl.x = 0 + (s_id*300);
+		cl.y = 0 +(s_id * 300);
 		cl.z = packet->z;
 
 
@@ -321,7 +321,7 @@ void process_packet(int s_id, unsigned char* p)
 		//cout << "로그인 허용 전송" << s_id << endl;
 		//cl.do_send(sizeof(_packet), &_packet);
 		send_login_ok_packet(s_id);
-		cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
+		//cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
 
 		// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
 		for (auto& other : clients) {
@@ -378,7 +378,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet.x = other.x;
 			packet.y = other.y;
 			packet.z = other.z;
-
+			cout << cl._s_id << "에게 " << other._s_id << "을 " << endl;
 			cl.do_send(sizeof(packet), &packet);
 		}
 
@@ -396,13 +396,13 @@ void process_packet(int s_id, unsigned char* p)
 		//클라 recv 확인용
 
 		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		cout << millisec_since_epoch - packet->move_time << "ms" << endl;
+	//	cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		send_status_packet(s_id);
 		
 		if (true == is_bonfire(cl._s_id))
 		{
-			cout << "모닥불 지역" << endl;
+			//cout << "모닥불 지역" << endl;
 			if (false == cl.is_bone) {
 				cl.is_bone = true;
 				cl._is_active = true;
@@ -440,7 +440,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (ST_INGAME != other._state)
 				continue;
 			send_move_packet( other._s_id, cl._s_id);
-			cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 					
 		}
 
@@ -518,7 +518,7 @@ void process_packet(int s_id, unsigned char* p)
 		float x = packet->x;
 		float y = packet->y;
 		float z = packet->z;
-		cout << "플레이어[" << s_id << "]가  받음" << "[" << p_s_id << "] " << x << " " << y << " " << z << endl;
+		//cout << "플레이어[" << s_id << "]가  받음" << "[" << p_s_id << "] " << x << " " << y << " " << z << endl;
 		break;
 
 	}
@@ -631,7 +631,7 @@ void worker_thread()
 				player_heal(_s_id); 
 			}
 			send_hp_packet(_s_id, _s_id);
-			cout << "hp +1" << endl;
+			//cout << "hp +1" << endl;
 			delete exp_over;
 			break;
 		}
