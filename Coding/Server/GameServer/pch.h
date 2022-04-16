@@ -11,7 +11,7 @@
 #include "CorePch.h"
 #include "Enum.h"
 
-const int RANGE = 1000;
+const int RANGE = 10000;
 const int BONFIRE_RANGE = 1700;
 
 struct timer_ev {

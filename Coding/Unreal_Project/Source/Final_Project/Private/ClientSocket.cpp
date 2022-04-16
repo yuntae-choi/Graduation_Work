@@ -53,7 +53,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
 		ReadyToSend_StatusPacket();
-		ReadyToSend_MovePacket(packet->s_id, fMy_x, fMy_y, fMy_z);
+		//ReadyToSend_MovePacket(packet->s_id, fMy_x, fMy_y, fMy_z);
 
 				// 캐릭터 정보
 		cCharacter p;
@@ -62,9 +62,12 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		p.Y = packet->y;
 		p.Z = packet->z;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
+		PlayerController->iMySessionId = packet->s_id;
+		PlayerController->bSetPlayer = true;
+		PlayerController->StartPlayerInfo(CharactersInfo.players[packet->s_id]);
 		PlayerController->RecvWorldInfo(&CharactersInfo);
 
-		//MYLOG(Warning, TEXT("i'm player%d init spawn : (%f, %f, %f)"), id, x, y, z);
+		//MYLOG(Warning, TEXT("i'm player%d init spawn : (%f, %f, %f)"), packet->s_id, x, y, z);
 
 	}
 	break;
@@ -84,8 +87,15 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		float z = packet->z;
 		ReadyToSend_ChatPacket(packet->s_id, x, y, z);
 
-		PlayerController->RecvNewPlayer(id, x, y, z);
-		//PlayerController->UpdateNewPlayer(packet->s_id, x, y, z);
+		cCharacter p;
+		p.SessionId = packet->s_id;
+		p.X = packet->x;;
+		p.Y = packet->y;
+		p.Z = packet->z;
+		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
+		
+		PlayerController->RecvNewPlayer(p);
+	   // PlayerController->UpdateNewPlayer(packet->s_id, x, y, z);
 
 		break;
 	}
@@ -93,10 +103,9 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(ptr);
 
-		int id = packet->sessionID;
-		float x = packet->x;
-		float y = packet->y;
-		float z = packet->z;
+		CharactersInfo.players[packet->sessionID].X = packet->x;;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Y = packet->y;;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Z = packet->z;;		// 캐릭터 정보
 
 		break;
 	}
@@ -107,7 +116,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		int target = packet->target;
 		
 		//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
-		//clients[target].hp = packet->hp;
+		CharactersInfo.players[target].HealthValue = packet->hp;
 
 
 	}

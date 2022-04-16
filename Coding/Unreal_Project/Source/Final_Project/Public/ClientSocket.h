@@ -19,19 +19,19 @@ public:
 	~cCharacter() {};
 
 	// 세션 아이디
-	int SessionId;
+	int SessionId=-1;
 	// 위치
-	float X;
-	float Y;
-	float Z;
+	float X=0;
+	float Y=0;
+	float Z=0;
 	// 회전값
-	float Yaw;
-	float Pitch;
-	float Roll;
+	float Yaw=0;
+	float Pitch=0;
+	float Roll=0;
 	// 속도
-	float VX;
-	float VY;
-	float VZ;
+	float VX=0;
+	float VY=0;
+	float VZ=0;
 	// 속성
 	bool	IsAlive;
 	float	HealthValue;
