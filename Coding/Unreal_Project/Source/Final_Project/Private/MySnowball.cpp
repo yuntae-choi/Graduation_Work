@@ -97,13 +97,13 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 {
 	MYLOG(Warning, TEXT("collision"));
 
-	auto MyCharacter = Cast<AMyCharacter>(OtherActor);
+	//auto MyCharacter = Cast<AMyCharacter>(OtherActor);
 
-	if (nullptr != MyCharacter)
-	{
-		FDamageEvent DamageEvent;
-		MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
-	}
+	//if (nullptr != MyCharacter)
+	//{
+	//	FDamageEvent DamageEvent;
+	//	MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
+	//}
 
 	Destroy();
 	

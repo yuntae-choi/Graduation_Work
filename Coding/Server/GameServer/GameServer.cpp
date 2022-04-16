@@ -504,19 +504,24 @@ void process_packet(int s_id, unsigned char* p)
 		//printf("Move\n");
 		break;
 	}
-	case SC_PACKET_STATUS_CHANGE: {
-		//printf("status\n");
-		//printf("클라이언트 recv 성공\n");
-
-		break;
-
-	}
 	case CS_PACKET_ATTACK: {
 		printf("attack\n");
 		break;
 
 	}
+	case CS_PACKET_DAMAGE: {
+		sc_packet_hp_change packet;
+		cl._hp -= 10;
+		packet.hp = cl._hp;
+		packet.target = cl._s_id;
+		packet.type = SC_PACKET_HP;
+		packet.size = sizeof(packet);
+		cl.do_send(sizeof(packet), &packet);
+		cout << "플레이어[" << s_id << "가 데미지 받음"<< endl;
 
+	    break;
+
+	}
 	case CS_PACKET_CHAT: {
 		cs_packet_chat* packet = reinterpret_cast<cs_packet_chat*>(p);
 		int p_s_id = packet->s_id;

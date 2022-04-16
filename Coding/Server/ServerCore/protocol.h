@@ -17,6 +17,8 @@ const char CS_PACKET_ATTACK = 3;
 const char CS_PACKET_CHAT = 4;
 const char CS_PACKET_TELEPORT = 5;
 const char CS_PACKET_THROW_SNOW = 6;
+const char CS_PACKET_DAMAGE = 7;
+
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -90,6 +92,11 @@ struct cs_packet_attack {
 	unsigned char size;
 	char	type;
 	float   Angle;
+};
+
+struct cs_packet_damage {
+	unsigned char size;
+	char	type;
 };
 
 struct cs_packet_get_item {

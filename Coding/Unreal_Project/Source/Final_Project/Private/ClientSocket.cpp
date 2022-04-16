@@ -119,7 +119,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		sc_packet_hp_change* packet = reinterpret_cast<sc_packet_hp_change*>(ptr);
 		int target = packet->target;
-		
 		//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
 		CharactersInfo.players[target].HealthValue = packet->hp;
 
@@ -178,6 +177,13 @@ void ClientSocket::ReadyToSend_StatusPacket() {
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_STATUS_CHANGE;
+	SendPacket(&packet);
+};
+
+void ClientSocket::ReadyToSend_DamgePacket() {
+	cs_packet_damage packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_DAMAGE;
 	SendPacket(&packet);
 };
 

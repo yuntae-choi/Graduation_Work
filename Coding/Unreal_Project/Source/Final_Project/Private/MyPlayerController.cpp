@@ -340,9 +340,11 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 	auto MyRotation = m_Player->GetActorRotation();
 	auto MyVelocity = m_Player->GetVelocity();
 	if (input == COMMAND_MOVE)
-		myClientSocket->ReadyToSend_MovePacket(iMySessionId, MyLocation,  MyRotation, MyVelocity);
+		myClientSocket->ReadyToSend_MovePacket(iMySessionId, MyLocation, MyRotation, MyVelocity);
 	else if (input == COMMAND_ATTACK)
 		myClientSocket->ReadyToSend_AttackPacket();
+	else if (input == COMMAND_DAMAGE)
+		myClientSocket->ReadyToSend_DamgePacket();
 
 }
 

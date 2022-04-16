@@ -300,12 +300,25 @@ void AMyCharacter::ReleaseSnowball()
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//auto MySnowball = Cast<AMySnowball>(OtherActor);
+	auto MySnowball = Cast<AMySnowball>(OtherActor);
 
-	//if (nullptr != MySnowball)
+	if (nullptr != MySnowball)
+	{
+		MYLOG(Warning, TEXT("snowball hit."));
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
+
+	}
+
+
+	//auto MyCharacter = Cast<AMyCharacter>(OtherActor);
+
+	//if (nullptr != MyCharacter)
 	//{
-	//	MYLOG(Warning, TEXT("snowball hit."));
+	//	FDamageEvent DamageEvent;
+	//	MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
 	//}
+
 }
 
 void AMyCharacter::StartFarming()

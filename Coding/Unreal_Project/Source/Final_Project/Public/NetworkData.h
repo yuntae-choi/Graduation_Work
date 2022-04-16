@@ -39,8 +39,8 @@ enum CS_PacketType
 	CS_PACKET_ATTACK,
 	CS_PACKET_CHAT,
 	CS_PACKET_TELEPORT,
-	CS_PACKET_THROW_SNOW
-
+	CS_PACKET_THROW_SNOW,
+	CS_PACKET_DAMAGE
 };
 
 enum SC_PacketType
@@ -61,7 +61,8 @@ enum SC_PacketType
 enum COMMAND_Type
 {
 	COMMAND_ATTACK = 1,
-	COMMAND_MOVE
+	COMMAND_MOVE,
+	COMMAND_DAMAGE
 };
 
 // ÆÐÅ¶
@@ -97,6 +98,12 @@ struct cs_packet_attack {
 	unsigned char size;
 	char	type;
 };
+
+struct cs_packet_damage {
+	unsigned char size;
+	char	type;
+};
+
 
 struct cs_packet_chat {
 	unsigned char size;
