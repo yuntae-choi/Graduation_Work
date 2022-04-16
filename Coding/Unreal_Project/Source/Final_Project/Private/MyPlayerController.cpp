@@ -111,9 +111,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 			AMyCharacter* SpawnCharacter = world->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 			SpawnCharacter->SpawnDefaultController();
 
-			SpawnCharacter->iSessionID = player.second.SessionId;
 			SpawnCharacter->SessionId = player.second.SessionId;
-
 			//SpawnCharacter->HealthValue = player.second.HealthValue;
 			SpawnCharacter->IsAlive = player.second.IsAlive;
 			//SpawnCharacter->IsAttacking = player.second.IsAttacking;
@@ -127,13 +125,13 @@ bool AMyPlayerController::UpdateWorldInfo()
 		{
 			AMyCharacter* OtherPlayer = Cast<AMyCharacter>(Character_);
 
-			if (!OtherPlayer || OtherPlayer->iSessionID == -1 || OtherPlayer->iSessionID == iMySessionId)
+			if (!OtherPlayer || OtherPlayer->SessionId == -1 || OtherPlayer->SessionId == iMySessionId)
 			{
 				continue;
 			}
 
 			//타플레이어
-			cCharacter* info = &CharactersInfo->players[OtherPlayer->iSessionID];
+			cCharacter* info = &CharactersInfo->players[OtherPlayer->SessionId];
 
 			if (info->IsAlive)
 			{
@@ -293,7 +291,7 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 	myClientSocket->fMy_x = MyLocation.X;
 	myClientSocket->fMy_y = MyLocation.Y;
 	myClientSocket->fMy_z = MyLocation.Z;
-	//MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
+	MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
 
 
 	if (!info.IsAlive)
@@ -338,9 +336,8 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 	iMySessionId = m_Player->iSessionID;
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
-	auto MyVelocity = m_Player->GetVelocity();
 	if (input == COMMAND_MOVE)
-		myClientSocket->ReadyToSend_MovePacket(iMySessionId, MyLocation,  MyRotation, MyVelocity);
+		myClientSocket->ReadyToSend_MovePacket(iMySessionId, MyLocation.X, MyLocation.Y, MyLocation.Z);
 	else if (input == COMMAND_ATTACK)
 		myClientSocket->ReadyToSend_AttackPacket();
 
@@ -404,7 +401,7 @@ void AMyPlayerController::UpdateNewPlayer()
 		MYLOG(Warning, TEXT("spawn fail"));
 		return;
 	}
-	//MYLOG(Warning, TEXT("spawn ok player%d : %f, %f, %f"), iOtherSessionId, fOther_x, fOther_y, fOther_z);
+	MYLOG(Warning, TEXT("spawn ok player%d : %f, %f, %f"), iOtherSessionId, fOther_x, fOther_y, fOther_z);
 
 	SpawnCharacter->SpawnDefaultController();
 	SpawnCharacter->iSessionID = new_s_id;

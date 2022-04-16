@@ -391,17 +391,12 @@ void process_packet(int s_id, unsigned char* p)
 		cl.x = packet->x;
 		cl.y = packet->y;
 		cl.z = packet->z;
-		cl.Yaw = packet->yaw;
-		cl.Pitch = packet->pitch;
-		cl.Roll = packet->roll;
-		cl.VX = packet->vz;
-		cl.VY = packet->vz;
-		cl.VZ = packet->vz;
+
 		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
 
-		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-	    //cout << millisec_since_epoch - packet->move_time << "ms" << endl;
+		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	//	cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		send_status_packet(s_id);
 		
@@ -445,7 +440,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (ST_INGAME != other._state)
 				continue;
 			send_move_packet( other._s_id, cl._s_id);
-			cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 					
 		}
 
@@ -657,13 +652,7 @@ void send_move_packet(int _id, int target)
 	packet.x = clients[target].x;
 	packet.y = clients[target].y;
 	packet.z = clients[target].z;
-	packet.yaw = clients[target].Yaw;
-	packet.pitch = clients[target].Pitch;
-	packet.roll = clients[target].Roll;
-	packet.vx = clients[target].VX;
-	packet.vy = clients[target].VY;
-	packet.vz = clients[target].VZ;
-	//packet.move_time = clients[target].last_move_time;
+	packet.move_time = clients[target].last_move_time;
 	clients[_id].do_send(sizeof(packet), &packet);
 }
 //타이머

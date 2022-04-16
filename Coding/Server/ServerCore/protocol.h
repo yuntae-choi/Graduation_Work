@@ -73,15 +73,7 @@ struct cs_packet_move {
 	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
 	int sessionID;
 	float x, y, z;
-	// 속도
-	float vx;
-	float vy;
-	float vz;
-	// 회전값
-	float yaw;
-	float pitch;
-	float roll;
-	//long long		move_time;
+	long long		move_time;
 };
 
 struct cs_packet_attack {
