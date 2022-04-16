@@ -144,6 +144,7 @@ public:
 	void ReadyToSend_MovePacket(int sessionID, float x, float y, float z);
 	void ReadyToSend_AttackPacket();
 	void ReadyToSend_ChatPacket(int sessionID, float x, float y, float z);
+	void ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);

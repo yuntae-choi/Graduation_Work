@@ -522,6 +522,28 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 
 	}
+	case CS_PACKET_THROW_SNOW: {
+		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
+		cout << "플레이어[" << packet->s_id << "]가 보냄" << packet->dx << endl;
+		for (auto& other : clients) {
+			if (other._s_id == s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			cout << "섹스1" << endl;
+			packet->type = SC_PACKET_THROW_SNOW;
+			other.do_send(sizeof(packet), &packet);
+			cout << "섹스2" << endl;
+
+			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+
+		}
+
+
+		break;
+
+	}
+
 	default:
 		printf("Unknown PACKET type\n");
 

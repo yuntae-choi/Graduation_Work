@@ -38,7 +38,9 @@ enum CS_PacketType
 	CS_PACKET_MOVE,
 	CS_PACKET_ATTACK,
 	CS_PACKET_CHAT,
-	CS_PACKET_TELEPORT
+	CS_PACKET_TELEPORT,
+	CS_PACKET_THROW_SNOW
+
 };
 
 enum SC_PacketType
@@ -51,7 +53,8 @@ enum SC_PacketType
 	SC_PACKET_LOGIN_FAIL,
 	SC_PACKET_STATUS_CHANGE,
 	SC_PACKET_DISCONNECT,
-	SC_PACKET_HP
+	SC_PACKET_HP,
+	SC_PACKET_THROW_SNOW
 
 };
 
@@ -101,6 +104,16 @@ struct cs_packet_teleport {
 	unsigned char size;
 	char	type;
 };
+
+struct cs_packet_throw_snow {
+	unsigned char size;
+	char	type;
+	int s_id;
+	float x, y, z;
+	float dx, dy, dz;
+
+};
+
 struct sc_packet_login_ok {
 	unsigned char size;
 	char type;

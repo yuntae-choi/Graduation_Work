@@ -52,7 +52,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		int id = packet->s_id;
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
-		ReadyToSend_StatusPacket();
+		//ReadyToSend_StatusPacket();
 		//ReadyToSend_MovePacket(packet->s_id, fMy_x, fMy_y, fMy_z);
 
 				// 캐릭터 정보
@@ -63,7 +63,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		p.Z = packet->z;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
 		PlayerController->iMySessionId = packet->s_id;
-		PlayerController->bSetPlayer = true;
 		PlayerController->StartPlayerInfo(CharactersInfo.players[packet->s_id]);
 		PlayerController->RecvWorldInfo(&CharactersInfo);
 
@@ -85,7 +84,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		float x = packet->x;
 		float y = packet->y;
 		float z = packet->z;
-		ReadyToSend_ChatPacket(packet->s_id, x, y, z);
+		//ReadyToSend_ChatPacket(packet->s_id, x, y, z);
 
 		cCharacter p;
 		p.SessionId = packet->s_id;
@@ -103,9 +102,15 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(ptr);
 
-		CharactersInfo.players[packet->sessionID].X = packet->x;;		// 캐릭터 정보
-		CharactersInfo.players[packet->sessionID].Y = packet->y;;		// 캐릭터 정보
-		CharactersInfo.players[packet->sessionID].Z = packet->z;;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].X = packet->x;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Y = packet->y;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Z = packet->z;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Yaw = packet->yaw;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Pitch = packet->pitch;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Roll = packet->roll;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VX = packet->vx;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
 
 		break;
 	}
@@ -118,6 +123,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
 		CharactersInfo.players[target].HealthValue = packet->hp;
 
+		break;
 
 	}
 
@@ -133,11 +139,20 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		break;
 	}
+
+	case SC_PACKET_THROW_SNOW:
+	{
+
+		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
+		MYLOG(Warning, TEXT("player%d snow : (%f, %f, %f)"), packet->s_id, packet->dx, packet->dy, packet->dz);
+		//ReadyToSend_ChatPacket(packet->s_id, packet->dx, packet->dy, packet->z);
+		break;
+	}
 	case SC_PACKET_STATUS_CHANGE:
 	{
 		
-		ReadyToSend_StatusPacket();
-
+	//ReadyToSend_StatusPacket();
+		break;
 	}
 	}
 }
@@ -175,23 +190,46 @@ void ClientSocket::SetPlayerController(AMyPlayerController* pPlayerController)
 	}
 }
 
-void ClientSocket::ReadyToSend_MovePacket(int sessionID, float x, float y, float z)
+void ClientSocket::ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity)
 {
 	if (_login_ok) {
 		cs_packet_move packet;
 		packet.size = sizeof(packet);
 		packet.type = CS_PACKET_MOVE;
 		//packet.direction = dr;
-		packet.sessionID = sessionID;
-		packet.x = x;
-		packet.y = y;
-		packet.z = z;
+		packet.sessionID = s_id;
+		packet.x = MyLocation.X;
+		packet.y = MyLocation.Y;
+		packet.z = MyLocation.Z;
+		packet.yaw = MyRotation.Yaw;
+		packet.pitch = MyRotation.Pitch;
+		packet.roll = MyRotation.Roll;
+		packet.vx = MyVelocity.X;
+		packet.vy = MyVelocity.Y;
+		packet.vz = MyVelocity.Z;
 
-		size_t sent = 0;
-		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		packet.move_time = millisec_since_epoch;
+	//	size_t sent = 0;
+		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		//packet.move_time = millisec_since_epoch;
 		SendPacket(&packet);
 	}
+};
+
+void ClientSocket::ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
+{
+
+	cs_packet_throw_snow packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_THROW_SNOW;
+	packet.s_id = s_id;
+	packet.x = MyLocation.X;
+	packet.y = MyLocation.Y;
+	packet.z = MyLocation.Z;
+	packet.dx = MyDirection.X;
+	packet.dy = MyDirection.Y;
+	packet.dz = MyDirection.Z;
+	size_t sent = 0;
+	SendPacket(&packet);
 };
 
 void ClientSocket::ReadyToSend_AttackPacket()

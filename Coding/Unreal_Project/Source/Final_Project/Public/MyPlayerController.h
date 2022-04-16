@@ -33,6 +33,7 @@ public:
 	void SendPlayerInfo();		// 플레이어 위치 송신
 	bool UpdateWorldInfo();		// 월드 동기화
 	void UpdatePlayerInfo(const cCharacter& info);		// 플레이어 동기화	
+	void Throw_Snow(FVector MyLocation, FVector MyDirection);
 
 	
 	void UpdatePlayerS_id(int _s_id);
