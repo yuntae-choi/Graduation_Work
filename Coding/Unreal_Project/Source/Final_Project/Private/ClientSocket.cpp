@@ -52,7 +52,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		int id = packet->s_id;
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
-		//ReadyToSend_StatusPacket();
+		ReadyToSend_StatusPacket();
 		//ReadyToSend_MovePacket(packet->s_id, fMy_x, fMy_y, fMy_z);
 
 				// 캐릭터 정보
@@ -63,6 +63,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		p.Z = packet->z;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
 		PlayerController->iMySessionId = packet->s_id;
+		PlayerController->bSetPlayer = true;
 		PlayerController->StartPlayerInfo(CharactersInfo.players[packet->s_id]);
 		PlayerController->RecvWorldInfo(&CharactersInfo);
 
@@ -84,7 +85,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		float x = packet->x;
 		float y = packet->y;
 		float z = packet->z;
-		//ReadyToSend_ChatPacket(packet->s_id, x, y, z);
+		ReadyToSend_ChatPacket(packet->s_id, x, y, z);
 
 		cCharacter p;
 		p.SessionId = packet->s_id;
@@ -141,7 +142,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_STATUS_CHANGE:
 	{
 		
-	//ReadyToSend_StatusPacket();
+		ReadyToSend_StatusPacket();
 
 	}
 	}
