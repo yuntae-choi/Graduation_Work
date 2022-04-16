@@ -288,6 +288,8 @@ void AMyCharacter::ReleaseSnowball()
 			FVector cameraLocation;
 			FRotator cameraRotation;
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
 
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
 			snowball = nullptr;

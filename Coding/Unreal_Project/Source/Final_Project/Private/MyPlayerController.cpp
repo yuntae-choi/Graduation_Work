@@ -412,6 +412,12 @@ void AMyPlayerController::UpdateNewPlayer()
 	bNewPlayerEntered = false;
 }
 
+void AMyPlayerController::Throw_Snow(FVector MyLocation, FVector MyDirection)
+{
+	myClientSocket->ReadyToSend_Throw_Packet(iMySessionId, MyLocation, MyDirection);
+
+};
+
 //void AMyPlayerController::UpdateRotation()
 //{
 //	float pitch, yaw, roll;

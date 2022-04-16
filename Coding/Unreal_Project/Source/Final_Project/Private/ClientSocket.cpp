@@ -123,6 +123,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
 		CharactersInfo.players[target].HealthValue = packet->hp;
 
+		break;
 
 	}
 
@@ -138,11 +139,20 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		break;
 	}
+
+	case SC_PACKET_THROW_SNOW:
+	{
+
+		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
+		MYLOG(Warning, TEXT("player%d snow : (%f, %f, %f)"), packet->s_id, packet->dx, packet->dy, packet->dz);
+		//ReadyToSend_ChatPacket(packet->s_id, packet->dx, packet->dy, packet->z);
+		break;
+	}
 	case SC_PACKET_STATUS_CHANGE:
 	{
 		
 	//ReadyToSend_StatusPacket();
-
+		break;
 	}
 	}
 }
@@ -203,6 +213,23 @@ void ClientSocket::ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator
 		//packet.move_time = millisec_since_epoch;
 		SendPacket(&packet);
 	}
+};
+
+void ClientSocket::ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
+{
+
+	cs_packet_throw_snow packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_THROW_SNOW;
+	packet.s_id = s_id;
+	packet.x = MyLocation.X;
+	packet.y = MyLocation.Y;
+	packet.z = MyLocation.Z;
+	packet.dx = MyDirection.X;
+	packet.dy = MyDirection.Y;
+	packet.dz = MyDirection.Z;
+	size_t sent = 0;
+	SendPacket(&packet);
 };
 
 void ClientSocket::ReadyToSend_AttackPacket()

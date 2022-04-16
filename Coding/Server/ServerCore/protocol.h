@@ -16,6 +16,7 @@ const char CS_PACKET_MOVE = 2;
 const char CS_PACKET_ATTACK = 3;
 const char CS_PACKET_CHAT = 4;
 const char CS_PACKET_TELEPORT = 5;
+const char CS_PACKET_THROW_SNOW = 6;
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -27,6 +28,7 @@ const char SC_PACKET_LOGIN_FAIL = 6;
 const char SC_PACKET_STATUS_CHANGE = 7;
 const char SC_PACKET_DISCONNECT = 8;
 const char SC_PACKET_HP = 9;
+const char SC_PACKET_THROW_SNOW = 10;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -110,6 +112,16 @@ struct cs_packet_teleport {
 	unsigned char size;
 	char	type;
 };
+
+struct cs_packet_throw_snow {
+	unsigned char size;
+	char	type;
+	int s_id;
+	float x, y, z;
+	float dx, dy, dz;
+
+};
+
 
 struct sc_packet_put_object {
 	unsigned char size;
