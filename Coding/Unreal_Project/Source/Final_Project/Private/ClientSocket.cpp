@@ -103,9 +103,15 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(ptr);
 
-		CharactersInfo.players[packet->sessionID].X = packet->x;;		// 캐릭터 정보
-		CharactersInfo.players[packet->sessionID].Y = packet->y;;		// 캐릭터 정보
-		CharactersInfo.players[packet->sessionID].Z = packet->z;;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].X = packet->x;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Y = packet->y;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Z = packet->z;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Yaw = packet->yaw;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Pitch = packet->pitch;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Roll = packet->roll;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VX = packet->vx;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
 
 		break;
 	}
@@ -175,21 +181,27 @@ void ClientSocket::SetPlayerController(AMyPlayerController* pPlayerController)
 	}
 }
 
-void ClientSocket::ReadyToSend_MovePacket(int sessionID, float x, float y, float z)
+void ClientSocket::ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity)
 {
 	if (_login_ok) {
 		cs_packet_move packet;
 		packet.size = sizeof(packet);
 		packet.type = CS_PACKET_MOVE;
 		//packet.direction = dr;
-		packet.sessionID = sessionID;
-		packet.x = x;
-		packet.y = y;
-		packet.z = z;
+		packet.sessionID = s_id;
+		packet.x = MyLocation.X;
+		packet.y = MyLocation.Y;
+		packet.z = MyLocation.Z;
+		packet.yaw = MyRotation.Yaw;
+		packet.pitch = MyRotation.Pitch;
+		packet.roll = MyRotation.Roll;
+		packet.vx = MyVelocity.X;
+		packet.vy = MyVelocity.Y;
+		packet.vz = MyVelocity.Z;
 
-		size_t sent = 0;
-		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		packet.move_time = millisec_since_epoch;
+	//	size_t sent = 0;
+		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		//packet.move_time = millisec_since_epoch;
 		SendPacket(&packet);
 	}
 };

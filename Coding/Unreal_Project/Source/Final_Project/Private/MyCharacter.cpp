@@ -200,11 +200,21 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 
 void AMyCharacter::LookUp(float NewAxisValue)
 {
+	if (NewAxisValue != 0)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+	}
 	AddControllerPitchInput(NewAxisValue);
 }
 
 void AMyCharacter::Turn(float NewAxisValue)
 {
+	if (NewAxisValue != 0)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+	}
 	AddControllerYawInput(NewAxisValue);
 }
 
