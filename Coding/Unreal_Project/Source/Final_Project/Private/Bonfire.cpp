@@ -26,7 +26,6 @@ ABonfire::ABonfire()
 
 	sphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ABonfire::OnComponentBeginOverlap);
 	sphereComponent->OnComponentEndOverlap.AddDynamic(this, &ABonfire::OnComponentEndOverlap);
-	sphereComponent->OnComponentActivated.AddDynamic(this, &ABonfire::OnComponentActivated);
 }
 
 // Called when the game starts or when spawned

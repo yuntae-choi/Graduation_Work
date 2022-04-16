@@ -71,8 +71,9 @@ private:
 	void EndFarming();
 	void UpdateFarming(float deltaTime);
 	void UpdateHP();
-	void ChangeSnowman();
-	void WaitForStartGame();
+	void ChangeSnowman();	// 캐릭터를 눈사람화 (사망)
+	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
+	void WaitForStartGame();	// 게임 시작 후 대기
 	bool GetItem(int itemType);
 
 public:	

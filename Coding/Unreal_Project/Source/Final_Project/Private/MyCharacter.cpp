@@ -12,7 +12,7 @@ const int AMyCharacter::iMinHP = 270;
 const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
-const float fChangeSnowmanStunTime = 10.0f;	// 동물에서 눈사람으로 변할 때 스턴 시간
+const float fChangeSnowmanStunTime = 3.0f;// 실제값 - 10.0f;	// 동물에서 눈사람으로 변할 때 스턴 시간
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
@@ -84,8 +84,8 @@ AMyCharacter::AMyCharacter()
 	projectileClass = AMySnowball::StaticClass();
 
 	iSessionID = 0;
-	iCurrentHP = iMaxHP;	// 실제 설정값
-	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
+	//iCurrentHP = iMaxHP;	// 실제 설정값
+	iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
 	
@@ -285,12 +285,14 @@ void AMyCharacter::ReleaseSnowball()
 }
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (bIsSnowman)	// 자신이 눈사람인 경우에만 hit 확인
+{	// 자신이 눈사람이고, 스턴상태가 아닌 경우에만 hit 확인
+	if (bIsSnowman && iCharacterState != CharacterState::SnowmanStunned)
 	{
 		AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
 		if (otherCharacter && !(otherCharacter->GetIsSnowman()))
 		{	// hit가 발생한 액터가 캐릭터이고, 그 캐릭터가 동물인 경우
+			ChangeAnimal();
+			otherCharacter->ChangeSnowman();
 			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
 		}
 	}
@@ -419,7 +421,7 @@ void AMyCharacter::UpdateSpeed()
 void AMyCharacter::ChangeSnowman()
 {
 	// 스켈레탈메시, 애니메이션 블루프린트 변경
-	myAnim->SetDead();
+	//myAnim->SetDead();	// 무슨 용도?
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
@@ -433,6 +435,26 @@ void AMyCharacter::ChangeSnowman()
 	StartStun(fChangeSnowmanStunTime);
 
 	ResetHasItems();
+}
+
+void AMyCharacter::ChangeAnimal()
+{
+	// 스켈레탈메시, 애니메이션 블루프린트 변경
+	GetMesh()->SetSkeletalMesh(bear);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetAnimInstanceClass(bearAnim);
+
+	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
+	MYCHECK(nullptr != myAnim);
+	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
+
+	bIsSnowman = false;
+	iCurrentHP = iMaxHP;
+	GetWorldTimerManager().ClearTimer(temperatureHandle);
+
+	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
+
+	iCharacterState = CharacterState::AnimalNormal;
 }
 
 void AMyCharacter::WaitForStartGame()
