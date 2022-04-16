@@ -44,7 +44,7 @@ public:
 	//void UpdateTemperatureByMatch();
 	void UpdateSpeed();
 	int GetCharacterState() { return iCharacterState; };
-	bool GetIsSnowman() { return bIsSnowman; };
+	bool IsSnowman() { return bIsSnowman; };
 	void StartStun(float waitTime);
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
@@ -71,9 +71,8 @@ private:
 	void EndFarming();
 	void UpdateFarming(float deltaTime);
 	void UpdateHP();
-	void ChangeSnowman();	// 캐릭터를 눈사람화 (사망)
-	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
-	void WaitForStartGame();	// 게임 시작 후 대기
+	void ChangeSnowman();
+	void WaitForStartGame();
 	bool GetItem(int itemType);
 
 public:	

@@ -24,7 +24,6 @@ public:
 	UFUNCTION()
 	void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	void UpdateOverlapCharacters();	// overlap 중인 캐릭터를 찾아서 체온 증감 상태를 변경
 
 protected:
 	// Called when the game starts or when spawned
@@ -34,7 +33,6 @@ public:
 	// 내부 - 회복량, 외부 - 피해량
 	static const int iHealAmount;
 	static const int iDamageAmount;
-
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	USphereComponent* sphereComponent;

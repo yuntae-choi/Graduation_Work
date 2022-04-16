@@ -12,7 +12,7 @@ const int AMyCharacter::iMinHP = 270;
 const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
-const float fChangeSnowmanStunTime = 3.0f;// 실제값 - 10.0f;	// 동물에서 눈사람으로 변할 때 스턴 시간
+const float fChangeSnowmanStunTime = 10.0f;	// 동물에서 눈사람으로 변할 때 스턴 시간
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
@@ -34,7 +34,7 @@ AMyCharacter::AMyCharacter()
 	GetCapsuleComponent()->SetCapsuleRadius(37.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
 	GetCapsuleComponent()->SetUseCCD(true);
-	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
+	//GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -74.0f), FRotator(0.0f, -90.0f, 0.0f));
 	springArm->TargetArmLength = 220.0f;
 	springArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
@@ -99,7 +99,7 @@ AMyCharacter::AMyCharacter()
 	farmingItem = nullptr;
 	bIsFarming = false;
 	
-	bIsInsideOfBonfire = false;
+	bIsInsideOfBonfire = false;	// 초기값 : true로 설정해야함,  캐릭터 초기 생성위치 모닥불 내부여야 함
 
 	//fMatchDuration = 3.0f;
 	//match = true;
@@ -107,6 +107,8 @@ AMyCharacter::AMyCharacter()
 	iCharacterState = CharacterState::AnimalNormal;
 	bIsSnowman = false;
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
+
+	//playerController = Cast<APlayerController>(GetController());
 }
 
 // Called when the game starts or when spawned
@@ -198,11 +200,21 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 
 void AMyCharacter::LookUp(float NewAxisValue)
 {
+	if (NewAxisValue != 0)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+	}
 	AddControllerPitchInput(NewAxisValue);
 }
 
 void AMyCharacter::Turn(float NewAxisValue)
 {
+	if (NewAxisValue != 0)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+	}
 	AddControllerYawInput(NewAxisValue);
 }
 
@@ -288,21 +300,12 @@ void AMyCharacter::ReleaseSnowball()
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
-	if (!otherCharacter) return;
+	//auto MySnowball = Cast<AMySnowball>(OtherActor);
 
-	// 자신 - 눈사람, 스턴상태 x
-	// 상대 - 동물
-	if (bIsSnowman && iCharacterState != CharacterState::SnowmanStunned)
-	{
-		if (!(otherCharacter->GetIsSnowman()))
-		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
-			ChangeAnimal();
-			otherCharacter->ChangeSnowman();
-			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
-			return;
-		}
-	}
+	//if (nullptr != MySnowball)
+	//{
+	//	MYLOG(Warning, TEXT("snowball hit."));
+	//}
 }
 
 void AMyCharacter::StartFarming()
@@ -428,7 +431,7 @@ void AMyCharacter::UpdateSpeed()
 void AMyCharacter::ChangeSnowman()
 {
 	// 스켈레탈메시, 애니메이션 블루프린트 변경
-	//myAnim->SetDead();	// 무슨 용도?
+	myAnim->SetDead();
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
@@ -442,26 +445,6 @@ void AMyCharacter::ChangeSnowman()
 	StartStun(fChangeSnowmanStunTime);
 
 	ResetHasItems();
-}
-
-void AMyCharacter::ChangeAnimal()
-{
-	// 스켈레탈메시, 애니메이션 블루프린트 변경
-	GetMesh()->SetSkeletalMesh(bear);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetAnimInstanceClass(bearAnim);
-
-	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
-	MYCHECK(nullptr != myAnim);
-	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
-
-	bIsSnowman = false;
-	iCurrentHP = iMaxHP;
-	GetWorldTimerManager().ClearTimer(temperatureHandle);
-
-	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
-
-	iCharacterState = CharacterState::AnimalNormal;
 }
 
 void AMyCharacter::WaitForStartGame()

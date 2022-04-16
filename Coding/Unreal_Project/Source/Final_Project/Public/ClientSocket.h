@@ -29,9 +29,9 @@ public:
 	float Pitch=0;
 	float Roll=0;
 	// 속도
-	float VX=0;
-	float VY=0;
-	float VZ=0;
+	float VX;
+	float VY;
+	float VZ;
 	// 속성
 	bool	IsAlive;
 	float	HealthValue;
@@ -141,7 +141,7 @@ public:
 	void ProcessPacket(unsigned char* ptr);
 	void ReadyToSend_LoginPacket();
 	void ReadyToSend_StatusPacket();
-	void ReadyToSend_MovePacket(int sessionID, float x, float y, float z);
+	void ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity);
 	void ReadyToSend_AttackPacket();
 	void ReadyToSend_ChatPacket(int sessionID, float x, float y, float z);
 	void ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
