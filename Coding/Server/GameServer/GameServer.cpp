@@ -535,12 +535,9 @@ void process_packet(int s_id, unsigned char* p)
 				continue;
 			if (ST_INGAME != other._state)
 				continue;
-			cout << "섹스1" << endl;
 			packet->type = SC_PACKET_THROW_SNOW;
 			cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
 			other.do_send(sizeof(*packet), packet);
-			cout << "섹스2" << endl;
-
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 
 		}
