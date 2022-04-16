@@ -285,15 +285,32 @@ void AMyCharacter::ReleaseSnowball()
 }
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
-{	// 자신이 눈사람이고, 스턴상태가 아닌 경우에만 hit 확인
+{
+	AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
+	if (!otherCharacter) return;
+
+	// 자신 - 눈사람, 스턴상태 x
+	// 상대 - 동물
 	if (bIsSnowman && iCharacterState != CharacterState::SnowmanStunned)
 	{
-		AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
-		if (otherCharacter && !(otherCharacter->GetIsSnowman()))
-		{	// hit가 발생한 액터가 캐릭터이고, 그 캐릭터가 동물인 경우
+		if (!(otherCharacter->GetIsSnowman()))
+		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
 			ChangeAnimal();
 			otherCharacter->ChangeSnowman();
 			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
+			return;
+		}
+	}
+
+	// 자신 - 동물
+	// 상대 - 눈사람, 스턴상태 x
+	if (!bIsSnowman)
+	{
+		if ((otherCharacter->GetIsSnowman()) && (otherCharacter->GetCharacterState() != CharacterState::SnowmanStunned))
+		{	// 본인 눈사람화(사망), 상대 캐릭터 동물화(부활)
+			ChangeSnowman();
+			otherCharacter->ChangeAnimal();
+			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *(otherCharacter->GetName()), *GetName());
 		}
 	}
 }
