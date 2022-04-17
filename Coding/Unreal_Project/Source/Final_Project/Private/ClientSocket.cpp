@@ -130,15 +130,19 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
 		MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
-		PlayerController->RecvNewBall(packet->s_id);
-
 		break;
 	}
 	case SC_PACKET_THROW_SNOW:
 	{
-
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
 		MYLOG(Warning, TEXT("player%d snow : (%f, %f, %f)"), packet->s_id, packet->dx, packet->dy, packet->dz);
+		CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCz = packet->z;		/// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
+		PlayerController->RecvNewBall(packet->s_id);
 		break;
 	}
 	case SC_PACKET_STATUS_CHANGE:

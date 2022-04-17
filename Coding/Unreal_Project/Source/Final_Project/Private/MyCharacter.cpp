@@ -220,6 +220,13 @@ void AMyCharacter::Turn(float NewAxisValue)
 
 void AMyCharacter::Attack()
 {
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (iSessionID == PlayerController->iMySessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
+
+}
+
+void AMyCharacter::SnowAttack()
+{
 	if (isAttacking) return;
 	if (bIsSnowman) return;
 	//if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
@@ -228,10 +235,6 @@ void AMyCharacter::Attack()
 	isAttacking = true;
 	// 디버깅용 - 실제는 주석 해제
 	//iSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
-
-	
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (iSessionID == PlayerController->iMySessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
 
 	// Attempt to fire a projectile.
 	if (projectileClass)
@@ -276,7 +279,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	return FinalDamage;
 }
 
-void AMyCharacter::ReleaseSnowball()
+void AMyCharacter::ReleaseSnowball(FVector MyLocation_, FVector MyDirection_)
 {
 	if (IsValid(snowball))
 	{
@@ -285,13 +288,12 @@ void AMyCharacter::ReleaseSnowball()
 
 		if (snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
-			FVector cameraLocation;
-			FRotator cameraRotation;
-			GetActorEyesViewPoint(cameraLocation, cameraRotation);
 			//던지는 순간 좌표값 보내는 코드
 			//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			//PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
-			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
+			
+			MYLOG(Warning, TEXT("snow dir : %f, %f, %f"), MyDirection_.X, MyDirection_.Y, MyDirection_.Z);
+			II_Throwable::Execute_Throw(snowball, MyDirection_);
 			snowball = nullptr;
 		}
 

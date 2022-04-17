@@ -5,7 +5,9 @@
 #include "Final_Project.h"
 #include "Animation/AnimInstance.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "MyPlayerController.h"
 #include "MyAnimInstance.generated.h"
+
 
 /**
  * 
@@ -25,6 +27,7 @@ public:
 private:
 	UFUNCTION()
 	void AnimNotify_SnowballRelease();
+	void Anim_SnowballRelease();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))

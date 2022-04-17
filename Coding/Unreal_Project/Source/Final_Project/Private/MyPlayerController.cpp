@@ -341,10 +341,13 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
 	auto MyVelocity = m_Player->GetVelocity();
+	FVector MyCameraLocation;
+	FRotator MyCameraRotation;
+	m_Player->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
 	if (input == COMMAND_MOVE)
 		myClientSocket->ReadyToSend_MovePacket(iMySessionId, MyLocation, MyRotation, MyVelocity);
-	else if (input == COMMAND_ATTACK)
-		myClientSocket->ReadyToSend_AttackPacket();
+	else if (input == COMMAND_ATTACK) 
+		myClientSocket->ReadyToSend_Throw_Packet(iMySessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
 		myClientSocket->ReadyToSend_DamgePacket();
 
@@ -395,9 +398,6 @@ void AMyPlayerController::UpdateNewPlayer()
 		return;
 	}
 
-
-
-	
 	// 새로운 플레이어를 필드에 스폰
 	FVector SpawnLocation_;
 	SpawnLocation_.X = CharactersInfo->players[new_s_id].X;
@@ -405,9 +405,9 @@ void AMyPlayerController::UpdateNewPlayer()
 	SpawnLocation_.Z = CharactersInfo->players[new_s_id].Z;
 
 	FRotator SpawnRotation;
-	SpawnRotation.Yaw = 0.0f;
-	SpawnRotation.Pitch = 0.0f;
-	SpawnRotation.Roll = 0.0f;
+	SpawnRotation.Yaw = CharactersInfo->players[new_s_id].Yaw;
+	SpawnRotation.Pitch = CharactersInfo->players[new_s_id].Pitch;
+	SpawnRotation.Roll = CharactersInfo->players[new_s_id].Roll;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -433,11 +433,24 @@ void AMyPlayerController::UpdateNewPlayer()
 void AMyPlayerController::UpdateNewBall()
 {
 	UWorld* const World = GetWorld();
-
 	// 새로운 플레이어가 자기 자신이면 무시
 	int new_s_id = iNewBalls.front();
+	FVector C_Location_;
+	C_Location_.X = CharactersInfo->players[new_s_id].fCx;
+	C_Location_.Y = CharactersInfo->players[new_s_id].fCy;
+	C_Location_.Z = CharactersInfo->players[new_s_id].fCz;
+	FVector CD_Location_;
+	CD_Location_.X = CharactersInfo->players[new_s_id].fCDx;
+	CD_Location_.Y = CharactersInfo->players[new_s_id].fCDy;
+	CD_Location_.Z = CharactersInfo->players[new_s_id].fCDz;
+	CharactersInfo->players[new_s_id].FMyLocation = C_Location_;
+	CharactersInfo->players[new_s_id].FMyDirection = CD_Location_;
+	
 	if (new_s_id == iMySessionId)
 	{
+		auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+		
+		m_Player->SnowAttack();
 		iNewBalls.pop();
 		return;
 	}
@@ -449,7 +462,7 @@ void AMyPlayerController::UpdateNewBall()
 	{
 		AMyCharacter* OtherPlayer = Cast<AMyCharacter>(Character_);
 
-		if (!OtherPlayer || OtherPlayer->iSessionID == -1 || OtherPlayer->iSessionID == iMySessionId)
+		if (!OtherPlayer || OtherPlayer->iSessionID == -1 || new_s_id == iMySessionId )
 		{
 			continue;
 		}
@@ -458,7 +471,7 @@ void AMyPlayerController::UpdateNewBall()
 			cCharacter* info = &CharactersInfo->players[new_s_id];
 			if (info->IsAlive)
 			{				
-				OtherPlayer->Attack();
+				OtherPlayer->SnowAttack();
 				iNewBalls.pop();
 				return;
 			}
