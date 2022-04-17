@@ -80,4 +80,5 @@ public:
 	//UPROPERTY(EditAnywhere, Category = "Spawning")
 	//TSubclassOf<class AMyCharacter> WhoToSpawn;
 
+	bool bNewPlayerEntered;
 };
