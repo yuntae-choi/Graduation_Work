@@ -543,6 +543,15 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 
 	}
+	case CS_PACKET_GET_ITEM: {
+		cs_packet_get_item* packet = reinterpret_cast<cs_packet_get_item*>(p);
+		int p_s_id = packet->s_id;
+		int _item_no = packet->item_num;
+		cout << "플레이어[" << s_id << "]가 " << "[" << _item_no << "]얻음" << endl;
+		break;
+
+	}
+
 	case CS_PACKET_THROW_SNOW: {
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		cout << "throw";

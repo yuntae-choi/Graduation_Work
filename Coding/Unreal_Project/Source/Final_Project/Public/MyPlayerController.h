@@ -29,7 +29,7 @@ public:
 
 	//void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
 	void UpdatePlayerInfo(int input);
-	
+	void UpdateFarming(int item_no);
 	void SendPlayerInfo();		// 플레이어 위치 송신
 	bool UpdateWorldInfo();		// 월드 동기화
 	void UpdatePlayerInfo(const cCharacter& info);		// 플레이어 동기화	

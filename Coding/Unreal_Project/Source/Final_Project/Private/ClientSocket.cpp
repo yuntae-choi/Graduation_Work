@@ -241,6 +241,18 @@ void ClientSocket::ReadyToSend_AttackPacket()
 	SendPacket(&packet);
 };
 
+void ClientSocket::ReadyToSend_ItemPacket(int item_no)
+{
+
+	cs_packet_get_item packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_GET_ITEM;
+	packet.s_id = iMy_s_id;
+	packet.item_no = item_no;
+	size_t sent = 0;
+	SendPacket(&packet);
+};
+
 void ClientSocket::ReadyToSend_ChatPacket(int sessionID, float x, float y, float z)
 {
 

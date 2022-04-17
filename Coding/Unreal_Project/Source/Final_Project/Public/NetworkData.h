@@ -40,7 +40,8 @@ enum CS_PacketType
 	CS_PACKET_CHAT,
 	CS_PACKET_TELEPORT,
 	CS_PACKET_THROW_SNOW,
-	CS_PACKET_DAMAGE
+	CS_PACKET_DAMAGE,
+	CS_PACKET_GET_ITEM
 };
 
 enum SC_PacketType
@@ -55,7 +56,8 @@ enum SC_PacketType
 	SC_PACKET_DISCONNECT,
 	SC_PACKET_HP,
 	SC_PACKET_THROW_SNOW,
-	SC_PACKET_ATTACK
+	SC_PACKET_ATTACK,
+	SC_PACKET_GET_ITEM
 
 
 };
@@ -65,6 +67,14 @@ enum COMMAND_Type
 	COMMAND_ATTACK = 1,
 	COMMAND_MOVE,
 	COMMAND_DAMAGE
+};
+
+enum ITEM_Type
+{
+	ITEM_MAT = 0,
+	ITEM_UMB,
+	ITEM_BAG,
+	ITEM_SNOW
 };
 
 // ÆÐÅ¶
@@ -130,6 +140,13 @@ struct cs_packet_throw_snow {
 	float x, y, z;
 	float dx, dy, dz;
 
+};
+
+struct cs_packet_get_item {
+	unsigned char size;
+	char	type;
+	int s_id;
+	int item_no;
 };
 
 struct sc_packet_login_ok {
