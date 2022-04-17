@@ -31,6 +31,7 @@ const char SC_PACKET_STATUS_CHANGE = 7;
 const char SC_PACKET_DISCONNECT = 8;
 const char SC_PACKET_HP = 9;
 const char SC_PACKET_THROW_SNOW = 10;
+const char SC_PACKET_ATTACK = 11;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -91,7 +92,7 @@ struct cs_packet_move {
 struct cs_packet_attack {
 	unsigned char size;
 	char	type;
-	float   Angle;
+	int s_id;
 };
 
 struct cs_packet_damage {

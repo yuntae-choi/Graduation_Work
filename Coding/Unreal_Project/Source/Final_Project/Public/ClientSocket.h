@@ -205,6 +205,7 @@ public:
 	Overlap _recv_over;
 	char	_id[MAX_NAME_SIZE];
 	char	_pw[MAX_NAME_SIZE];
+	int     iMy_s_id;
 	float	fMy_x;
 	float	fMy_y;
 	float	fMy_z;

@@ -49,9 +49,7 @@ public:
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 
-	int		SessionId;		// 플레이어 고유 아이디
-	bool	IsAlive;		// 살아있는지
-	bool	IsAttacking;	// 공격중인지
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -99,6 +97,10 @@ public:
 	// 모든 캐릭터 동일 & 변경될 일 x
 	static const int iMaxHP;
 	static const int iMinHP;
+	int		SessionId;		// 플레이어 고유 아이디
+	bool	IsAlive;		// 살아있는지
+	bool	IsAttacking;	// 공격중인지
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iCurrentHP;

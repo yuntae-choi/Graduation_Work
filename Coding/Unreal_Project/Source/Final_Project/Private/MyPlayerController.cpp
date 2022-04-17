@@ -22,8 +22,6 @@ AMyPlayerController::AMyPlayerController()
 
 
 	PrimaryActorTick.bCanEverTick = true;
-
-	bNewPlayerEntered = false;
 }
 
 
@@ -375,11 +373,11 @@ void AMyPlayerController::UpdateNewPlayer()
 	if (new_s_id== iMySessionId)
 	{
 		iNewPlayers.pop();
-		bNewPlayerEntered = false;
+
 		return;
 	}
 
-	bNewPlayerEntered = true;
+
 
 	
 	// 새로운 플레이어를 필드에 스폰
@@ -411,7 +409,7 @@ void AMyPlayerController::UpdateNewPlayer()
 	SpawnCharacter->SpawnDefaultController();
 	SpawnCharacter->iSessionID = new_s_id;
 	iNewPlayers.pop();
-	bNewPlayerEntered = false;
+
 }
 
 void AMyPlayerController::Throw_Snow(FVector MyLocation, FVector MyDirection)

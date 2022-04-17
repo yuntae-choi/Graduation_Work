@@ -54,7 +54,9 @@ enum SC_PacketType
 	SC_PACKET_STATUS_CHANGE,
 	SC_PACKET_DISCONNECT,
 	SC_PACKET_HP,
-	SC_PACKET_THROW_SNOW
+	SC_PACKET_THROW_SNOW,
+	SC_PACKET_ATTACK
+
 
 };
 
@@ -97,6 +99,7 @@ struct cs_packet_move {
 struct cs_packet_attack {
 	unsigned char size;
 	char	type;
+	int s_id;
 };
 
 struct cs_packet_damage {

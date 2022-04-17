@@ -505,6 +505,17 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 	}
 	case CS_PACKET_ATTACK: {
+		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(p);
+		for (auto& other : clients) {
+			if (other._s_id == s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			packet->type = SC_PACKET_ATTACK;
+			cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+			other.do_send(sizeof(*packet), packet);
+			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+		}
 		printf("attack\n");
 		break;
 
@@ -534,14 +545,14 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case CS_PACKET_THROW_SNOW: {
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
-		
+		cout << "throw";
 		for (auto& other : clients) {
 			if (other._s_id == s_id)
 				continue;
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
-			cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
 			other.do_send(sizeof(*packet), packet);
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 

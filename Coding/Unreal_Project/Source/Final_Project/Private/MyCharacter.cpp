@@ -288,9 +288,9 @@ void AMyCharacter::ReleaseSnowball()
 			FVector cameraLocation;
 			FRotator cameraRotation;
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
-
+			//던지는 순간 좌표값 보내는 코드
+			//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			//PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
 			snowball = nullptr;
 		}
