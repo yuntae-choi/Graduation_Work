@@ -9,12 +9,17 @@
 AMyPlayerController::AMyPlayerController()
 {
 
-	mySocket = ClientSocket::GetSingleton();
-	mySocket->SetPlayerController(this);
+	myClientSocket = ClientSocket::GetSingleton();
+	/*myClientSocket->h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(myClientSocket->_socket), myClientSocket->h_iocp, 0, 0);
+	*///int ret = myClientSocket->Connect();
+	//if (ret)
+	//{
+		//UE_LOG(LogClass, Log, TEXT("IOCP Server connect success!"));
+		myClientSocket->SetPlayerController(this);
+		
+	//}
 
-	bNewPlayerEntered = false;
-
-	//nPlayers = -1;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -24,23 +29,21 @@ void AMyPlayerController::BeginPlay()
 {
 	//Super::BeginPlay(); //게임 종료가 안됨
 
-	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (!player_)
+	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!m_Player)
 		return;
-	auto MyLocation = player_->GetActorLocation();
+	auto MyLocation = m_Player->GetActorLocation();
 
-	mySocket->fMy_z = MyLocation.Z;
-
-	mySocket->StartListen();
-
+	myClientSocket->fMy_z = MyLocation.Z;
+	myClientSocket->StartListen();
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	mySocket->CloseSocket();
-	mySocket->StopListen();
+	myClientSocket->CloseSocket();
+	myClientSocket->StopListen();
 	//Super::EndPlay(EndPlayReason);
 }
 
@@ -48,8 +51,12 @@ void AMyPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//새플레이어
 	if (!iNewPlayers.empty())
 		UpdateNewPlayer();
+	//새 눈덩이
+	if (!iNewBalls.empty())
+		UpdateNewBall();
 	// 월드 동기화
 	UpdateWorldInfo();
 	//UpdateRotation();
@@ -101,6 +108,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 			SpawnCharacter->iSessionID = player.second.SessionId;
 			SpawnCharacter->SessionId = player.second.SessionId;
 
+			//SpawnCharacter->HealthValue = player.second.HealthValue;
 			SpawnCharacter->IsAlive = player.second.IsAlive;
 			//SpawnCharacter->IsAttacking = player.second.IsAttacking;
 		}
@@ -209,9 +217,9 @@ void AMyPlayerController::StartPlayerInfo(const cCharacter& info)
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
 
-	mySocket->fMy_x = MyLocation.X;
-	mySocket->fMy_y = MyLocation.Y;
-	mySocket->fMy_z = MyLocation.Z;
+	myClientSocket->fMy_x = MyLocation.X;
+	myClientSocket->fMy_y = MyLocation.Y;
+	myClientSocket->fMy_z = MyLocation.Z;
 	MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
 
 
@@ -276,9 +284,9 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
 	
-	mySocket->fMy_x = MyLocation.X;
-	mySocket->fMy_y = MyLocation.Y;
-	mySocket->fMy_z = MyLocation.Z;
+	myClientSocket->fMy_x = MyLocation.X;
+	myClientSocket->fMy_y = MyLocation.Y;
+	myClientSocket->fMy_z = MyLocation.Z;
 	//MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
 
 
@@ -326,17 +334,17 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 	auto MyRotation = m_Player->GetActorRotation();
 	auto MyVelocity = m_Player->GetVelocity();
 	if (input == COMMAND_MOVE)
-		mySocket->Send_MovePacket(iMySessionId, MyLocation, MyRotation, MyVelocity);
+		myClientSocket->ReadyToSend_MovePacket(iMySessionId, MyLocation, MyRotation, MyVelocity);
 	else if (input == COMMAND_ATTACK)
-		mySocket->Send_AttackPacket();
+		myClientSocket->ReadyToSend_AttackPacket();
 	else if (input == COMMAND_DAMAGE)
-		mySocket->Send_DamgePacket();
+		myClientSocket->ReadyToSend_DamgePacket();
 
 }
 
 void AMyPlayerController::UpdateFarming(int item_no)
 {
-		mySocket->Send_ItemPacket(item_no);
+		myClientSocket->ReadyToSend_ItemPacket(item_no);
 }
 
 void AMyPlayerController::UpdatePlayerS_id(int id)
@@ -346,6 +354,7 @@ void AMyPlayerController::UpdatePlayerS_id(int id)
 	if (!m_Player)
 		return;
 	m_Player->iSessionID = id;
+	m_Player->SessionId = id;
 	m_Player->SetActorLocationAndRotation(FVector(id * 100.0f, id * 100.0f, m_Player->GetActorLocation().Z), FRotator(0.0f, -90.0f, 0.0f));
 }
 
@@ -355,6 +364,14 @@ void AMyPlayerController::RecvNewPlayer(const cCharacter& info)
 
 	UWorld* World = GetWorld();
 	iNewPlayers.push(info.SessionId);
+}
+
+void AMyPlayerController::RecvNewBall(int s_id)
+{
+	//MYLOG(Warning, TEXT("recv ok player%d : %f, %f, %f"), sessionID, x, y, z);
+
+	UWorld* World = GetWorld();
+	iNewBalls.push(s_id);
 }
 
 void AMyPlayerController::UpdateNewPlayer()
@@ -405,9 +422,47 @@ void AMyPlayerController::UpdateNewPlayer()
 
 }
 
+void AMyPlayerController::UpdateNewBall()
+{
+	UWorld* const World = GetWorld();
+
+	// 새로운 플레이어가 자기 자신이면 무시
+	int new_s_id = iNewBalls.front();
+	if (new_s_id == iMySessionId)
+	{
+		iNewBalls.pop();
+		return;
+	}
+
+	TArray<AActor*> SpawnedCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
+
+	for (auto& Character_ : SpawnedCharacters)
+	{
+		AMyCharacter* OtherPlayer = Cast<AMyCharacter>(Character_);
+
+		if (!OtherPlayer || OtherPlayer->iSessionID == -1 || OtherPlayer->iSessionID == iMySessionId)
+		{
+			continue;
+		}
+        
+		if (new_s_id == OtherPlayer->iSessionID) {
+			cCharacter* info = &CharactersInfo->players[new_s_id];
+			if (info->IsAlive)
+			{				
+				OtherPlayer->Attack();
+				iNewBalls.pop();
+				return;
+			}
+		}
+	}
+	iNewPlayers.pop();
+
+}
+
 void AMyPlayerController::Throw_Snow(FVector MyLocation, FVector MyDirection)
 {
-	mySocket->Send_Throw_Packet(iMySessionId, MyLocation, MyDirection);
+	myClientSocket->ReadyToSend_Throw_Packet(iMySessionId, MyLocation, MyDirection);
 
 };
 

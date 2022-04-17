@@ -25,7 +25,7 @@ public:
 	AMyPlayerController();
 
 	void RecvNewPlayer(const cCharacter& info);
-
+	void RecvNewBall(int s_id);
 
 	//void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
 	void UpdatePlayerInfo(int input);
@@ -49,10 +49,12 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	ClientSocket* mySocket;
+	ClientSocket* myClientSocket;
 	cCharactersInfo* CharactersInfo;	// 다른 캐릭터의 정보
 	cCharacter* NewPlayer;
 	void UpdateNewPlayer();
+	void UpdateNewBall();
+
 	void StartPlayerInfo(const cCharacter& info);
 
 	void RecvWorldInfo(cCharactersInfo* ci_)
@@ -76,9 +78,10 @@ public:
 	bool bSetPlayer = false;
 	// 새 플레이어 입장
 	queue <int> iNewPlayers;
+	queue <int> iNewBalls;
+
 	int	nPlayers;
 	//UPROPERTY(EditAnywhere, Category = "Spawning")
 	//TSubclassOf<class AMyCharacter> WhoToSpawn;
 
-	bool bNewPlayerEntered;
 };

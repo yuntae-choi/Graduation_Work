@@ -48,8 +48,8 @@ public:
 	void StartStun(float waitTime);
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
-
-	class UMyAnimInstance* GetAnim() const { return myAnim; }
+	void Attack();
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -59,8 +59,6 @@ private:
 	void LeftRight(float NewAxisValue);
 	void LookUp(float NewAxisValue);
 	void Turn(float NewAxisValue);
-
-	void Attack();
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);

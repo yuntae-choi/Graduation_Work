@@ -20,6 +20,23 @@ bool ClientSocket::Connect()
 	if (ret == SOCKET_ERROR)
 		return false;
 
+	// Connect
+	//while (true)
+	//{
+	//	if (::connect(_socket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	//	{
+	//		// 원래 블록했어야 했는데... 너가 논블로킹으로 하라며?
+	//		if (::WSAGetLastError() == WSAEWOULDBLOCK)
+	//			continue;
+	//		// 이미 연결된 상태라면 break
+	//		if (::WSAGetLastError() == WSAEISCONN)
+	//			break;
+	//		// Error
+	//		break;
+	//	}
+	//}
+
+	MYLOG(Warning, TEXT("Connected to Server!"));
 	return true;
 }
 
@@ -35,13 +52,12 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		int id = packet->s_id;
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
-
+		// 캐릭터 정보
 		cCharacter p;
 		p.SessionId = packet->s_id;
 		p.X = packet->x;;
 		p.Y = packet->y;
 		p.Z = packet->z;
-		p.Yaw = packet->yaw;
 		iMy_s_id = packet->s_id;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
 		PlayerController->iMySessionId = packet->s_id;
@@ -60,7 +76,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
-
 		cCharacter p;
 		p.SessionId = packet->s_id;
 		p.X = packet->x;;
@@ -115,6 +130,8 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
 		MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
+		PlayerController->RecvNewBall(packet->s_id);
+
 		break;
 	}
 	case SC_PACKET_THROW_SNOW:
@@ -122,42 +139,40 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
 		MYLOG(Warning, TEXT("player%d snow : (%f, %f, %f)"), packet->s_id, packet->dx, packet->dy, packet->dz);
-
 		break;
 	}
 	case SC_PACKET_STATUS_CHANGE:
 	{
+		
+
 		break;
 	}
 	}
 }
 
 
-void ClientSocket::Send_LoginPacket(float z)
+void ClientSocket::ReadyToSend_LoginPacket()
 {
 	MYLOG(Warning, TEXT("Connected to Server!"));
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
-
 	strcpy_s(packet.id, _id);
 	strcpy_s(packet.pw, _pw);
-
-	packet.z = z;
-
+	packet.z = fMy_z;
 	size_t sent = 0;
 	SendPacket(&packet);
 	
 };
 
-void ClientSocket::Send_StatusPacket() {
+void ClientSocket::ReadyToSend_StatusPacket() {
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_STATUS_CHANGE;
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_DamgePacket() {
+void ClientSocket::ReadyToSend_DamgePacket() {
 	cs_packet_damage packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_DAMAGE;
@@ -173,7 +188,7 @@ void ClientSocket::SetPlayerController(AMyPlayerController* pPlayerController)
 	}
 }
 
-void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity)
+void ClientSocket::ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity)
 {
 	if (_login_ok) {
 		cs_packet_move packet;
@@ -198,7 +213,7 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRota
 	}
 };
 
-void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
+void ClientSocket::ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
 {
 
 	cs_packet_throw_snow packet;
@@ -215,7 +230,7 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_AttackPacket()
+void ClientSocket::ReadyToSend_AttackPacket()
 {
 
 	cs_packet_attack packet;
@@ -226,7 +241,7 @@ void ClientSocket::Send_AttackPacket()
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_ItemPacket(int item_no)
+void ClientSocket::ReadyToSend_ItemPacket(int item_no)
 {
 
 	cs_packet_get_item packet;
@@ -238,7 +253,7 @@ void ClientSocket::Send_ItemPacket(int item_no)
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_ChatPacket(int sessionID, float x, float y, float z)
+void ClientSocket::ReadyToSend_ChatPacket(int sessionID, float x, float y, float z)
 {
 
 	cs_packet_chat packet;
@@ -269,19 +284,16 @@ uint32 ClientSocket::Run()
 {
 	// 초기 init 과정을 기다림
 	FPlatformProcess::Sleep(0.03);
-
+	// recv while loop 시작
+	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
 	Connect();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
-
+	
 	RecvPacket();
 	_login_ok = false;
-	Send_LoginPacket(fMy_z);
-
-	FPlatformProcess::Sleep(0.03);
-
-	// recv while loop 시작
-	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
+	ReadyToSend_LoginPacket();
+	FPlatformProcess::Sleep(0.1);
 	while (StopTaskCounter.GetValue() == 0 && PlayerController != nullptr)
 	{
 		DWORD num_byte;
