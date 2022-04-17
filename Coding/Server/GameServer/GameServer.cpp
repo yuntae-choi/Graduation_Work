@@ -582,8 +582,6 @@ void process_packet(int s_id, unsigned char* p)
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		cout << "throw";
 		for (auto& other : clients) {
-			if (other._s_id == s_id)
-				continue;
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
