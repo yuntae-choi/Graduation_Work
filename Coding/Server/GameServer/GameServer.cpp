@@ -120,7 +120,7 @@ int main()
 
 	for (auto& th : worker_threads)
 		th.join();
-
+	timer_thread.join();
 	//timer_thread.join();
 	for (auto& cl : clients) {
 		if (ST_INGAME == cl._state)
