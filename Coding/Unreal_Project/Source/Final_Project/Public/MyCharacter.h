@@ -90,13 +90,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	AMySnowball* snowball;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	int32 iSessionID;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Data", Meta = (AllowPrivateAccess = true))
+	int32 iSessionId;
 
 	// 모든 캐릭터 동일 & 변경될 일 x
 	static const int iMaxHP;
 	static const int iMinHP;
-	int		SessionId;		// 플레이어 고유 아이디
+
 	bool	IsAlive;		// 살아있는지
 	bool	IsAttacking;	// 공격중인지
 

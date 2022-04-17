@@ -392,7 +392,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_MOVE: {
 		
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
-		CLIENT& cl = clients[s_id];
+		CLIENT& cl = clients[packet->sessionID];
 		cl.x = packet->x;
 		cl.y = packet->y;
 		cl.z = packet->z;
@@ -400,6 +400,8 @@ void process_packet(int s_id, unsigned char* p)
 		cl.VX = packet->vz;
 		cl.VY = packet->vz;
 		cl.VZ = packet->vz;
+		//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f)\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ);
+
 		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
 
@@ -734,6 +736,8 @@ void send_move_packet(int _id, int target)
 	packet.vy = clients[target].VY;
 	packet.vz = clients[target].VZ;
 	//packet.move_time = clients[target].last_move_time;
+
+	//printf_s("[Send move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f)\n", packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);
 	clients[_id].do_send(sizeof(packet), &packet);
 }
 //타이머

@@ -27,6 +27,7 @@ public:
 	void SetSessionId(const int sessionId) { iSessionId = sessionId; }
 	void SetCharactersInfo(cCharactersInfo* ci_) { if (ci_ != nullptr)	CharactersInfo = ci_; }
 	void SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_);
+	void SetInitInfo(const cCharacter& me);
 
 	//void RecvNewPlayer(const cCharacter& info);
 	//void RecvNewBall(int s_id);
@@ -51,12 +52,13 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	void InitPlayerSetting();
 	bool UpdateWorldInfo();		// 월드 동기화
-	void SendMoveInfo();		// 플레이어 위치 송신
 	void UpdateNewPlayer();
 
 
 	ClientSocket*			mySocket;
+	cCharacter				initInfo;
 	queue<shared_ptr<cCharacter>>				NewCharactersInfo;			// 플레이어 로그인 시 캐릭터 정보
 	cCharactersInfo*		CharactersInfo;	// 다른 캐릭터들의 정보
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
@@ -65,6 +67,7 @@ private:
 	FTimerHandle			SendPlayerInfoHandle;	// 동기화 타이머 핸들러
 
 	bool							bNewPlayerEntered;
+	bool							bInitPlayerSetting;
 	
 
 	//bool							bIsConnected;	// 서버와 접속 유무
@@ -80,7 +83,6 @@ private:
 	//float fOther_x;
 	//float fOther_y;
 	//float fOther_z;
-	//bool bSetPlayer = false;
 	//// 새 플레이어 입장
 	//queue <int> iNewPlayers;
 	//queue <int> iNewBalls;

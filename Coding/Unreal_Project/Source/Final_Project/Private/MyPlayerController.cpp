@@ -12,6 +12,7 @@ AMyPlayerController::AMyPlayerController()
 	mySocket->SetPlayerController(this);
 
 	bNewPlayerEntered = false;
+	bInitPlayerSetting = false;
 
 	iPlayerCount = -1;
 
@@ -38,6 +39,10 @@ void AMyPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//플레이어 초기설정
+	if (bInitPlayerSetting)
+		InitPlayerSetting();
+
 	//새 플레이어 스폰
 	if (bNewPlayerEntered)
 		UpdateNewPlayer();
@@ -53,6 +58,12 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 }
 
+void AMyPlayerController::SetInitInfo(const cCharacter& me)
+{
+	initInfo = me;
+	bInitPlayerSetting = true;
+}
+
 void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
 {
 	if (NewPlayer_ != nullptr)
@@ -64,6 +75,14 @@ void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
 	}
 }
 
+void AMyPlayerController::InitPlayerSetting()
+{
+	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!player_) return;
+	player_->SetActorLocationAndRotation(FVector(initInfo.X, initInfo.Y, initInfo.Z), FRotator(0.0f, initInfo.Yaw, 0.0f));
+	player_->iSessionId = initInfo.SessionId;
+	bInitPlayerSetting = false;
+}
 
 bool AMyPlayerController::UpdateWorldInfo()
 {
@@ -80,112 +99,82 @@ bool AMyPlayerController::UpdateWorldInfo()
 		return false;
 	}
 
-	//// 스폰캐릭터들배열 하나 생성하고 월드에 있는 캐릭터들을 배열에 넣어주기
-	//TArray<AActor*> SpawnedCharacters;
-	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
+	// 스폰캐릭터들배열 하나 생성하고 월드에 있는 캐릭터들을 배열에 넣어주기
+	TArray<AActor*> SpawnedCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
 
-	//if (iPlayerCount == -1)
-	//{
-	//	for (auto& player : CharactersInfo->players)
-	//	{
-	//		if (player.first == iSessionId || !player.second.IsAlive)
-	//			continue;
+	if (iPlayerCount == -1)
+	{
+		iPlayerCount = CharactersInfo->players.size();
+		return false;
+	}
+	else
+	{
+		for (auto& Character_ : SpawnedCharacters)
+		{
+			AMyCharacter* OtherPlayer = Cast<AMyCharacter>(Character_);
 
-	//		FVector SpawnLocation_;
-	//		SpawnLocation_.X = player.second.X;
-	//		SpawnLocation_.Y = player.second.Y;
-	//		SpawnLocation_.Z = player.second.Z;
+			if (!OtherPlayer || OtherPlayer->iSessionId == -1 || OtherPlayer->iSessionId == iSessionId)
+			{
+				continue;
+			}
 
-	//		FRotator SpawnRotation;
-	//		SpawnRotation.Yaw = player.second.Yaw;
-	//		SpawnRotation.Pitch = player.second.Pitch;
-	//		SpawnRotation.Roll = player.second.Roll;
+			//타플레이어
+			cCharacter* info = &CharactersInfo->players[OtherPlayer->iSessionId];
 
-	//		FActorSpawnParameters SpawnParams;
-	//		SpawnParams.Owner = this;
-	//		SpawnParams.Instigator = GetInstigator();
-	//		SpawnParams.Name = FName(*FString(to_string(player.second.SessionId).c_str()));
+			if (info->IsAlive)
+			{
+				//if (OtherPlayer->HealthValue != info->HealthValue)
+				//{
+				//	UE_LOG(LogClass, Log, TEXT("other player damaged."));
+				//	// 피격 파티클 소환
+				//	FTransform transform(OtherPlayer->GetActorLocation());
+				//	UGameplayStatics::SpawnEmitterAtLocation(
+				//		world, HitEmiiter, transform, true
+				//	);
+				//	// 피격 애니메이션 플레이
+				//	OtherPlayer->PlayDamagedAnimation();
+				//	OtherPlayer->HealthValue = info->HealthValue;
+				//}
 
-	//		AMyCharacter* SpawnCharacter = world->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
-	//		SpawnCharacter->SpawnDefaultController();
+				//// 공격중일때 타격 애니메이션 플레이
+				//if (info->IsAttacking)
+				//{
+				//	UE_LOG(LogClass, Log, TEXT("other player hit."));
+				//	OtherPlayer->PlayHitAnimation();
+				//}
 
-	//		SpawnCharacter->iSessionID = player.second.SessionId;
-	//		SpawnCharacter->SessionId = player.second.SessionId;
+				FVector CharacterLocation;
+				CharacterLocation.X = info->X;
+				CharacterLocation.Y = info->Y;
+				CharacterLocation.Z = info->Z;
 
-	//		//SpawnCharacter->HealthValue = player.second.HealthValue;
-	//		SpawnCharacter->IsAlive = player.second.IsAlive;
-	//		//SpawnCharacter->IsAttacking = player.second.IsAttacking;
-	//	}
+				FRotator CharacterRotation;
+				CharacterRotation.Yaw = info->Yaw;
+				CharacterRotation.Pitch = 0.0f;
+				CharacterRotation.Roll = 0.0f;
 
-	//	iPlayerCount = CharactersInfo->players.size();
-	//}
-	//else
-	//{
-	//	for (auto& Character_ : SpawnedCharacters)
-	//	{
-	//		AMyCharacter* OtherPlayer = Cast<AMyCharacter>(Character_);
+				FVector CharacterVelocity;
+				CharacterVelocity.X = info->VX;
+				CharacterVelocity.Y = info->VY;
+				CharacterVelocity.Z = info->VZ;
 
-	//		if (!OtherPlayer || OtherPlayer->iSessionID == -1 || OtherPlayer->iSessionID == iSessionId)
-	//		{
-	//			continue;
-	//		}
+				OtherPlayer->AddMovementInput(CharacterVelocity);
+				OtherPlayer->SetActorRotation(CharacterRotation);
+				OtherPlayer->SetActorLocation(CharacterLocation);
+			}
+			else
+			{
+			/*	UE_LOG(LogClass, Log, TEXT("other player dead."));
+				FTransform transform(Character->GetActorLocation());
+				UGameplayStatics::SpawnEmitterAtLocation(
+					world, DestroyEmiiter, transform, true
+				);
+				Character->Destroy();*/
+			}
+		}
 
-	//		//타플레이어
-	//		cCharacter* info = &CharactersInfo->players[OtherPlayer->iSessionID];
-
-	//		if (info->IsAlive)
-	//		{
-	//			//if (OtherPlayer->HealthValue != info->HealthValue)
-	//			//{
-	//			//	UE_LOG(LogClass, Log, TEXT("other player damaged."));
-	//			//	// 피격 파티클 소환
-	//			//	FTransform transform(OtherPlayer->GetActorLocation());
-	//			//	UGameplayStatics::SpawnEmitterAtLocation(
-	//			//		world, HitEmiiter, transform, true
-	//			//	);
-	//			//	// 피격 애니메이션 플레이
-	//			//	OtherPlayer->PlayDamagedAnimation();
-	//			//	OtherPlayer->HealthValue = info->HealthValue;
-	//			//}
-
-	//			//// 공격중일때 타격 애니메이션 플레이
-	//			//if (info->IsAttacking)
-	//			//{
-	//			//	UE_LOG(LogClass, Log, TEXT("other player hit."));
-	//			//	OtherPlayer->PlayHitAnimation();
-	//			//}
-
-	//			FVector CharacterLocation;
-	//			CharacterLocation.X = info->X;
-	//			CharacterLocation.Y = info->Y;
-	//			CharacterLocation.Z = info->Z;
-
-	//			FRotator CharacterRotation;
-	//			CharacterRotation.Yaw = info->Yaw;
-	//			CharacterRotation.Pitch = info->Pitch;
-	//			CharacterRotation.Roll = info->Roll;
-
-	//			FVector CharacterVelocity;
-	//			CharacterVelocity.X = info->VX;
-	//			CharacterVelocity.Y = info->VY;
-	//			CharacterVelocity.Z = info->VZ;
-
-	//			OtherPlayer->AddMovementInput(CharacterVelocity);
-	//			OtherPlayer->SetActorRotation(CharacterRotation);
-	//			OtherPlayer->SetActorLocation(CharacterLocation);
-	//		}
-	//		else
-	//		{
-	//		/*	UE_LOG(LogClass, Log, TEXT("other player dead."));
-	//			FTransform transform(Character->GetActorLocation());
-	//			UGameplayStatics::SpawnEmitterAtLocation(
-	//				world, DestroyEmiiter, transform, true
-	//			);
-	//			Character->Destroy();*/
-	//		}
-	//	}
-
-	//}
+	}
 
 
 	return true;
@@ -223,12 +212,14 @@ void AMyPlayerController::UpdateNewPlayer()
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = GetInstigator();
-		//SpawnParams.Name = FName(*FString(to_string(NewCharactersInfo.front()->SessionId).c_str()));
+		SpawnParams.Name = FName(*FString(to_string(NewCharactersInfo.front()->SessionId).c_str()));
 
 		WhoToSpawn = AMyCharacter::StaticClass();
 		AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 		SpawnCharacter->SpawnDefaultController();
-		SpawnCharacter->SessionId = NewCharactersInfo.front()->SessionId;
+		SpawnCharacter->iSessionId = NewCharactersInfo.front()->SessionId;
+
+		MYLOG(Warning, TEXT("who %d"), SpawnCharacter->iSessionId);
 
 		// 필드의 플레이어 정보에 추가
 		if (CharactersInfo != nullptr)

@@ -45,10 +45,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[info.SessionId] = info;
 		MyPlayerController->SetSessionId(info.SessionId);
 		MyPlayerController->SetCharactersInfo(&CharactersInfo);
-
-		auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(MyPlayerController, 0));
-		if (!player_) return;
-		player_->SetActorLocationAndRotation(FVector(info.X, info.Y, info.Z), FRotator(0.0f, info.Yaw, 0.0f));
+		MyPlayerController->SetInitInfo(info);
 
 		MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
 
@@ -76,20 +73,21 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		break;
 	}
 
-	//case SC_PACKET_MOVE:
-	//{
-	//	cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(ptr);
+	case SC_PACKET_MOVE:
+	{
+		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(ptr);
 
-	//	CharactersInfo.players[packet->sessionID].X = packet->x;		// 캐릭터 정보
-	//	CharactersInfo.players[packet->sessionID].Y = packet->y;		// 캐릭터 정보
-	//	CharactersInfo.players[packet->sessionID].Z = packet->z;		// 캐릭터 정보
-	//	CharactersInfo.players[packet->sessionID].Yaw = packet->yaw;		// 캐릭터 정보
-	//	CharactersInfo.players[packet->sessionID].VX = packet->vx;		// 캐릭터 정보
-	//	CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
-	//	CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].X = packet->x;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Y = packet->y;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Z = packet->z;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Yaw = packet->yaw;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VX = packet->vx;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
 
-	//	break;
-	//}
+		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f)"), packet->sessionID, packet->x, packet->y, packet->z, packet->yaw, packet->vx, packet->vy, packet->vz);
+		break;
+	}
 
 	//case SC_PACKET_HP:
 	//{
@@ -202,7 +200,7 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRota
 		packet.vy = MyVelocity.Y;
 		packet.vz = MyVelocity.Z;
 
-		MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f)"), packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);
+		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f)"), packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);
 		SendPacket(&packet);
 	}
 };
