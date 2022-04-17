@@ -130,6 +130,8 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
 		MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
+		PlayerController->RecvNewBall(packet->s_id);
+
 		break;
 	}
 	case SC_PACKET_THROW_SNOW:

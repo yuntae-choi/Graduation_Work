@@ -59,8 +59,12 @@ void AMyPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//새플레이어
 	if (!iNewPlayers.empty())
 		UpdateNewPlayer();
+	//새 눈덩이
+	if (!iNewBalls.empty())
+		UpdateNewBall();
 	// 월드 동기화
 	UpdateWorldInfo();
 	//UpdateRotation();
@@ -358,6 +362,7 @@ void AMyPlayerController::UpdatePlayerS_id(int id)
 	if (!m_Player)
 		return;
 	m_Player->iSessionID = id;
+	m_Player->SessionId = id;
 	m_Player->SetActorLocationAndRotation(FVector(id * 100.0f, id * 100.0f, m_Player->GetActorLocation().Z), FRotator(0.0f, -90.0f, 0.0f));
 }
 
@@ -367,6 +372,14 @@ void AMyPlayerController::RecvNewPlayer(const cCharacter& info)
 
 	UWorld* World = GetWorld();
 	iNewPlayers.push(info.SessionId);
+}
+
+void AMyPlayerController::RecvNewBall(int s_id)
+{
+	//MYLOG(Warning, TEXT("recv ok player%d : %f, %f, %f"), sessionID, x, y, z);
+
+	UWorld* World = GetWorld();
+	iNewBalls.push(s_id);
 }
 
 void AMyPlayerController::UpdateNewPlayer()
@@ -413,6 +426,44 @@ void AMyPlayerController::UpdateNewPlayer()
 
 	SpawnCharacter->SpawnDefaultController();
 	SpawnCharacter->iSessionID = new_s_id;
+	iNewPlayers.pop();
+
+}
+
+void AMyPlayerController::UpdateNewBall()
+{
+	UWorld* const World = GetWorld();
+
+	// 새로운 플레이어가 자기 자신이면 무시
+	int new_s_id = iNewBalls.front();
+	if (new_s_id == iMySessionId)
+	{
+		iNewBalls.pop();
+		return;
+	}
+
+	TArray<AActor*> SpawnedCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
+
+	for (auto& Character_ : SpawnedCharacters)
+	{
+		AMyCharacter* OtherPlayer = Cast<AMyCharacter>(Character_);
+
+		if (!OtherPlayer || OtherPlayer->iSessionID == -1 || OtherPlayer->iSessionID == iMySessionId)
+		{
+			continue;
+		}
+        
+		if (new_s_id == OtherPlayer->iSessionID) {
+			cCharacter* info = &CharactersInfo->players[new_s_id];
+			if (info->IsAlive)
+			{				
+				OtherPlayer->Attack();
+				iNewBalls.pop();
+				return;
+			}
+		}
+	}
 	iNewPlayers.pop();
 
 }
