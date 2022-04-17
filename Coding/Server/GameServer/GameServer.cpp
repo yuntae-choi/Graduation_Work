@@ -547,6 +547,32 @@ void process_packet(int s_id, unsigned char* p)
 		cs_packet_get_item* packet = reinterpret_cast<cs_packet_get_item*>(p);
 		int p_s_id = packet->s_id;
 		int _item_no = packet->item_num;
+		switch (packet->item_num)
+		{
+
+		case ITEM_BAG:
+		{
+			cl.bHasBag = true;
+			break;
+		}
+		case ITEM_UMB:
+		{
+			cl.bHasUmbrella = true;
+			break;
+		}
+		case ITEM_MAT:
+		{
+			cl.iCurrentMatchCount++;
+			break;
+		}
+		case ITEM_SNOW:
+		{
+			cl.iCurrentSnowballCount++;
+			break;
+		}
+		default:
+			break;
+		}
 		cout << "플레이어[" << s_id << "]가 " << "아이템 [" << _item_no << "]얻음" << endl;
 		break;
 
