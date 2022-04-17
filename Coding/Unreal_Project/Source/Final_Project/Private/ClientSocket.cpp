@@ -84,8 +84,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	//	CharactersInfo.players[packet->sessionID].Y = packet->y;		// 캐릭터 정보
 	//	CharactersInfo.players[packet->sessionID].Z = packet->z;		// 캐릭터 정보
 	//	CharactersInfo.players[packet->sessionID].Yaw = packet->yaw;		// 캐릭터 정보
-	//	CharactersInfo.players[packet->sessionID].Pitch = packet->pitch;		// 캐릭터 정보
-	//	CharactersInfo.players[packet->sessionID].Roll = packet->roll;		// 캐릭터 정보
 	//	CharactersInfo.players[packet->sessionID].VX = packet->vx;		// 캐릭터 정보
 	//	CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
 	//	CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
@@ -189,25 +187,26 @@ void ClientSocket::ReadyToSend_DamgePacket() {
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_MovePacket(cCharacter& info)
+void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity)
 {
 	if (_login_ok) {
 		cs_packet_move packet;
 		packet.size = sizeof(packet);
 		packet.type = CS_PACKET_MOVE;
-		packet.sessionID = info.SessionId;
-		packet.x = info.X;
-		packet.y = info.Y;
-		packet.z = info.Z;
-		packet.yaw = info.Yaw;
-		packet.vx = info.VX;
-		packet.vy = info.VY;
-		packet.vz = info.VZ;
+		packet.sessionID = s_id;
+		packet.x = MyLocation.X;
+		packet.y = MyLocation.Y;
+		packet.z = MyLocation.Z;
+		packet.yaw = MyRotation.Yaw;
+		packet.vx = MyVelocity.X;
+		packet.vy = MyVelocity.Y;
+		packet.vz = MyVelocity.Z;
 
-		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f)"), packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);
+		MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f)"), packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);
 		SendPacket(&packet);
 	}
 };
+
 
 void ClientSocket::ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
 {

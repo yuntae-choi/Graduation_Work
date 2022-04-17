@@ -146,7 +146,7 @@ public:
 	void ProcessPacket(unsigned char* ptr);
 	void Send_LoginPacket();
 	void ReadyToSend_StatusPacket();
-	void Send_MovePacket(cCharacter& info);
+	void Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity);
 	void ReadyToSend_AttackPacket();
 	void ReadyToSend_ChatPacket(int sessionID, float x, float y, float z);
 	void ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);

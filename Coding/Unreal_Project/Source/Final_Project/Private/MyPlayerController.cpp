@@ -23,9 +23,6 @@ void AMyPlayerController::BeginPlay()
 {
 	mySocket->StartListen();
 
-	// 0.05초마다 SendMoveInfo호출
-	GetWorldTimerManager().SetTimer(SendPlayerInfoHandle, this, &AMyPlayerController::SendMoveInfo, 0.05f, true);
-
 	// 실행시 클릭없이 바로 조작
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
@@ -194,32 +191,6 @@ bool AMyPlayerController::UpdateWorldInfo()
 	return true;
 }
 
-void AMyPlayerController::SendMoveInfo()
-{
-	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (!player_)
-		return;
-
-	const auto& location_ = player_->GetActorLocation();
-	const auto& rotation_ = player_->GetActorRotation();
-	const auto& velocity_ = player_->GetVelocity();
-
-	cCharacter info;
-	info.SessionId = iSessionId;
-
-	info.X = location_.X;
-	info.Y = location_.Y;
-	info.Z = location_.Z;
-
-	info.Yaw = rotation_.Yaw;
-
-	info.VX = velocity_.X;
-	info.VY = velocity_.Y;
-	info.VZ = velocity_.Z;
-
-	mySocket->Send_MovePacket(info);
-}
-
 void AMyPlayerController::UpdateNewPlayer()
 {
 	UWorld* const World = GetWorld();
@@ -282,8 +253,25 @@ void AMyPlayerController::UpdateNewPlayer()
 	bNewPlayerEntered = false;
 }
 
-//
-//
+void AMyPlayerController::UpdatePlayerInfo(int input)
+{
+	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!m_Player)
+		return;
+	auto MyLocation = m_Player->GetActorLocation();
+	auto MyRotation = m_Player->GetActorRotation();
+	auto MyVelocity = m_Player->GetVelocity();
+	FVector MyCameraLocation;
+	FRotator MyCameraRotation;
+	m_Player->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
+	if (input == COMMAND_MOVE)
+		mySocket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity);
+	else if (input == COMMAND_ATTACK) 
+		mySocket->ReadyToSend_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
+	else if (input == COMMAND_DAMAGE)
+		mySocket->ReadyToSend_DamgePacket();
+
+}
 //
 ////플레이어 정보 업데이트
 //void AMyPlayerController::StartPlayerInfo(const cCharacter& info)
@@ -420,26 +408,6 @@ void AMyPlayerController::UpdateNewPlayer()
 //	}
 //}
 //
-//void AMyPlayerController::UpdatePlayerInfo(int input)
-//{
-//	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-//	if (!m_Player)
-//		return;
-//	iMySessionId = m_Player->iSessionID;
-//	auto MyLocation = m_Player->GetActorLocation();
-//	auto MyRotation = m_Player->GetActorRotation();
-//	auto MyVelocity = m_Player->GetVelocity();
-//	FVector MyCameraLocation;
-//	FRotator MyCameraRotation;
-//	m_Player->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
-//	if (input == COMMAND_MOVE)
-//		mySocket->ReadyToSend_MovePacket(iMySessionId, MyLocation, MyRotation, MyVelocity);
-//	else if (input == COMMAND_ATTACK) 
-//		mySocket->ReadyToSend_Throw_Packet(iMySessionId, MyCameraLocation, MyCameraRotation.Vector());
-//	else if (input == COMMAND_DAMAGE)
-//		mySocket->ReadyToSend_DamgePacket();
-//
-//}
 //
 //void AMyPlayerController::UpdateFarming(int item_no)
 //{

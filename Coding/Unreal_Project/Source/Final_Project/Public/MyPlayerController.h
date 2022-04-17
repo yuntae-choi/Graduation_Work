@@ -32,7 +32,7 @@ public:
 	//void RecvNewBall(int s_id);
 
 	////void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
-	//void UpdatePlayerInfo(int input);
+	void UpdatePlayerInfo(int input);
 	//void UpdateFarming(int item_no);
 	//void UpdatePlayerInfo(const cCharacter& info);		// 플레이어 동기화	
 	//void Throw_Snow(FVector MyLocation, FVector MyDirection);

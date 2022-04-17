@@ -182,8 +182,8 @@ void AMyCharacter::UpDown(float NewAxisValue)
 {
 	if (NewAxisValue != 0)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		//PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
 }
@@ -192,8 +192,8 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 {
 	if (NewAxisValue != 0)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		//PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
 }
@@ -202,8 +202,8 @@ void AMyCharacter::LookUp(float NewAxisValue)
 {
 	if (NewAxisValue != 0)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		//PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddControllerPitchInput(NewAxisValue);
 }
@@ -212,15 +212,15 @@ void AMyCharacter::Turn(float NewAxisValue)
 {
 	if (NewAxisValue != 0)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		//PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddControllerYawInput(NewAxisValue);
 }
 
 void AMyCharacter::Attack()
 {
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
 	//if (iSessionID == PlayerController->iMySessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
 
 }
