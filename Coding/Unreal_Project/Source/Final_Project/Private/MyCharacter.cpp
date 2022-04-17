@@ -346,6 +346,7 @@ void AMyCharacter::StartFarming()
 		case ItemboxState::Opened:
 			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
 			if (GetItem(itembox->GetItemType())) { 
+				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
 				PlayerController->UpdateFarming(itembox->GetItemType());
 				itembox->DeleteItem(); 			
 			}

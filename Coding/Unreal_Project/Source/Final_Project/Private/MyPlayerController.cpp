@@ -348,7 +348,6 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 
 void AMyPlayerController::UpdateFarming(int item_no)
 {
-	if (item_no)
 		myClientSocket->ReadyToSend_ItemPacket(item_no);
 }
 
