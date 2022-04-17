@@ -9,21 +9,14 @@
 AMyPlayerController::AMyPlayerController()
 {
 
-	myClientSocket = ClientSocket::GetSingleton();
-	/*myClientSocket->h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(myClientSocket->_socket), myClientSocket->h_iocp, 0, 0);
-	*///int ret = myClientSocket->Connect();
-	//if (ret)
-	//{
-		//UE_LOG(LogClass, Log, TEXT("IOCP Server connect success!"));
-		myClientSocket->SetPlayerController(this);
-		
-	//}
-
-
-	PrimaryActorTick.bCanEverTick = true;
+	mySocket = ClientSocket::GetSingleton();
+	mySocket->SetPlayerController(this);
 
 	bNewPlayerEntered = false;
+
+	nPlayers = -1;
+
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 
@@ -31,29 +24,23 @@ void AMyPlayerController::BeginPlay()
 {
 	//Super::BeginPlay(); //게임 종료가 안됨
 
-	//auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	//if (!m_Player)
-	//	return;
-	//auto MyLocation = m_Player->GetActorLocation();
-	//auto MyRotation = m_Player->GetActorRotation();
-
-	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (!m_Player)
+	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!player_)
 		return;
-	auto MyLocation = m_Player->GetActorLocation();
-	auto MyRotation = m_Player->GetActorRotation();
-	myClientSocket->fMy_x = MyLocation.X;
-	myClientSocket->fMy_y = MyLocation.Y;
-	myClientSocket->fMy_z = MyLocation.Z;
-	myClientSocket->StartListen();
+	auto MyLocation = player_->GetActorLocation();
+
+	mySocket->fMy_z = MyLocation.Z;
+
+	mySocket->StartListen();
+
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	myClientSocket->CloseSocket();
-	myClientSocket->StopListen();
+	mySocket->CloseSocket();
+	mySocket->StopListen();
 	//Super::EndPlay(EndPlayReason);
 }
 
@@ -114,7 +101,6 @@ bool AMyPlayerController::UpdateWorldInfo()
 			SpawnCharacter->iSessionID = player.second.SessionId;
 			SpawnCharacter->SessionId = player.second.SessionId;
 
-			//SpawnCharacter->HealthValue = player.second.HealthValue;
 			SpawnCharacter->IsAlive = player.second.IsAlive;
 			//SpawnCharacter->IsAttacking = player.second.IsAttacking;
 		}
@@ -223,9 +209,9 @@ void AMyPlayerController::StartPlayerInfo(const cCharacter& info)
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
 
-	myClientSocket->fMy_x = MyLocation.X;
-	myClientSocket->fMy_y = MyLocation.Y;
-	myClientSocket->fMy_z = MyLocation.Z;
+	mySocket->fMy_x = MyLocation.X;
+	mySocket->fMy_y = MyLocation.Y;
+	mySocket->fMy_z = MyLocation.Z;
 	MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
 
 
@@ -290,9 +276,9 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
 	
-	myClientSocket->fMy_x = MyLocation.X;
-	myClientSocket->fMy_y = MyLocation.Y;
-	myClientSocket->fMy_z = MyLocation.Z;
+	mySocket->fMy_x = MyLocation.X;
+	mySocket->fMy_y = MyLocation.Y;
+	mySocket->fMy_z = MyLocation.Z;
 	//MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
 
 
@@ -340,11 +326,11 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 	auto MyRotation = m_Player->GetActorRotation();
 	auto MyVelocity = m_Player->GetVelocity();
 	if (input == COMMAND_MOVE)
-		myClientSocket->ReadyToSend_MovePacket(iMySessionId, MyLocation, MyRotation, MyVelocity);
+		mySocket->Send_MovePacket(iMySessionId, MyLocation, MyRotation, MyVelocity);
 	else if (input == COMMAND_ATTACK)
-		myClientSocket->ReadyToSend_AttackPacket();
+		mySocket->Send_AttackPacket();
 	else if (input == COMMAND_DAMAGE)
-		myClientSocket->ReadyToSend_DamgePacket();
+		mySocket->Send_DamgePacket();
 
 }
 
@@ -416,7 +402,7 @@ void AMyPlayerController::UpdateNewPlayer()
 
 void AMyPlayerController::Throw_Snow(FVector MyLocation, FVector MyDirection)
 {
-	myClientSocket->ReadyToSend_Throw_Packet(iMySessionId, MyLocation, MyDirection);
+	mySocket->Send_Throw_Packet(iMySessionId, MyLocation, MyDirection);
 
 };
 

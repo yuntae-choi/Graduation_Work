@@ -49,6 +49,8 @@ public:
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 
+	class UMyAnimInstance* GetAnim() const { return myAnim; }
+
 	int		SessionId;		// 플레이어 고유 아이디
 	bool	IsAlive;		// 살아있는지
 	bool	IsAttacking;	// 공격중인지

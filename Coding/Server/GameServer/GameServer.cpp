@@ -164,9 +164,7 @@ void send_login_ok_packet(int _s_id)
 	packet.x = clients[_s_id].x;
 	packet.y = clients[_s_id].y;
 	packet.z = clients[_s_id].z;
-	//packet.Yaw = clients[_s_id].Yaw;
-	//packet.Pitch = clients[_s_id].Pitch;
-	//packet.Roll = clients[_s_id].Roll;*/
+	packet.yaw = clients[_s_id].Yaw;
 	cout << "로그인 허용 전송" << "[" << _s_id <<"]" << " " << packet.x << " " << packet.y << " " << packet.z << endl;
 	clients[_s_id].do_send(sizeof(packet), &packet);
 }
@@ -303,10 +301,10 @@ void process_packet(int s_id, unsigned char* p)
 		cl.state_lock.lock();
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
-		cl.x = 0 + (s_id*300);
-		cl.y = 0 +(s_id * 300);
+		cl.x = s_id * 300;
+		cl.y = s_id * 300;
 		cl.z = packet->z;
-
+		cl.Yaw = s_id * 40.0f;
 
 		//sc_packet_login_ok _packet;
 		//_packet.size = sizeof(_packet);

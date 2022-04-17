@@ -38,7 +38,7 @@ struct cs_packet_login {
 	char	type;
 	char	id[MAX_NAME_SIZE];
 	char	pw[MAX_NAME_SIZE];
-	float x, y, z;
+	float z;
 
 
 };
@@ -50,6 +50,7 @@ struct sc_packet_login_ok {
 	int		s_id;
 	float x, y, z;
 
+	float yaw;
 };
 
 struct cs_packet_start { // 게임 레디 요청

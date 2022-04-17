@@ -49,7 +49,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	ClientSocket* myClientSocket;
+	ClientSocket* mySocket;
 	cCharactersInfo* CharactersInfo;	// 다른 캐릭터의 정보
 
 	// 새 플레이어 입장
