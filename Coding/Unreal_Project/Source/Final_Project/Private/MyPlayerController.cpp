@@ -14,7 +14,7 @@ AMyPlayerController::AMyPlayerController()
 
 	bNewPlayerEntered = false;
 
-	nPlayers = -1;
+	//nPlayers = -1;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
