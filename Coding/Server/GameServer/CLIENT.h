@@ -28,11 +28,15 @@ public:
     int _exp;
     int _atk; // 공격력
     int _def;
-    int _job_no;
-    int _gold;
     int _at_range = 1; // 기본 공격 범위
     int _sk_range = 2; // 스킬 범위
     bool is_bone = false;
+    int32 iMaxSnowballCount;
+    int32 iCurrentSnowballCount;
+    int32 iCurrentMatchCount;
+    bool bHasUmbrella;
+    bool bHasBag;
+    bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
 
 
 

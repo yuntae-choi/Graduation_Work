@@ -288,9 +288,9 @@ void AMyCharacter::ReleaseSnowball()
 			FVector cameraLocation;
 			FRotator cameraRotation;
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
-
+			//던지는 순간 좌표값 보내는 코드
+			//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			//PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
 			snowball = nullptr;
 		}
@@ -329,11 +329,15 @@ void AMyCharacter::StartFarming()
 	if (Cast<ASnowdrift>(farmingItem))
 	{
 		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		PlayerController->UpdateFarming(ITEM_SNOW);
 		bIsFarming = true;
+
 	}
 	else if (Cast<AItembox>(farmingItem))
 	{
 		AItembox* itembox = Cast<AItembox>(farmingItem);
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		switch (itembox->GetItemboxState())
 		{
 		case ItemboxState::Closed:
@@ -341,7 +345,11 @@ void AMyCharacter::StartFarming()
 			break;
 		case ItemboxState::Opened:
 			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
-			if (GetItem(itembox->GetItemType())) { itembox->DeleteItem(); }
+			if (GetItem(itembox->GetItemType())) { 
+				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
+				PlayerController->UpdateFarming(itembox->GetItemType());
+				itembox->DeleteItem(); 			
+			}
 			break;
 		default:
 			break;

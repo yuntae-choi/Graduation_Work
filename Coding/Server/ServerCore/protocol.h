@@ -18,6 +18,7 @@ const char CS_PACKET_CHAT = 4;
 const char CS_PACKET_TELEPORT = 5;
 const char CS_PACKET_THROW_SNOW = 6;
 const char CS_PACKET_DAMAGE = 7;
+const char CS_PACKET_GET_ITEM = 8;
 
 
 
@@ -31,6 +32,8 @@ const char SC_PACKET_STATUS_CHANGE = 7;
 const char SC_PACKET_DISCONNECT = 8;
 const char SC_PACKET_HP = 9;
 const char SC_PACKET_THROW_SNOW = 10;
+const char SC_PACKET_ATTACK = 11;
+const char SC_PACKET_GET_ITEM = 12;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -92,7 +95,7 @@ struct cs_packet_move {
 struct cs_packet_attack {
 	unsigned char size;
 	char	type;
-	float   Angle;
+	int s_id;
 };
 
 struct cs_packet_damage {
@@ -103,6 +106,7 @@ struct cs_packet_damage {
 struct cs_packet_get_item {
 	unsigned char size;
 	char	type;
+	int s_id;
 	char    item_num;
 };
 

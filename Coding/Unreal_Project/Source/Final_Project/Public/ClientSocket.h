@@ -139,6 +139,7 @@ public:
 
 	bool Connect();
 	void ProcessPacket(unsigned char* ptr);
+
 	void Send_LoginPacket(float z);
 	void Send_StatusPacket();
 	void Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity);
@@ -146,6 +147,7 @@ public:
 	void Send_ChatPacket(int sessionID, float x, float y, float z);
 	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
 	void Send_DamgePacket();
+	void Send_ItemPacket(int item_no);
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);
@@ -205,6 +207,7 @@ public:
 	Overlap _recv_over;
 	char	_id[MAX_NAME_SIZE];
 	char	_pw[MAX_NAME_SIZE];
+	int     iMy_s_id;
 	float	fMy_x;
 	float	fMy_y;
 	float	fMy_z;

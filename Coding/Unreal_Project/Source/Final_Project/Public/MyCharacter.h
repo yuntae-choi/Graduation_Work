@@ -51,10 +51,6 @@ public:
 
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
 
-	int		SessionId;		// 플레이어 고유 아이디
-	bool	IsAlive;		// 살아있는지
-	bool	IsAttacking;	// 공격중인지
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -101,6 +97,10 @@ public:
 	// 모든 캐릭터 동일 & 변경될 일 x
 	static const int iMaxHP;
 	static const int iMinHP;
+	int		SessionId;		// 플레이어 고유 아이디
+	bool	IsAlive;		// 살아있는지
+	bool	IsAttacking;	// 공격중인지
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iCurrentHP;

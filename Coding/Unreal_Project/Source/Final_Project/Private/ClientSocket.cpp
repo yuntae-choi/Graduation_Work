@@ -35,21 +35,17 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		int id = packet->s_id;
 		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
-		//Send_StatusPacket();
-		//Send_MovePacket(packet->s_id, fMy_x, fMy_y, fMy_z);
 
-				// 캐릭터 정보
 		cCharacter p;
 		p.SessionId = packet->s_id;
 		p.X = packet->x;;
 		p.Y = packet->y;
 		p.Z = packet->z;
+		iMy_s_id = packet->s_id;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
 		PlayerController->iMySessionId = packet->s_id;
 		PlayerController->StartPlayerInfo(CharactersInfo.players[packet->s_id]);
 		PlayerController->RecvWorldInfo(&CharactersInfo);
-
-		//MYLOG(Warning, TEXT("i'm player%d init spawn : (%f, %f, %f)"), packet->s_id, x, y, z);
 
 	}
 	break;
@@ -63,11 +59,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
-		int id = packet->s_id;
-		float x = packet->x;
-		float y = packet->y;
-		float z = packet->z;
-		//Send_ChatPacket(packet->s_id, x, y, z);
 
 		cCharacter p;
 		p.SessionId = packet->s_id;
@@ -75,10 +66,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		p.Y = packet->y;
 		p.Z = packet->z;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
-		
 		PlayerController->RecvNewPlayer(p);
-	   // PlayerController->UpdateNewPlayer(packet->s_id, x, y, z);
-
 		break;
 	}
 	case SC_PACKET_MOVE:
@@ -121,19 +109,23 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		break;
 	}
+	case SC_PACKET_ATTACK:
+	{
 
+		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
+		MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
+		break;
+	}
 	case SC_PACKET_THROW_SNOW:
 	{
 
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
 		MYLOG(Warning, TEXT("player%d snow : (%f, %f, %f)"), packet->s_id, packet->dx, packet->dy, packet->dz);
-		//Send_ChatPacket(packet->s_id, packet->dx, packet->dy, packet->z);
+
 		break;
 	}
 	case SC_PACKET_STATUS_CHANGE:
 	{
-		
-	//Send_StatusPacket();
 		break;
 	}
 	}
@@ -228,7 +220,19 @@ void ClientSocket::Send_AttackPacket()
 	cs_packet_attack packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_ATTACK;
-	//packet.direction = dr;
+	packet.s_id = iMy_s_id;
+	size_t sent = 0;
+	SendPacket(&packet);
+};
+
+void ClientSocket::Send_ItemPacket(int item_no)
+{
+
+	cs_packet_get_item packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_GET_ITEM;
+	packet.s_id = iMy_s_id;
+	packet.item_no = item_no;
 	size_t sent = 0;
 	SendPacket(&packet);
 };

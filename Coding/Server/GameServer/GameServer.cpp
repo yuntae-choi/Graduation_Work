@@ -120,7 +120,7 @@ int main()
 
 	for (auto& th : worker_threads)
 		th.join();
-
+	timer_thread.join();
 	//timer_thread.join();
 	for (auto& cl : clients) {
 		if (ST_INGAME == cl._state)
@@ -503,6 +503,17 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 	}
 	case CS_PACKET_ATTACK: {
+		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(p);
+		for (auto& other : clients) {
+			if (other._s_id == s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			packet->type = SC_PACKET_ATTACK;
+			cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+			other.do_send(sizeof(*packet), packet);
+			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+		}
 		printf("attack\n");
 		break;
 
@@ -530,16 +541,51 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 
 	}
+	case CS_PACKET_GET_ITEM: {
+		cs_packet_get_item* packet = reinterpret_cast<cs_packet_get_item*>(p);
+		int p_s_id = packet->s_id;
+		int _item_no = packet->item_num;
+		switch (packet->item_num)
+		{
+
+		case ITEM_BAG:
+		{
+			cl.bHasBag = true;
+			break;
+		}
+		case ITEM_UMB:
+		{
+			cl.bHasUmbrella = true;
+			break;
+		}
+		case ITEM_MAT:
+		{
+			cl.iCurrentMatchCount++;
+			break;
+		}
+		case ITEM_SNOW:
+		{
+			cl.iCurrentSnowballCount++;
+			break;
+		}
+		default:
+			break;
+		}
+		cout << "플레이어[" << s_id << "]가 " << "아이템 [" << _item_no << "]얻음" << endl;
+		break;
+
+	}
+
 	case CS_PACKET_THROW_SNOW: {
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
-		
+		cout << "throw";
 		for (auto& other : clients) {
 			if (other._s_id == s_id)
 				continue;
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
-			cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
 			other.do_send(sizeof(*packet), packet);
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 

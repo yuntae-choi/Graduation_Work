@@ -29,7 +29,7 @@ public:
 
 	//void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
 	void UpdatePlayerInfo(int input);
-	
+	void UpdateFarming(int item_no);
 	void SendPlayerInfo();		// 플레이어 위치 송신
 	bool UpdateWorldInfo();		// 월드 동기화
 	void UpdatePlayerInfo(const cCharacter& info);		// 플레이어 동기화	
@@ -51,10 +51,6 @@ protected:
 public:
 	ClientSocket* mySocket;
 	cCharactersInfo* CharactersInfo;	// 다른 캐릭터의 정보
-
-	// 새 플레이어 입장
-	int	nPlayers;
-	bool bNewPlayerEntered;
 	cCharacter* NewPlayer;
 	void UpdateNewPlayer();
 	void StartPlayerInfo(const cCharacter& info);
@@ -78,7 +74,9 @@ public:
 	float fOther_y;
 	float fOther_z;
 	bool bSetPlayer = false;
+	// 새 플레이어 입장
 	queue <int> iNewPlayers;
+	int	nPlayers;
 	//UPROPERTY(EditAnywhere, Category = "Spawning")
 	//TSubclassOf<class AMyCharacter> WhoToSpawn;
 

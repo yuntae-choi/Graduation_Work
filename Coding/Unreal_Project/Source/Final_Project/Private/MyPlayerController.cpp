@@ -334,6 +334,11 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 
 }
 
+void AMyPlayerController::UpdateFarming(int item_no)
+{
+		mySocket->Send_ItemPacket(item_no);
+}
+
 void AMyPlayerController::UpdatePlayerS_id(int id)
 {
 	iMySessionId = id;
@@ -361,11 +366,11 @@ void AMyPlayerController::UpdateNewPlayer()
 	if (new_s_id== iMySessionId)
 	{
 		iNewPlayers.pop();
-		bNewPlayerEntered = false;
+
 		return;
 	}
 
-	bNewPlayerEntered = true;
+
 
 	
 	// 새로운 플레이어를 필드에 스폰
@@ -397,7 +402,7 @@ void AMyPlayerController::UpdateNewPlayer()
 	SpawnCharacter->SpawnDefaultController();
 	SpawnCharacter->iSessionID = new_s_id;
 	iNewPlayers.pop();
-	bNewPlayerEntered = false;
+
 }
 
 void AMyPlayerController::Throw_Snow(FVector MyLocation, FVector MyDirection)
