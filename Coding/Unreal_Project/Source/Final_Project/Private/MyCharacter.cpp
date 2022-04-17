@@ -292,7 +292,7 @@ void AMyCharacter::ReleaseSnowball(FVector MyLocation_, FVector MyDirection_)
 			//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			//PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
 			
-			MYLOG(Warning, TEXT("snow dir : %f, %f, %f"), MyDirection_.X, MyDirection_.Y, MyDirection_.Z);
+			MYLOG(Warning, TEXT("snow[%d] dir : %f, %f, %f"), iSessionID, MyDirection_.X, MyDirection_.Y, MyDirection_.Z);
 			II_Throwable::Execute_Throw(snowball, MyDirection_);
 			snowball = nullptr;
 		}
