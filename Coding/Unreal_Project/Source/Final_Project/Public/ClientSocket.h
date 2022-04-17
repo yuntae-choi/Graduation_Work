@@ -19,24 +19,29 @@ public:
 	~cCharacter() {};
 
 	// 세션 아이디
-	int SessionId=-1;
+	int SessionId = -1;
 	// 위치
-	float X=0;
-	float Y=0;
-	float Z=0;
+	float X = 0;
+	float Y = 0;
+	float Z = 0;
 	// 회전값
-	float Yaw=0;
-	float Pitch=0;
-	float Roll=0;
+	float Yaw = 0;
+	float Pitch = 0;
+	float Roll = 0;
 	// 속도
-	float VX;
-	float VY;
-	float VZ;
+	float VX = 0;
+	float VY = 0;
+	float VZ = 0;
 	// 속성
-	bool	IsAlive;
+	bool	IsAlive = true;
 	float	HealthValue;
-	bool	IsAttacking;
-
+	bool	IsAttacking = false;
+	//카메라 방향
+	float fCx, fCy, fCz;
+	//카메라 위치
+	float fCDx, fCDy, fCDz;
+	FVector FMyLocation;
+	FVector FMyDirection;
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
 		stream << info.SessionId << endl;
@@ -139,9 +144,9 @@ public:
 
 	bool Connect();
 	void ProcessPacket(unsigned char* ptr);
-	void ReadyToSend_LoginPacket();
+	void Send_LoginPacket();
 	void ReadyToSend_StatusPacket();
-	void ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity);
+	void Send_MovePacket(cCharacter& info);
 	void ReadyToSend_AttackPacket();
 	void ReadyToSend_ChatPacket(int sessionID, float x, float y, float z);
 	void ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
@@ -206,15 +211,15 @@ public:
 	Overlap _recv_over;
 	char	_id[MAX_NAME_SIZE];
 	char	_pw[MAX_NAME_SIZE];
-	int     iMy_s_id;
-	float	fMy_x;
-	float	fMy_y;
-	float	fMy_z;
+	//int     iMy_s_id;
+	//float	fMy_x;
+	//float	fMy_y;
+	//float	fMy_z;
 
 	string _name;
 	int      _prev_size = 0;
 	bool _stop = false;
-	bool _login_ok;
+	bool _login_ok =false;
 
 private:
 
@@ -224,5 +229,5 @@ private:
 	cCharacter	NewPlayer;
 	cCharacter* RecvNewPlayer(stringstream& RecvStream);
 
-	AMyPlayerController* PlayerController;	// 플레이어 컨트롤러 정보	
+	AMyPlayerController* MyPlayerController;	// 플레이어 컨트롤러 정보	
 };

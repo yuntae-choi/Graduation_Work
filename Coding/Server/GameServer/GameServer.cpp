@@ -165,7 +165,10 @@ void send_login_ok_packet(int _s_id)
 	packet.y = clients[_s_id].y;
 	packet.z = clients[_s_id].z;
 	packet.yaw = clients[_s_id].Yaw;
-	cout << "로그인 허용 전송" << "[" << _s_id <<"]" << " " << packet.x << " " << packet.y << " " << packet.z << endl;
+	//packet.Yaw = clients[_s_id].Yaw;
+	//packet.Pitch = clients[_s_id].Pitch;
+	//packet.Roll = clients[_s_id].Roll;*/
+	printf("[Send login ok] id : %d, location : (%f,%f,%f) yaw : %f\n", _s_id, packet.x, packet.y, packet.z, packet.yaw);
 	clients[_s_id].do_send(sizeof(packet), &packet);
 }
 
@@ -280,11 +283,10 @@ void process_packet(int s_id, unsigned char* p)
 
 	switch (packet_type) {
 	case CS_PACKET_LOGIN: {
-		printf("login\n");
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
 
 		CLIENT& cl = clients[s_id];
-		printf_s("[INFO] 로그인 시도 {%s}/{%s}\n", packet->id, packet->pw);
+		printf_s("[Recv login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
 
 	/*	for (int i = 0; i < MAX_USER; ++i) {
 			clients[i].state_lock.lock();
@@ -301,10 +303,11 @@ void process_packet(int s_id, unsigned char* p)
 		cl.state_lock.lock();
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
-		cl.x = s_id * 300;
-		cl.y = s_id * 300;
+		cl.x = s_id * 300.0f;
+		cl.y = s_id * 300.0f;
 		cl.z = packet->z;
 		cl.Yaw = s_id * 40.0f;
+
 
 		//sc_packet_login_ok _packet;
 		//_packet.size = sizeof(_packet);
@@ -346,7 +349,9 @@ void process_packet(int s_id, unsigned char* p)
 			packet.x = cl.x;
 			packet.y = cl.y;
 			packet.z = cl.z;
+			packet.yaw = cl.Yaw;
 
+			printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 			other.do_send(sizeof(packet), &packet);
 		}
 
@@ -376,7 +381,9 @@ void process_packet(int s_id, unsigned char* p)
 			packet.x = other.x;
 			packet.y = other.y;
 			packet.z = other.z;
-			cout << cl._s_id << "에게 " << other._s_id << "을 " << endl;
+			packet.yaw = other.Yaw;
+
+			printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 			cl.do_send(sizeof(packet), &packet);
 		}
 
@@ -390,8 +397,6 @@ void process_packet(int s_id, unsigned char* p)
 		cl.y = packet->y;
 		cl.z = packet->z;
 		cl.Yaw = packet->yaw;
-		cl.Pitch = packet->pitch;
-		cl.Roll = packet->roll;
 		cl.VX = packet->vz;
 		cl.VY = packet->vz;
 		cl.VZ = packet->vz;
@@ -580,8 +585,6 @@ void process_packet(int s_id, unsigned char* p)
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		cout << "throw";
 		for (auto& other : clients) {
-			if (other._s_id == s_id)
-				continue;
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
@@ -727,8 +730,6 @@ void send_move_packet(int _id, int target)
 	packet.y = clients[target].y;
 	packet.z = clients[target].z;
 	packet.yaw = clients[target].Yaw;
-	packet.pitch = clients[target].Pitch;
-	packet.roll = clients[target].Roll;
 	packet.vx = clients[target].VX;
 	packet.vy = clients[target].VY;
 	packet.vz = clients[target].VZ;

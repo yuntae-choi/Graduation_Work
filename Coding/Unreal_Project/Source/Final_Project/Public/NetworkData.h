@@ -86,7 +86,15 @@ struct cs_packet_login {
 	char	id[MAX_NAME_SIZE];
 	char	pw[MAX_NAME_SIZE];
 	float z;
+};
 
+struct sc_packet_login_ok {
+	unsigned char size;
+	char type;
+	// 세션 아이디
+	int		s_id;
+	float x, y, z;
+	float yaw;
 };
 
 struct cs_packet_move {
@@ -96,14 +104,20 @@ struct cs_packet_move {
 	int sessionID;
 	float x, y, z;
 	// 속도
-	float vx;
-	float vy;
-	float vz;
+	float vx, vy, vz;
 	// 회전값
 	float yaw;
-	float pitch;
-	float roll;
 	//long long move_time;
+};
+
+struct sc_packet_put_object {
+	unsigned char size;
+	char type;
+	int s_id;
+	float x, y, z;
+	float yaw;
+	char object_type;
+	char	name[MAX_NAME_SIZE];
 };
 
 struct cs_packet_attack {
@@ -149,36 +163,12 @@ struct cs_packet_get_item {
 	int item_no;
 };
 
-struct sc_packet_login_ok {
-	unsigned char size;
-	char type;
-	
-	// 세션 아이디
-	int		s_id;
-
-	float x;
-	float y;
-	float z;
-};
-
-
-
 struct sc_packet_move {
 	unsigned char size;
 	char type;
 	int		id;
 	short  x, y;
 	char move_time[MAX_CHAT_SIZE];
-};
-
-struct sc_packet_put_object {
-	unsigned char size;
-	char type;
-	int s_id;
-	short x, y;
-	short z;
-	char object_type;
-	char	name[MAX_NAME_SIZE];
 };
 
 struct sc_packet_remove_object {

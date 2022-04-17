@@ -183,7 +183,7 @@ void AMyCharacter::UpDown(float NewAxisValue)
 	if (NewAxisValue != 0)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		//PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
 }
@@ -193,7 +193,7 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 	if (NewAxisValue != 0)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		//PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
 }
@@ -203,7 +203,7 @@ void AMyCharacter::LookUp(float NewAxisValue)
 	if (NewAxisValue != 0)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		//PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddControllerPitchInput(NewAxisValue);
 }
@@ -213,12 +213,19 @@ void AMyCharacter::Turn(float NewAxisValue)
 	if (NewAxisValue != 0)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		//PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddControllerYawInput(NewAxisValue);
 }
 
 void AMyCharacter::Attack()
+{
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	//if (iSessionID == PlayerController->iMySessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
+
+}
+
+void AMyCharacter::SnowAttack()
 {
 	if (isAttacking) return;
 	if (bIsSnowman) return;
@@ -228,10 +235,6 @@ void AMyCharacter::Attack()
 	isAttacking = true;
 	// 디버깅용 - 실제는 주석 해제
 	//iSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
-
-	
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (iSessionID == PlayerController->iMySessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
 
 	// Attempt to fire a projectile.
 	if (projectileClass)
@@ -276,7 +279,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	return FinalDamage;
 }
 
-void AMyCharacter::ReleaseSnowball()
+void AMyCharacter::ReleaseSnowball(FVector MyLocation_, FVector MyDirection_)
 {
 	if (IsValid(snowball))
 	{
@@ -285,13 +288,12 @@ void AMyCharacter::ReleaseSnowball()
 
 		if (snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
-			FVector cameraLocation;
-			FRotator cameraRotation;
-			GetActorEyesViewPoint(cameraLocation, cameraRotation);
 			//던지는 순간 좌표값 보내는 코드
 			//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			//PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
-			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
+			
+			MYLOG(Warning, TEXT("snow dir : %f, %f, %f"), MyDirection_.X, MyDirection_.Y, MyDirection_.Z);
+			II_Throwable::Execute_Throw(snowball, MyDirection_);
 			snowball = nullptr;
 		}
 
@@ -306,7 +308,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	{
 		MYLOG(Warning, TEXT("snowball hit."));
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
+		//PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
 
 	}
 
@@ -330,7 +332,7 @@ void AMyCharacter::StartFarming()
 	{
 		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdateFarming(ITEM_SNOW);
+		//PlayerController->UpdateFarming(ITEM_SNOW);
 		bIsFarming = true;
 
 	}
@@ -347,7 +349,7 @@ void AMyCharacter::StartFarming()
 			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
 			if (GetItem(itembox->GetItemType())) { 
 				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
-				PlayerController->UpdateFarming(itembox->GetItemType());
+				//PlayerController->UpdateFarming(itembox->GetItemType());
 				itembox->DeleteItem(); 			
 			}
 			break;

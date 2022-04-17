@@ -42,8 +42,6 @@ struct cs_packet_login {
 	char	id[MAX_NAME_SIZE];
 	char	pw[MAX_NAME_SIZE];
 	float z;
-
-
 };
 
 struct sc_packet_login_ok {
@@ -52,8 +50,30 @@ struct sc_packet_login_ok {
 	// 세션 아이디
 	int		s_id;
 	float x, y, z;
-
 	float yaw;
+};
+
+struct cs_packet_move {
+	unsigned char size;
+	char	type;
+	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	int sessionID;
+	float x, y, z;
+	// 속도
+	float vx, vy, vz;
+	// 회전값
+	float yaw;
+	//long long move_time;
+};
+
+struct sc_packet_put_object {
+	unsigned char size;
+	char type;
+	int s_id;
+	float x, y, z;
+	float yaw;
+	char object_type;
+	char	name[MAX_NAME_SIZE];
 };
 
 struct cs_packet_start { // 게임 레디 요청
@@ -73,23 +93,6 @@ struct sc_packet_start_ok { // 스폰
 	char	name[MAX_NAME_SIZE];
 	float x, y, z;
 	char image_num;
-};
-
-struct cs_packet_move {
-	unsigned char size;
-	char	type;
-	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
-	int sessionID;
-	float x, y, z;
-	// 속도
-	float vx;
-	float vy;
-	float vz;
-	// 회전값
-	float yaw;
-	float pitch;
-	float roll;
-	//long long		move_time;
 };
 
 struct cs_packet_attack {
@@ -132,16 +135,6 @@ struct cs_packet_throw_snow {
 	float x, y, z;
 	float dx, dy, dz;
 
-};
-
-
-struct sc_packet_put_object {
-	unsigned char size;
-	char type;
-	int s_id;
-	short x, y, z;
-	char object_type;
-	char	name[MAX_NAME_SIZE];
 };
 
 struct sc_packet_remove_object {

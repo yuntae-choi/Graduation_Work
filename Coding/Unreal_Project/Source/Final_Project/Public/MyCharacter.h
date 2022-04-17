@@ -31,7 +31,7 @@ public:
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
-	void ReleaseSnowball();
+	void ReleaseSnowball(FVector MyLocation_, FVector MyDirection_);
 
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
@@ -49,7 +49,8 @@ public:
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
-	
+	void SnowAttack();
+
 
 protected:
 	virtual void BeginPlay() override;
