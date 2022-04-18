@@ -184,7 +184,7 @@ void send_login_fail_packet(int _s_id)
 void send_remove_object(int _s_id, int victim)
 {
 	sc_packet_remove_object packet;
-	packet.id = victim;
+	packet.s_id = victim;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_REMOVE_OBJECT;
 	clients[_s_id].do_send(sizeof(packet), &packet);
@@ -233,7 +233,7 @@ void Disconnect(int _s_id)
 	cl.vl.lock();
 	unordered_set <int> my_vl = cl.viewlist;
 	cl.vl.unlock();
-	
+	strcpy_s(clients[_s_id]._id, " ");
 	for (auto& other : my_vl) {
 		CLIENT& target = clients[other];
 
@@ -247,11 +247,11 @@ void Disconnect(int _s_id)
 		}
 		else target.vl.unlock();
 	}
-	clients[_s_id].state_lock.lock();
+	//clients[_s_id].state_lock.lock();
 	clients[_s_id]._state = ST_FREE;
-	clients[_s_id].state_lock.unlock();
+	//clients[_s_id].state_lock.unlock();
 	closesocket(clients[_s_id]._socket);
-	cout << "------------연결 종료------------" << endl;
+	cout << "------------플레이어 " << _s_id << " 연결 종료------------" << endl;
 }
 
 //플레이어 이벤트 등록
@@ -590,12 +590,19 @@ void process_packet(int s_id, unsigned char* p)
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 
 		}
-
-
 		break;
-
 	}
-
+	case CS_PACKET_LOGOUT: {
+		cs_packet_logout* packet = reinterpret_cast<cs_packet_logout*>(p);
+		cout << "logout";
+		for (auto& other : clients) {
+			if (s_id == other._s_id) continue;
+			if (ST_INGAME != other._state) continue;
+			send_remove_object(other._s_id, s_id);
+		}
+		Disconnect(s_id);
+		break;
+	}
 	default:
 		printf("Unknown PACKET type\n");
 

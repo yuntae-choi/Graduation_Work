@@ -50,6 +50,8 @@ void AMyPlayerController::BeginPlay()
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	MYLOG(Warning, TEXT("EndPlay!"));
+	myClientSocket->LogoutPlayer(iMySessionId);
 	myClientSocket->CloseSocket();
 	myClientSocket->StopListen();
 	//Super::EndPlay(EndPlayReason);

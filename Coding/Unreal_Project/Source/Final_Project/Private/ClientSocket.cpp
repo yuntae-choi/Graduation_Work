@@ -286,6 +286,18 @@ bool ClientSocket::Init()
 	return true;
 }
 
+void ClientSocket::LogoutPlayer(const int& s_id)
+{
+	MYLOG(Warning, TEXT("Logout!"));
+	cs_packet_logout packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_LOGOUT;
+	packet.s_id = iMy_s_id;
+	SendPacket(&packet);
+	closesocket(_socket);
+	WSACleanup();
+}
+
 uint32 ClientSocket::Run()
 {
 	// 초기 init 과정을 기다림

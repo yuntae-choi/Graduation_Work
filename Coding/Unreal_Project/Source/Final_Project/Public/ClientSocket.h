@@ -152,6 +152,7 @@ public:
 	void ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
 	void ReadyToSend_DamgePacket();
 	void ReadyToSend_ItemPacket(int item_no);
+	void LogoutPlayer(const int& s_id);
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);

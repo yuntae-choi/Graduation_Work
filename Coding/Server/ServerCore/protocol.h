@@ -19,6 +19,7 @@ const char CS_PACKET_TELEPORT = 5;
 const char CS_PACKET_THROW_SNOW = 6;
 const char CS_PACKET_DAMAGE = 7;
 const char CS_PACKET_GET_ITEM = 8;
+const char CS_PACKET_LOGOUT = 9;
 
 
 
@@ -44,6 +45,12 @@ struct cs_packet_login {
 	float x, y, z;
 
 
+};
+
+struct cs_packet_logout {
+	unsigned char size;
+	char	type;
+	int     s_id;
 };
 
 struct sc_packet_login_ok {
@@ -146,7 +153,7 @@ struct sc_packet_put_object {
 struct sc_packet_remove_object {
 	unsigned char size;
 	char type;
-	int id;
+	int s_id;
 };
 
 struct sc_packet_chat {
