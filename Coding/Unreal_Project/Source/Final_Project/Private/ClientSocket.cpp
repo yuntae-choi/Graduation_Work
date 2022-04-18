@@ -172,10 +172,12 @@ void ClientSocket::ReadyToSend_LoginPacket()
 	
 };
 
-void ClientSocket::ReadyToSend_StatusPacket() {
+void ClientSocket::ReadyToSend_StatusPacket(STATE_Type _state) {
+	//CharactersInfo.players[iMy_s_id].My_State = _state;
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_STATUS_CHANGE;
+	packet.type = CS_PACKET_STATUS_CHANGE;
+	packet.state = _state;
 	SendPacket(&packet);
 };
 

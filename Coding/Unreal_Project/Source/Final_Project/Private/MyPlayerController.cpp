@@ -321,12 +321,10 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 		//// 캐릭터 속성 업데이트
 		if (m_Player->iCurrentHP != info.HealthValue)
 		{
-			UE_LOG(LogClass, Log, TEXT("Player damaged"));
-			
+			UE_LOG(LogClass, Log, TEXT("Player 체력 변경: -> %d"), info.HealthValue);
 			m_Player->iCurrentHP = info.HealthValue;
 		}
-		FDamageEvent DamageEvent;
-		m_Player->TakeDamage(0, DamageEvent, false, this);
+		
 	}
 }
 
@@ -350,6 +348,18 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 		myClientSocket->ReadyToSend_DamgePacket();
 
 }
+
+
+void AMyPlayerController::UpdateStateInfo(STATE_Type _input)
+{
+	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!m_Player)
+		return;
+	CharactersInfo->players[iMySessionId].My_State = _input;
+	myClientSocket->ReadyToSend_StatusPacket(_input);
+
+}
+
 
 void AMyPlayerController::UpdateFarming(int item_no)
 {

@@ -268,12 +268,12 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{	// 동물인 경우 체력 감소
 		//iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
 
-		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
+		//MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
 	}
 	else
 	{	// 눈사람인 경우 스턴
 		StartStun(fStunTime);
-		MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
+		//MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
 	}
 	return FinalDamage;
 }
@@ -500,29 +500,39 @@ void AMyCharacter::UpdateTemperatureState()
 {
 	if (bIsSnowman) return;
 
-	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+	//GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
 	//if (match)
 	//{
 	//	GetWorldTimerManager().SetTimer(temperatureHandle, this, &AMyCharacter::UpdateTemperatureByMatch, 1.0f, true);
 	//}
 	//else
 	//{
+
+
 		if (bIsInsideOfBonfire)
 		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
-			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
-				{
+			//GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				//{
 					//iCurrentHP += ABonfire::iHealAmount;
 					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
 
-				}), 1.0f, true);
+				//}), 1.0f, true);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			if (iSessionID == PlayerController->iMySessionId)
+			    PlayerController->UpdateStateInfo(ST_INBURN);
+			UE_LOG(LogTemp, Warning, TEXT("in burn"));
+
 		}
 		else
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
-			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
-				{
+			//GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				//{
 					//iCurrentHP -= ABonfire::iDamageAmount;
 					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
-				}), 1.0f, true);
+				//}), 1.0f, true);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			if (iSessionID == PlayerController->iMySessionId)
+			   PlayerController->UpdateStateInfo(ST_OUTBURN);
 		}
 	//}
 }

@@ -11,6 +11,7 @@ class AMyPlayerController;
 
 using namespace std;
 
+enum STATE_Type { ST_SNOWMAN, ST_INBURN, ST_OUTBURN };
 
 // 플레이어 정보
 class cCharacter {
@@ -42,6 +43,8 @@ public:
 	float fCDx, fCDy, fCDz;
 	FVector FMyLocation;
 	FVector FMyDirection;
+	STATE_Type My_State;
+
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
 		stream << info.SessionId << endl;
@@ -145,7 +148,7 @@ public:
 	bool Connect();
 	void ProcessPacket(unsigned char* ptr);
 	void ReadyToSend_LoginPacket();
-	void ReadyToSend_StatusPacket();
+	void ReadyToSend_StatusPacket(STATE_Type _state);
 	void ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity);
 	void ReadyToSend_AttackPacket();
 	void ReadyToSend_ChatPacket(int sessionID, float x, float y, float z);

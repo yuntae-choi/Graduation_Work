@@ -20,6 +20,7 @@ const char CS_PACKET_THROW_SNOW = 6;
 const char CS_PACKET_DAMAGE = 7;
 const char CS_PACKET_GET_ITEM = 8;
 const char CS_PACKET_LOGOUT = 9;
+const char CS_PACKET_STATUS_CHANGE = 10;
 
 
 
@@ -175,8 +176,6 @@ struct sc_packet_status_change {
 	unsigned char size;
 	char type;
 	short   state;
-	short	hp, maxhp;
-	bool ice[4]; // 사지분해
 };
 
 

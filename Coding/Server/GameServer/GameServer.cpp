@@ -49,7 +49,8 @@ void send_hp_packet(int _id, int target)
 
 void player_heal(int s_id)
 {
-	Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
+	if (clients[s_id]._hp < clients[s_id]._max_hp)
+	    Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
 }
 
 //플레이어 판별
@@ -402,25 +403,10 @@ void process_packet(int s_id, unsigned char* p)
 
 		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		//cout << packet->move_time << "-ms-" << endl;
-		cout << millisec_since_epoch - packet->move_time << "ms" << endl;
+		//cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		//send_status_packet(s_id);
 		
-		if (true == is_bonfire(cl._s_id))
-		{
-			//cout << "모닥불 지역" << endl;
-			if (false == cl.is_bone) {
-				cl.is_bone = true;
-				cl._is_active = true;
-				player_heal(cl._s_id);
-
-			}
-		}
-		else
-		{
-			cl.is_bone = false;
-			cl._is_active = false;
-		}
 
 		unordered_set <int> near_list;
 		for (auto& other : clients) {
@@ -604,6 +590,40 @@ void process_packet(int s_id, unsigned char* p)
 		Disconnect(s_id);
 		break;
 	}
+	case CS_PACKET_STATUS_CHANGE: {
+		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(p);
+		
+		if (packet->state == ST_INBURN)
+		{
+			if (false == cl.is_bone) {
+				cl.is_bone = true;
+				cl._is_active = true;
+				player_heal(cl._s_id);
+			}
+			cout << s_id << "플레이어 모닥불 내부" << endl;
+
+		}
+		else if(packet->state == ST_OUTBURN)
+		{
+			if (true == cl.is_bone) {
+				cl.is_bone = false;
+				cl._is_active = false;
+			}
+			cout << s_id << "플레이어 모닥불 밖" << endl;
+
+		}
+		else if (packet->state == ST_SNOWMAN)
+		{
+			if (false == cl.bIsSnowman) {
+				cl.bIsSnowman = true;
+			}
+			cout << s_id << "플레이어 눈사람" << endl;
+
+		}
+		
+		break;
+	}
+
 	default:
 		printf("Unknown PACKET type\n");
 
