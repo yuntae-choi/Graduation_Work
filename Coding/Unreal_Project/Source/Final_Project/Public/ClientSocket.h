@@ -38,12 +38,11 @@ public:
 	bool	IsAlive = true;
 	float	HealthValue;
 	bool	IsAttacking = false;
-	//카메라 방향
-	float fCx, fCy, fCz;
 	//카메라 위치
+	float fCx, fCy, fCz;
+	//카메라 방향
 	float fCDx, fCDy, fCDz;
-	FVector FMyLocation;
-	FVector FMyDirection;
+
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
 		stream << info.SessionId << endl;

@@ -31,7 +31,7 @@ public:
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
-	void ReleaseSnowball(FVector MyLocation_, FVector MyDirection_);
+	void ReleaseSnowball();
 
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);

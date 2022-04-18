@@ -90,6 +90,23 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		break;
 	}
 
+	case SC_PACKET_THROW_SNOW:
+	{
+		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
+
+		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
+
+		CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCz = packet->z;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
+		MyPlayerController->SetNewBall(packet->s_id);
+
+		break;
+	}
+
 	//case SC_PACKET_HP:
 	//{
 	//	sc_packet_hp_change* packet = reinterpret_cast<sc_packet_hp_change*>(ptr);
@@ -118,19 +135,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 	//	cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
 	//	MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
-	//	break;
-	//}
-	//case SC_PACKET_THROW_SNOW:
-	//{
-	//	cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
-	//	MYLOG(Warning, TEXT("player%d snow : (%f, %f, %f)"), packet->s_id, packet->dx, packet->dy, packet->dz);
-	//	CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
-	//	CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
-	//	CharactersInfo.players[packet->s_id].fCz = packet->z;		/// 카메라 위치
-	//	CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
-	//	CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
-	//	CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
-	//	MyPlayerController->RecvNewBall(packet->s_id);
 	//	break;
 	//}
 	//case SC_PACKET_STATUS_CHANGE:
@@ -222,6 +226,8 @@ void ClientSocket::ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVecto
 	packet.dy = MyDirection.Y;
 	packet.dz = MyDirection.Z;
 	size_t sent = 0;
+
+	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
 	SendPacket(&packet);
 };
 

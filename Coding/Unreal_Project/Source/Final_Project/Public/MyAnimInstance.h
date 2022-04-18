@@ -25,7 +25,7 @@ public:
 	void SetDead() { bIsDead = true; }
 
 	float GetDirection() const { return fCurrentPawnDirection; }
-	void SetDirection(const float dir) { fCurrentPawnDirection = dir; MYLOG(Warning, TEXT("%f"), fCurrentPawnDirection); }
+	void SetDirection(const float dir) { fCurrentPawnDirection = dir; }
 
 private:
 	UFUNCTION()

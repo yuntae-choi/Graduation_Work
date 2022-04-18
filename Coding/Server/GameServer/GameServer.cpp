@@ -586,7 +586,7 @@ void process_packet(int s_id, unsigned char* p)
 
 	case CS_PACKET_THROW_SNOW: {
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
-		cout << "throw";
+		printf_s("[Recv and send throw snow]\n");
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
 				continue;

@@ -53,10 +53,8 @@ void UMyAnimInstance::AnimNotify_SnowballRelease()
 
 	auto MyCharacter = Cast<AMyCharacter>(Pawn);
 	if (nullptr == MyCharacter) return;
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	
-	//MyCharacter->ReleaseSnowball(PlayerController->CharactersInfo->players[MyCharacter->iSessionID].FMyLocation,
-	//PlayerController->CharactersInfo->players[MyCharacter->iSessionID].FMyDirection);
+
+	MyCharacter->ReleaseSnowball();
 }
 
 void UMyAnimInstance::Anim_SnowballRelease()

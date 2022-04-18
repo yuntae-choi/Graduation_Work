@@ -221,7 +221,7 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
-	//if (iSessionID == PlayerController->iMySessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
+	if (iSessionId == PlayerController->iSessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
 
 }
 
@@ -279,7 +279,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	return FinalDamage;
 }
 
-void AMyCharacter::ReleaseSnowball(FVector MyLocation_, FVector MyDirection_)
+void AMyCharacter::ReleaseSnowball()
 {
 	if (IsValid(snowball))
 	{
@@ -289,11 +289,14 @@ void AMyCharacter::ReleaseSnowball(FVector MyLocation_, FVector MyDirection_)
 		if (snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
 			//던지는 순간 좌표값 보내는 코드
-			//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			//PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			
-			MYLOG(Warning, TEXT("snow dir : %f, %f, %f"), MyDirection_.X, MyDirection_.Y, MyDirection_.Z);
-			II_Throwable::Execute_Throw(snowball, MyDirection_);
+			FVector direction_;
+			direction_.X = PlayerController->GetCharactersInfo()->players[iSessionId].fCDx;
+			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
+			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
+
+			II_Throwable::Execute_Throw(snowball, direction_);
 			snowball = nullptr;
 		}
 

@@ -24,27 +24,19 @@ class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 public:
 	AMyPlayerController();
 
+	cCharactersInfo* GetCharactersInfo() const { return charactersInfo; }
 	void SetSessionId(const int sessionId) { iSessionId = sessionId; }
-	void SetCharactersInfo(cCharactersInfo* ci_) { if (ci_ != nullptr)	CharactersInfo = ci_; }
+	void SetCharactersInfo(cCharactersInfo* ci_) { if (ci_ != nullptr)	charactersInfo = ci_; }
 	void SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_);
 	void SetInitInfo(const cCharacter& me);
+	void SetNewBall(const int s_id);
 
-	//void RecvNewPlayer(const cCharacter& info);
-	//void RecvNewBall(int s_id);
-
-	////void UpdateNewPlayer(int new_s_id, float new_x, float new_y, float new_z);
 	void UpdatePlayerInfo(int input);
 	//void UpdateFarming(int item_no);
-	//void UpdatePlayerInfo(const cCharacter& info);		// 플레이어 동기화	
-	//void Throw_Snow(FVector MyLocation, FVector MyDirection);
-	//
-	//void UpdatePlayerS_id(int _s_id);
 
 	// 스폰시킬 다른 캐릭터
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<class ACharacter> WhoToSpawn;
-
-	//void UpdateRotation();
 
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -61,33 +53,17 @@ public:
 private:
 	ClientSocket*			mySocket;
 	cCharacter				initInfo;
-	queue<shared_ptr<cCharacter>>				NewCharactersInfo;			// 플레이어 로그인 시 캐릭터 정보
-	cCharactersInfo*		CharactersInfo;	// 다른 캐릭터들의 정보
-	int							iPlayerCount;
+	queue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
+	queue <int>				newBalls;
+	cCharactersInfo*		charactersInfo;	// 다른 캐릭터들의 정보
 
 	FTimerHandle			SendPlayerInfoHandle;	// 동기화 타이머 핸들러
 
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
+
 	
 
 	//bool							bIsConnected;	// 서버와 접속 유무
-	//void UpdateNewBall();
-
-	//void StartPlayerInfo(const cCharacter& info);
-	//
-	//int32 iMySessionId;
-	//float fMy_x;
-	//float fMy_y;
-	//float fMy_z;
-	//int32 iOtherSessionId;
-	//float fOther_x;
-	//float fOther_y;
-	//float fOther_z;
-	//// 새 플레이어 입장
-	//queue <int> iNewPlayers;
-	//queue <int> iNewBalls;
-
-	//int	nPlayers;
 
 };
