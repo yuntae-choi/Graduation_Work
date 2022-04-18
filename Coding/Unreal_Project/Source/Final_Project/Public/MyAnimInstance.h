@@ -24,6 +24,9 @@ public:
 	void PlayAttackMontage();
 	void SetDead() { bIsDead = true; }
 
+	float GetDirection() const { return fCurrentPawnDirection; }
+	void SetDirection(const float dir) { fCurrentPawnDirection = dir; MYLOG(Warning, TEXT("%f"), fCurrentPawnDirection); }
+
 private:
 	UFUNCTION()
 	void AnimNotify_SnowballRelease();

@@ -2,6 +2,7 @@
 
 #include "MyPlayerController.h"
 #include "ClientSocket.h"
+#include "MyAnimInstance.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -162,6 +163,9 @@ bool AMyPlayerController::UpdateWorldInfo()
 				OtherPlayer->AddMovementInput(CharacterVelocity);
 				OtherPlayer->SetActorRotation(CharacterRotation);
 				OtherPlayer->SetActorLocation(CharacterLocation);
+				OtherPlayer->GetAnim()->SetDirection(info->direction);
+
+
 			}
 			else
 			{
@@ -255,8 +259,11 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 	FVector MyCameraLocation;
 	FRotator MyCameraRotation;
 	m_Player->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
+	float dir = m_Player->GetAnim()->GetDirection();
+
+
 	if (input == COMMAND_MOVE)
-		mySocket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity);
+		mySocket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity, dir);
 	else if (input == COMMAND_ATTACK) 
 		mySocket->ReadyToSend_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)

@@ -107,6 +107,8 @@ struct cs_packet_move {
 	float vx, vy, vz;
 	// È¸Àü°ª
 	float yaw;
+
+	float direction;
 	//long long move_time;
 };
 

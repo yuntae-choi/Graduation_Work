@@ -56,12 +56,13 @@ private:
 	bool UpdateWorldInfo();		// 월드 동기화
 	void UpdateNewPlayer();
 
-
+public:
+	int							iSessionId;			// 캐릭터의 세션 고유 아이디
+private:
 	ClientSocket*			mySocket;
 	cCharacter				initInfo;
 	queue<shared_ptr<cCharacter>>				NewCharactersInfo;			// 플레이어 로그인 시 캐릭터 정보
 	cCharactersInfo*		CharactersInfo;	// 다른 캐릭터들의 정보
-	int							iSessionId;			// 캐릭터의 세션 고유 아이디
 	int							iPlayerCount;
 
 	FTimerHandle			SendPlayerInfoHandle;	// 동기화 타이머 핸들러

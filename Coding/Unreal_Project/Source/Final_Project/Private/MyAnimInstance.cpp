@@ -27,12 +27,14 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (!bIsDead)
 	{
 		fCurrentPawnSpeed = FVector(Pawn->GetVelocity() * FVector(1.0f, 1.0f, 0.0f)).Size();
-		auto Character = Cast<ACharacter>(Pawn);
+		auto Character = Cast<AMyCharacter>(Pawn);
 		if (Character)
 		{
 			float MoveForward = Character->GetInputAxisValue(TEXT("UpDown"));
 			float MoveRight = Character->GetInputAxisValue(TEXT("LeftRight"));
-			fCurrentPawnDirection = UKismetMathLibrary::DegAtan2(MoveForward, MoveRight);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			if(Character->iSessionId == PlayerController->iSessionId)
+				fCurrentPawnDirection = UKismetMathLibrary::DegAtan2(MoveForward, MoveRight);
 			bIsInAir = Character->GetMovementComponent()->IsFalling();
 		}
 	}

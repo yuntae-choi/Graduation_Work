@@ -51,6 +51,8 @@ public:
 	void Attack();
 	void SnowAttack();
 
+	UFUNCTION()
+	class UMyAnimInstance* GetAnim() const { return myAnim; }
 
 protected:
 	virtual void BeginPlay() override;

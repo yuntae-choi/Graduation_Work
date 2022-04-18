@@ -84,8 +84,9 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[packet->sessionID].VX = packet->vx;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].direction = packet->direction;		// 캐릭터 정보
 
-		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f)"), packet->sessionID, packet->x, packet->y, packet->z, packet->yaw, packet->vx, packet->vy, packet->vz);
+		//MYLOG(Warning, TEXT("[Recv move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), packet->sessionID, packet->x, packet->y, packet->z, packet->yaw, packet->vx, packet->vy, packet->vz, packet->direction);
 		break;
 	}
 
@@ -185,7 +186,7 @@ void ClientSocket::ReadyToSend_DamgePacket() {
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity)
+void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir)
 {
 	if (_login_ok) {
 		cs_packet_move packet;
@@ -199,8 +200,9 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRota
 		packet.vx = MyVelocity.X;
 		packet.vy = MyVelocity.Y;
 		packet.vz = MyVelocity.Z;
+		packet.direction = dir;
 
-		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f)"), packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);
+		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), s_id, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz, dir);
 		SendPacket(&packet);
 	}
 };

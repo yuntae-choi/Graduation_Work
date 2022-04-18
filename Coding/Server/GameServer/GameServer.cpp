@@ -397,10 +397,11 @@ void process_packet(int s_id, unsigned char* p)
 		cl.y = packet->y;
 		cl.z = packet->z;
 		cl.Yaw = packet->yaw;
-		cl.VX = packet->vz;
-		cl.VY = packet->vz;
+		cl.VX = packet->vx;
+		cl.VY = packet->vy;
 		cl.VZ = packet->vz;
-		//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f)\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ);
+		cl.direction = packet->direction;
+		//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f), dir : %f\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ, cl.direction);
 
 		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
@@ -735,6 +736,7 @@ void send_move_packet(int _id, int target)
 	packet.vx = clients[target].VX;
 	packet.vy = clients[target].VY;
 	packet.vz = clients[target].VZ;
+	packet.direction = clients[target].direction;
 	//packet.move_time = clients[target].last_move_time;
 
 	//printf_s("[Send move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f)\n", packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);

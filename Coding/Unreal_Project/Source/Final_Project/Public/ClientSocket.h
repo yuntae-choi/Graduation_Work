@@ -32,6 +32,8 @@ public:
 	float VX = 0;
 	float VY = 0;
 	float VZ = 0;
+
+	float direction = 0.0f;
 	// ¼Ó¼º
 	bool	IsAlive = true;
 	float	HealthValue;
@@ -146,7 +148,7 @@ public:
 	void ProcessPacket(unsigned char* ptr);
 	void Send_LoginPacket();
 	void ReadyToSend_StatusPacket();
-	void Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity);
+	void Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir);
 	void ReadyToSend_AttackPacket();
 	void ReadyToSend_ChatPacket(int sessionID, float x, float y, float z);
 	void ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
