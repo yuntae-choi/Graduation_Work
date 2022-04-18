@@ -95,7 +95,9 @@ struct cs_packet_move {
 	float yaw;
 	float pitch;
 	float roll;
-	//long long		move_time;
+	//char move_time[MAX_CHAT_SIZE];
+
+	long long		move_time;
 };
 
 struct cs_packet_attack {
@@ -121,7 +123,7 @@ struct cs_packet_chat {
 	char	type;
 	int s_id;
 	float x, y, z;
-	char	message[MAX_CHAT_SIZE];
+	char	message[100];
 };
 
 struct cs_packet_teleport {

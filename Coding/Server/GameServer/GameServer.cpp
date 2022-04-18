@@ -400,8 +400,9 @@ void process_packet(int s_id, unsigned char* p)
 		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
 
-		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-	    //cout << millisec_since_epoch - packet->move_time << "ms" << endl;
+		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		//cout << packet->move_time << "-ms-" << endl;
+		cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		//send_status_packet(s_id);
 		

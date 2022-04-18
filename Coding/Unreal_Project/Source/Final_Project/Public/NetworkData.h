@@ -110,7 +110,8 @@ struct cs_packet_move {
 	float yaw;
 	float pitch;
 	float roll;
-	//long long move_time;
+	//char move_time[100];
+	long long move_time;
 };
 
 struct cs_packet_attack {

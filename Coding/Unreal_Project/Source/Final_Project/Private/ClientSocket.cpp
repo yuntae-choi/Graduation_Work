@@ -212,9 +212,9 @@ void ClientSocket::ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator
 		packet.vy = MyVelocity.Y;
 		packet.vz = MyVelocity.Z;
 
-	//	size_t sent = 0;
-		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		//packet.move_time = millisec_since_epoch;
+	    size_t sent = 0;
+		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		packet.move_time = millisec_since_epoch;
 		SendPacket(&packet);
 	}
 };
