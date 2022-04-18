@@ -729,10 +729,13 @@ void worker_thread()
 		case OP_PLAYER_HEAL: {
 		
 			if (clients[_s_id].is_bone == true) { 
-				clients[_s_id]._hp += 1;
-				player_heal(_s_id); 
+				if (clients[_s_id]._hp < clients[_s_id]._max_hp) {
+					clients[_s_id]._hp += 1;
+					player_heal(_s_id);
+					send_hp_packet(_s_id, _s_id);
+				}
 			}
-			send_hp_packet(_s_id, _s_id);
+			
 			//cout << "hp +1" << endl;
 			delete exp_over;
 			break;
