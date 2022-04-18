@@ -394,8 +394,8 @@ void process_packet(int s_id, unsigned char* p)
 		cl.Yaw = packet->yaw;
 		cl.Pitch = packet->pitch;
 		cl.Roll = packet->roll;
-		cl.VX = packet->vz;
-		cl.VY = packet->vz;
+		cl.VX = packet->vx;
+		cl.VY = packet->vy;
 		cl.VZ = packet->vz;
 		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
 		//클라 recv 확인용
