@@ -50,7 +50,8 @@ public:
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
 	void SnowAttack();
-
+	void ChangeSnowman();
+	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 
 protected:
 	virtual void BeginPlay() override;
@@ -68,10 +69,9 @@ private:
 	void EndFarming();
 	void UpdateFarming(float deltaTime);
 	void UpdateHP();
-	void ChangeSnowman();
 	bool GetItem(int itemType);
 	bool GetIsSnowman() { return bIsSnowman; };
-	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
+	
 	void WaitForStartGame();	// 게임 시작 후 대기
 
 public:	

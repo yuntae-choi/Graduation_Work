@@ -175,6 +175,7 @@ struct sc_packet_login_fail {
 struct sc_packet_status_change {
 	unsigned char size;
 	char type;
+	int s_id;
 	short   state;
 };
 

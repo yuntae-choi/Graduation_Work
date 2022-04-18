@@ -8,7 +8,8 @@
 #include "Snowdrift.h"
 
 const int AMyCharacter::iMaxHP = 390;
-const int AMyCharacter::iMinHP = 270;
+//const int AMyCharacter::iMinHP = 270;
+const int AMyCharacter::iMinHP = 0;
 const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도

@@ -180,6 +180,22 @@ bool AMyPlayerController::UpdateWorldInfo()
 				OtherPlayer->AddMovementInput(CharacterVelocity);
 				OtherPlayer->SetActorRotation(CharacterRotation);
 				OtherPlayer->SetActorLocation(CharacterLocation);
+
+				//눈사람 변화
+				if (!OtherPlayer->IsSnowman())
+				{
+					if (info->My_State == ST_SNOWMAN)
+					{
+						OtherPlayer->ChangeSnowman();
+					}
+				}
+				else {
+					if (info->My_State != ST_SNOWMAN)
+					{
+						OtherPlayer->ChangeAnimal();
+					}
+				}
+
 			}
 			else
 			{
@@ -189,6 +205,8 @@ bool AMyPlayerController::UpdateWorldInfo()
 					world, DestroyEmiiter, transform, true
 				);
 				Character->Destroy();*/
+
+
 			}
 		}
 
@@ -321,7 +339,7 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 		//// 캐릭터 속성 업데이트
 		if (m_Player->iCurrentHP != info.HealthValue)
 		{
-			UE_LOG(LogClass, Log, TEXT("Player 체력 변경: -> %d"), info.HealthValue);
+			//UE_LOG(LogClass, Log, TEXT("Player 체력 변경: -> %d"), info.HealthValue);
 			m_Player->iCurrentHP = info.HealthValue;
 		}
 		

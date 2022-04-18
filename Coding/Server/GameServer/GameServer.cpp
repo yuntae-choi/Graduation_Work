@@ -515,6 +515,23 @@ void process_packet(int s_id, unsigned char* p)
 		packet.type = SC_PACKET_HP;
 		packet.size = sizeof(packet);
 		cl.do_send(sizeof(packet), &packet);
+
+		if (cl._hp <= 0)
+		{
+			sc_packet_status_change _packet;
+			_packet.size = sizeof(_packet);
+			_packet.type = SC_PACKET_STATUS_CHANGE;
+			_packet.state = ST_SNOWMAN;
+			_packet.s_id = s_id;
+			for (auto& other : clients) {
+				if (ST_INGAME != other._state)
+					continue;
+				other.do_send(sizeof(_packet), &_packet);
+				cout << "눈사람" << endl;
+				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+			}
+		}
+		
 		cout << "플레이어[" << s_id << "가 데미지 받음"<< endl;
 
 	    break;
@@ -730,7 +747,7 @@ void worker_thread()
 		
 			if (clients[_s_id].is_bone == true) { 
 				if (clients[_s_id]._hp < clients[_s_id]._max_hp) {
-					clients[_s_id]._hp += 1;
+					clients[_s_id]._hp += 10;
 					player_heal(_s_id);
 					send_hp_packet(_s_id, _s_id);
 				}
