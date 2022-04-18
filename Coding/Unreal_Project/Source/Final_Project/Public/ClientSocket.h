@@ -34,7 +34,7 @@ public:
 	float VZ;
 	// 속성
 	bool	IsAlive;
-	float	HealthValue;
+	int	HealthValue;
 	bool	IsAttacking;
 	//카메라 방향
 	float fCx, fCy, fCz;
@@ -212,6 +212,7 @@ public:
 	Overlap _recv_over;
 	char	_id[MAX_NAME_SIZE];
 	char	_pw[MAX_NAME_SIZE];
+	int     iMax_Hp;
 	int     iMy_s_id;
 	float	fMy_x;
 	float	fMy_y;

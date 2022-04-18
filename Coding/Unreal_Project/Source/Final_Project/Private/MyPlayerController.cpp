@@ -40,6 +40,7 @@ void AMyPlayerController::BeginPlay()
 		return;
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
+	myClientSocket->iMax_Hp = m_Player->iMaxHP;
 	myClientSocket->fMy_x = MyLocation.X;
 	myClientSocket->fMy_y = MyLocation.Y;
 	myClientSocket->fMy_z = MyLocation.Z;
@@ -226,7 +227,6 @@ void AMyPlayerController::StartPlayerInfo(const cCharacter& info)
 		return;
 	auto MyLocation = m_Player->GetActorLocation();
 	auto MyRotation = m_Player->GetActorRotation();
-
 	myClientSocket->fMy_x = MyLocation.X;
 	myClientSocket->fMy_y = MyLocation.Y;
 	myClientSocket->fMy_z = MyLocation.Z;
@@ -319,18 +319,14 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 	else
 	{
 		//// 캐릭터 속성 업데이트
-		//if (Player->HealthValue != info.HealthValue)
-		//{
-		//	UE_LOG(LogClass, Log, TEXT("Player damaged"));
-		//	// 피격 파티클 스폰
-		//	FTransform transform(Player->GetActorLocation());
-		//	UGameplayStatics::SpawnEmitterAtLocation(
-		//		world, HitEmiiter, transform, true
-		//	);
-		//	// 피격 애니메이션 스폰
-		//	Player->PlayDamagedAnimation();
-		//	Player->HealthValue = info.HealthValue;
-		//}
+		if (m_Player->iCurrentHP != info.HealthValue)
+		{
+			UE_LOG(LogClass, Log, TEXT("Player damaged"));
+			
+			m_Player->iCurrentHP = info.HealthValue;
+		}
+		FDamageEvent DamageEvent;
+		m_Player->TakeDamage(0, DamageEvent, false, this);
 	}
 }
 

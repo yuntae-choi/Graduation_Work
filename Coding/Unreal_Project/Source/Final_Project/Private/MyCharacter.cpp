@@ -267,7 +267,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 	if (!bIsSnowman)
 	{	// 동물인 경우 체력 감소
-		iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
+		//iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
 
 		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
 	}
@@ -496,8 +496,8 @@ void AMyCharacter::UpdateTemperatureState()
 		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
 			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
 				{
-					iCurrentHP += ABonfire::iHealAmount;
-					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+					//iCurrentHP += ABonfire::iHealAmount;
+					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
 
 				}), 1.0f, true);
 		}
@@ -505,8 +505,8 @@ void AMyCharacter::UpdateTemperatureState()
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
 			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
 				{
-					iCurrentHP -= ABonfire::iDamageAmount;
-					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+					//iCurrentHP -= ABonfire::iDamageAmount;
+					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
 				}), 1.0f, true);
 		}
 	//}

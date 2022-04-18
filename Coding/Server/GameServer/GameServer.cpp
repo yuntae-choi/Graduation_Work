@@ -306,7 +306,7 @@ void process_packet(int s_id, unsigned char* p)
 		cl.x = 0 + (s_id*300);
 		cl.y = 0 +(s_id * 300);
 		cl.z = packet->z;
-
+		cl._hp = cl._max_hp;
 
 		//sc_packet_login_ok _packet;
 		//_packet.size = sizeof(_packet);

@@ -21,7 +21,7 @@ public:
     float VX;
     float VY;
     float VZ;
-    int _max_hp; // 최대 체력
+    int _max_hp = 390; // 최대 체력
     int _hp; // 체력
     int _level; // 레벨
     int _max_exp;

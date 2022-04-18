@@ -68,6 +68,7 @@ public:
 	bool				bIsConnected;	// 辑滚客 立加 蜡公
 	
 	int32 iMySessionId;
+;
 	float fMy_x;
 	float fMy_y;
 	float fMy_z;

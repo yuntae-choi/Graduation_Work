@@ -58,6 +58,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		p.X = packet->x;;
 		p.Y = packet->y;
 		p.Z = packet->z;
+		p.HealthValue = iMax_Hp;
 		iMy_s_id = packet->s_id;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
 		PlayerController->iMySessionId = packet->s_id;
