@@ -95,9 +95,6 @@ struct cs_packet_throw_snow {
 struct cs_packet_damage {
 	unsigned char size;
 	char type;
-	int s_id;
-	int hp;
-	int damage;
 };
 
 struct sc_packet_hp_change {

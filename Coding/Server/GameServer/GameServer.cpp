@@ -37,13 +37,15 @@ void worker_thread();
 void ev_timer();
 
 //이동
-void send_hp_packet(int _id, int target)
+void send_hp_packet(int _id)
 {
 	sc_packet_hp_change packet;
-	packet.s_id = target;
+	packet.s_id = _id;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_HP;
-	packet.hp = clients[target]._hp;
+	packet.hp = clients[_id]._hp;
+
+	printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
 	clients[_id].do_send(sizeof(packet), &packet);
 }
 
@@ -309,6 +311,7 @@ void process_packet(int s_id, unsigned char* p)
 		cl.z = packet->z;
 		cl.Yaw = s_id * 40.0f;
 
+		cl._hp = cl._max_hp;
 
 		//sc_packet_login_ok _packet;
 		//_packet.size = sizeof(_packet);
@@ -531,13 +534,7 @@ void process_packet(int s_id, unsigned char* p)
 		sc_packet_hp_change packet;
 		cl._hp -= 10;
 		if (cl._hp < 0) cl._hp = 0;
-		packet.hp = cl._hp;
-		packet.s_id = cl._s_id;
-		packet.type = SC_PACKET_HP;
-		packet.size = sizeof(packet);
-
-		printf_s("[Send hp] id : %d, hp : %d\n", packet.s_id, packet.hp);
-		cl.do_send(sizeof(packet), &packet);
+		send_hp_packet(cl._s_id);
 
 	    break;
 
@@ -595,7 +592,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet->type = SC_PACKET_THROW_SNOW;
 			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
 
-			printf_s("[Send throw snow]\n");
+			//printf_s("[Send throw snow]\n");
 			other.do_send(sizeof(*packet), packet);
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 
@@ -724,7 +721,8 @@ void worker_thread()
 				clients[_s_id]._hp += 1;
 				player_heal(_s_id); 
 			}
-			send_hp_packet(_s_id, _s_id);
+
+			send_hp_packet(_s_id);
 			//cout << "hp +1" << endl;
 			delete exp_over;
 			break;

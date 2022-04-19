@@ -32,7 +32,7 @@ public:
 	void SetInitInfo(const cCharacter& me);
 	void SetNewBall(const int s_id);
 
-	void UpdatePlayerInfo(int input);
+	void SendPlayerInfo(int input);
 	//void UpdateFarming(int item_no);
 
 	// 스폰시킬 다른 캐릭터

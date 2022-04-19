@@ -94,7 +94,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 	if (world == nullptr)					return false;
 	if (charactersInfo == nullptr)	return false;
 
-	// 플레이어 사망업데이트
+	// 플레이어 체력, 사망업데이트
 	//UpdatePlayerInfo(CharactersInfo->players[iMySessionId]);
 
 	if (charactersInfo->players.size() == 1)
@@ -129,17 +129,17 @@ bool AMyPlayerController::UpdateWorldInfo()
 
 		if (info->IsAlive)
 		{
-			//if (OtherPlayer->HealthValue != info->HealthValue)
+			//if (player_->iCurrentHP != info->HealthValue)
 			//{
-			//	UE_LOG(LogClass, Log, TEXT("other player damaged."));
-			//	// 피격 파티클 소환
-			//	FTransform transform(OtherPlayer->GetActorLocation());
-			//	UGameplayStatics::SpawnEmitterAtLocation(
-			//		world, HitEmiiter, transform, true
-			//	);
-			//	// 피격 애니메이션 플레이
-			//	OtherPlayer->PlayDamagedAnimation();
-			//	OtherPlayer->HealthValue = info->HealthValue;
+			//	MYLOG(Warning, TEXT("other player damaged."));
+			//	//// 피격 파티클 소환
+			//	//FTransform transform(OtherPlayer->GetActorLocation());
+			//	//UGameplayStatics::SpawnEmitterAtLocation(
+			//	//	world, HitEmiiter, transform, true
+			//	//);
+			//	//// 피격 애니메이션 플레이
+			//	//player_->PlayDamagedAnimation();
+			//	//player_->iCurrentHP = info->HealthValue;
 			//}
 
 			//// 공격중일때 타격 애니메이션 플레이
@@ -190,11 +190,9 @@ void AMyPlayerController::UpdateNewPlayer()
 
 	for (int i = 0; i < size_; ++i)
 	{
-		MYLOG(Warning, TEXT("it's %d"), newPlayers.front()->SessionId);
 		// 새로운 플레이어가 자기 자신이면 무시
 		if (newPlayers.front()->SessionId == iSessionId)
 		{
-			MYLOG(Warning, TEXT("%d %d It's my character"), newPlayers.front()->SessionId, iSessionId);
 			newPlayers.front() = nullptr;
 			newPlayers.pop();
 			continue;
@@ -221,8 +219,6 @@ void AMyPlayerController::UpdateNewPlayer()
 		SpawnCharacter->SpawnDefaultController();
 		SpawnCharacter->iSessionId = newPlayers.front()->SessionId;
 
-		MYLOG(Warning, TEXT("who %d"), SpawnCharacter->iSessionId);
-
 		// 필드의 플레이어 정보에 추가
 		if (charactersInfo != nullptr)
 		{
@@ -237,7 +233,7 @@ void AMyPlayerController::UpdateNewPlayer()
 			charactersInfo->players[newPlayers.front()->SessionId] = info;
 		}
 
-		MYLOG(Warning, TEXT("other player spawned."));
+		MYLOG(Warning, TEXT("other player(id : %d) spawned."), newPlayers.front()->SessionId);
 
 		newPlayers.front() = nullptr;
 		newPlayers.pop();
@@ -245,7 +241,7 @@ void AMyPlayerController::UpdateNewPlayer()
 	bNewPlayerEntered = false;
 }
 
-void AMyPlayerController::UpdatePlayerInfo(int input)
+void AMyPlayerController::SendPlayerInfo(int input)
 {
 	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!m_Player)

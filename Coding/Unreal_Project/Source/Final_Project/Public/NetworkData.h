@@ -142,6 +142,13 @@ struct cs_packet_damage {
 	char	type;
 };
 
+struct sc_packet_hp_change {
+	unsigned char size;
+	char type;
+	int s_id;
+	int hp;
+};
+
 struct cs_packet_attack {
 	unsigned char size;
 	char	type;

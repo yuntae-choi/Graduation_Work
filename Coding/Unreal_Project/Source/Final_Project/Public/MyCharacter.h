@@ -76,8 +76,10 @@ private:
 	void UpdateFarming(float deltaTime);
 	void UpdateHP();
 	void ChangeSnowman();
-	void WaitForStartGame();
 	bool GetItem(int itemType);
+	bool GetIsSnowman() { return bIsSnowman; };
+	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
+	void WaitForStartGame();	// 게임 시작 후 대기
 
 public:	
 

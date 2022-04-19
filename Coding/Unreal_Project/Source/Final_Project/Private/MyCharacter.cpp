@@ -12,10 +12,11 @@ const int AMyCharacter::iMinHP = 270;
 const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
-const float fChangeSnowmanStunTime = 10.0f;	// 동물에서 눈사람으로 변할 때 스턴 시간
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
+
+const float fChangeSnowmanStunTime = 3.0f;// 실제값 - 10.0f;
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -194,7 +195,7 @@ void AMyCharacter::UpDown(float NewAxisValue)
 	if (NewAxisValue != 0)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
 }
@@ -204,7 +205,7 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 	if (NewAxisValue != 0)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
 }
@@ -214,7 +215,7 @@ void AMyCharacter::LookUp(float NewAxisValue)
 	if (NewAxisValue != 0)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 	AddControllerPitchInput(NewAxisValue);
 }
@@ -224,7 +225,7 @@ void AMyCharacter::Turn(float NewAxisValue)
 	if (NewAxisValue != 0)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 	AddControllerYawInput(NewAxisValue);
 }
@@ -232,7 +233,7 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (iSessionId == PlayerController->iSessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
+	if (iSessionId == PlayerController->iSessionId)  PlayerController->SendPlayerInfo(COMMAND_ATTACK);
 }
 
 void AMyCharacter::SnowAttack()
@@ -284,7 +285,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		if (iSessionId == PlayerController->iSessionId)
 		{
-			PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
+			PlayerController->SendPlayerInfo(COMMAND_DAMAGE);
 		}
 	}
 	else
@@ -334,7 +335,21 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 		//}
 
 	}
+	AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
+	if (!otherCharacter) return;
 
+	// 자신 - 눈사람, 스턴상태 x
+	// 상대 - 동물
+	if (bIsSnowman && iCharacterState != CharacterState::SnowmanStunned)
+	{
+		if (!(otherCharacter->GetIsSnowman()))
+		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
+			ChangeAnimal();
+			otherCharacter->ChangeSnowman();
+			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
+			return;
+		}
+	}
 
 	//auto MyCharacter = Cast<AMyCharacter>(OtherActor);
 
@@ -343,7 +358,6 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	//	FDamageEvent DamageEvent;
 	//	MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
 	//}
-
 }
 
 void AMyCharacter::StartFarming()
@@ -519,8 +533,8 @@ void AMyCharacter::UpdateTemperatureState()
 		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
 			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
 				{
-					iCurrentHP += ABonfire::iHealAmount;
-					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+					//iCurrentHP += ABonfire::iHealAmount;
+					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
 
 				}), 1.0f, true);
 		}
@@ -528,8 +542,8 @@ void AMyCharacter::UpdateTemperatureState()
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
 			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
 				{
-					iCurrentHP -= ABonfire::iDamageAmount;
-					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+					//iCurrentHP -= ABonfire::iDamageAmount;
+					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
 				}), 1.0f, true);
 		}
 	//}
@@ -586,4 +600,24 @@ void AMyCharacter::ResetHasItems()
 	iMaxMatchCount = iOriginMaxMatchCount;
 	bHasUmbrella = false;
 	bHasBag = false;
+}
+
+void AMyCharacter::ChangeAnimal()
+{
+	// 스켈레탈메시, 애니메이션 블루프린트 변경
+	GetMesh()->SetSkeletalMesh(bear);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetAnimInstanceClass(bearAnim);
+
+	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
+	MYCHECK(nullptr != myAnim);
+	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
+
+	bIsSnowman = false;
+	iCurrentHP = iMaxHP;
+	GetWorldTimerManager().ClearTimer(temperatureHandle);
+
+	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
+
+	iCharacterState = CharacterState::AnimalNormal;
 }

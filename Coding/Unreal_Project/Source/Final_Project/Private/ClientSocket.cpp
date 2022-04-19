@@ -94,7 +94,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
 
-		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
+
 
 		CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
 		CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
@@ -102,21 +102,25 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
 		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
 		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
+
+		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
 		MyPlayerController->SetNewBall(packet->s_id);
 
 		break;
 	}
 
-	//case SC_PACKET_HP:
-	//{
-	//	sc_packet_hp_change* packet = reinterpret_cast<sc_packet_hp_change*>(ptr);
-	//	int target = packet->target;
-	//	//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
-	//	CharactersInfo.players[target].HealthValue = packet->hp;
+	case SC_PACKET_HP:
+	{
+		sc_packet_hp_change* packet = reinterpret_cast<sc_packet_hp_change*>(ptr);
 
-	//	break;
+		//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
+		CharactersInfo.players[packet->s_id].HealthValue = packet->hp;
 
-	//}
+		MYLOG(Warning, TEXT("[Recv hp change] id : %d, hp : %d"), packet->s_id, packet->hp);
+
+		break;
+
+	}
 
 	case SC_PACKET_REMOVE_OBJECT:
 	{

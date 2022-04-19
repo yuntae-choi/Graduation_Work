@@ -36,7 +36,7 @@ public:
 	float direction = 0.0f;
 	// 속성
 	bool	IsAlive = true;
-	float	HealthValue;
+	int	HealthValue = 390.0f;
 	bool	IsAttacking = false;
 	//카메라 위치
 	float fCx, fCy, fCz;
