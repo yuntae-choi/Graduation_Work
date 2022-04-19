@@ -118,12 +118,14 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 	//}
 
+	case SC_PACKET_REMOVE_OBJECT:
+	{
+		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
 
-	//case SC_PACKET_REMOVE_OBJECT:
-	//{
+		MYLOG(Warning, TEXT("[Recv remove object] id : %d"), packet->s_id);
 
-	//	break;
-	//}
+		break;
+	}
 
 	//case SC_PACKET_CHAT:
 	//{
@@ -272,6 +274,17 @@ void ClientSocket::ReadyToSend_ChatPacket(int sessionID, float x, float y, float
 	SendPacket(&packet);
 };
 
+void ClientSocket::Send_LogoutPacket(const int& s_id)
+{
+	cs_packet_logout packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_LOGOUT;
+	packet.s_id = MyPlayerController->iSessionId;
+	MYLOG(Warning, TEXT("[Send Logout] id : %d"), packet.s_id);
+	SendPacket(&packet);
+}
+
+
 void ClientSocket::CloseSocket()
 {
 	closesocket(_socket);
@@ -292,7 +305,8 @@ uint32 ClientSocket::Run()
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
 	
-	RecvPacket();
+	 RecvPacket();
+
 	Send_LoginPacket();
 
 	FPlatformProcess::Sleep(0.03);

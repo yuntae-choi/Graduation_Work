@@ -122,6 +122,16 @@ void AMyCharacter::BeginPlay()
 	WaitForStartGame();	// 대기시간
 }
 
+void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	MYLOG(Warning, TEXT("endplay"));
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	PlayerController->GetSocket()->Send_LogoutPacket(iSessionId);
+	//PlayerController->GetSocket()->CloseSocket();
+	//PlayerController->GetSocket()->StopListen();
+ }
+
+
 // Called every frame
 void AMyCharacter::Tick(float DeltaTime)
 {
@@ -183,7 +193,7 @@ void AMyCharacter::UpDown(float NewAxisValue)
 {
 	if (NewAxisValue != 0)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
@@ -193,7 +203,7 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 {
 	if (NewAxisValue != 0)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
@@ -203,7 +213,7 @@ void AMyCharacter::LookUp(float NewAxisValue)
 {
 	if (NewAxisValue != 0)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddControllerPitchInput(NewAxisValue);
@@ -213,7 +223,7 @@ void AMyCharacter::Turn(float NewAxisValue)
 {
 	if (NewAxisValue != 0)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
 	}
 	AddControllerYawInput(NewAxisValue);
@@ -221,9 +231,8 @@ void AMyCharacter::Turn(float NewAxisValue)
 
 void AMyCharacter::Attack()
 {
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId == PlayerController->iSessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
-
 }
 
 void AMyCharacter::SnowAttack()

@@ -41,7 +41,8 @@ enum CS_PacketType
 	CS_PACKET_TELEPORT,
 	CS_PACKET_THROW_SNOW,
 	CS_PACKET_DAMAGE,
-	CS_PACKET_GET_ITEM
+	CS_PACKET_GET_ITEM,
+	CS_PACKET_LOGOUT
 };
 
 enum SC_PacketType
@@ -95,6 +96,12 @@ struct sc_packet_login_ok {
 	int		s_id;
 	float x, y, z;
 	float yaw;
+};
+
+struct cs_packet_logout {
+	unsigned char size;
+	char	type;
+	int     s_id;
 };
 
 struct cs_packet_move {
@@ -175,7 +182,7 @@ struct sc_packet_move {
 struct sc_packet_remove_object {
 	unsigned char size;
 	char type;
-	int id;
+	int s_id;
 };
 
 struct sc_packet_chat {

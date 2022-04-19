@@ -605,7 +605,17 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 
 	}
-
+	case CS_PACKET_LOGOUT: {
+		cs_packet_logout* packet = reinterpret_cast<cs_packet_logout*>(p);
+		cout << "[Recv logout]";
+		for (auto& other : clients) {
+			if (s_id == other._s_id) continue;
+			if (ST_INGAME != other._state) continue;
+			send_remove_object(other._s_id, s_id);
+		}
+		Disconnect(s_id);
+		break;
+	}
 	default:
 		printf("Unknown PACKET type\n");
 

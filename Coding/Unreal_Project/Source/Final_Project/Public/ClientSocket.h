@@ -6,7 +6,7 @@
 #include "Final_Project.h"
 #include "NetworkData.h"
 
-class AMyGameMode;
+class AMyGameModeBase;
 class AMyPlayerController;
 
 using namespace std;
@@ -153,10 +153,10 @@ public:
 	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
 	void Send_DamagePacket();
 	void ReadyToSend_ItemPacket(int item_no);
+	void Send_LogoutPacket(const int& s_id);
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);
-
 
 	void RecvPacket()
 	{
@@ -168,7 +168,6 @@ public:
 		int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, NULL);
 		if (SOCKET_ERROR == ret) {
 			int error_num = WSAGetLastError();
-
 		}
 	};
 	void SendPacket(void* packet)

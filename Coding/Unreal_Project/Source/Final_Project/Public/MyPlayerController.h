@@ -25,6 +25,7 @@ public:
 	AMyPlayerController();
 
 	cCharactersInfo* GetCharactersInfo() const { return charactersInfo; }
+	ClientSocket* GetSocket() const { return mySocket; }
 	void SetSessionId(const int sessionId) { iSessionId = sessionId; }
 	void SetCharactersInfo(cCharactersInfo* ci_) { if (ci_ != nullptr)	charactersInfo = ci_; }
 	void SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_);

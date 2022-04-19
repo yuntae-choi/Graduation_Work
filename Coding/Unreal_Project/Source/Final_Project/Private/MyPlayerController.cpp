@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyPlayerController.h"
+#include "MyGameModeBase.h"
 #include "ClientSocket.h"
 #include "MyAnimInstance.h"
 
@@ -21,6 +22,7 @@ AMyPlayerController::AMyPlayerController()
 
 void AMyPlayerController::BeginPlay()
 {
+	MYLOG(Warning, TEXT("BeginPlay!"));
 	mySocket->StartListen();
 
 	// 실행시 클릭없이 바로 조작
@@ -30,8 +32,10 @@ void AMyPlayerController::BeginPlay()
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	mySocket->CloseSocket();
-	mySocket->StopListen();
+	//MYLOG(Warning, TEXT("EndPlay!"));
+	//mySocket->Send_LogoutPacket(iSessionId);
+	//mySocket->CloseSocket();
+	//mySocket->StopListen();
 }
 
 void AMyPlayerController::Tick(float DeltaTime)
@@ -49,8 +53,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 	// 월드 동기화
 	UpdateWorldInfo();
 
-	////UpdateRotation();
-
+	//UpdateRotation();
 }
 
 void AMyPlayerController::SetInitInfo(const cCharacter& me)

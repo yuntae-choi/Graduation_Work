@@ -19,6 +19,7 @@ const char CS_PACKET_TELEPORT = 5;
 const char CS_PACKET_THROW_SNOW = 6;
 const char CS_PACKET_DAMAGE = 7;
 const char CS_PACKET_GET_ITEM = 8;
+const char CS_PACKET_LOGOUT = 9;
 
 
 
