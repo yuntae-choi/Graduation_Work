@@ -68,8 +68,6 @@ void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
 	{
 		bNewPlayerEntered = true;
 		newPlayers.push(NewPlayer_);
-
-		MYLOG(Warning, TEXT("size : %d"), newPlayers.size());
 	}
 }
 
@@ -83,8 +81,12 @@ void AMyPlayerController::InitPlayerSetting()
 {
 	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!player_) return;
-	player_->SetActorLocationAndRotation(FVector(initInfo.X, initInfo.Y, initInfo.Z), FRotator(0.0f, initInfo.Yaw, 0.0f));
+	player_->SetActorLocation(FVector(initInfo.X, initInfo.Y, initInfo.Z));
 	player_->iSessionId = initInfo.SessionId;
+
+	//컨트롤러는 초기설정이 불가능함
+	//SetActorRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
+
 	bInitPlayerSetting = false;
 }
 
@@ -275,7 +277,6 @@ void AMyPlayerController::SendPlayerInfo(int input)
 		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
 		mySocket->Send_DamagePacket();
-
 }
 
 //플레이어 정보 업데이트
@@ -310,7 +311,7 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 		// 캐릭터 속성 업데이트
 		if (player_->iCurrentHP != info.HealthValue)
 		{
-			MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
+			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
 			player_->iCurrentHP = info.HealthValue;
 
 
@@ -326,77 +327,7 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 	}
 }
 
-//
-////플레이어 정보 업데이트
-//void AMyPlayerController::StartPlayerInfo(const cCharacter& info)
-//{
-//	auto Player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
-//	if (!Player_)
-//		return;
-//
-//
-//	UWorld* const world = GetWorld();
-//	if (!world)
-//		return;
-//
-//	if (bSetPlayer) {
-//		iMySessionId = info.SessionId;
-//		FVector _CharacterLocation;
-//		_CharacterLocation.X = info.X;
-//		_CharacterLocation.Y = info.Y;
-//		_CharacterLocation.Z = info.Z;
-//		Player_->SetActorLocation(_CharacterLocation);
-//		bSetPlayer = false;
-//	}
-//
-//	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-//	if (!m_Player)
-//		return;
-//	auto MyLocation = m_Player->GetActorLocation();
-//	auto MyRotation = m_Player->GetActorRotation();
-//
-//	mySocket->fMy_x = MyLocation.X;
-//	mySocket->fMy_y = MyLocation.Y;
-//	mySocket->fMy_z = MyLocation.Z;
-//	MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
-//
-//
-//	if (!info.IsAlive)
-//	{
-//		/*UE_LOG(LogClass, Log, TEXT("Player Die"));
-//		FTransform transform(Player->GetActorLocation());
-//		UGameplayStatics::SpawnEmitterAtLocation(
-//			world, DestroyEmiiter, transform, true
-//		);
-//		Player->Destroy();
-//
-//		CurrentWidget->RemoveFromParent();
-//		GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
-//		if (GameOverWidget != nullptr)
-//		{
-//			GameOverWidget->AddToViewport();
-//		}*/
-//	}
-//	else
-//	{
-//		//// 캐릭터 속성 업데이트
-//		//if (Player->HealthValue != info.HealthValue)
-//		//{
-//		//	UE_LOG(LogClass, Log, TEXT("Player damaged"));
-//		//	// 피격 파티클 스폰
-//		//	FTransform transform(Player->GetActorLocation());
-//		//	UGameplayStatics::SpawnEmitterAtLocation(
-//		//		world, HitEmiiter, transform, true
-//		//	);
-//		//	// 피격 애니메이션 스폰
-//		//	Player->PlayDamagedAnimation();
-//		//	Player->HealthValue = info.HealthValue;
-//		//}
-//	}
-//}
-//
-//
-//
+
 //void AMyPlayerController::UpdateFarming(int item_no)
 //{
 //		mySocket->ReadyToSend_ItemPacket(item_no);

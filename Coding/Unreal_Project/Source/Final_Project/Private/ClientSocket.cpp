@@ -113,10 +113,9 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		sc_packet_hp_change* packet = reinterpret_cast<sc_packet_hp_change*>(ptr);
 
-		//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
 		CharactersInfo.players[packet->s_id].HealthValue = packet->hp;
 
-		MYLOG(Warning, TEXT("[Recv hp change] id : %d, hp : %d"), packet->s_id, packet->hp);
+		//MYLOG(Warning, TEXT("[Recv hp change] id : %d, hp : %d"), packet->s_id, packet->hp);
 
 		break;
 

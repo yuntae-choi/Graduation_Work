@@ -9,6 +9,7 @@
 #include <thread>
 
 #include <atomic>
+#include <cmath>
 
 HANDLE g_h_iocp;
 SOCKET sever_socket;
@@ -317,10 +318,10 @@ void process_packet(int s_id, unsigned char* p)
 		cl.state_lock.lock();
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
-		cl.x = s_id * 300.0f;
-		cl.y = s_id * 300.0f;
+		cl.x = 300.0f * cos(s_id + 45.0f);
+		cl.y = 300.0f * sin(s_id + 45.0f);
 		cl.z = packet->z;
-		cl.Yaw = s_id * 40.0f;
+		cl.Yaw = s_id * 45.0f - 140.0f;
 
 		cl._hp = cl._max_hp;
 
@@ -825,7 +826,7 @@ void worker_thread()
 				if (clients[_s_id]._hp > clients[_s_id]._min_hp) {
 					clients[_s_id]._hp -= 1;
 					player_damage(_s_id);
-					send_hp_packet(_s_id;
+					send_hp_packet(_s_id);
 					cout << "hp -1" << endl;
 
 				}
