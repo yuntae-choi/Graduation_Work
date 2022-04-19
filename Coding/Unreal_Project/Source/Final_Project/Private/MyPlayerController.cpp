@@ -94,8 +94,8 @@ bool AMyPlayerController::UpdateWorldInfo()
 	if (world == nullptr)					return false;
 	if (charactersInfo == nullptr)	return false;
 
-	// 플레이어 체력, 사망업데이트
-	//UpdatePlayerInfo(CharactersInfo->players[iMySessionId]);
+	// 플레이어자신 체력, 사망업데이트
+	UpdatePlayerInfo(charactersInfo->players[iSessionId]);
 
 	if (charactersInfo->players.size() == 1)
 	{
@@ -168,6 +168,21 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->SetActorRotation(CharacterRotation);
 			player_->SetActorLocation(CharacterLocation);
 			player_->GetAnim()->SetDirection(info->direction);
+
+			//눈사람 변화
+			if (!player_->IsSnowman())
+			{
+				if (info->My_State == ST_SNOWMAN)
+				{
+					player_->ChangeSnowman();
+				}
+			}
+			else {
+				if (info->My_State != ST_SNOWMAN)
+				{
+					player_->ChangeAnimal();
+				}
+			}
 		}
 		else
 		{
@@ -263,6 +278,54 @@ void AMyPlayerController::SendPlayerInfo(int input)
 
 }
 
+//플레이어 정보 업데이트
+void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
+{
+	UWorld* const world = GetWorld();
+	if (!world)
+		return;
+
+	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!player_)
+		return;
+
+	if (!info.IsAlive)
+	{
+		/*UE_LOG(LogClass, Log, TEXT("Player Die"));
+		FTransform transform(Player->GetActorLocation());
+		UGameplayStatics::SpawnEmitterAtLocation(
+			world, DestroyEmiiter, transform, true
+		);
+		Player->Destroy();
+
+		CurrentWidget->RemoveFromParent();
+		GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
+		if (GameOverWidget != nullptr)
+		{
+			GameOverWidget->AddToViewport();
+		}*/
+	}
+	else
+	{
+		// 캐릭터 속성 업데이트
+		if (player_->iCurrentHP != info.HealthValue)
+		{
+			MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
+			player_->iCurrentHP = info.HealthValue;
+
+
+			//// 피격 파티클 스폰
+			//FTransform transform(player_->GetActorLocation());
+			//UGameplayStatics::SpawnEmitterAtLocation(
+			//	world, HitEmiiter, transform, true
+			//);
+			// 피격 애니메이션 스폰
+			//player_->PlayDamagedAnimation();
+			//player_->HealthValue = info.HealthValue;
+		}
+	}
+}
+
 //
 ////플레이어 정보 업데이트
 //void AMyPlayerController::StartPlayerInfo(const cCharacter& info)
@@ -332,72 +395,6 @@ void AMyPlayerController::SendPlayerInfo(int input)
 //	}
 //}
 //
-////플레이어 정보 업데이트
-//void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
-//{
-//	auto Player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
-//	if (!Player_)
-//		return;
-//	
-//	
-//	UWorld* const world = GetWorld();
-//	if (!world)
-//		return;
-//
-//	if (bSetPlayer) {
-//		FVector _CharacterLocation;
-//		_CharacterLocation.X = info.X;
-//		_CharacterLocation.Y = info.Y;
-//		_CharacterLocation.Z = info.Z;
-//		Player_->SetActorLocation(_CharacterLocation);
-//		bSetPlayer = false;
-//	}
-//
-//	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-//	if (!m_Player)
-//		return;
-//	auto MyLocation = m_Player->GetActorLocation();
-//	auto MyRotation = m_Player->GetActorRotation();
-//	
-//	mySocket->fMy_x = MyLocation.X;
-//	mySocket->fMy_y = MyLocation.Y;
-//	mySocket->fMy_z = MyLocation.Z;
-//	//MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
-//
-//
-//	if (!info.IsAlive)
-//	{
-//		/*UE_LOG(LogClass, Log, TEXT("Player Die"));
-//		FTransform transform(Player->GetActorLocation());
-//		UGameplayStatics::SpawnEmitterAtLocation(
-//			world, DestroyEmiiter, transform, true
-//		);
-//		Player->Destroy();
-//
-//		CurrentWidget->RemoveFromParent();
-//		GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
-//		if (GameOverWidget != nullptr)
-//		{
-//			GameOverWidget->AddToViewport();
-//		}*/
-//	}
-//	else
-//	{
-//		//// 캐릭터 속성 업데이트
-//		//if (Player->HealthValue != info.HealthValue)
-//		//{
-//		//	UE_LOG(LogClass, Log, TEXT("Player damaged"));
-//		//	// 피격 파티클 스폰
-//		//	FTransform transform(Player->GetActorLocation());
-//		//	UGameplayStatics::SpawnEmitterAtLocation(
-//		//		world, HitEmiiter, transform, true
-//		//	);
-//		//	// 피격 애니메이션 스폰
-//		//	Player->PlayDamagedAnimation();
-//		//	Player->HealthValue = info.HealthValue;
-//		//}
-//	}
-//}
 //
 //
 //void AMyPlayerController::UpdateFarming(int item_no)

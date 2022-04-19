@@ -51,7 +51,18 @@ void send_hp_packet(int _id)
 
 void player_heal(int s_id)
 {
-	Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
+	if (false == clients[s_id].bIsSnowman) {
+		if (clients[s_id]._hp < clients[s_id]._max_hp)
+			Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
+	}
+}
+
+void player_damage(int s_id)
+{
+	if (false == clients[s_id].bIsSnowman) {
+		if (clients[s_id]._hp > clients[s_id]._min_hp)
+			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);
+	}
 }
 
 //플레이어 판별
@@ -407,29 +418,10 @@ void process_packet(int s_id, unsigned char* p)
 		cl.direction = packet->direction;
 		//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f), dir : %f\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ, cl.direction);
 
-		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
-		//클라 recv 확인용
-
 		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 	    //cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		//send_status_packet(s_id);
-		
-		if (true == is_bonfire(cl._s_id))
-		{
-			//cout << "모닥불 지역" << endl;
-			if (false == cl.is_bone) {
-				cl.is_bone = true;
-				cl._is_active = true;
-				player_heal(cl._s_id);
-
-			}
-		}
-		else
-		{
-			cl.is_bone = false;
-			cl._is_active = false;
-		}
 
 		unordered_set <int> near_list;
 		for (auto& other : clients) {
@@ -531,10 +523,25 @@ void process_packet(int s_id, unsigned char* p)
 
 	}
 	case CS_PACKET_DAMAGE: {
-		sc_packet_hp_change packet;
 		cl._hp -= 10;
 		if (cl._hp < 0) cl._hp = 0;
 		send_hp_packet(cl._s_id);
+
+		if (cl._hp <= cl._min_hp)
+		{
+			sc_packet_status_change _packet;
+			_packet.size = sizeof(_packet);
+			_packet.type = SC_PACKET_STATUS_CHANGE;
+			_packet.state = ST_SNOWMAN;
+			_packet.s_id = s_id;
+			for (auto& other : clients) {
+				if (ST_INGAME != other._state)
+					continue;
+				other.do_send(sizeof(_packet), &_packet);
+				cout << "눈사람" << endl;
+				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+			}
+		}
 
 	    break;
 
@@ -611,6 +618,89 @@ void process_packet(int s_id, unsigned char* p)
 			send_remove_object(other._s_id, s_id);
 		}
 		Disconnect(s_id);
+		break;
+	}
+	case CS_PACKET_STATUS_CHANGE: {
+		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(p);
+
+		printf_s("[Recv status change] status : %d\n", packet->state);
+
+		if (packet->state == ST_INBURN)
+		{
+			if (true == cl.bIsSnowman) {
+				cl.bIsSnowman = false;
+				sc_packet_status_change _packet;
+				_packet.size = sizeof(_packet);
+				_packet.type = SC_PACKET_STATUS_CHANGE;
+				_packet.state = ST_ANIMAL;
+				_packet.s_id = s_id;
+				for (auto& other : clients) {
+					if (s_id == other._s_id)
+						continue;
+					if (ST_INGAME != other._state)
+						continue;
+					other.do_send(sizeof(_packet), &_packet);
+					cout << "동물" << endl;
+					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+				}
+			}
+			if (false == cl.is_bone) {
+				cl.is_bone = true;
+				cl._is_active = true;
+				player_heal(cl._s_id);
+			}
+			cout << s_id << "플레이어 모닥불 내부" << endl;
+
+		}
+		else if (packet->state == ST_OUTBURN)
+		{
+			if (true == cl.bIsSnowman) {
+				cl.bIsSnowman = false;
+				sc_packet_status_change _packet;
+				_packet.size = sizeof(_packet);
+				_packet.type = SC_PACKET_STATUS_CHANGE;
+				_packet.state = ST_ANIMAL;
+				_packet.s_id = s_id;
+				for (auto& other : clients) {
+					if (s_id == other._s_id)
+						continue;
+					if (ST_INGAME != other._state)
+						continue;
+					other.do_send(sizeof(_packet), &_packet);
+					cout << "동물" << endl;
+					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+				}
+			}
+			if (true == cl.is_bone) {
+				cl.is_bone = false;
+				cl._is_active = true;
+				player_damage(cl._s_id);
+			}
+			cout << s_id << "플레이어 모닥불 밖" << endl;
+		}
+		else if (packet->state == ST_SNOWMAN)
+		{
+			if (false == cl.bIsSnowman) {
+				cl.bIsSnowman = true;
+				sc_packet_status_change _packet;
+				_packet.size = sizeof(_packet);
+				_packet.type = SC_PACKET_STATUS_CHANGE;
+				_packet.state = ST_SNOWMAN;
+				_packet.s_id = s_id;
+				for (auto& other : clients) {
+					if (s_id == other._s_id)
+						continue;
+					if (ST_INGAME != other._state)
+						continue;
+					other.do_send(sizeof(_packet), &_packet);
+					cout << "눈사람" << endl;
+					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+				}
+			}
+			cout << s_id << "플레이어 눈사람" << endl;
+
+		}
+
 		break;
 	}
 	default:
@@ -718,12 +808,29 @@ void worker_thread()
 		case OP_PLAYER_HEAL: {
 		
 			if (clients[_s_id].is_bone == true) { 
-				clients[_s_id]._hp += 1;
-				player_heal(_s_id); 
+				if (clients[_s_id]._hp + 10 <= clients[_s_id]._max_hp) {
+					clients[_s_id]._hp += 10;
+					player_heal(_s_id);
+				}
+				else
+					clients[_s_id]._hp = clients[_s_id]._max_hp;
+				send_hp_packet(_s_id);
+			}
+			delete exp_over;
+			break;
+		}
+		case OP_PLAYER_DAMAGE: {
+
+			if (clients[_s_id].is_bone == false) {
+				if (clients[_s_id]._hp > clients[_s_id]._min_hp) {
+					clients[_s_id]._hp -= 1;
+					player_damage(_s_id);
+					send_hp_packet(_s_id;
+					cout << "hp -1" << endl;
+
+				}
 			}
 
-			send_hp_packet(_s_id);
-			//cout << "hp +1" << endl;
 			delete exp_over;
 			break;
 		}
@@ -768,7 +875,13 @@ void ev_timer()
 		if (clients[s_id]._is_active == false) continue;
 		if (order.start_t <= chrono::system_clock::now()) {
 			if (order.order == CL_BONEFIRE) {
+				if (clients[s_id].is_bone == false) continue;
 				Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
+				this_thread::sleep_for(50ms);
+			}
+			else if (order.order == CL_BONEOUT) {
+				if (clients[s_id].is_bone == true) continue;
+				Player_Event(s_id, order.target_id, OP_PLAYER_DAMAGE);
 				this_thread::sleep_for(50ms);
 			}
 

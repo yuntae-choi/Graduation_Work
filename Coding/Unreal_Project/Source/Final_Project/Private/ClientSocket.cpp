@@ -53,13 +53,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	}
 
 	case SC_PACKET_LOGIN_FAIL:
-	break;
+		break;
 
 	case SC_PACKET_PUT_OBJECT:
 	{
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
 
-		auto info =make_shared<cCharacter>();
+		auto info = make_shared<cCharacter>();
 		info->SessionId = packet->s_id;
 		info->X = packet->x;
 		info->Y = packet->y;
@@ -131,6 +131,20 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		break;
 	}
 
+	case SC_PACKET_STATUS_CHANGE:
+	{
+		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
+		//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), packet->s_id);
+		if (ST_SNOWMAN == packet->state) {
+			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
+			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
+		}
+		else if (ST_ANIMAL == packet->state) {
+			CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
+		}
+		break;
+	}
+
 	//case SC_PACKET_CHAT:
 	//{
 
@@ -141,12 +155,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 	//	cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
 	//	MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
-	//	break;
-	//}
-	//case SC_PACKET_STATUS_CHANGE:
-	//{
-	//	
-
 	//	break;
 	//}
 	}
@@ -182,10 +190,14 @@ void ClientSocket::Send_LoginPacket()
 	
 };
 
-void ClientSocket::ReadyToSend_StatusPacket() {
+void ClientSocket::Send_StatusPacket(STATE_Type _state) {
+	//CharactersInfo.players[iMy_s_id].My_State = _state;
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_STATUS_CHANGE;
+	packet.type = CS_PACKET_STATUS_CHANGE;
+	packet.state = _state;
+
+	MYLOG(Warning, TEXT("[Send status] status : %d"), _state);
 	SendPacket(&packet);
 };
 

@@ -9,6 +9,7 @@
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
+//const int AMyCharacter::iMinHP = 0;
 const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
@@ -291,7 +292,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	else
 	{	// 눈사람인 경우 스턴
 		StartStun(fStunTime);
-		MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
+		//MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
 	}
 	return FinalDamage;
 }
@@ -345,6 +346,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 		if (!(otherCharacter->GetIsSnowman()))
 		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
 			ChangeAnimal();
+			UpdateTemperatureState();
 			otherCharacter->ChangeSnowman();
 			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
 			return;
@@ -522,7 +524,7 @@ void AMyCharacter::UpdateTemperatureState()
 {
 	if (bIsSnowman) return;
 
-	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+	//GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
 	//if (match)
 	//{
 	//	GetWorldTimerManager().SetTimer(temperatureHandle, this, &AMyCharacter::UpdateTemperatureByMatch, 1.0f, true);
@@ -531,20 +533,26 @@ void AMyCharacter::UpdateTemperatureState()
 	//{
 		if (bIsInsideOfBonfire)
 		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
-			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
-				{
+			//GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+			//	{
 					//iCurrentHP += ABonfire::iHealAmount;
 					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
 
-				}), 1.0f, true);
+				//}), 1.0f, true);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			if (iSessionId == PlayerController->iSessionId)
+				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN);
 		}
 		else
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
-			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
-				{
+			//GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+			//	{
 					//iCurrentHP -= ABonfire::iDamageAmount;
 					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
-				}), 1.0f, true);
+				//}), 1.0f, true);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			if (iSessionId == PlayerController->iSessionId)
+				PlayerController->GetSocket()->Send_StatusPacket(ST_OUTBURN);
 		}
 	//}
 }

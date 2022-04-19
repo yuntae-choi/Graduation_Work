@@ -48,6 +48,7 @@ private:
 	void InitPlayerSetting();
 	bool UpdateWorldInfo();		// 월드 동기화
 	void UpdateNewPlayer();
+	void UpdatePlayerInfo(const cCharacter& info);
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디

@@ -42,7 +42,8 @@ enum CS_PacketType
 	CS_PACKET_THROW_SNOW,
 	CS_PACKET_DAMAGE,
 	CS_PACKET_GET_ITEM,
-	CS_PACKET_LOGOUT
+	CS_PACKET_LOGOUT,
+	CS_PACKET_STATUS_CHANGE
 };
 
 enum SC_PacketType
@@ -208,9 +209,8 @@ struct sc_packet_login_fail {
 struct sc_packet_status_change {
 	unsigned char size;
 	char type;
-	short	level;
-	short	hp, maxhp;
-	int		exp;
+	int s_id;
+	short   state;
 };
 
 

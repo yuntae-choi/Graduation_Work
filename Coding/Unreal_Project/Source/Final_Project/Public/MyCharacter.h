@@ -50,9 +50,8 @@ public:
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
 	void SnowAttack();
-
-	int32 GetHp() const { return iCurrentHP; }
-	AMySnowball* GetSnow() const { return snowball; }
+	void ChangeSnowman();
+	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -75,10 +74,8 @@ private:
 	void EndFarming();
 	void UpdateFarming(float deltaTime);
 	void UpdateHP();
-	void ChangeSnowman();
 	bool GetItem(int itemType);
 	bool GetIsSnowman() { return bIsSnowman; };
-	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 	void WaitForStartGame();	// 게임 시작 후 대기
 
 public:	

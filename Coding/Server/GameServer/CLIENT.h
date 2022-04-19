@@ -25,6 +25,7 @@ public:
     float direction;
 
 	int _max_hp = 390; // 최대 체력
+    int _min_hp = 270;
     int _hp; // 체력
     int _level; // 레벨
     int _max_exp;
@@ -33,13 +34,13 @@ public:
     int _def;
     int _at_range = 1; // 기본 공격 범위
     int _sk_range = 2; // 스킬 범위
-    bool is_bone = false;
+    bool is_bone = true;
     int32 iMaxSnowballCount;
     int32 iCurrentSnowballCount;
     int32 iCurrentMatchCount;
     bool bHasUmbrella;
     bool bHasBag;
-    bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
+    bool bIsSnowman = false;	// 현재 캐릭터가 눈사람인지
 
 
 
