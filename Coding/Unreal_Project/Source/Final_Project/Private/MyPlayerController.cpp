@@ -239,51 +239,8 @@ void AMyPlayerController::StartPlayerInfo(const cCharacter& info)
 		_CharacterLocation.Z = info.Z;
 		Player_->SetActorLocation(_CharacterLocation);
 		bSetPlayer = false;
-	}
+	};
 
-	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (!m_Player)
-		return;
-	auto MyLocation = m_Player->GetActorLocation();
-	auto MyRotation = m_Player->GetActorRotation();
-	myClientSocket->fMy_x = MyLocation.X;
-	myClientSocket->fMy_y = MyLocation.Y;
-	myClientSocket->fMy_z = MyLocation.Z;
-	MYLOG(Warning, TEXT("i'm player init spawn : (%f, %f, %f)"), MyLocation.X, MyLocation.Y, MyLocation.Z);
-
-
-	if (!info.IsAlive)
-	{
-		/*UE_LOG(LogClass, Log, TEXT("Player Die"));
-		FTransform transform(Player->GetActorLocation());
-		UGameplayStatics::SpawnEmitterAtLocation(
-			world, DestroyEmiiter, transform, true
-		);
-		Player->Destroy();
-
-		CurrentWidget->RemoveFromParent();
-		GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
-		if (GameOverWidget != nullptr)
-		{
-			GameOverWidget->AddToViewport();
-		}*/
-	}
-	else
-	{
-		//// 캐릭터 속성 업데이트
-		//if (Player->HealthValue != info.HealthValue)
-		//{
-		//	UE_LOG(LogClass, Log, TEXT("Player damaged"));
-		//	// 피격 파티클 스폰
-		//	FTransform transform(Player->GetActorLocation());
-		//	UGameplayStatics::SpawnEmitterAtLocation(
-		//		world, HitEmiiter, transform, true
-		//	);
-		//	// 피격 애니메이션 스폰
-		//	Player->PlayDamagedAnimation();
-		//	Player->HealthValue = info.HealthValue;
-		//}
-	}
 }
 
 //플레이어 정보 업데이트
@@ -453,6 +410,7 @@ void AMyPlayerController::UpdateNewPlayer()
 
 	SpawnCharacter->SpawnDefaultController();
 	SpawnCharacter->iSessionID = new_s_id;
+	MYLOG(Warning, TEXT("spawn player %d"), new_s_id);
 	iNewPlayers.pop();
 
 }

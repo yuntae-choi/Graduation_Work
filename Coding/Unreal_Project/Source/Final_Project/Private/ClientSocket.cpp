@@ -59,6 +59,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		p.Y = packet->y;
 		p.Z = packet->z;
 		p.HealthValue = iMax_Hp;
+		p.My_State = ST_ANIMAL;
 		iMy_s_id = packet->s_id;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
 		PlayerController->iMySessionId = packet->s_id;
@@ -82,6 +83,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		p.X = packet->x;;
 		p.Y = packet->y;
 		p.Z = packet->z;
+		p.Yaw = 0;
+		p.Pitch = 0;
+		p.Roll = 0;
+		p.VX = 0;
+		p.VY = 0;
+		p.VZ = 0;
+		p.My_State = ST_ANIMAL;
 		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
 		PlayerController->RecvNewPlayer(p);
 		break;

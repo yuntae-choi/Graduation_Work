@@ -352,7 +352,7 @@ void process_packet(int s_id, unsigned char* p)
 			//other.viewlist.insert(s_id);
 			//other.vl.unlock();
 			sc_packet_put_object packet;
-			packet.s_id = s_id;
+			packet.s_id = cl._s_id;
 			strcpy_s(packet.name, cl.name);
 			packet.object_type = 0;
 			packet.size = sizeof(packet);
@@ -360,7 +360,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet.x = cl.x;
 			packet.y = cl.y;
 			packet.z = cl.z;
-
+			cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
 			other.do_send(sizeof(packet), &packet);
 		}
 
@@ -390,7 +390,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet.x = other.x;
 			packet.y = other.y;
 			packet.z = other.z;
-			cout << cl._s_id << "에게 " << other._s_id << "을 " << endl;
+			//cout << cl._s_id << "에게 " << other._s_id << "을 " << endl;
 			cl.do_send(sizeof(packet), &packet);
 		}
 
