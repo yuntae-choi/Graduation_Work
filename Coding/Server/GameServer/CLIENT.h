@@ -38,7 +38,7 @@ public:
     int32 iCurrentMatchCount;
     bool bHasUmbrella;
     bool bHasBag;
-    bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
+    bool bIsSnowman= false;	// 현재 캐릭터가 눈사람인지
 
 
 

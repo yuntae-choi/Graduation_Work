@@ -149,10 +149,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_STATUS_CHANGE:
 	{
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
-		MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), packet->s_id);
+		//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), packet->s_id);
 		if (ST_SNOWMAN == packet->state) {		
 			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;		
 			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
+		}
+		else if (ST_ANIMAL == packet->state) {
+			CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
 		}
 		break;
 	}

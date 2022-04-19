@@ -322,8 +322,8 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	{
 		if (!(otherCharacter->GetIsSnowman()))
 		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
-
 			ChangeAnimal();
+			UpdateTemperatureState();
 			otherCharacter->ChangeSnowman();
 			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
 			return;
@@ -509,7 +509,6 @@ void AMyCharacter::UpdateTemperatureState()
 	//}
 	//else
 	//{
-
 
 		if (bIsInsideOfBonfire)
 		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)

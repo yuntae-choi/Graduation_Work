@@ -189,7 +189,8 @@ bool AMyPlayerController::UpdateWorldInfo()
 						OtherPlayer->ChangeSnowman();
 					}
 				}
-				else {
+				else 
+				{
 					if (info->My_State != ST_SNOWMAN)
 					{
 						OtherPlayer->ChangeAnimal();

@@ -11,7 +11,7 @@ class AMyPlayerController;
 
 using namespace std;
 
-enum STATE_Type { ST_SNOWMAN, ST_INBURN, ST_OUTBURN };
+enum STATE_Type { ST_SNOWMAN, ST_INBURN, ST_OUTBURN, ST_ANIMAL };
 
 // 플레이어 정보
 class cCharacter {
