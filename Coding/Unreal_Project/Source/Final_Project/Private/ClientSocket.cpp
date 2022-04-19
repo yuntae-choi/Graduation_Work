@@ -20,6 +20,22 @@ bool ClientSocket::Connect()
 	if (ret == SOCKET_ERROR)
 		return false;
 
+	// Connect
+	//while (true)
+	//{
+	//	if (::connect(_socket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	//	{
+	//		// 원래 블록했어야 했는데... 너가 논블로킹으로 하라며?
+	//		if (::WSAGetLastError() == WSAEWOULDBLOCK)
+	//			continue;
+	//		// 이미 연결된 상태라면 break
+	//		if (::WSAGetLastError() == WSAEISCONN)
+	//			break;
+	//		// Error
+	//		break;
+	//	}
+	//}
+
 	MYLOG(Warning, TEXT("Connected to Server!"));
 	return true;
 }
@@ -31,48 +47,53 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 	case SC_PACKET_LOGIN_OK:
 	{
+
 		sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
+		int id = packet->s_id;
+		PlayerController->UpdatePlayerS_id(id);
 		_login_ok = true;
-
 		// 캐릭터 정보
-		cCharacter info;
-		info.SessionId = packet->s_id;
-		info.X = packet->x;
-		info.Y = packet->y;
-		info.Z = packet->z;
-		info.Yaw = packet->yaw;
+		cCharacter p;
+		p.SessionId = packet->s_id;
+		p.X = packet->x;;
+		p.Y = packet->y;
+		p.Z = packet->z;
+		p.HealthValue = iMax_Hp;
+		p.My_State = ST_ANIMAL;
+		iMy_s_id = packet->s_id;
+		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
+		PlayerController->iMySessionId = packet->s_id;
+		PlayerController->StartPlayerInfo(CharactersInfo.players[packet->s_id]);
+		PlayerController->RecvWorldInfo(&CharactersInfo);
 
-		CharactersInfo.players[info.SessionId] = info;
-		MyPlayerController->SetSessionId(info.SessionId);
-		MyPlayerController->SetCharactersInfo(&CharactersInfo);
-		MyPlayerController->SetInitInfo(info);
-
-		MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
-
-		break;
 	}
-
+	break;
 	case SC_PACKET_LOGIN_FAIL:
-		break;
+	{
+
+	}
+	break;
 
 	case SC_PACKET_PUT_OBJECT:
 	{
+		
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
-
-		auto info = make_shared<cCharacter>();
-		info->SessionId = packet->s_id;
-		info->X = packet->x;
-		info->Y = packet->y;
-		info->Z = packet->z;
-		info->Yaw = packet->yaw;
-
-		MyPlayerController->SetNewCharacterInfo(info);
-
-		MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
-
+		cCharacter p;
+		p.SessionId = packet->s_id;
+		p.X = packet->x;;
+		p.Y = packet->y;
+		p.Z = packet->z;
+		p.Yaw = 0;
+		p.Pitch = 0;
+		p.Roll = 0;
+		p.VX = 0;
+		p.VY = 0;
+		p.VZ = 0;
+		p.My_State = ST_ANIMAL;
+		CharactersInfo.players[packet->s_id] = p;		// 캐릭터 정보
+		PlayerController->RecvNewPlayer(p);
 		break;
 	}
-
 	case SC_PACKET_MOVE:
 	{
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(ptr);
@@ -81,30 +102,11 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[packet->sessionID].Y = packet->y;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].Z = packet->z;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].Yaw = packet->yaw;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Pitch = packet->pitch;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Roll = packet->roll;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].VX = packet->vx;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
-		CharactersInfo.players[packet->sessionID].direction = packet->direction;		// 캐릭터 정보
-
-		//MYLOG(Warning, TEXT("[Recv move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), packet->sessionID, packet->x, packet->y, packet->z, packet->yaw, packet->vx, packet->vy, packet->vz, packet->direction);
-		break;
-	}
-
-	case SC_PACKET_THROW_SNOW:
-	{
-		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
-
-
-
-		CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
-		CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
-		CharactersInfo.players[packet->s_id].fCz = packet->z;		// 카메라 위치
-		CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
-		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
-		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
-
-		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
-		MyPlayerController->SetNewBall(packet->s_id);
 
 		break;
 	}
@@ -112,127 +114,130 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_HP:
 	{
 		sc_packet_hp_change* packet = reinterpret_cast<sc_packet_hp_change*>(ptr);
-
-		CharactersInfo.players[packet->s_id].HealthValue = packet->hp;
-
-		//MYLOG(Warning, TEXT("[Recv hp change] id : %d, hp : %d"), packet->s_id, packet->hp);
+		int target = packet->target;
+		//이런식으로 클라이언트info 관리하는 벡터 만들면 인덱스 접근 해서 바꿔줘
+		CharactersInfo.players[target].HealthValue = packet->hp;
 
 		break;
 
 	}
+
 
 	case SC_PACKET_REMOVE_OBJECT:
 	{
-		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
-
-		MYLOG(Warning, TEXT("[Recv remove object] id : %d"), packet->s_id);
 
 		break;
 	}
 
+	case SC_PACKET_CHAT:
+	{
+
+		break;
+	}
+	case SC_PACKET_ATTACK:
+	{
+
+		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
+		MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
+		break;
+	}
+	case SC_PACKET_THROW_SNOW:
+	{
+		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
+		MYLOG(Warning, TEXT("player%d snow : (%f, %f, %f)"), packet->s_id, packet->dx, packet->dy, packet->dz);
+		CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCz = packet->z;		/// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
+		PlayerController->RecvNewBall(packet->s_id);
+		break;
+	}
 	case SC_PACKET_STATUS_CHANGE:
 	{
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
-		MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
-		//if (ST_SNOWMAN == packet->state) {
-		//	CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
-		//	//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
-		//}
-		//else if (ST_ANIMAL == packet->state) {
-		//	CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
-		//}
-		//break;
+		//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), packet->s_id);
+		if (ST_SNOWMAN == packet->state) {		
+			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;		
+			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
+		}
+		else if (ST_ANIMAL == packet->state) {
+			CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
+		}
+		break;
 	}
-
-	//case SC_PACKET_CHAT:
-	//{
-
-	//	break;
-	//}
-	//case SC_PACKET_ATTACK:
-	//{
-
-	//	cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
-	//	MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
-	//	break;
-	//}
 	}
 }
+
+
+void ClientSocket::ReadyToSend_LoginPacket()
+{
+	MYLOG(Warning, TEXT("Connected to Server!"));
+	cs_packet_login packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_LOGIN;
+	strcpy_s(packet.id, _id);
+	strcpy_s(packet.pw, _pw);
+	packet.x = fMy_x;
+	packet.y = fMy_y;
+	packet.z = fMy_z;
+	size_t sent = 0;
+	SendPacket(&packet);
+	
+};
+
+void ClientSocket::ReadyToSend_StatusPacket(STATE_Type _state) {
+	//CharactersInfo.players[iMy_s_id].My_State = _state;
+	sc_packet_status_change packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_STATUS_CHANGE;
+	packet.state = _state;
+	SendPacket(&packet);
+};
+
+void ClientSocket::ReadyToSend_DamgePacket() {
+	cs_packet_damage packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_DAMAGE;
+	SendPacket(&packet);
+};
 
 void ClientSocket::SetPlayerController(AMyPlayerController* pPlayerController)
 {
 	// 플레이어 컨트롤러 세팅
 	if (pPlayerController)
 	{
-		MyPlayerController = pPlayerController;
+		PlayerController = pPlayerController;
 	}
 }
 
-void ClientSocket::Send_LoginPacket()
-{
-	cs_packet_login packet;
-	packet.size = sizeof(packet);
-	packet.type = CS_PACKET_LOGIN;
-	strcpy_s(packet.id, _id);
-	strcpy_s(packet.pw, _pw);
-
-	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(MyPlayerController, 0));
-	if (!player_) return;
-	auto location_ = player_->GetActorLocation();
-
-	packet.z = location_.Z;
-	size_t sent = 0;
-
-
-	MYLOG(Warning, TEXT("[Send login] z : %f"), packet.z);
-	SendPacket(&packet);
-	
-};
-
-void ClientSocket::Send_StatusPacket(STATE_Type _state) {
-	//CharactersInfo.players[iMy_s_id].My_State = _state;
-	sc_packet_status_change packet;
-	packet.size = sizeof(packet);
-	packet.s_id = MyPlayerController->iSessionId;
-	packet.type = CS_PACKET_STATUS_CHANGE;
-	packet.state = _state;
-
-	MYLOG(Warning, TEXT("[Send status] status : %d"), _state);
-	SendPacket(&packet);
-};
-
-void ClientSocket::Send_DamagePacket() {
-	cs_packet_damage packet;
-	packet.size = sizeof(packet);
-	packet.type = CS_PACKET_DAMAGE;
-
-	MYLOG(Warning, TEXT("[Send damage]"));
-	SendPacket(&packet);
-};
-
-void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir)
+void ClientSocket::ReadyToSend_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity)
 {
 	if (_login_ok) {
 		cs_packet_move packet;
 		packet.size = sizeof(packet);
 		packet.type = CS_PACKET_MOVE;
+		//packet.direction = dr;
 		packet.sessionID = s_id;
 		packet.x = MyLocation.X;
 		packet.y = MyLocation.Y;
 		packet.z = MyLocation.Z;
 		packet.yaw = MyRotation.Yaw;
+		packet.pitch = MyRotation.Pitch;
+		packet.roll = MyRotation.Roll;
 		packet.vx = MyVelocity.X;
 		packet.vy = MyVelocity.Y;
 		packet.vz = MyVelocity.Z;
-		packet.direction = dir;
 
-		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), s_id, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz, dir);
+	    size_t sent = 0;
+		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		packet.move_time = millisec_since_epoch;
 		SendPacket(&packet);
 	}
 };
 
-
-void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
+void ClientSocket::ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
 {
 
 	cs_packet_throw_snow packet;
@@ -246,35 +251,33 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	packet.dy = MyDirection.Y;
 	packet.dz = MyDirection.Z;
 	size_t sent = 0;
-
-	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
 	SendPacket(&packet);
 };
 
-//void ClientSocket::ReadyToSend_AttackPacket()
-//{
-//
-//	cs_packet_attack packet;
-//	packet.size = sizeof(packet);
-//	packet.type = CS_PACKET_ATTACK;
-//	//packet.s_id = iMy_s_id;
-//	size_t sent = 0;
-//	SendPacket(&packet);
-//};
+void ClientSocket::ReadyToSend_AttackPacket()
+{
 
-void ClientSocket::Send_ItemPacket(int item_no)
+	cs_packet_attack packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_ATTACK;
+	packet.s_id = iMy_s_id;
+	size_t sent = 0;
+	SendPacket(&packet);
+};
+
+void ClientSocket::ReadyToSend_ItemPacket(int item_no)
 {
 
 	cs_packet_get_item packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_GET_ITEM;
-	//packet.s_id = iMy_s_id;
+	packet.s_id = iMy_s_id;
 	packet.item_no = item_no;
 	size_t sent = 0;
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_ChatPacket(int sessionID, float x, float y, float z)
+void ClientSocket::ReadyToSend_ChatPacket(int sessionID, float x, float y, float z)
 {
 
 	cs_packet_chat packet;
@@ -290,17 +293,6 @@ void ClientSocket::Send_ChatPacket(int sessionID, float x, float y, float z)
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_LogoutPacket(const int& s_id)
-{
-	cs_packet_logout packet;
-	packet.size = sizeof(packet);
-	packet.type = CS_PACKET_LOGOUT;
-	packet.s_id = MyPlayerController->iSessionId;
-	MYLOG(Warning, TEXT("[Send Logout] id : %d"), packet.s_id);
-	SendPacket(&packet);
-}
-
-
 void ClientSocket::CloseSocket()
 {
 	closesocket(_socket);
@@ -312,24 +304,33 @@ bool ClientSocket::Init()
 	return true;
 }
 
+void ClientSocket::LogoutPlayer(const int& s_id)
+{
+	MYLOG(Warning, TEXT("Logout!"));
+	cs_packet_logout packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_LOGOUT;
+	packet.s_id = iMy_s_id;
+	SendPacket(&packet);
+	closesocket(_socket);
+	WSACleanup();
+}
+
 uint32 ClientSocket::Run()
 {
 	// 초기 init 과정을 기다림
 	FPlatformProcess::Sleep(0.03);
-
+	// recv while loop 시작
+	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
 	Connect();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
 	
-	 RecvPacket();
-
-	Send_LoginPacket();
-
-	FPlatformProcess::Sleep(0.03);
-
-	// recv while loop 시작
-	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
-	while (StopTaskCounter.GetValue() == 0 && MyPlayerController != nullptr)
+	RecvPacket();
+	_login_ok = false;
+	ReadyToSend_LoginPacket();
+	FPlatformProcess::Sleep(0.1);
+	while (StopTaskCounter.GetValue() == 0 && PlayerController != nullptr)
 	{
 		DWORD num_byte;
 		LONG64 iocp_key;
