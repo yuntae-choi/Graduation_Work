@@ -339,7 +339,7 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 		//// 캐릭터 속성 업데이트
 		if (m_Player->iCurrentHP != info.HealthValue)
 		{
-			//UE_LOG(LogClass, Log, TEXT("Player 체력 변경: -> %d"), info.HealthValue);
+			UE_LOG(LogClass, Log, TEXT("Player 체력 변경: -> %d"), info.HealthValue);
 			m_Player->iCurrentHP = info.HealthValue;
 		}
 		

@@ -53,6 +53,13 @@ void player_heal(int s_id)
 	    Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
 }
 
+void player_damage(int s_id)
+{
+	if (clients[s_id]._hp > clients[s_id].iMinHP) 
+		Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);
+}
+
+
 //플레이어 판별
 bool is_player(int id)
 {
@@ -624,7 +631,9 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			if (true == cl.is_bone) {
 				cl.is_bone = false;
-				cl._is_active = false;
+				cl._is_active = true;
+				player_damage(cl._s_id);
+
 			}
 			cout << s_id << "플레이어 모닥불 밖" << endl;
 
@@ -635,9 +644,7 @@ void process_packet(int s_id, unsigned char* p)
 				cl.bIsSnowman = true;
 			}
 			cout << s_id << "플레이어 눈사람" << endl;
-
-		}
-		
+		}	
 		break;
 	}
 
@@ -747,8 +754,12 @@ void worker_thread()
 		
 			if (clients[_s_id].is_bone == true) { 
 				if (clients[_s_id]._hp < clients[_s_id]._max_hp) {
-					clients[_s_id]._hp += 10;
-					player_heal(_s_id);
+					if (clients[_s_id]._hp + 10 <= clients[_s_id]._max_hp) {
+						clients[_s_id]._hp += 10;
+						player_heal(_s_id);
+					}
+					else
+						clients[_s_id]._hp = clients[_s_id]._max_hp;
 					send_hp_packet(_s_id, _s_id);
 				}
 			}
@@ -757,6 +768,22 @@ void worker_thread()
 			delete exp_over;
 			break;
 		}
+		case OP_PLAYER_DAMAGE: {
+
+			if (clients[_s_id].is_bone == false) {
+				if (clients[_s_id]._hp > clients[_s_id].iMinHP) {
+					clients[_s_id]._hp -= 1;
+					player_damage(_s_id);
+					send_hp_packet(_s_id, _s_id);
+					cout << "hp -1" << endl;
+
+				}
+			}
+
+			delete exp_over;
+			break;
+		}
+
 		}
 	
 	
@@ -797,10 +824,15 @@ void ev_timer()
 		if (clients[s_id]._is_active == false) continue;
 		if (order.start_t <= chrono::system_clock::now()) {
 			if (order.order == CL_BONEFIRE) {
+				if (clients[s_id].is_bone == false) continue;
 				Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
 				this_thread::sleep_for(50ms);
 			}
-
+			else if (order.order == CL_BONEOUT) {
+				if (clients[s_id].is_bone == true) continue;
+				Player_Event(s_id, order.target_id, OP_PLAYER_DAMAGE);
+				this_thread::sleep_for(50ms);
+			}
 		}
 		else {
 			timer_q.push(order);

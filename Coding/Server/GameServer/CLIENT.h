@@ -25,6 +25,8 @@ public:
     int _hp; // 체력
     int _level; // 레벨
     int _max_exp;
+    int iMinHP = 270;
+
     int _exp;
     int _atk; // 공격력
     int _def;
