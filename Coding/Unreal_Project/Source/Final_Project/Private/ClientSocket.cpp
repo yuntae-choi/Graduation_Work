@@ -133,15 +133,15 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_STATUS_CHANGE:
 	{
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
-		//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), packet->s_id);
-		if (ST_SNOWMAN == packet->state) {
-			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
-			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
-		}
-		else if (ST_ANIMAL == packet->state) {
-			CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
-		}
-		break;
+		MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
+		//if (ST_SNOWMAN == packet->state) {
+		//	CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
+		//	//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
+		//}
+		//else if (ST_ANIMAL == packet->state) {
+		//	CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
+		//}
+		//break;
 	}
 
 	//case SC_PACKET_CHAT:
@@ -193,6 +193,7 @@ void ClientSocket::Send_StatusPacket(STATE_Type _state) {
 	//CharactersInfo.players[iMy_s_id].My_State = _state;
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
+	packet.s_id = MyPlayerController->iSessionId;
 	packet.type = CS_PACKET_STATUS_CHANGE;
 	packet.state = _state;
 
@@ -250,18 +251,18 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	SendPacket(&packet);
 };
 
-void ClientSocket::ReadyToSend_AttackPacket()
-{
+//void ClientSocket::ReadyToSend_AttackPacket()
+//{
+//
+//	cs_packet_attack packet;
+//	packet.size = sizeof(packet);
+//	packet.type = CS_PACKET_ATTACK;
+//	//packet.s_id = iMy_s_id;
+//	size_t sent = 0;
+//	SendPacket(&packet);
+//};
 
-	cs_packet_attack packet;
-	packet.size = sizeof(packet);
-	packet.type = CS_PACKET_ATTACK;
-	//packet.s_id = iMy_s_id;
-	size_t sent = 0;
-	SendPacket(&packet);
-};
-
-void ClientSocket::ReadyToSend_ItemPacket(int item_no)
+void ClientSocket::Send_ItemPacket(int item_no)
 {
 
 	cs_packet_get_item packet;
@@ -273,7 +274,7 @@ void ClientSocket::ReadyToSend_ItemPacket(int item_no)
 	SendPacket(&packet);
 };
 
-void ClientSocket::ReadyToSend_ChatPacket(int sessionID, float x, float y, float z)
+void ClientSocket::Send_ChatPacket(int sessionID, float x, float y, float z)
 {
 
 	cs_packet_chat packet;

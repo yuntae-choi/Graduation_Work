@@ -43,7 +43,7 @@ public:
 	float fCx, fCy, fCz;
 	//카메라 방향
 	float fCDx, fCDy, fCDz;
-	STATE_Type My_State;
+	STATE_Type My_State = ST_ANIMAL;
 
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
@@ -150,11 +150,11 @@ public:
 	void Send_LoginPacket();
 	void Send_StatusPacket(STATE_Type _state);
 	void Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir);
-	void ReadyToSend_AttackPacket();
-	void ReadyToSend_ChatPacket(int sessionID, float x, float y, float z);
+	//void ReadyToSend_AttackPacket();
+	void Send_ChatPacket(int sessionID, float x, float y, float z);
 	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
 	void Send_DamagePacket();
-	void ReadyToSend_ItemPacket(int item_no);
+	void Send_ItemPacket(int item_no);
 	void Send_LogoutPacket(const int& s_id);
 
 	// 플레이어 컨트롤러 세팅
@@ -213,10 +213,6 @@ public:
 	Overlap _recv_over;
 	char	_id[MAX_NAME_SIZE];
 	char	_pw[MAX_NAME_SIZE];
-	//int     iMy_s_id;
-	//float	fMy_x;
-	//float	fMy_y;
-	//float	fMy_z;
 
 	string _name;
 	int      _prev_size = 0;
@@ -224,12 +220,7 @@ public:
 	bool _login_ok =false;
 
 private:
-
 	cCharactersInfo CharactersInfo;		// 캐릭터 정보
-	cCharactersInfo* RecvCharacterInfo(stringstream& RecvStream);
-
-	cCharacter	NewPlayer;
-	cCharacter* RecvNewPlayer(stringstream& RecvStream);
 
 	AMyPlayerController* MyPlayerController;	// 플레이어 컨트롤러 정보	
 };

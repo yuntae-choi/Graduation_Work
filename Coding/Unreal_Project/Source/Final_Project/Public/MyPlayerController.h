@@ -35,10 +35,6 @@ public:
 	void SendPlayerInfo(int input);
 	//void UpdateFarming(int item_no);
 
-	// 스폰시킬 다른 캐릭터
-	UPROPERTY(EditAnywhere, Category = "Spawning")
-	TSubclassOf<class ACharacter> WhoToSpawn;
-
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
@@ -59,13 +55,12 @@ private:
 	queue <int>				newBalls;
 	cCharactersInfo*		charactersInfo;	// 다른 캐릭터들의 정보
 
-	FTimerHandle			SendPlayerInfoHandle;	// 동기화 타이머 핸들러
-
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
 
-	
+	// 스폰시킬 다른 캐릭터
+	UPROPERTY(EditAnywhere, Category = "Spawning")
+	TSubclassOf<class ACharacter> WhoToSpawn;
 
 	//bool							bIsConnected;	// 서버와 접속 유무
-
 };

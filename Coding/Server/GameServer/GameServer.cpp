@@ -321,7 +321,8 @@ void process_packet(int s_id, unsigned char* p)
 		cl.x = 300.0f * cos(s_id + 45.0f);
 		cl.y = 300.0f * sin(s_id + 45.0f);
 		cl.z = packet->z;
-		cl.Yaw = s_id * 45.0f - 140.0f;
+		//cl.Yaw = s_id * 45.0f - 140.0f;
+		cl.Yaw = 0.0f;
 
 		cl._hp = cl._max_hp;
 
@@ -624,7 +625,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_STATUS_CHANGE: {
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(p);
 
-		printf_s("[Recv status change] status : %d\n", packet->state);
+		//printf_s("[Recv status change] status : %d\n", packet->state);
 
 		if (packet->state == ST_INBURN)
 		{
