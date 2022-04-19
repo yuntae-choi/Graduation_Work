@@ -51,6 +51,9 @@ public:
 	void Attack();
 	void SnowAttack();
 
+	int32 GetHp() const { return iCurrentHP; }
+	AMySnowball* GetSnow() const { return snowball; }
+
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
 

@@ -53,6 +53,12 @@ struct sc_packet_login_ok {
 	float yaw;
 };
 
+struct cs_packet_logout {
+	unsigned char size;
+	char	type;
+	int     s_id;
+};
+
 struct cs_packet_move {
 	unsigned char size;
 	char	type;
@@ -75,6 +81,29 @@ struct sc_packet_put_object {
 	float yaw;
 	char object_type;
 	char	name[MAX_NAME_SIZE];
+};
+
+struct cs_packet_throw_snow {
+	unsigned char size;
+	char	type;
+	int s_id;
+	float x, y, z;
+	float dx, dy, dz;
+};
+
+struct cs_packet_damage {
+	unsigned char size;
+	char type;
+	int s_id;
+	int hp;
+	int damage;
+};
+
+struct sc_packet_hp_change {
+	unsigned char size;
+	char type;
+	int s_id;
+	int hp;
 };
 
 struct cs_packet_start { // 게임 레디 요청
@@ -102,11 +131,6 @@ struct cs_packet_attack {
 	int s_id;
 };
 
-struct cs_packet_damage {
-	unsigned char size;
-	char	type;
-};
-
 struct cs_packet_get_item {
 	unsigned char size;
 	char	type;
@@ -129,19 +153,10 @@ struct cs_packet_teleport {
 	char	type;
 };
 
-struct cs_packet_throw_snow {
-	unsigned char size;
-	char	type;
-	int s_id;
-	float x, y, z;
-	float dx, dy, dz;
-
-};
-
 struct sc_packet_remove_object {
 	unsigned char size;
 	char type;
-	int id;
+	int s_id;
 };
 
 struct sc_packet_chat {
@@ -163,13 +178,5 @@ struct sc_packet_status_change {
 	short   state;
 	short	hp, maxhp;
 	bool ice[4]; // 사지분해
-};
-
-
-struct sc_packet_hp_change {
-	unsigned char size;
-	char type;
-	int target;
-	int	hp;
 };
 #pragma pack(pop)

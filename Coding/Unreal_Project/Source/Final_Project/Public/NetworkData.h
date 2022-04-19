@@ -122,15 +122,23 @@ struct sc_packet_put_object {
 	char	name[MAX_NAME_SIZE];
 };
 
-struct cs_packet_attack {
+struct cs_packet_throw_snow {
 	unsigned char size;
 	char	type;
 	int s_id;
+	float x, y, z;
+	float dx, dy, dz;
 };
 
 struct cs_packet_damage {
 	unsigned char size;
 	char	type;
+};
+
+struct cs_packet_attack {
+	unsigned char size;
+	char	type;
+	int s_id;
 };
 
 
@@ -147,15 +155,6 @@ struct cs_packet_teleport {
 	// 더미 클라이언트에서 동접 테스트용으로 사용.
 	unsigned char size;
 	char	type;
-};
-
-struct cs_packet_throw_snow {
-	unsigned char size;
-	char	type;
-	int s_id;
-	float x, y, z;
-	float dx, dy, dz;
-
 };
 
 struct cs_packet_get_item {
@@ -198,14 +197,6 @@ struct sc_packet_status_change {
 	short	level;
 	short	hp, maxhp;
 	int		exp;
-};
-
-
-struct sc_packet_hp_change {
-	unsigned char size;
-	char type;
-	int target;
-	int	hp;
 };
 
 

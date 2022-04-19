@@ -106,6 +106,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 
 	for (auto& Character_ : SpawnedCharacters)
 	{
+		//자신포함 모든플레이어
 		AMyCharacter* player_ = Cast<AMyCharacter>(Character_);
 
 		//새 눈덩이
@@ -254,13 +255,12 @@ void AMyPlayerController::UpdatePlayerInfo(int input)
 	m_Player->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
 	float dir = m_Player->GetAnim()->GetDirection();
 
-
 	if (input == COMMAND_MOVE)
 		mySocket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity, dir);
 	else if (input == COMMAND_ATTACK) 
-		mySocket->ReadyToSend_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
-		mySocket->ReadyToSend_DamgePacket();
+		mySocket->Send_DamagePacket();
 
 }
 

@@ -40,7 +40,7 @@ void ev_timer();
 void send_hp_packet(int _id, int target)
 {
 	sc_packet_hp_change packet;
-	packet.target = target;
+	packet.s_id = target;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_HP;
 	packet.hp = clients[target]._hp;
@@ -185,7 +185,7 @@ void send_login_fail_packet(int _s_id)
 void send_remove_object(int _s_id, int victim)
 {
 	sc_packet_remove_object packet;
-	packet.id = victim;
+	packet.s_id = victim;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_REMOVE_OBJECT;
 	clients[_s_id].do_send(sizeof(packet), &packet);
@@ -235,6 +235,7 @@ void Disconnect(int _s_id)
 	unordered_set <int> my_vl = cl.viewlist;
 	cl.vl.unlock();
 	
+	strcpy_s(clients[_s_id]._id, " ");
 	for (auto& other : my_vl) {
 		CLIENT& target = clients[other];
 
@@ -248,11 +249,11 @@ void Disconnect(int _s_id)
 		}
 		else target.vl.unlock();
 	}
-	clients[_s_id].state_lock.lock();
+	//clients[_s_id].state_lock.lock();
 	clients[_s_id]._state = ST_FREE;
-	clients[_s_id].state_lock.unlock();
+	//clients[_s_id].state_lock.unlock();
 	closesocket(clients[_s_id]._socket);
-	cout << "------------연결 종료------------" << endl;
+	cout << "------------플레이어 " << _s_id << " 연결 종료------------" << endl;
 }
 
 //플레이어 이벤트 등록
@@ -529,12 +530,14 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_DAMAGE: {
 		sc_packet_hp_change packet;
 		cl._hp -= 10;
+		if (cl._hp < 0) cl._hp = 0;
 		packet.hp = cl._hp;
-		packet.target = cl._s_id;
+		packet.s_id = cl._s_id;
 		packet.type = SC_PACKET_HP;
 		packet.size = sizeof(packet);
+
+		printf_s("[Send hp] id : %d, hp : %d\n", packet.s_id, packet.hp);
 		cl.do_send(sizeof(packet), &packet);
-		cout << "플레이어[" << s_id << "가 데미지 받음"<< endl;
 
 	    break;
 
@@ -586,12 +589,13 @@ void process_packet(int s_id, unsigned char* p)
 
 	case CS_PACKET_THROW_SNOW: {
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
-		printf_s("[Recv and send throw snow]\n");
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
 			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+
+			printf_s("[Send throw snow]\n");
 			other.do_send(sizeof(*packet), packet);
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 

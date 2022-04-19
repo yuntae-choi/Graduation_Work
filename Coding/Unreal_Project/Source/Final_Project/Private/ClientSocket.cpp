@@ -183,10 +183,12 @@ void ClientSocket::ReadyToSend_StatusPacket() {
 	SendPacket(&packet);
 };
 
-void ClientSocket::ReadyToSend_DamgePacket() {
+void ClientSocket::Send_DamagePacket() {
 	cs_packet_damage packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_DAMAGE;
+
+	MYLOG(Warning, TEXT("[Send damage]"));
 	SendPacket(&packet);
 };
 
@@ -212,7 +214,7 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRota
 };
 
 
-void ClientSocket::ReadyToSend_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
+void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
 {
 
 	cs_packet_throw_snow packet;

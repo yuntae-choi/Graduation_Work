@@ -34,7 +34,8 @@ AMyCharacter::AMyCharacter()
 	GetCapsuleComponent()->SetCapsuleRadius(37.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
 	GetCapsuleComponent()->SetUseCCD(true);
-	//GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
+	GetCapsuleComponent()->BodyInstance.bNotifyRigidBodyCollision = true;
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -74.0f), FRotator(0.0f, -90.0f, 0.0f));
 	springArm->TargetArmLength = 220.0f;
 	springArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
@@ -267,9 +268,15 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 	if (!bIsSnowman)
 	{	// 동물인 경우 체력 감소
-		iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
+		//iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
 
-		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
+		//MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
+
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		if (iSessionId == PlayerController->iSessionId)
+		{
+			PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
+		}
 	}
 	else
 	{	// 눈사람인 경우 스턴
@@ -309,9 +316,13 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 
 	if (nullptr != MySnowball)
 	{
-		MYLOG(Warning, TEXT("snowball hit."));
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		//PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
+		//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		//if (iSessionId == PlayerController->iSessionId)
+		//{
+		//	MYLOG(Warning, TEXT("id: %d snowball hit."), iSessionId);
+
+		//	PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
+		//}
 
 	}
 
