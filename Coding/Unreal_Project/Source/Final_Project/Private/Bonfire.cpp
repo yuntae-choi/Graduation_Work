@@ -32,8 +32,6 @@ ABonfire::ABonfire()
 void ABonfire::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UpdateOverlapCharacters(); // 처음 시작할 때는 begin overlap 이벤트가 발생하지 않아서 이렇게 처리해주어야 한다
 	
 	UpdateOverlapCharacters();
 }
