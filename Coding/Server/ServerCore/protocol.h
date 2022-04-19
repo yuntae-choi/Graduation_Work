@@ -3,7 +3,7 @@
 
 const short SERVER_PORT = 8000;
 
-const int BUFSIZE = 256;
+const int BUFSIZE = 1024;
 const int  ReZone_HEIGHT = 2000;
 const int  ReZone_WIDTH = 2000;
 const int  MAX_NAME_SIZE = 20;

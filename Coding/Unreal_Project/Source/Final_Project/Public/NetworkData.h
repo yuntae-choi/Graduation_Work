@@ -26,8 +26,7 @@ using std::chrono::system_clock;
 
 const int  MAX_NAME_SIZE = 20;
 const int  MAX_CHAT_SIZE = 100;
-const int BUF_SIZE = 255;
-const static int MAX_BUFF_SIZE = 255;
+const int BUF_SIZE = 1024;
 
 // 소켓 통신 구조체
 

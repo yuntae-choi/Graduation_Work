@@ -358,7 +358,7 @@ void process_packet(int s_id, unsigned char* p)
 			//other.viewlist.insert(s_id);
 			//other.vl.unlock();
 			sc_packet_put_object packet;
-			packet.s_id = s_id;
+			packet.s_id = cl._s_id;
 			strcpy_s(packet.name, cl.name);
 			packet.object_type = 0;
 			packet.size = sizeof(packet);
@@ -369,6 +369,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet.yaw = cl.Yaw;
 
 			printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+			//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
 			other.do_send(sizeof(packet), &packet);
 		}
 
