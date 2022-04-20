@@ -368,7 +368,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet.z = cl.z;
 			packet.yaw = cl.Yaw;
 
-			printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+			//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 			//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
 			other.do_send(sizeof(packet), &packet);
 		}
@@ -401,7 +401,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet.z = other.z;
 			packet.yaw = other.Yaw;
 
-			printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+			//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 			cl.do_send(sizeof(packet), &packet);
 		}
 
@@ -517,7 +517,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_ATTACK;
-			cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
 			other.do_send(sizeof(*packet), packet);
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 		}
@@ -526,6 +526,7 @@ void process_packet(int s_id, unsigned char* p)
 
 	}
 	case CS_PACKET_DAMAGE: {
+		cout << cl._s_id << "데미지 받음 " << endl;
 		cl._hp -= 10;
 		if (cl._hp < 0) cl._hp = 0;
 		send_hp_packet(cl._s_id);
@@ -829,7 +830,7 @@ void worker_thread()
 					clients[_s_id]._hp -= 1;
 					player_damage(_s_id);
 					send_hp_packet(_s_id);
-					cout << "hp -1" << endl;
+					//cout << "hp -1" << endl;
 
 				}
 			}
