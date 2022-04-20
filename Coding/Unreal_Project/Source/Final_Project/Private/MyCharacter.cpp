@@ -6,18 +6,17 @@
 #include "MyItem.h"
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
+#include "Debug.h"
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
-//const int AMyCharacter::iMinHP = 0;
 const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
+const float fChangeSnowmanStunTime = 3.0f;	// 실제값 - 10.0f, 눈사람화 할 때 스턴 시간
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
-
-const float fChangeSnowmanStunTime = 3.0f;// 실제값 - 10.0f;
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -87,8 +86,8 @@ AMyCharacter::AMyCharacter()
 	projectileClass = AMySnowball::StaticClass();
 
 	iSessionId = -1;
-	iCurrentHP = iMaxHP;	// 실제 설정값
-	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
+	//iCurrentHP = iMaxHP;	// 실제 설정값
+	iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
 	
@@ -110,8 +109,6 @@ AMyCharacter::AMyCharacter()
 	iCharacterState = CharacterState::AnimalNormal;
 	bIsSnowman = false;
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
-
-	//playerController = Cast<APlayerController>(GetController());
 }
 
 // Called when the game starts or when spawned
@@ -235,6 +232,10 @@ void AMyCharacter::Attack()
 {
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId == PlayerController->iSessionId)  PlayerController->SendPlayerInfo(COMMAND_ATTACK);
+
+#ifdef SINGLEPLAY_DEBUG
+	SnowAttack();
+#endif
 }
 
 void AMyCharacter::SnowAttack()
@@ -279,10 +280,11 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 	if (!bIsSnowman)
 	{	// 동물인 경우 체력 감소
-		//iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
+#ifdef SINGLEPLAY_DEBUG
+		iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
 
-		//MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
-
+		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
+#endif
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		if (iSessionId == PlayerController->iSessionId)
 		{
@@ -292,7 +294,9 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	else
 	{	// 눈사람인 경우 스턴
 		StartStun(fStunTime);
-		//MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
+#ifdef SINGLEPLAY_DEBUG
+		MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
+#endif
 	}
 	return FinalDamage;
 }
@@ -307,6 +311,7 @@ void AMyCharacter::ReleaseSnowball()
 		if (snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
 			//던지는 순간 좌표값 보내는 코드
+#ifdef MULTIPLAY_DEBUG
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			
 			FVector direction_;
@@ -315,6 +320,15 @@ void AMyCharacter::ReleaseSnowball()
 			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
 
 			II_Throwable::Execute_Throw(snowball, direction_);
+#endif
+#ifdef SINGLEPLAY_DEBUG
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+
+			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
+#endif
 			snowball = nullptr;
 		}
 
@@ -524,7 +538,9 @@ void AMyCharacter::UpdateTemperatureState()
 {
 	if (bIsSnowman) return;
 
-	//GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+#ifdef SINGLEPLAY_DEBUG
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+#endif
 	//if (match)
 	//{
 	//	GetWorldTimerManager().SetTimer(temperatureHandle, this, &AMyCharacter::UpdateTemperatureByMatch, 1.0f, true);
@@ -533,23 +549,27 @@ void AMyCharacter::UpdateTemperatureState()
 	//{
 		if (bIsInsideOfBonfire)
 		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
-			//GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
-			//	{
-					//iCurrentHP += ABonfire::iHealAmount;
-					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+#ifdef SINGLEPLAY_DEBUG
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP += ABonfire::iHealAmount;
+					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
 
-				//}), 1.0f, true);
+				}), 1.0f, true);
+#endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			if (iSessionId == PlayerController->iSessionId)
 				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN);
 		}
 		else
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
-			//GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
-			//	{
-					//iCurrentHP -= ABonfire::iDamageAmount;
-					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
-				//}), 1.0f, true);
+#ifdef SINGLEPLAY_DEBUG
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP -= ABonfire::iDamageAmount;
+					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+				}), 1.0f, true);
+#endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			if (iSessionId == PlayerController->iSessionId)
 				PlayerController->GetSocket()->Send_StatusPacket(ST_OUTBURN);
