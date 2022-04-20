@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 
-//#define MULTIPLAY_DEBUG
-#define SINGLEPLAY_DEBUG
+#define MULTIPLAY_DEBUG
+//#define SINGLEPLAY_DEBUG
 
 /**
  * 
