@@ -120,8 +120,8 @@ AMyCharacter::AMyCharacter()
 	projectileClass = AMySnowball::StaticClass();
 
 	iSessionId = -1;
-	//iCurrentHP = iMaxHP;	// 실제 설정값
-	iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
+	iCurrentHP = iMaxHP;	// 실제 설정값
+	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
 	
@@ -560,6 +560,8 @@ void AMyCharacter::ChangeSnowman()
 	StartStun(fChangeSnowmanStunTime);
 
 	ResetHasItems();
+
+	isAttacking = false;	// 공격 도중에 상태 변할 시 발생하는 오류 방지
 }
 
 void AMyCharacter::WaitForStartGame()
@@ -689,6 +691,8 @@ void AMyCharacter::ChangeAnimal()
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
 
 	iCharacterState = CharacterState::AnimalNormal;
+
+	isAttacking = false;	// 공격 도중에 상태 변할 시 발생하는 오류 방지
 }
 
 void AMyCharacter::SetCharacterMaterial(int id)
