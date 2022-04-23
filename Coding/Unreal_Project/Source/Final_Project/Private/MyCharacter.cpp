@@ -19,7 +19,15 @@ const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 
 // 색상별 곰 텍스쳐
-FString TextureStringArray[] = { TEXT("/Game/Characters/Bear/bear_texture.bear_texture") };
+FString TextureStringArray[] = {
+	TEXT("/Game/Characters/Bear/bear_texture.bear_texture"),
+	TEXT("/Game/Characters/Bear/bear_texture_light_red.bear_texture_light_red"),
+	TEXT("/Game/Characters/Bear/bear_texture_yellow.bear_texture_yellow"),
+	TEXT("/Game/Characters/Bear/bear_texture_light_green.bear_texture_light_green"),
+	TEXT("/Game/Characters/Bear/bear_texture_cyan.bear_texture_cyan"),
+	TEXT("/Game/Characters/Bear/bear_texture_blue.bear_texture_blue"),
+	TEXT("/Game/Characters/Bear/bear_texture_light_gray.bear_texture_light_gray"),
+	TEXT("/Game/Characters/Bear/bear_texture_black.bear_texture_black") };
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -89,13 +97,15 @@ AMyCharacter::AMyCharacter()
 		bearMaterial = BearMaterial.Object;
 	}
 
-	dynamicMaterialInstance = GetMesh()->CreateDynamicMaterialInstance(0);
-	// 본인 session id에 맞는 곰 텍스쳐(색상) 하나만 갖도록		TextureStringArray[iSessionId] <- 이런식으로 되도록
-	static ConstructorHelpers::FObjectFinder<UTexture>BearTexture(*(TextureStringArray[0]));
-	if (BearTexture.Succeeded())
+	// 모든 색상의 곰 텍스쳐 로드해서 저장
+	for (int i = 0; i < 8; ++i)
 	{
-		bearTexture = BearTexture.Object;
-		dynamicMaterialInstance->SetTextureParameterValue(FName("Tex"), bearTexture);	// 본인 색상의 곰 텍스쳐 사용
+		ConstructorHelpers::FObjectFinder<UTexture>BearTexture(*(TextureStringArray[i]));
+		if (BearTexture.Succeeded())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("d"));
+			bearTextureArray.Add(BearTexture.Object);
+		}
 	}
 
 	static ConstructorHelpers::FObjectFinder<UMaterial>SnowmanMaterial(TEXT("/Game/Characters/Snowman/M_Snowman.M_Snowman"));
@@ -139,6 +149,9 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 수정 필요 - 캐릭터의 session id가 결정될 때 이 함수가 호출되도록
+	SetCharacterMaterial(iSessionId);	// 캐릭터 머티리얼 설정(색상)
 
 	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
 
@@ -537,7 +550,7 @@ void AMyCharacter::ChangeSnowman()
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
-	SetCharacterMaterial();
+	SetCharacterMaterial();	// 눈사람으로 머티리얼 변경할 때는 색상 필요 x (디폴트값으로)
 
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
@@ -664,7 +677,7 @@ void AMyCharacter::ChangeAnimal()
 	GetMesh()->SetSkeletalMesh(bear);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(bearAnim);
-	SetCharacterMaterial();
+	SetCharacterMaterial(iSessionId);
 
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);
@@ -678,13 +691,14 @@ void AMyCharacter::ChangeAnimal()
 	iCharacterState = CharacterState::AnimalNormal;
 }
 
-void AMyCharacter::SetCharacterMaterial()
+void AMyCharacter::SetCharacterMaterial(int id)
 {
+	if (id < 0) id = 0;	// id가 유효하지 않은 경우 (싱글플레이)
 	if (!bIsSnowman)
 	{	// 곰 머티리얼로 변경, 본인 색상의 곰 텍스쳐 적용
 		GetMesh()->SetMaterial(0, bearMaterial);
 		dynamicMaterialInstance = GetMesh()->CreateDynamicMaterialInstance(0);
-		dynamicMaterialInstance->SetTextureParameterValue(FName("Tex"), bearTexture);	// 본인 색상의 곰 텍스쳐 사용
+		dynamicMaterialInstance->SetTextureParameterValue(FName("Tex"), bearTextureArray[id]);	// 본인 색상의 곰 텍스쳐 사용
 	}
 	else
 	{	// 눈사람 머티리얼로 변경

@@ -52,7 +52,7 @@ public:
 	void SnowAttack();
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
-	void SetCharacterMaterial();
+	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -132,6 +132,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = State)
 	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInstanceDynamic* dynamicMaterialInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* bearMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<UTexture*> bearTextureArray;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* snowmanMaterial;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
@@ -183,10 +195,4 @@ private:
 
 	// 스턴 관리하는 타이머 핸들러
 	FTimerHandle stunHandle;
-
-	UMaterialInterface* bearMaterial;
-	UMaterialInstanceDynamic* dynamicMaterialInstance;
-	UTexture* bearTexture;	// id에 따른 색상을 갖는 곰 텍스쳐
-	
-	UMaterialInterface* snowmanMaterial;
 };
