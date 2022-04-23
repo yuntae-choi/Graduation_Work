@@ -85,7 +85,9 @@ void AMyPlayerController::InitPlayerSetting()
 	player_->iSessionId = initInfo.SessionId;
 
 	//컨트롤러는 초기설정이 불가능함
-	//SetActorRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
+	SetControlRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
+
+	player_->SetCharacterMaterial(iSessionId);
 
 	bInitPlayerSetting = false;
 }
@@ -235,6 +237,7 @@ void AMyPlayerController::UpdateNewPlayer()
 		AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 		SpawnCharacter->SpawnDefaultController();
 		SpawnCharacter->iSessionId = newPlayers.front()->SessionId;
+		SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
 
 		// 필드의 플레이어 정보에 추가
 		if (charactersInfo != nullptr)
