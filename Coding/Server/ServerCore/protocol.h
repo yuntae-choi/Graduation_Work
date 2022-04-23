@@ -21,6 +21,7 @@ const char CS_PACKET_DAMAGE = 7;
 const char CS_PACKET_GET_ITEM = 8;
 const char CS_PACKET_LOGOUT = 9;
 const char CS_PACKET_STATUS_CHANGE = 10;
+const char CS_PACKET_READY = 11;
 
 
 
@@ -36,6 +37,8 @@ const char SC_PACKET_HP = 9;
 const char SC_PACKET_THROW_SNOW = 10;
 const char SC_PACKET_ATTACK = 11;
 const char SC_PACKET_GET_ITEM = 12;
+const char SC_PACKET_READY = 13;
+const char SC_PACKET_START = 14;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -105,23 +108,20 @@ struct sc_packet_hp_change {
 	int hp;
 };
 
-struct cs_packet_start { // 게임 레디 요청
+struct cs_packet_ready { // 게임 레디 요청
 	unsigned char size;
 	char	type;
-	bool	ready;
 };
 struct sc_packet_ready { // 타 플레이어 레디
 	unsigned char size;
 	char	type;
-	char	name[MAX_NAME_SIZE];
+	int	s_id;
 };
 
-struct sc_packet_start_ok { // 스폰
+struct sc_packet_start { // 스폰
 	unsigned char size;
 	char type;
-	char	name[MAX_NAME_SIZE];
-	float x, y, z;
-	char image_num;
+
 };
 
 struct cs_packet_attack {

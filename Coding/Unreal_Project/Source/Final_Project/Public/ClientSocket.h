@@ -156,6 +156,7 @@ public:
 	void Send_DamagePacket();
 	void Send_ItemPacket(int item_no);
 	void Send_LogoutPacket(const int& s_id);
+	void Send_ReadyPacket();
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);

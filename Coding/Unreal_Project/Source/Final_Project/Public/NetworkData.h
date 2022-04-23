@@ -42,7 +42,8 @@ enum CS_PacketType
 	CS_PACKET_DAMAGE,
 	CS_PACKET_GET_ITEM,
 	CS_PACKET_LOGOUT,
-	CS_PACKET_STATUS_CHANGE
+	CS_PACKET_STATUS_CHANGE,
+	CS_PACKET_READY
 };
 
 enum SC_PacketType
@@ -58,8 +59,9 @@ enum SC_PacketType
 	SC_PACKET_HP,
 	SC_PACKET_THROW_SNOW,
 	SC_PACKET_ATTACK,
-	SC_PACKET_GET_ITEM
-
+	SC_PACKET_GET_ITEM,
+	SC_PACKET_READY,
+	SC_PACKET_START
 
 };
 
@@ -212,7 +214,21 @@ struct sc_packet_status_change {
 	short   state;
 };
 
+struct sc_packet_ready { // 타 플레이어 레디
+	unsigned char size;
+	char	type;
+	int	s_id;
+};
 
+struct cs_packet_ready { // 게임 레디 요청
+	unsigned char size;
+	char	type;
+};
+
+struct sc_packet_start { // 스폰
+	unsigned char size;
+	char type;
+};
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
 

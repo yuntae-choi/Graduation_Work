@@ -707,6 +707,41 @@ void process_packet(int s_id, unsigned char* p)
 
 		break;
 	}
+	case CS_PACKET_READY: {
+		sc_packet_ready _packet;
+		_packet.size = sizeof(_packet);
+		_packet.type = SC_PACKET_READY;
+		_packet.s_id = s_id;
+		for (auto& other : clients) {
+			if (s_id == other._s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			other.do_send(sizeof(_packet), &_packet);
+		}
+
+		for (auto& other : clients) {
+			if (s_id == other._s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			if (other.b_ready == false)
+				return;
+		}
+
+		sc_packet_start s_packet;
+		s_packet.size = sizeof(s_packet);
+		s_packet.type = SC_PACKET_START;
+
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state)
+				continue;
+			other.do_send(sizeof(s_packet), &s_packet);
+		}
+		cout << s_id << "플레이어 레디" << endl;
+
+		break;
+	}
 	default:
 		printf("Unknown PACKET type\n");
 
