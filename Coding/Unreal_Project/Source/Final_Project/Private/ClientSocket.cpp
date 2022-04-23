@@ -55,6 +55,22 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_LOGIN_FAIL:
 		break;
 
+	case SC_PACKET_READY:
+	{
+		sc_packet_ready* packet = reinterpret_cast<sc_packet_ready*>(ptr);
+		int _s_id = packet->s_id;
+		MYLOG(Warning, TEXT("[player %d ] : READY"), packet->s_id);
+		break;
+	}
+
+	case SC_PACKET_START:
+	{
+		// 게임시작
+
+		break;
+	}
+
+
 	case SC_PACKET_PUT_OBJECT:
 	{
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
@@ -134,14 +150,14 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
 		MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
-		//if (ST_SNOWMAN == packet->state) {
-		//	CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
-		//	//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
-		//}
-		//else if (ST_ANIMAL == packet->state) {
-		//	CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
-		//}
-		//break;
+		if (ST_SNOWMAN == packet->state) {
+			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
+			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
+		}
+		else if (ST_ANIMAL == packet->state) {
+			CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
+		}
+		break;
 	}
 
 	//case SC_PACKET_CHAT:
@@ -188,6 +204,16 @@ void ClientSocket::Send_LoginPacket()
 	SendPacket(&packet);
 	
 };
+
+void ClientSocket::Send_ReadyPacket()
+{
+	cs_packet_ready packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_READY;
+	SendPacket(&packet);
+
+};
+
 
 void ClientSocket::Send_StatusPacket(STATE_Type _state) {
 	//CharactersInfo.players[iMy_s_id].My_State = _state;
