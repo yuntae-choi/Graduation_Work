@@ -52,6 +52,7 @@ public:
 	void SnowAttack();
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
+	void SetCharacterMaterial();
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -128,6 +129,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bHasBag;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = State)
+	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
@@ -174,11 +178,15 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = State)
 	int32 iCharacterState;	// 현재 캐릭터의 상태 (AnimalNormal, AnimalSlow, SnowmanNormal, SnowmanStunned)
 
-	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
-
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	APlayerController* playerController;
 
 	// 스턴 관리하는 타이머 핸들러
 	FTimerHandle stunHandle;
+
+	UMaterialInterface* bearMaterial;
+	UMaterialInstanceDynamic* dynamicMaterialInstance;
+	UTexture* bearTexture;	// id에 따른 색상을 갖는 곰 텍스쳐
+	
+	UMaterialInterface* snowmanMaterial;
 };

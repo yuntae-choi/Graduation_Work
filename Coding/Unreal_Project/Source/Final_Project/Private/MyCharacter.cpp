@@ -18,6 +18,9 @@ const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 
+// 색상별 곰 텍스쳐
+FString TextureStringArray[] = { TEXT("/Game/Characters/Bear/bear_texture.bear_texture") };
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -80,14 +83,35 @@ AMyCharacter::AMyCharacter()
 		snowmanAnim = SNOWMAN_ANIM.Class;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UMaterial>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear.M_Bear"));
+	if (BearMaterial.Succeeded())
+	{
+		bearMaterial = BearMaterial.Object;
+	}
+
+	dynamicMaterialInstance = GetMesh()->CreateDynamicMaterialInstance(0);
+	// 본인 session id에 맞는 곰 텍스쳐(색상) 하나만 갖도록		TextureStringArray[iSessionId] <- 이런식으로 되도록
+	static ConstructorHelpers::FObjectFinder<UTexture>BearTexture(*(TextureStringArray[0]));
+	if (BearTexture.Succeeded())
+	{
+		bearTexture = BearTexture.Object;
+		dynamicMaterialInstance->SetTextureParameterValue(FName("Tex"), bearTexture);	// 본인 색상의 곰 텍스쳐 사용
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial>SnowmanMaterial(TEXT("/Game/Characters/Snowman/M_Snowman.M_Snowman"));
+	if (SnowmanMaterial.Succeeded())
+	{
+		snowmanMaterial = SnowmanMaterial.Object;
+	}
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
 	projectileClass = AMySnowball::StaticClass();
 
 	iSessionId = -1;
-	iCurrentHP = iMaxHP;	// 실제 설정값
-	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
+	//iCurrentHP = iMaxHP;	// 실제 설정값
+	iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
 	
@@ -101,7 +125,7 @@ AMyCharacter::AMyCharacter()
 	farmingItem = nullptr;
 	bIsFarming = false;
 	
-	bIsInsideOfBonfire = false;	// 초기값 : true로 설정해야함,  캐릭터 초기 생성위치 모닥불 내부여야 함
+	bIsInsideOfBonfire = false;
 
 	//fMatchDuration = 3.0f;
 	//match = true;
@@ -506,13 +530,15 @@ void AMyCharacter::UpdateSpeed()
 
 void AMyCharacter::ChangeSnowman()
 {
+	bIsSnowman = true;
+
 	// 스켈레탈메시, 애니메이션 블루프린트 변경
 	myAnim->SetDead();
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
+	SetCharacterMaterial();
 
-	bIsSnowman = true;
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 
@@ -632,20 +658,36 @@ void AMyCharacter::ResetHasItems()
 
 void AMyCharacter::ChangeAnimal()
 {
+	bIsSnowman = false;
+
 	// 스켈레탈메시, 애니메이션 블루프린트 변경
 	GetMesh()->SetSkeletalMesh(bear);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(bearAnim);
+	SetCharacterMaterial();
 
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);
 	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
 
-	bIsSnowman = false;
 	iCurrentHP = iMaxHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
 
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
 
 	iCharacterState = CharacterState::AnimalNormal;
+}
+
+void AMyCharacter::SetCharacterMaterial()
+{
+	if (!bIsSnowman)
+	{	// 곰 머티리얼로 변경, 본인 색상의 곰 텍스쳐 적용
+		GetMesh()->SetMaterial(0, bearMaterial);
+		dynamicMaterialInstance = GetMesh()->CreateDynamicMaterialInstance(0);
+		dynamicMaterialInstance->SetTextureParameterValue(FName("Tex"), bearTexture);	// 본인 색상의 곰 텍스쳐 사용
+	}
+	else
+	{	// 눈사람 머티리얼로 변경
+		GetMesh()->SetMaterial(0, snowmanMaterial);
+	}
 }
