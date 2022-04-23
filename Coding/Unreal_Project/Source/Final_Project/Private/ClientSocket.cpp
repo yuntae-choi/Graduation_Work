@@ -134,14 +134,14 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
 		MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
-		//if (ST_SNOWMAN == packet->state) {
-		//	CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
-		//	//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
-		//}
-		//else if (ST_ANIMAL == packet->state) {
-		//	CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
-		//}
-		//break;
+		if (ST_SNOWMAN == packet->state) {
+			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
+			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
+		}
+		else if (ST_ANIMAL == packet->state) {
+			CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
+		}
+		break;
 	}
 
 	//case SC_PACKET_CHAT:
