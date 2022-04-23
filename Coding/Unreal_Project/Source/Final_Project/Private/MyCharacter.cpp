@@ -103,7 +103,6 @@ AMyCharacter::AMyCharacter()
 		ConstructorHelpers::FObjectFinder<UTexture>BearTexture(*(TextureStringArray[i]));
 		if (BearTexture.Succeeded())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("d"));
 			bearTextureArray.Add(BearTexture.Object);
 		}
 	}
