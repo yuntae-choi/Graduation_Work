@@ -13,6 +13,8 @@
 
 HANDLE g_h_iocp;
 HANDLE g_timer;
+mutex  m;
+condition_variable cv;
 SOCKET sever_socket;
 concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
@@ -21,6 +23,7 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
+
 
 void show_err();
 int get_id();
@@ -54,16 +57,22 @@ void send_hp_packet(int _id)
 void player_heal(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
-		if (clients[s_id]._hp < clients[s_id]._max_hp)
+		if (clients[s_id]._hp < clients[s_id]._max_hp) {
+			unique_lock<mutex> _lock(m);
 			Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
+			cv.notify_one();
+		}
 	}
 }
 
 void player_damage(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
-		if (clients[s_id]._hp > clients[s_id]._min_hp)
+		if (clients[s_id]._hp > clients[s_id]._min_hp) {
+			unique_lock<mutex> _lock(m);
 			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);
+			cv.notify_one();
+		}
 	}
 }
 
@@ -909,8 +918,10 @@ void send_move_packet(int _id, int target)
 void ev_timer() 
 {
 	WaitForSingleObject(g_timer, INFINITE);
-
+	timer_q.clear();
 	while (true) {
+		unique_lock<mutex> lock(m);
+		cv.wait(lock, []() {return timer_q.empty() == false; });
 		timer_ev order;
 		timer_q.try_pop(order);
 		//auto t = order.start_t - chrono::system_clock::now();
@@ -934,10 +945,7 @@ void ev_timer()
 		else {
 			timer_q.push(order);
 			this_thread::sleep_for(10ms);
-
 		}
-
-
 	}
 
 }
