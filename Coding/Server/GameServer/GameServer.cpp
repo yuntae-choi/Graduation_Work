@@ -918,7 +918,10 @@ void send_move_packet(int _id, int target)
 void ev_timer() 
 {
 	WaitForSingleObject(g_timer, INFINITE);
-	timer_q.clear();
+	{
+		unique_lock<mutex> lock(m);
+		timer_q.clear();
+	}
 	while (true) {
 		unique_lock<mutex> lock(m);
 		cv.wait(lock, []() {return timer_q.empty() == false; });
