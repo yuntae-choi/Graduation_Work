@@ -12,6 +12,7 @@
 #include <cmath>
 
 HANDLE g_h_iocp;
+HANDLE g_timer;
 SOCKET sever_socket;
 concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
@@ -46,7 +47,7 @@ void send_hp_packet(int _id)
 	packet.type = SC_PACKET_HP;
 	packet.hp = clients[_id]._hp;
 
-	printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
+	// printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
 	clients[_id].do_send(sizeof(packet), &packet);
 }
 
@@ -114,10 +115,14 @@ int main()
 	AcceptEx(sever_socket, c_socket, accept_buf, 0, sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16, NULL, &accept_ex._wsa_over);
 
+	g_timer = CreateEvent(NULL, FALSE, FALSE, NULL);
+
 	for (int i = 0; i < MAX_USER; ++i)
 		clients[i]._s_id = i;
 
 	vector <thread> worker_threads;
+
+
 
 	thread timer_thread{ ev_timer };
 
@@ -718,6 +723,7 @@ void process_packet(int s_id, unsigned char* p)
 				continue;
 			other.do_send(sizeof(_packet), &_packet);
 		}
+		cout << s_id << "플레이어 레디" << endl;
 
 		for (auto& other : clients) {
 			if (s_id == other._s_id)
@@ -737,8 +743,8 @@ void process_packet(int s_id, unsigned char* p)
 				continue;
 			other.do_send(sizeof(s_packet), &s_packet);
 		}
-		cout << s_id << "플레이어 레디" << endl;
-
+		SetEvent(g_timer);
+		cout << "게임 스타트" << endl;
 		break;
 	}
 	default:
@@ -902,6 +908,7 @@ void send_move_packet(int _id, int target)
 //타이머
 void ev_timer() 
 {
+	WaitForSingleObject(g_timer, INFINITE);
 
 	while (true) {
 		timer_ev order;
