@@ -321,7 +321,8 @@ void process_packet(int s_id, unsigned char* p)
 		cl.x = 300.0f * cos(s_id + 45.0f);
 		cl.y = 300.0f * sin(s_id + 45.0f);
 		cl.z = packet->z;
-		cl.Yaw = s_id * 45.0f - 140.0f;
+		cl.Yaw = s_id * 55.0f - 115.0f;
+		if (cl.Yaw > 180) cl.Yaw -= 360;
 
 		cl._hp = cl._max_hp;
 
