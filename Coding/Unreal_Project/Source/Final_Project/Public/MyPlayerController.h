@@ -34,6 +34,11 @@ public:
 
 	void SendPlayerInfo(int input);
 	//void UpdateFarming(int item_no);
+	UFUNCTION(BlueprintCallable)
+	void PlayerReady();	// 컨트롤러를 소유한 플레이어가 레디하면 호출되는 함수
+	UFUNCTION(BlueprintCallable)
+	void PlayerUnready();
+	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
 
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -45,9 +50,20 @@ private:
 	bool UpdateWorldInfo();		// 월드 동기화
 	void UpdateNewPlayer();
 	void UpdatePlayerInfo(const cCharacter& info);
+	void LoadReadyUI();	// ReadyUI 띄우기, UI에 대한 입력만 허용
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	bool bIsReady;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> readyUIClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	class UUserWidget* readyUI;
+
 private:
 	ClientSocket*			mySocket;
 	cCharacter				initInfo;

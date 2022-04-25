@@ -4,6 +4,8 @@
 #include "MyGameModeBase.h"
 #include "ClientSocket.h"
 #include "MyAnimInstance.h"
+#include "Blueprint/UserWidget.h"
+#include "UObject/ConstructorHelpers.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -17,6 +19,14 @@ AMyPlayerController::AMyPlayerController()
 	bInitPlayerSetting = false;
 
 	PrimaryActorTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> READY_UI(TEXT("/Game/Blueprints/ReadyUI.ReadyUI_C"));
+	if (READY_UI.Succeeded() && (READY_UI.Class != nullptr))
+	{
+		readyUIClass = READY_UI.Class;
+	}
+
+	bIsReady = false;
 }
 
 
@@ -26,8 +36,10 @@ void AMyPlayerController::BeginPlay()
 	mySocket->StartListen();
 
 	// 실행시 클릭없이 바로 조작
-	FInputModeGameOnly InputMode;
-	SetInputMode(InputMode);
+	//FInputModeGameOnly InputMode;
+	//SetInputMode(InputMode);
+
+	LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -354,3 +366,45 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 //	UWorld* World = GetWorld();
 //	iNewPlayers.push(info.SessionId);
 //}
+
+void AMyPlayerController::LoadReadyUI()
+{
+	if (readyUIClass)
+	{
+		readyUI = CreateWidget<UUserWidget>(GetWorld(), readyUIClass);
+		if (readyUI)
+		{
+			readyUI->AddToViewport();
+
+			FInputModeUIOnly InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputMode);
+			bShowMouseCursor = true;
+		}
+	}
+}
+
+void AMyPlayerController::PlayerReady()
+{
+	// 서버에 레디했다고 전송
+	UE_LOG(LogTemp, Warning, TEXT("PlayerReady"));
+	bIsReady = true;
+}
+
+void AMyPlayerController::PlayerUnready()
+{
+	// 서버에 언레디했다고 전송
+	UE_LOG(LogTemp, Warning, TEXT("PlayerUnready"));
+	bIsReady = false;
+}
+
+void AMyPlayerController::StartGame()
+{
+	readyUI->RemoveFromParent();	// ReadyUI 제거
+
+	// 실행시 클릭없이 바로 조작
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+
+	// 게임 시작되면 실행시킬 코드들 작성
+}
