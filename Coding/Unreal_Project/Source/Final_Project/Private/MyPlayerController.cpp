@@ -15,7 +15,7 @@ AMyPlayerController::AMyPlayerController()
 	mySocket = ClientSocket::GetSingleton();
 	mySocket->SetPlayerController(this);
 
-	bNewPlayerEntered = false;
+	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -58,10 +58,9 @@ void AMyPlayerController::Tick(float DeltaTime)
 	if (bInitPlayerSetting)
 		InitPlayerSetting();
 
-	//새 플레이어 스폰
-	if (bNewPlayerEntered)
+	if (newPlayers.TryPop(newplayer))
 		UpdateNewPlayer();
-	
+
 	// 월드 동기화
 	UpdateWorldInfo();
 
@@ -78,15 +77,15 @@ void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
 {
 	if (NewPlayer_ != nullptr)
 	{
-		bNewPlayerEntered = true;
-		newPlayers.push(NewPlayer_);
+		//bNewPlayerEntered = true;
+		newPlayers.Push(NewPlayer_);
 	}
 }
 
 void AMyPlayerController::SetNewBall(const int s_id)
 {
 	UWorld* World = GetWorld();
-	newBalls.push(s_id);
+	newBalls.Push(s_id);
 }
 
 void AMyPlayerController::InitPlayerSetting()
@@ -123,91 +122,87 @@ bool AMyPlayerController::UpdateWorldInfo()
 	TArray<AActor*> SpawnedCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
 
+	//새 눈덩이
+	int new_ball;
+	while (newBalls.TryPop(new_ball))
+	{
+		charactersInfo->players[new_ball].new_ball = true;
+	}
+
 	for (auto& Character_ : SpawnedCharacters)
 	{
 		//자신포함 모든플레이어
 		AMyCharacter* player_ = Cast<AMyCharacter>(Character_);
 
-		//새 눈덩이
-		if (!newBalls.empty() && newBalls.front() == player_->iSessionId)
-		{
+		cCharacter* info = &charactersInfo->players[player_->iSessionId];
+		if (!info->IsAlive) continue;
+
+		if (info->new_ball) { 
 			player_->SnowAttack();
-			newBalls.pop();
+			info->new_ball = false;
 		}
 
+
+		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
 		{
 			continue;
 		}
 
-		//타플레이어
-		cCharacter* info = &charactersInfo->players[player_->iSessionId];
 
-		if (info->IsAlive)
+		//if (player_->iCurrentHP != info->HealthValue)
+		//{
+		//	MYLOG(Warning, TEXT("other player damaged."));
+		//	//// 피격 파티클 소환
+		//	//FTransform transform(OtherPlayer->GetActorLocation());
+		//	//UGameplayStatics::SpawnEmitterAtLocation(
+		//	//	world, HitEmiiter, transform, true
+		//	//);
+		//	//// 피격 애니메이션 플레이
+		//	//player_->PlayDamagedAnimation();
+		//	//player_->iCurrentHP = info->HealthValue;
+		//}
+
+		//// 공격중일때 타격 애니메이션 플레이
+		//if (info->IsAttacking)
+		//{
+		//	UE_LOG(LogClass, Log, TEXT("other player hit."));
+		//	OtherPlayer->PlayHitAnimation();
+		//}
+
+		FVector CharacterLocation;
+		CharacterLocation.X = info->X;
+		CharacterLocation.Y = info->Y;
+		CharacterLocation.Z = info->Z;
+
+		FRotator CharacterRotation;
+		CharacterRotation.Yaw = info->Yaw;
+		CharacterRotation.Pitch = 0.0f;
+		CharacterRotation.Roll = 0.0f;
+
+		FVector CharacterVelocity;
+		CharacterVelocity.X = info->VX;
+		CharacterVelocity.Y = info->VY;
+		CharacterVelocity.Z = info->VZ;
+
+		player_->AddMovementInput(CharacterVelocity);
+		player_->SetActorRotation(CharacterRotation);
+		player_->SetActorLocation(CharacterLocation);
+		player_->GetAnim()->SetDirection(info->direction);
+
+		//눈사람 변화
+		if (!player_->IsSnowman())
 		{
-			//if (player_->iCurrentHP != info->HealthValue)
-			//{
-			//	MYLOG(Warning, TEXT("other player damaged."));
-			//	//// 피격 파티클 소환
-			//	//FTransform transform(OtherPlayer->GetActorLocation());
-			//	//UGameplayStatics::SpawnEmitterAtLocation(
-			//	//	world, HitEmiiter, transform, true
-			//	//);
-			//	//// 피격 애니메이션 플레이
-			//	//player_->PlayDamagedAnimation();
-			//	//player_->iCurrentHP = info->HealthValue;
-			//}
-
-			//// 공격중일때 타격 애니메이션 플레이
-			//if (info->IsAttacking)
-			//{
-			//	UE_LOG(LogClass, Log, TEXT("other player hit."));
-			//	OtherPlayer->PlayHitAnimation();
-			//}
-
-			FVector CharacterLocation;
-			CharacterLocation.X = info->X;
-			CharacterLocation.Y = info->Y;
-			CharacterLocation.Z = info->Z;
-
-			FRotator CharacterRotation;
-			CharacterRotation.Yaw = info->Yaw;
-			CharacterRotation.Pitch = 0.0f;
-			CharacterRotation.Roll = 0.0f;
-
-			FVector CharacterVelocity;
-			CharacterVelocity.X = info->VX;
-			CharacterVelocity.Y = info->VY;
-			CharacterVelocity.Z = info->VZ;
-
-			player_->AddMovementInput(CharacterVelocity);
-			player_->SetActorRotation(CharacterRotation);
-			player_->SetActorLocation(CharacterLocation);
-			player_->GetAnim()->SetDirection(info->direction);
-
-			//눈사람 변화
-			if (!player_->IsSnowman())
+			if (info->My_State == ST_SNOWMAN)
 			{
-				if (info->My_State == ST_SNOWMAN)
-				{
-					player_->ChangeSnowman();
-				}
-			}
-			else {
-				if (info->My_State != ST_SNOWMAN)
-				{
-					player_->ChangeAnimal();
-				}
+				player_->ChangeSnowman();
 			}
 		}
-		else
-		{
-			/*	UE_LOG(LogClass, Log, TEXT("other player dead."));
-				FTransform transform(Character->GetActorLocation());
-				UGameplayStatics::SpawnEmitterAtLocation(
-					world, DestroyEmiiter, transform, true
-				);
-				Character->Destroy();*/
+		else {
+			if (info->My_State != ST_SNOWMAN)
+			{
+				player_->ChangeAnimal();
+			}
 		}
 	}
 	return true;
@@ -217,60 +212,50 @@ void AMyPlayerController::UpdateNewPlayer()
 {
 	UWorld* const World = GetWorld();
 
-	int size_ = newPlayers.size();
+	int size_ = newPlayers.Size();
 
-	for (int i = 0; i < size_; ++i)
+
+	// 새로운 플레이어를 필드에 스폰
+	FVector SpawnLocation_;
+	SpawnLocation_.X = newplayer.get()->X;
+	SpawnLocation_.Y = newplayer.get()->Y;
+	SpawnLocation_.Z = newplayer.get()->Z;
+
+	FRotator SpawnRotation;
+	SpawnRotation.Yaw = newplayer.get()->Yaw;
+	SpawnRotation.Pitch = 0.0f;
+	SpawnRotation.Roll = 0.0f;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+	SpawnParams.Name = FName(*FString(to_string(newplayer.get()->SessionId).c_str()));
+
+	WhoToSpawn = AMyCharacter::StaticClass();
+	AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
+	SpawnCharacter->SpawnDefaultController();
+	SpawnCharacter->iSessionId = newplayer.get()->SessionId;
+	SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
+
+	// 필드의 플레이어 정보에 추가
+	if (charactersInfo != nullptr)
 	{
-		// 새로운 플레이어가 자기 자신이면 무시
-		if (newPlayers.front()->SessionId == iSessionId)
-		{
-			newPlayers.front() = nullptr;
-			newPlayers.pop();
-			continue;
-		}
+		cCharacter info;
+		info.SessionId = newplayer.get()->SessionId;
+		info.X = newplayer.get()->X;
+		info.Y = newplayer.get()->Y;
+		info.Z = newplayer.get()->Z;
 
-		// 새로운 플레이어를 필드에 스폰
-		FVector SpawnLocation_;
-		SpawnLocation_.X = newPlayers.front()->X;
-		SpawnLocation_.Y = newPlayers.front()->Y;
-		SpawnLocation_.Z = newPlayers.front()->Z;
+		info.Yaw = newplayer.get()->Yaw;
 
-		FRotator SpawnRotation;
-		SpawnRotation.Yaw = newPlayers.front()->Yaw;
-		SpawnRotation.Pitch = 0.0f;
-		SpawnRotation.Roll = 0.0f;
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.Instigator = GetInstigator();
-		SpawnParams.Name = FName(*FString(to_string(newPlayers.front()->SessionId).c_str()));
-
-		WhoToSpawn = AMyCharacter::StaticClass();
-		AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
-		SpawnCharacter->SpawnDefaultController();
-		SpawnCharacter->iSessionId = newPlayers.front()->SessionId;
-		SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
-
-		// 필드의 플레이어 정보에 추가
-		if (charactersInfo != nullptr)
-		{
-			cCharacter info;
-			info.SessionId = newPlayers.front()->SessionId;
-			info.X = newPlayers.front()->X;
-			info.Y = newPlayers.front()->Y;
-			info.Z = newPlayers.front()->Z;
-
-			info.Yaw = newPlayers.front()->Yaw;
-
-			charactersInfo->players[newPlayers.front()->SessionId] = info;
-		}
-
-		MYLOG(Warning, TEXT("other player(id : %d) spawned."), newPlayers.front()->SessionId);
-
-		newPlayers.front() = nullptr;
-		newPlayers.pop();
+		charactersInfo->players[newplayer.get()->SessionId] = info;
 	}
-	bNewPlayerEntered = false;
+
+	newplayer = NULL;
+
+	//MYLOG(Warning, TEXT("other player(id : %d) spawned."), newPlayers.front()->SessionId);
+
+	//bNewPlayerEntered = false;
 }
 
 void AMyPlayerController::SendPlayerInfo(int input)
@@ -288,7 +273,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 
 	if (input == COMMAND_MOVE)
 		mySocket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity, dir);
-	else if (input == COMMAND_ATTACK) 
+	else if (input == COMMAND_ATTACK)
 		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
 		mySocket->Send_DamagePacket();

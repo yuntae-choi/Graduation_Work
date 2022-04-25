@@ -1,25 +1,34 @@
 ﻿//----------------------------------------------------------------------------------------------------------------------------------------------
 // GameServer.cpp 파일
 //----------------------------------------------------------------------------------------------------------------------------------------------
+#include <thread>
+#include <cmath>
 
 #include "pch.h"
 #include "CorePch.h"
 #include "CLIENT.h"
 #include "Overlap.h"
-#include <thread>
+#include "ConcurrentQueue.h"
+#include "ConcurrentStack.h"
+#include "ThreadManager.h"
 
-#include <atomic>
-#include <cmath>
+CoreGlobal Core;
 
 HANDLE g_h_iocp;
+HANDLE g_timer;
+mutex  m;
+condition_variable cv;
 SOCKET sever_socket;
-concurrency::concurrent_priority_queue <timer_ev> timer_q;
+LockQueue<timer_ev> timer_q;
+
+//concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
+
 
 void show_err();
 int get_id();
@@ -46,23 +55,25 @@ void send_hp_packet(int _id)
 	packet.type = SC_PACKET_HP;
 	packet.hp = clients[_id]._hp;
 
-	printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
+	// printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
 	clients[_id].do_send(sizeof(packet), &packet);
 }
 
 void player_heal(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
-		if (clients[s_id]._hp < clients[s_id]._max_hp)
+		if (clients[s_id]._hp < clients[s_id]._max_hp) {
 			Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
+		}
 	}
 }
 
 void player_damage(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
-		if (clients[s_id]._hp > clients[s_id]._min_hp)
-			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);
+		if (clients[s_id]._hp > clients[s_id]._min_hp) {
+			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);;
+		}
 	}
 }
 
@@ -114,27 +125,26 @@ int main()
 	AcceptEx(sever_socket, c_socket, accept_buf, 0, sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16, NULL, &accept_ex._wsa_over);
 
+	g_timer = CreateEvent(NULL, FALSE, FALSE, NULL);
+
 	for (int i = 0; i < MAX_USER; ++i)
 		clients[i]._s_id = i;
 
-	vector <thread> worker_threads;
-
-	thread timer_thread{ ev_timer };
-
 	// 시스템 정보 가져옴
-	//SYSTEM_INFO sysInfo;
-	//GetSystemInfo(&sysInfo);
+	SYSTEM_INFO sysInfo;
+	GetSystemInfo(&sysInfo);
 	//printf_s("[INFO] CPU 쓰레드 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
 	// 적절한 작업 스레드의 갯수는 (CPU * 2) + 1
-	//int nThreadCnt = sysInfo.dwNumberOfProcessors;
-	int nThreadCnt = 5;
+	int nThreadCnt = sysInfo.dwNumberOfProcessors;
+	//int nThreadCnt = 5;
 
-	for (int i = 0; i < 10; ++i)
-		worker_threads.emplace_back(worker_thread);
+	for (int i = 0; i < nThreadCnt; ++i)
+		GThreadManager->Launch(worker_thread);
 
-	for (auto& th : worker_threads)
-		th.join();
-	timer_thread.join();
+	GThreadManager->Launch(ev_timer);
+              
+	GThreadManager->Join();
+
 	//timer_thread.join();
 	for (auto& cl : clients) {
 		if (ST_INGAME == cl._state)
@@ -287,7 +297,7 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 	order.target_id = user_id;
 	order.order = ev;
 	order.start_t = chrono::system_clock::now() + ms;
-	timer_q.push(order);
+	timer_q.Push(order);
 }
 
 //패킷 판별
@@ -321,7 +331,8 @@ void process_packet(int s_id, unsigned char* p)
 		cl.x = 300.0f * cos(s_id + 45.0f);
 		cl.y = 300.0f * sin(s_id + 45.0f);
 		cl.z = packet->z;
-		cl.Yaw = s_id * 45.0f - 140.0f;
+		cl.Yaw = s_id * 55.0f - 115.0f;
+		if (cl.Yaw > 180) cl.Yaw -= 360;
 
 		cl._hp = cl._max_hp;
 
@@ -718,6 +729,7 @@ void process_packet(int s_id, unsigned char* p)
 				continue;
 			other.do_send(sizeof(_packet), &_packet);
 		}
+		cout << s_id << "플레이어 레디" << endl;
 
 		for (auto& other : clients) {
 			if (s_id == other._s_id)
@@ -737,8 +749,8 @@ void process_packet(int s_id, unsigned char* p)
 				continue;
 			other.do_send(sizeof(s_packet), &s_packet);
 		}
-		cout << s_id << "플레이어 레디" << endl;
-
+		SetEvent(g_timer);
+		cout << "게임 스타트" << endl;
 		break;
 	}
 	default:
@@ -902,10 +914,13 @@ void send_move_packet(int _id, int target)
 //타이머
 void ev_timer() 
 {
-
+	WaitForSingleObject(g_timer, INFINITE);
+	{
+		timer_q.Clear();
+	}
 	while (true) {
 		timer_ev order;
-		timer_q.try_pop(order);
+		timer_q.WaitPop(order);
 		//auto t = order.start_t - chrono::system_clock::now();
 		int s_id = order.this_id;
 		if (false == is_player(s_id)) continue;
@@ -925,12 +940,9 @@ void ev_timer()
 
 		}
 		else {
-			timer_q.push(order);
+			timer_q.Push(order);
 			this_thread::sleep_for(10ms);
-
 		}
-
-
 	}
 
 }

@@ -109,9 +109,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_THROW_SNOW:
 	{
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
-
-
-
 		CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
 		CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
 		CharactersInfo.players[packet->s_id].fCz = packet->z;		// 카메라 위치

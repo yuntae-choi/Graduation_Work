@@ -195,4 +195,12 @@ private:
 
 	// 스턴 관리하는 타이머 핸들러
 	FTimerHandle stunHandle;
+
+
+
+
+	bool bIsUpDownZero = false;
+	bool bIsLeftRightZero = false;
+	bool bIsLookUpZero = false;
+	bool bIsTurnZero = false;
 };

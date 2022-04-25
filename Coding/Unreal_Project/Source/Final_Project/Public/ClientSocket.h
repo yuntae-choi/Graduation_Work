@@ -3,6 +3,8 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <queue>
+#include <mutex>
 #include "Final_Project.h"
 #include "NetworkData.h"
 
@@ -11,9 +13,79 @@ class AMyPlayerController;
 
 using namespace std;
 
+//================================================================
+// 플레이어 변신 상태 + 모닥불 충돌 여부
+//================================================================
 enum STATE_Type { ST_SNOWMAN, ST_INBURN, ST_OUTBURN, ST_ANIMAL };
 
-// 플레이어 정보
+//================================================================
+// 멀티쓰레드 상황에서 큐에 동시성을 보장해줌
+//================================================================
+template<typename T>
+class LockQueue
+{
+public:
+	LockQueue() { }
+
+	LockQueue(const LockQueue&) = delete;
+	LockQueue& operator=(const LockQueue&) = delete;
+	
+	void Push(T value)
+	//void Push(int32 value)
+	{
+		lock_guard<mutex> lock(_mutex);
+		_queue.push(std::move(value));
+		_condVar.notify_one();
+	}
+	
+	bool TryPop(T& value)
+	//bool TryPop(int32& value)
+	{
+		lock_guard<mutex> lock(_mutex);
+		if (_queue.empty())
+			return false;
+
+		value = std::move(_queue.front());
+		_queue.pop();
+		return true;
+	}
+
+	void WaitPop(T& value)
+	//void WaitPop(int32& value)
+	{
+		unique_lock<mutex> lock(_mutex);
+		_condVar.wait(lock, [this] { return _queue.empty() == false; });
+		value = std::move(_queue.front());
+		_queue.pop();
+	}
+
+	void Clear()
+	{
+		unique_lock<mutex> lock(_mutex);
+		if (_queue.empty() == false)
+		{
+			queue<T> _empty;
+			//queue<int32> _empty;
+			swap(_queue, _empty);
+		}
+	}
+
+	int Size()
+	{
+		unique_lock<mutex> lock(_mutex);
+		return _queue.size();
+	}
+
+private:
+	std::queue<T> _queue;
+	//std::queue<int32> _queue;
+	std::mutex _mutex;
+	std::condition_variable _condVar;
+};
+
+//================================================================
+// 플레이어 정보가 담긴 클래스
+//================================================================
 class cCharacter {
 public:
 	cCharacter() {};
@@ -44,6 +116,8 @@ public:
 	//카메라 방향
 	float fCDx, fCDy, fCDz;
 	STATE_Type My_State = ST_ANIMAL;
+
+	bool new_ball = false;
 
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
@@ -84,8 +158,10 @@ public:
 	}
 };
 
-
+//================================================================
 // 플레이어 직렬화/역직렬화 클래스
+// map 컨테이너를 활용하여 플레이어 정보에 접근함
+//================================================================
 class cCharactersInfo
 {
 public:
@@ -125,6 +201,10 @@ public:
 	}
 };
 
+//================================================================
+// 서버와 통신을 담당하는 클래스
+// 클라이언트 소켓을 담고 있음
+//================================================================
 class FINAL_PROJECT_API ClientSocket : public FRunnable
 {
 public:

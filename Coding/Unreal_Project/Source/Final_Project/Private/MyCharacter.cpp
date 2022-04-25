@@ -225,42 +225,58 @@ void AMyCharacter::SetItem(AMyItem* NewItem)
 
 void AMyCharacter::UpDown(float NewAxisValue)
 {
-	if (NewAxisValue != 0)
+	AddMovementInput(GetActorForwardVector(), NewAxisValue);
+
+	if (NewAxisValue != 0.0f) bIsUpDownZero = false;
+
+	if (!bIsUpDownZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
-	AddMovementInput(GetActorForwardVector(), NewAxisValue);
+
+	if (NewAxisValue == 0.0f) bIsUpDownZero = true;
 }
 
 void AMyCharacter::LeftRight(float NewAxisValue)
 {
-	if (NewAxisValue != 0)
+	AddMovementInput(GetActorRightVector(), NewAxisValue);
+
+	if (NewAxisValue != 0.0f) bIsLeftRightZero = false;
+
+	if (!bIsLeftRightZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
-	AddMovementInput(GetActorRightVector(), NewAxisValue);
+
+	if (NewAxisValue == 0.0f) bIsLeftRightZero = true;
 }
 
 void AMyCharacter::LookUp(float NewAxisValue)
 {
-	if (NewAxisValue != 0)
+	AddControllerPitchInput(NewAxisValue);
+
+	if (NewAxisValue != 0) bIsLookUpZero = false;
+
+	if (!bIsLookUpZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
-	AddControllerPitchInput(NewAxisValue);
 }
 
 void AMyCharacter::Turn(float NewAxisValue)
 {
-	if (NewAxisValue != 0)
+	AddControllerYawInput(NewAxisValue);
+
+	if (NewAxisValue != 0) bIsTurnZero = false;
+
+	if (!bIsTurnZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
-	AddControllerYawInput(NewAxisValue);
 }
 
 void AMyCharacter::Attack()

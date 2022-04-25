@@ -3,7 +3,7 @@
 #pragma once
 
 #include <thread>
-#include <queue>
+//#include <queue>
 #include "Final_Project.h"
 #include "MyCharacter.h"
 #include "GameFramework/PlayerController.h"
@@ -67,8 +67,12 @@ public:
 private:
 	ClientSocket*			mySocket;
 	cCharacter				initInfo;
-	queue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
-	queue <int>				newBalls;
+	LockQueue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
+		//새 플레이어 스폰
+	shared_ptr<cCharacter> newplayer;
+	//queue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
+	LockQueue<int> newBalls;
+	//queue <int>				newBalls;
 	cCharactersInfo*		charactersInfo;	// 다른 캐릭터들의 정보
 
 	bool							bNewPlayerEntered;
