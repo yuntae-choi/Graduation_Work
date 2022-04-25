@@ -160,6 +160,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CLIENT.cpp" />
+    <ClCompile Include="ConcurrentQueue.cpp" />
+    <ClCompile Include="ConcurrentStack.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="Overlap.cpp" />
     <ClCompile Include="pch.cpp">
@@ -171,6 +173,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CLIENT.h" />
+    <ClInclude Include="ConcurrentQueue.h" />
+    <ClInclude Include="ConcurrentStack.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Overlap.h" />
     <ClInclude Include="pch.h" />

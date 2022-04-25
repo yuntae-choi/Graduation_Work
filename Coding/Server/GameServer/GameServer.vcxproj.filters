@@ -16,6 +16,9 @@
     <Filter Include="Enum">
       <UniqueIdentifier>{f1aa7514-5563-4c11-b70f-b7cf1a82d1a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Concurent">
+      <UniqueIdentifier>{6e0c3814-c947-484c-a452-88e9ceb0f2ce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameServer.cpp">
@@ -30,6 +33,12 @@
     <ClCompile Include="Overlap.cpp">
       <Filter>Exp_Over</Filter>
     </ClCompile>
+    <ClCompile Include="ConcurrentQueue.cpp">
+      <Filter>Concurent</Filter>
+    </ClCompile>
+    <ClCompile Include="ConcurrentStack.cpp">
+      <Filter>Concurent</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -43,6 +52,12 @@
     </ClInclude>
     <ClInclude Include="Enum.h">
       <Filter>Enum</Filter>
+    </ClInclude>
+    <ClInclude Include="ConcurrentQueue.h">
+      <Filter>Concurent</Filter>
+    </ClInclude>
+    <ClInclude Include="ConcurrentStack.h">
+      <Filter>Concurent</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
