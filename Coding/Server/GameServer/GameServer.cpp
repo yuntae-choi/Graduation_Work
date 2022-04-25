@@ -1,6 +1,8 @@
 ﻿//----------------------------------------------------------------------------------------------------------------------------------------------
 // GameServer.cpp 파일
 //----------------------------------------------------------------------------------------------------------------------------------------------
+#include <thread>
+#include <cmath>
 
 #include "pch.h"
 #include "CorePch.h"
@@ -8,9 +10,9 @@
 #include "Overlap.h"
 #include "ConcurrentQueue.h"
 #include "ConcurrentStack.h"
+#include "ThreadManager.h"
 
-#include <thread>
-#include <cmath>
+CoreGlobal Core;
 
 HANDLE g_h_iocp;
 HANDLE g_timer;
@@ -128,26 +130,21 @@ int main()
 	for (int i = 0; i < MAX_USER; ++i)
 		clients[i]._s_id = i;
 
-	vector <thread> worker_threads;
-
-
-
-	thread timer_thread{ ev_timer };
-
 	// 시스템 정보 가져옴
-	//SYSTEM_INFO sysInfo;
-	//GetSystemInfo(&sysInfo);
+	SYSTEM_INFO sysInfo;
+	GetSystemInfo(&sysInfo);
 	//printf_s("[INFO] CPU 쓰레드 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
 	// 적절한 작업 스레드의 갯수는 (CPU * 2) + 1
-	//int nThreadCnt = sysInfo.dwNumberOfProcessors;
-	int nThreadCnt = 5;
+	int nThreadCnt = sysInfo.dwNumberOfProcessors;
+	//int nThreadCnt = 5;
 
-	for (int i = 0; i < 10; ++i)
-		worker_threads.emplace_back(worker_thread);
+	for (int i = 0; i < nThreadCnt; ++i)
+		GThreadManager->Launch(worker_thread);
 
-	for (auto& th : worker_threads)
-		th.join();
-	timer_thread.join();
+	GThreadManager->Launch(ev_timer);
+              
+	GThreadManager->Join();
+
 	//timer_thread.join();
 	for (auto& cl : clients) {
 		if (ST_INGAME == cl._state)
