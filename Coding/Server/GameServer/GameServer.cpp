@@ -12,8 +12,6 @@
 #include "ConcurrentStack.h"
 #include "ThreadManager.h"
 
-CoreGlobal Core;
-
 HANDLE g_h_iocp;
 HANDLE g_timer;
 mutex  m;

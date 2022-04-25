@@ -10,7 +10,7 @@
     <Filter Include="Main">
       <UniqueIdentifier>{8632b4a3-1dcd-47df-9e73-64d7a0b587d8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ThreadManager">
+    <Filter Include="Thread">
       <UniqueIdentifier>{db0e9bc1-6721-4e29-ae3d-15e4600f550a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -37,7 +37,10 @@
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="ThreadManager.h">
-      <Filter>ThreadManager</Filter>
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Lock.h">
+      <Filter>Thread</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -57,7 +60,10 @@
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="ThreadManager.cpp">
-      <Filter>ThreadManager</Filter>
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="Lock.cpp">
+      <Filter>Thread</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
