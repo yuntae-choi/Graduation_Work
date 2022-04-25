@@ -6,6 +6,9 @@
 #include "CorePch.h"
 #include "CLIENT.h"
 #include "Overlap.h"
+#include "ConcurrentQueue.h"
+#include "ConcurrentStack.h"
+
 #include <thread>
 
 #include <atomic>
@@ -16,7 +19,9 @@ HANDLE g_timer;
 mutex  m;
 condition_variable cv;
 SOCKET sever_socket;
-concurrency::concurrent_priority_queue <timer_ev> timer_q;
+LockQueue<timer_ev> timer_q;
+
+//concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
 
 using std::chrono::duration_cast;
@@ -60,7 +65,7 @@ void player_heal(int s_id)
 		if (clients[s_id]._hp < clients[s_id]._max_hp) {
 			unique_lock<mutex> _lock(m);
 			Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
-			cv.notify_one();
+			//cv.notify_one();
 		}
 	}
 }
@@ -71,7 +76,7 @@ void player_damage(int s_id)
 		if (clients[s_id]._hp > clients[s_id]._min_hp) {
 			unique_lock<mutex> _lock(m);
 			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);
-			cv.notify_one();
+			//cv.notify_one();
 		}
 	}
 }
@@ -301,7 +306,7 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 	order.target_id = user_id;
 	order.order = ev;
 	order.start_t = chrono::system_clock::now() + ms;
-	timer_q.push(order);
+	timer_q.Push(order);
 }
 
 //패킷 판별
@@ -920,13 +925,11 @@ void ev_timer()
 	WaitForSingleObject(g_timer, INFINITE);
 	{
 		unique_lock<mutex> lock(m);
-		timer_q.clear();
+		timer_q.Clear();
 	}
 	while (true) {
-		unique_lock<mutex> lock(m);
-		cv.wait(lock, []() {return timer_q.empty() == false; });
 		timer_ev order;
-		timer_q.try_pop(order);
+		timer_q.WaitPop(order);
 		//auto t = order.start_t - chrono::system_clock::now();
 		int s_id = order.this_id;
 		if (false == is_player(s_id)) continue;
@@ -946,7 +949,7 @@ void ev_timer()
 
 		}
 		else {
-			timer_q.push(order);
+			timer_q.Push(order);
 			this_thread::sleep_for(10ms);
 		}
 	}

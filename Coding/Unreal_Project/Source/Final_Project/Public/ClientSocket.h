@@ -3,6 +3,8 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <queue>
+#include <mutex>
 #include "Final_Project.h"
 #include "NetworkData.h"
 
@@ -12,6 +14,68 @@ class AMyPlayerController;
 using namespace std;
 
 enum STATE_Type { ST_SNOWMAN, ST_INBURN, ST_OUTBURN, ST_ANIMAL };
+
+template<typename T>
+class LockQueue
+{
+public:
+	LockQueue() { }
+
+	LockQueue(const LockQueue&) = delete;
+	LockQueue& operator=(const LockQueue&) = delete;
+	
+	void Push(T value)
+	//void Push(int32 value)
+	{
+		lock_guard<mutex> lock(_mutex);
+		_queue.push(std::move(value));
+		_condVar.notify_one();
+	}
+	
+	bool TryPop(T& value)
+	//bool TryPop(int32& value)
+	{
+		lock_guard<mutex> lock(_mutex);
+		if (_queue.empty())
+			return false;
+
+		value = std::move(_queue.front());
+		_queue.pop();
+		return true;
+	}
+
+	void WaitPop(T& value)
+	//void WaitPop(int32& value)
+	{
+		unique_lock<mutex> lock(_mutex);
+		_condVar.wait(lock, [this] { return _queue.empty() == false; });
+		value = std::move(_queue.front());
+		_queue.pop();
+	}
+
+	void Clear()
+	{
+		unique_lock<mutex> lock(_mutex);
+		if (_queue.empty() == false)
+		{
+			queue<T> _empty;
+			//queue<int32> _empty;
+			swap(_queue, _empty);
+		}
+	}
+
+	int Size()
+	{
+		unique_lock<mutex> lock(_mutex);
+		return _queue.size();
+	}
+
+private:
+	std::queue<T> _queue;
+	//std::queue<int32> _queue;
+	std::mutex _mutex;
+	std::condition_variable _condVar;
+};
 
 // 플레이어 정보
 class cCharacter {
@@ -44,6 +108,8 @@ public:
 	//카메라 방향
 	float fCDx, fCDy, fCDz;
 	STATE_Type My_State = ST_ANIMAL;
+
+	bool new_ball = false;
 
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
