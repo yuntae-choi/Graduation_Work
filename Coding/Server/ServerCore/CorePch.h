@@ -2,6 +2,9 @@
 
 
 #include "Types.h"
+#include "CoreGlobal.h"
+#include "CoreTLS.h"
+#include "CoreMacro.h"
 #include "protocol.h"
 #include <vector>
 #include <list>

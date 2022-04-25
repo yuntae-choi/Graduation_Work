@@ -10,8 +10,6 @@
 #include "ConcurrentStack.h"
 
 #include <thread>
-
-#include <atomic>
 #include <cmath>
 
 HANDLE g_h_iocp;
@@ -63,9 +61,7 @@ void player_heal(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
 		if (clients[s_id]._hp < clients[s_id]._max_hp) {
-			unique_lock<mutex> _lock(m);
 			Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
-			//cv.notify_one();
 		}
 	}
 }
@@ -74,9 +70,7 @@ void player_damage(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
 		if (clients[s_id]._hp > clients[s_id]._min_hp) {
-			unique_lock<mutex> _lock(m);
-			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);
-			//cv.notify_one();
+			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);;
 		}
 	}
 }
@@ -925,7 +919,6 @@ void ev_timer()
 {
 	WaitForSingleObject(g_timer, INFINITE);
 	{
-		unique_lock<mutex> lock(m);
 		timer_q.Clear();
 	}
 	while (true) {

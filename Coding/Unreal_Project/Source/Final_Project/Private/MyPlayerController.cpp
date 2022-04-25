@@ -114,7 +114,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 	int new_ball;
 	while (newBalls.TryPop(new_ball))
 	{
-		charactersInfo->players[iSessionId].new_ball = true;
+		charactersInfo->players[new_ball].new_ball = true;
 	}
 
 	for (auto& Character_ : SpawnedCharacters)
@@ -125,7 +125,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 		cCharacter* info = &charactersInfo->players[player_->iSessionId];
 		if (!info->IsAlive) continue;
 
-		if (info->new_ball) player_->SnowAttack();
+		if (info->new_ball) { 
+			player_->SnowAttack();
+			info->new_ball = false;
+		}
+
 
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)

@@ -1,6 +1,6 @@
 #pragma once
+#include "pch.h"
 
-#include <mutex>
 
 template<typename T>
 class LockStack
