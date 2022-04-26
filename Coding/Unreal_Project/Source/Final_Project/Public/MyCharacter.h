@@ -53,6 +53,7 @@ public:
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
+	void UpdateUI();
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -192,6 +193,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	APlayerController* playerController;
+
+	UPROPERTY(VisibleAnywhere, Category = "Data")
+	class AMyPlayerController* localPlayerController;
 
 	// 스턴 관리하는 타이머 핸들러
 	FTimerHandle stunHandle;
