@@ -26,6 +26,12 @@ AMyPlayerController::AMyPlayerController()
 		readyUIClass = READY_UI.Class;
 	}
 
+	static ConstructorHelpers::FClassFinder<UUserWidget> CHARACTER_UI(TEXT("/Game/Blueprints/CharacterUI.CharacterUI_C"));
+	if (CHARACTER_UI.Succeeded() && (CHARACTER_UI.Class != nullptr))
+	{
+		characterUIClass = CHARACTER_UI.Class;
+	}
+
 	bIsReady = false;
 }
 
@@ -48,6 +54,8 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	//mySocket->Send_LogoutPacket(iSessionId);
 	//mySocket->CloseSocket();
 	//mySocket->StopListen();
+
+	FuncUpdateHPCont.Clear();	// 델리게이트 해제
 }
 
 void AMyPlayerController::Tick(float DeltaTime)
@@ -374,6 +382,10 @@ void AMyPlayerController::PlayerReady()
 	// 서버에 레디했다고 전송
 	UE_LOG(LogTemp, Warning, TEXT("PlayerReady"));
 	bIsReady = true;
+
+#ifdef SINGLEPLAY_DEBUG
+	StartGame();	// 디버깅용 - 레디버튼 누르면 startgame 호출
+#endif
 }
 
 void AMyPlayerController::PlayerUnready()
@@ -385,11 +397,36 @@ void AMyPlayerController::PlayerUnready()
 
 void AMyPlayerController::StartGame()
 {
+	UE_LOG(LogTemp, Warning, TEXT("StartGame"));
 	readyUI->RemoveFromParent();	// ReadyUI 제거
-
+	LoadCharacterUI();	// CharacterUI 띄우기
+	
 	// 실행시 클릭없이 바로 조작
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
+	bShowMouseCursor = false;
 
 	// 게임 시작되면 실행시킬 코드들 작성
+}
+
+void AMyPlayerController::LoadCharacterUI()
+{
+	if (characterUIClass)
+	{
+		characterUI = CreateWidget<UUserWidget>(GetWorld(), characterUIClass);
+		if (characterUI)
+		{
+			characterUI->AddToViewport();
+			CallDelegateUpdateHP();
+		}
+	}
+}
+
+void AMyPlayerController::CallDelegateUpdateHP()
+{
+	if (!characterUI) return;	// CharacterUI가 생성되기 전이면 갱신 x
+	AMyCharacter* localPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (FuncUpdateHPCont.IsBound() == true) FuncUpdateHPCont.Broadcast(localPlayer->iCurrentHP);	// 델리게이트 호출
+
+	UE_LOG(LogTemp, Warning, TEXT("call delegate update hp %d"), localPlayer->iCurrentHP);
 }
