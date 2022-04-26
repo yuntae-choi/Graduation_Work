@@ -3,7 +3,6 @@
 
 #include "MyCharacter.h"
 #include "MyAnimInstance.h"
-#include "MyItem.h"
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
 #include "Debug.h"
