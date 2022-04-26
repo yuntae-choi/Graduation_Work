@@ -17,9 +17,9 @@ AMyPlayerController::AMyPlayerController()
 
 	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
-
+	bSetStart = false;
 	PrimaryActorTick.bCanEverTick = true;
-
+	mySocket->Connect();
 	static ConstructorHelpers::FClassFinder<UUserWidget> READY_UI(TEXT("/Game/Blueprints/ReadyUI.ReadyUI_C"));
 	if (READY_UI.Succeeded() && (READY_UI.Class != nullptr))
 	{
@@ -372,6 +372,7 @@ void AMyPlayerController::LoadReadyUI()
 void AMyPlayerController::PlayerReady()
 {
 	// 서버에 레디했다고 전송
+	mySocket->Send_ReadyPacket();
 	UE_LOG(LogTemp, Warning, TEXT("PlayerReady"));
 	bIsReady = true;
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <thread>
+#include <atomic>
 //#include <queue>
 #include "Final_Project.h"
 #include "MyCharacter.h"
@@ -77,7 +78,7 @@ private:
 
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
-
+	atomic<bool>                    bSetStart;
 	// 스폰시킬 다른 캐릭터
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<class ACharacter> WhoToSpawn;
