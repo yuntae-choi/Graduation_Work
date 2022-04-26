@@ -12,10 +12,10 @@
 
 #include "MyPlayerController.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_OneParam, int32, NewHP);
 /**
  *
- */
+ */	
 UCLASS()
 class FINAL_PROJECT_API AMyPlayerController : public APlayerController
 {
@@ -39,6 +39,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlayerUnready();
 	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
+	void CallDelegateUpdateHP();	// UpdateHP 델리게이트 이벤트 호출
 
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -51,6 +52,7 @@ private:
 	void UpdateNewPlayer();
 	void UpdatePlayerInfo(const cCharacter& info);
 	void LoadReadyUI();	// ReadyUI 띄우기, UI에 대한 입력만 허용
+	void LoadCharacterUI();	// CharacterUI 띄우기, 게임에 대한 입력 허용
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
@@ -62,7 +64,16 @@ public:
 	TSubclassOf<class UUserWidget> readyUIClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	class UUserWidget* readyUI;
+	class UUserWidget* readyUI;	// 레디 UI (레디 버튼 및 텍스트)
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> characterUIClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	class UUserWidget* characterUI;	// 캐릭터 UI (체력, )
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_OneParam FuncUpdateHPCont;	// 델리게이트 이벤트 UpdateHP
 
 private:
 	ClientSocket*			mySocket;
