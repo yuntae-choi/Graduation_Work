@@ -18,6 +18,7 @@ AMyPlayerController::AMyPlayerController()
 	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
 	bSetStart = false;
+	bInGame = false;
 	PrimaryActorTick.bCanEverTick = true;
 	mySocket->Connect();
 	static ConstructorHelpers::FClassFinder<UUserWidget> READY_UI(TEXT("/Game/Blueprints/ReadyUI.ReadyUI_C"));
@@ -60,6 +61,9 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	if (newPlayers.TryPop(newplayer))
 		UpdateNewPlayer();
+
+	if (bSetStart)
+		StartGame();
 
 	// 월드 동기화
 	UpdateWorldInfo();
@@ -386,11 +390,12 @@ void AMyPlayerController::PlayerUnready()
 
 void AMyPlayerController::StartGame()
 {
-	readyUI->RemoveFromParent();	// ReadyUI 제거
-
-	// 실행시 클릭없이 바로 조작
-	FInputModeGameOnly InputMode;
-	SetInputMode(InputMode);
-
+	if (!bInGame) {
+		bInGame = true;
+		readyUI->RemoveFromParent();	// ReadyUI 제거
+		// 실행시 클릭없이 바로 조작
+		FInputModeGameOnly InputMode;
+		SetInputMode(InputMode);
+	}
 	// 게임 시작되면 실행시킬 코드들 작성
 }

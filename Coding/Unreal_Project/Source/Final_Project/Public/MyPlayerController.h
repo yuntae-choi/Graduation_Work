@@ -40,7 +40,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlayerUnready();
 	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
-
+	void Start_Signal()
+	{
+		bSetStart.store(true);
+	}
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
@@ -78,6 +81,7 @@ private:
 
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
+	bool							bInGame;
 	atomic<bool>                    bSetStart;
 	// 스폰시킬 다른 캐릭터
 	UPROPERTY(EditAnywhere, Category = "Spawning")

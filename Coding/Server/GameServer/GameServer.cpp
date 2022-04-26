@@ -725,6 +725,7 @@ void process_packet(int s_id, unsigned char* p)
 		_packet.size = sizeof(_packet);
 		_packet.type = SC_PACKET_READY;
 		_packet.s_id = s_id;
+		cl.b_ready = true;
 		for (auto& other : clients) {
 			if (s_id == other._s_id)
 				continue;

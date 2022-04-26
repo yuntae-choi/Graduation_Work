@@ -66,7 +66,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_START:
 	{
 		// 게임시작
-		
+		MyPlayerController->Start_Signal();
 		break;
 	}
 
