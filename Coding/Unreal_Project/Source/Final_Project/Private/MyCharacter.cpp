@@ -6,6 +6,7 @@
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
 #include "Debug.h"
+#include "MyPlayerController.h"
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
@@ -152,8 +153,13 @@ void AMyCharacter::BeginPlay()
 	SetCharacterMaterial(iSessionId);	// 캐릭터 머티리얼 설정(색상)
 
 	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
+	localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 
 	WaitForStartGame();	// 대기시간
+
+#ifdef SINGLEPLAY_DEBUG
+	UpdateUI();
+#endif
 }
 
 void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -333,6 +339,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{	// 동물인 경우 체력 감소
 #ifdef SINGLEPLAY_DEBUG
 		iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
+		UpdateUI();	// 변경된 체력으로 ui 갱신
 
 		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
 #endif
@@ -568,6 +575,9 @@ void AMyCharacter::ChangeSnowman()
 
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
+#ifdef SINGLEPLAY_DEBUG
+	UpdateUI();	// 변경된 체력으로 ui 갱신
+#endif
 
 	GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;	// 눈사람의 이동속도는 슬로우 상태인 캐릭터와 동일하게 설정
 	
@@ -609,7 +619,7 @@ void AMyCharacter::UpdateTemperatureState()
 				{
 					iCurrentHP += ABonfire::iHealAmount;
 					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
-
+					UpdateUI();	// 변경된 체력으로 ui 갱신
 				}), 1.0f, true);
 #endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -623,6 +633,7 @@ void AMyCharacter::UpdateTemperatureState()
 				{
 					iCurrentHP -= ABonfire::iDamageAmount;
 					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+					UpdateUI();	// 변경된 체력으로 ui 갱신
 				}), 1.0f, true);
 #endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -701,6 +712,9 @@ void AMyCharacter::ChangeAnimal()
 
 	iCurrentHP = iMaxHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
+#ifdef SINGLEPLAY_DEBUG
+	UpdateUI();	// 변경된 체력으로 ui 갱신
+#endif
 
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
 
@@ -722,4 +736,12 @@ void AMyCharacter::SetCharacterMaterial(int id)
 	{	// 눈사람 머티리얼로 변경
 		GetMesh()->SetMaterial(0, snowmanMaterial);
 	}
+}
+
+void AMyCharacter::UpdateUI()
+{
+#ifdef SINGLEPLAY_DEBUG
+	//if (iSessionId != localPlayerController->iSessionId) return;	// 로컬플레이어인 경우만 update
+	localPlayerController->CallDelegateUpdateHP();	// 체력 ui 갱신
+#endif
 }
