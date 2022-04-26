@@ -3,6 +3,7 @@
 #pragma once
 
 #include <thread>
+#include <atomic>
 //#include <queue>
 #include "Final_Project.h"
 #include "MyCharacter.h"
@@ -40,7 +41,10 @@ public:
 	void PlayerUnready();
 	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
 	void CallDelegateUpdateHP();	// UpdateHP 델리게이트 이벤트 호출
-
+	void Start_Signal()
+	{
+		bSetStart.store(true);
+	}
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
@@ -88,7 +92,8 @@ private:
 
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
-
+	bool							bInGame;
+	atomic<bool>                    bSetStart;
 	// 스폰시킬 다른 캐릭터
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<class ACharacter> WhoToSpawn;
