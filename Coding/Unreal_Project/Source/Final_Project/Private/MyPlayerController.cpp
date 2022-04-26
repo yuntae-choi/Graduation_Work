@@ -20,7 +20,7 @@ AMyPlayerController::AMyPlayerController()
 	bSetStart = false;
 	bInGame = false;
 	PrimaryActorTick.bCanEverTick = true;
-	mySocket->Connect();
+	
 	static ConstructorHelpers::FClassFinder<UUserWidget> READY_UI(TEXT("/Game/Blueprints/ReadyUI.ReadyUI_C"));
 	if (READY_UI.Succeeded() && (READY_UI.Class != nullptr))
 	{

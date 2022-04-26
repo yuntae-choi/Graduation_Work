@@ -340,7 +340,7 @@ uint32 ClientSocket::Run()
 	// 초기 init 과정을 기다림
 	FPlatformProcess::Sleep(0.03);
 
-	
+	Connect();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
 	
