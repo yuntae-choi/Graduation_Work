@@ -6,6 +6,7 @@
 #include "MyAnimInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Debug.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
