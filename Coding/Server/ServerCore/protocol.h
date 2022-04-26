@@ -1,7 +1,9 @@
 #pragma once
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
+#define _CRT_SECURE_NO_WARNINGS
 
-const short SERVER_PORT = 8000;
+const short SERVER_PORT = 10000;
 
 const int BUFSIZE = 1024;
 const int  ReZone_HEIGHT = 2000;

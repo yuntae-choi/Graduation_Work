@@ -120,9 +120,12 @@ int main()
 	ZeroMemory(&accept_ex._wsa_over, sizeof(accept_ex._wsa_over));
 	accept_ex._op = OP_ACCEPT;
 
+
+
 	AcceptEx(sever_socket, c_socket, accept_buf, 0, sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16, NULL, &accept_ex._wsa_over);
 
+	
 	g_timer = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	for (int i = 0; i < MAX_USER; ++i)
@@ -771,7 +774,7 @@ void worker_thread()
 		LONG64 iocp_key;
 		WSAOVERLAPPED* p_over;
 		BOOL ret = GetQueuedCompletionStatus(g_h_iocp, &num_byte, (PULONG_PTR)&iocp_key, &p_over, INFINITE);
-
+	
 		int _s_id = static_cast<int>(iocp_key);
 		Overlap* exp_over = reinterpret_cast<Overlap*>(p_over);
 		if (FALSE == ret) {
@@ -783,7 +786,7 @@ void worker_thread()
 			if (exp_over->_op == OP_SEND)
 				delete exp_over;
 			continue;
-		}
+		} 
 
 		switch (exp_over->_op) {
 		case OP_RECV: {
@@ -823,6 +826,8 @@ void worker_thread()
 		case OP_ACCEPT: {
 			cout << "Accept Completed.\n";
 			SOCKET c_socket = *(reinterpret_cast<SOCKET*>(exp_over->_net_buf));
+			
+			
 			int n__s_id = get_id();
 			if (-1 == n__s_id) {
 				cout << "user over.\n";
@@ -850,6 +855,8 @@ void worker_thread()
 
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), g_h_iocp, n__s_id, 0);
 				cl.do_recv();
+	
+
 			}
 
 			ZeroMemory(&exp_over->_wsa_over, sizeof(exp_over->_wsa_over));

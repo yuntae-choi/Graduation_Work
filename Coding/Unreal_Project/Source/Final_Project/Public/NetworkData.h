@@ -15,8 +15,9 @@
 #include "Final_Project.h"
 
 #define	MAX_BUFFER		4096
-#define SERVER_PORT		8000
-#define SERVER_IP		"127.0.0.1"
+#define SERVER_PORT		10000
+#define SERVER_IP		"192.168.219.102" // 외부 IP
+//#define SERVER_IP		"127.0.0.1" //로컬IP
 #define MAX_CLIENTS		100
 
 using std::chrono::duration_cast;
