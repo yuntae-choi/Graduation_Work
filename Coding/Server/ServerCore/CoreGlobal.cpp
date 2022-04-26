@@ -4,12 +4,16 @@
 
 ThreadManager* GThreadManager = nullptr;
 
-CoreGlobal::CoreGlobal()
+class CoreGlobal
 {
-	GThreadManager = new ThreadManager();
-}
+public:
+	CoreGlobal()
+	{
+		GThreadManager = new ThreadManager();
+	}
 
-CoreGlobal::~CoreGlobal()
-{
-	delete GThreadManager;
-}
+	~CoreGlobal()
+	{
+		delete GThreadManager;
+	}
+} GCoreGlobal; // <- 전역 객체를 바로 만들어줄수있음
