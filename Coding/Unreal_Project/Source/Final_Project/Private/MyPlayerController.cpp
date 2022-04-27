@@ -45,7 +45,7 @@ void AMyPlayerController::BeginPlay()
 	//FInputModeGameOnly InputMode;
 	//SetInputMode(InputMode);
 
-	LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
+	//LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
