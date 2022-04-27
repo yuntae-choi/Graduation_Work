@@ -395,6 +395,9 @@ void AMyCharacter::ReleaseSnowball()
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (!iSessionId == PlayerController->iSessionId || !PlayerController->is_start()) return;
+
 	auto MySnowball = Cast<AMySnowball>(OtherActor);
 
 	if (nullptr != MySnowball)
@@ -417,13 +420,29 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	{
 		if (!(otherCharacter->GetIsSnowman()))
 		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
+			//bIsSnowman = false;
+			PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
 			ChangeAnimal();
+			PlayerController->GetSocket()->Send_StatusPacket(ST_ANIMAL, iSessionId);
 			UpdateTemperatureState();
-			otherCharacter->ChangeSnowman();
+			PlayerController->GetSocket()->Send_StatusPacket(ST_SNOWMAN, otherCharacter->iSessionId);
+			
+			//PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
+			//otherCharacter->ChangeSnowman();
+			//PlayerController->SetCharacterState(otherCharacter->iSessionId, ST_SNOWMAN);
 			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
 			return;
 		}
 	}
+	/*else if (!bIsSnowman && otherCharacter->GetIsSnowman())
+	{
+		bIsSnowman = true;
+		PlayerController->SetCharacterState(iSessionId, ST_SNOWMAN);
+		ChangeSnowman();
+		if (iSessionId == PlayerController->iSessionId && PlayerController->is_start())
+			PlayerController->GetSocket()->Send_StatusPacket(ST_SNOWMAN);
+		
+	}*/
 
 	//auto MyCharacter = Cast<AMyCharacter>(OtherActor);
 
@@ -624,7 +643,7 @@ void AMyCharacter::UpdateTemperatureState()
 #endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start())
-				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN);
+				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN, iSessionId);
 		}
 		else
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
@@ -637,8 +656,8 @@ void AMyCharacter::UpdateTemperatureState()
 				}), 1.0f, true);
 #endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			if (iSessionId == PlayerController->iSessionId)
-				PlayerController->GetSocket()->Send_StatusPacket(ST_OUTBURN);
+			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start())
+				PlayerController->GetSocket()->Send_StatusPacket(ST_OUTBURN, iSessionId);
 		}
 	//}
 }

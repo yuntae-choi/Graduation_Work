@@ -228,7 +228,9 @@ public:
 	bool Connect();
 	void ProcessPacket(unsigned char* ptr);
 	void Send_LoginPacket();
-	void Send_StatusPacket(STATE_Type _state);
+	void Send_StatusPacket(STATE_Type _state, int s_id);
+
+	
 	void Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir);
 	//void ReadyToSend_AttackPacket();
 	void Send_ChatPacket(int sessionID, float x, float y, float z);

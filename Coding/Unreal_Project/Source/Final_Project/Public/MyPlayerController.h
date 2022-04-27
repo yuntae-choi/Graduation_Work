@@ -41,13 +41,17 @@ public:
 	void PlayerUnready();
 	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
 	void CallDelegateUpdateHP();	// UpdateHP 델리게이트 이벤트 호출
+	void SetCharacterState(const int s_id, STATE_Type _state)
+	{
+		charactersInfo->players[s_id].My_State = _state;
+	}
 	void Start_Signal()
 	{
 		bSetStart.store(true);
 	}
 	bool is_start()
 	{
-		return bSetStart;
+		return bInGame;
 	}
 protected:
 	virtual void Tick(float DeltaTime) override;

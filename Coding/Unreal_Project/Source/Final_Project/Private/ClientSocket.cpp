@@ -212,11 +212,11 @@ void ClientSocket::Send_ReadyPacket()
 };
 
 
-void ClientSocket::Send_StatusPacket(STATE_Type _state) {
+void ClientSocket::Send_StatusPacket(STATE_Type _state, int s_id) {
 	//CharactersInfo.players[iMy_s_id].My_State = _state;
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
-	packet.s_id = MyPlayerController->iSessionId;
+	packet.s_id = s_id;
 	packet.type = CS_PACKET_STATUS_CHANGE;
 	packet.state = _state;
 

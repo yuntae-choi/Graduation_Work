@@ -152,20 +152,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 			info->new_ball = false;
 		}
 
-		//눈사람 변화
-		if (!player_->IsSnowman())
-		{
-			if (info->My_State == ST_SNOWMAN)
-			{
-				player_->ChangeSnowman();
-			}
-		}
-		else {
-			if (info->My_State != ST_SNOWMAN)
-			{
-				player_->ChangeAnimal();
-			}
-		}
+	
 
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
@@ -213,7 +200,21 @@ bool AMyPlayerController::UpdateWorldInfo()
 		player_->SetActorRotation(CharacterRotation);
 		player_->SetActorLocation(CharacterLocation);
 		player_->GetAnim()->SetDirection(info->direction);
-
+		//눈사람 변화
+		if (!player_->IsSnowman())
+		{
+			if (info->My_State == ST_SNOWMAN)
+			{
+				player_->ChangeSnowman();
+			}
+		}
+		else if (player_->IsSnowman())
+		{
+			if (info->My_State == ST_ANIMAL)
+			{
+				player_->ChangeAnimal();
+			}
+		}
 		
 	}
 	return true;
@@ -334,6 +335,14 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 			//player_->PlayDamagedAnimation();
 			//player_->HealthValue = info.HealthValue;
 		}
+		//눈사람 변화
+		if (player_->IsSnowman())
+		{
+			if (info.My_State != ST_SNOWMAN)
+			{
+				player_->ChangeSnowman();
+			}
+		}
 	}
 }
 
@@ -408,6 +417,8 @@ void AMyPlayerController::StartGame()
 		FInputModeGameOnly InputMode;
 		SetInputMode(InputMode);
 		bShowMouseCursor = false;
+		auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+		m_Player->UpdateTemperatureState();
 	}
 	// 게임 시작되면 실행시킬 코드들 작성
 }
