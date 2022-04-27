@@ -152,6 +152,20 @@ bool AMyPlayerController::UpdateWorldInfo()
 			info->new_ball = false;
 		}
 
+		//눈사람 변화
+		if (!player_->IsSnowman())
+		{
+			if (info->My_State == ST_SNOWMAN)
+			{
+				player_->ChangeSnowman();
+			}
+		}
+		else {
+			if (info->My_State != ST_SNOWMAN)
+			{
+				player_->ChangeAnimal();
+			}
+		}
 
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
@@ -200,20 +214,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 		player_->SetActorLocation(CharacterLocation);
 		player_->GetAnim()->SetDirection(info->direction);
 
-		//눈사람 변화
-		if (!player_->IsSnowman())
-		{
-			if (info->My_State == ST_SNOWMAN)
-			{
-				player_->ChangeSnowman();
-			}
-		}
-		else {
-			if (info->My_State != ST_SNOWMAN)
-			{
-				player_->ChangeAnimal();
-			}
-		}
+		
 	}
 	return true;
 }

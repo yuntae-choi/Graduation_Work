@@ -544,7 +544,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_DAMAGE: {
 		cout << cl._s_id << "데미지 받음 " << endl;
 		cl._hp -= 10;
-		if (cl._hp < 0) cl._hp = 0;
+		if (cl._hp < 270) cl._hp = 270;
 		send_hp_packet(cl._s_id);
 
 		if (cl._hp <= cl._min_hp)
@@ -649,6 +649,7 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			if (true == cl.bIsSnowman) {
 				cl.bIsSnowman = false;
+				cl._hp = cl._max_hp;
 				sc_packet_status_change _packet;
 				_packet.size = sizeof(_packet);
 				_packet.type = SC_PACKET_STATUS_CHANGE;
@@ -702,6 +703,7 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			if (false == cl.bIsSnowman) {
 				cl.bIsSnowman = true;
+				cl._hp = cl._min_hp;
 				sc_packet_status_change _packet;
 				_packet.size = sizeof(_packet);
 				_packet.type = SC_PACKET_STATUS_CHANGE;
