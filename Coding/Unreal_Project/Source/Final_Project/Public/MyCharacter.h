@@ -31,7 +31,7 @@ public:
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
-	void ReleaseSnowball(FVector MyLocation_, FVector MyDirection_);
+	void ReleaseSnowball();
 
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
@@ -52,9 +52,16 @@ public:
 	void SnowAttack();
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
+	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
+	void UpdateUI();
+
+	UFUNCTION()
+	class UMyAnimInstance* GetAnim() const { return myAnim; }
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 
 private:
 	void UpDown(float NewAxisValue);
@@ -71,7 +78,6 @@ private:
 	void UpdateHP();
 	bool GetItem(int itemType);
 	bool GetIsSnowman() { return bIsSnowman; };
-	
 	void WaitForStartGame();	// 게임 시작 후 대기
 
 public:	
@@ -92,13 +98,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	AMySnowball* snowball;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	int32 iSessionID;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Data", Meta = (AllowPrivateAccess = true))
+	int32 iSessionId;
 
 	// 모든 캐릭터 동일 & 변경될 일 x
 	static const int iMaxHP;
 	static const int iMinHP;
-	int		SessionId;		// 플레이어 고유 아이디
+
 	bool	IsAlive;		// 살아있는지
 	bool	IsAttacking;	// 공격중인지
 
@@ -123,6 +129,21 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bHasBag;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = State)
+	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInstanceDynamic* dynamicMaterialInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* bearMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<UTexture*> bearTextureArray;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* snowmanMaterial;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
@@ -170,11 +191,20 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = State)
 	int32 iCharacterState;	// 현재 캐릭터의 상태 (AnimalNormal, AnimalSlow, SnowmanNormal, SnowmanStunned)
 
-	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
-
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	APlayerController* playerController;
 
+	UPROPERTY(VisibleAnywhere, Category = "Data")
+	class AMyPlayerController* localPlayerController;
+
 	// 스턴 관리하는 타이머 핸들러
 	FTimerHandle stunHandle;
+
+
+
+
+	bool bIsUpDownZero = false;
+	bool bIsLeftRightZero = false;
+	bool bIsLookUpZero = false;
+	bool bIsTurnZero = false;
 };

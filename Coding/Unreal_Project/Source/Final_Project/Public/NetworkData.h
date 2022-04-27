@@ -11,12 +11,13 @@
 #include <map>
 #include <vector>
 #include <chrono>
-
+#include <mutex>
 #include "Final_Project.h"
 
 #define	MAX_BUFFER		4096
-#define SERVER_PORT		8000
-#define SERVER_IP		"127.0.0.1"
+#define SERVER_PORT		10000
+#define SERVER_IP		"192.168.219.102" // 외부 IP
+//#define SERVER_IP		"127.0.0.1" //로컬IP
 #define MAX_CLIENTS		100
 
 using std::chrono::duration_cast;
@@ -26,8 +27,7 @@ using std::chrono::system_clock;
 
 const int  MAX_NAME_SIZE = 20;
 const int  MAX_CHAT_SIZE = 100;
-const int BUF_SIZE = 255;
-const static int MAX_BUFF_SIZE = 255;
+const int BUF_SIZE = 1024;
 
 // 소켓 통신 구조체
 
@@ -43,8 +43,8 @@ enum CS_PacketType
 	CS_PACKET_DAMAGE,
 	CS_PACKET_GET_ITEM,
 	CS_PACKET_LOGOUT,
-	CS_PACKET_STATUS_CHANGE
-
+	CS_PACKET_STATUS_CHANGE,
+	CS_PACKET_READY
 };
 
 enum SC_PacketType
@@ -60,12 +60,11 @@ enum SC_PacketType
 	SC_PACKET_HP,
 	SC_PACKET_THROW_SNOW,
 	SC_PACKET_ATTACK,
-	SC_PACKET_GET_ITEM
-
+	SC_PACKET_GET_ITEM,
+	SC_PACKET_READY,
+	SC_PACKET_START
 
 };
-
-
 
 enum COMMAND_Type
 {
@@ -90,8 +89,16 @@ struct cs_packet_login {
 	char	type;
 	char	id[MAX_NAME_SIZE];
 	char	pw[MAX_NAME_SIZE];
-	float x, y, z;
+	float z;
+};
 
+struct sc_packet_login_ok {
+	unsigned char size;
+	char type;
+	// 세션 아이디
+	int		s_id;
+	float x, y, z;
+	float yaw;
 };
 
 struct cs_packet_logout {
@@ -107,26 +114,48 @@ struct cs_packet_move {
 	int sessionID;
 	float x, y, z;
 	// 속도
-	float vx;
-	float vy;
-	float vz;
+	float vx, vy, vz;
 	// 회전값
 	float yaw;
-	float pitch;
-	float roll;
-	//char move_time[100];
-	long long move_time;
+
+	float direction;
+	//long long move_time;
+};
+
+struct sc_packet_put_object {
+	unsigned char size;
+	char type;
+	int s_id;
+	float x, y, z;
+	float yaw;
+	char object_type;
+	char	name[MAX_NAME_SIZE];
+};
+
+struct cs_packet_throw_snow {
+	unsigned char size;
+	char	type;
+	int s_id;
+	float x, y, z;
+	float dx, dy, dz;
+};
+
+struct cs_packet_damage {
+	unsigned char size;
+	char	type;
+};
+
+struct sc_packet_hp_change {
+	unsigned char size;
+	char type;
+	int s_id;
+	int hp;
 };
 
 struct cs_packet_attack {
 	unsigned char size;
 	char	type;
 	int s_id;
-};
-
-struct cs_packet_damage {
-	unsigned char size;
-	char	type;
 };
 
 
@@ -145,15 +174,6 @@ struct cs_packet_teleport {
 	char	type;
 };
 
-struct cs_packet_throw_snow {
-	unsigned char size;
-	char	type;
-	int s_id;
-	float x, y, z;
-	float dx, dy, dz;
-
-};
-
 struct cs_packet_get_item {
 	unsigned char size;
 	char	type;
@@ -161,36 +181,12 @@ struct cs_packet_get_item {
 	int item_no;
 };
 
-struct sc_packet_login_ok {
-	unsigned char size;
-	char type;
-	
-	// 세션 아이디
-	int		s_id;
-
-	float x;
-	float y;
-	float z;
-};
-
-
-
 struct sc_packet_move {
 	unsigned char size;
 	char type;
 	int		id;
 	short  x, y;
 	char move_time[MAX_CHAT_SIZE];
-};
-
-struct sc_packet_put_object {
-	unsigned char size;
-	char type;
-	int s_id;
-	short x, y;
-	short z;
-	char object_type;
-	char	name[MAX_NAME_SIZE];
 };
 
 struct sc_packet_remove_object {
@@ -219,15 +215,21 @@ struct sc_packet_status_change {
 	short   state;
 };
 
-
-struct sc_packet_hp_change {
+struct sc_packet_ready { // 타 플레이어 레디
 	unsigned char size;
-	char type;
-	int target;
-	int	hp;
+	char	type;
+	int	s_id;
 };
 
+struct cs_packet_ready { // 게임 레디 요청
+	unsigned char size;
+	char	type;
+};
 
+struct sc_packet_start { // 스폰
+	unsigned char size;
+	char type;
+};
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
 
@@ -258,6 +260,8 @@ public:
 	{
 	}
 };
+
+
 
 class FINAL_PROJECT_API NetworkData
 {

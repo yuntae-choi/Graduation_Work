@@ -3,6 +3,7 @@
 
 #include "MyAnimInstance.h"
 #include "MyCharacter.h"
+#include "Debug.h"
 
 UMyAnimInstance::UMyAnimInstance()
 {
@@ -27,12 +28,19 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (!bIsDead)
 	{
 		fCurrentPawnSpeed = FVector(Pawn->GetVelocity() * FVector(1.0f, 1.0f, 0.0f)).Size();
-		auto Character = Cast<ACharacter>(Pawn);
+		auto Character = Cast<AMyCharacter>(Pawn);
 		if (Character)
 		{
 			float MoveForward = Character->GetInputAxisValue(TEXT("UpDown"));
 			float MoveRight = Character->GetInputAxisValue(TEXT("LeftRight"));
+#ifdef MULTIPLAY_DEBUG
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			if (PlayerController && Character->iSessionId == PlayerController->iSessionId)
+				fCurrentPawnDirection = UKismetMathLibrary::DegAtan2(MoveForward, MoveRight);
+#endif
+#ifdef SINGLEPLAY_DEBUG
 			fCurrentPawnDirection = UKismetMathLibrary::DegAtan2(MoveForward, MoveRight);
+#endif
 			bIsInAir = Character->GetMovementComponent()->IsFalling();
 		}
 	}
@@ -51,10 +59,8 @@ void UMyAnimInstance::AnimNotify_SnowballRelease()
 
 	auto MyCharacter = Cast<AMyCharacter>(Pawn);
 	if (nullptr == MyCharacter) return;
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	
-	MyCharacter->ReleaseSnowball(PlayerController->CharactersInfo->players[MyCharacter->iSessionID].FMyLocation,
-	PlayerController->CharactersInfo->players[MyCharacter->iSessionID].FMyDirection);
+
+	MyCharacter->ReleaseSnowball();
 }
 
 void UMyAnimInstance::Anim_SnowballRelease()

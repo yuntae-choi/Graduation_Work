@@ -2,6 +2,9 @@
 
 
 #include "Types.h"
+#include "CoreMacro.h"
+#include "CoreTLS.h"
+#include "CoreGlobal.h"
 #include "protocol.h"
 #include <vector>
 #include <list>
@@ -18,7 +21,12 @@
 #include <MSWSock.h>
 #include <concurrent_priority_queue.h>
 
+#include <windows.h>
 #include <iostream>
 using namespace std;
+
+#include "Lock.h"
+
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment (lib, "MSWSock.LIB")
+

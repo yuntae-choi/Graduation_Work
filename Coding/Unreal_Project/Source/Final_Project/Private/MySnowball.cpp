@@ -3,6 +3,7 @@
 
 #include "MySnowball.h"
 #include "MyCharacter.h"
+#include "MyPlayerController.h"
 
 //#define CHECKTRAJECTORY	// 눈덩이가 던져지는 시점에서부터 충돌할 때까지의 궤적 로그 출력
 
@@ -95,15 +96,15 @@ void AMySnowball::Throw_Implementation(FVector Direction)
 // Function that is called when the projectile hits something.
 void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	MYLOG(Warning, TEXT("collision"));
+	auto MyCharacter = Cast<ACharacter>(OtherActor);
 
-	//auto MyCharacter = Cast<AMyCharacter>(OtherActor);
-
-	//if (nullptr != MyCharacter)
-	//{
-	//	FDamageEvent DamageEvent;
-	//	MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
-	//}
+	if (nullptr != MyCharacter)
+	{
+		FDamageEvent DamageEvent;
+		MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
+	}
+	else
+		MYLOG(Warning, TEXT("no damage"));
 
 	Destroy();
 	

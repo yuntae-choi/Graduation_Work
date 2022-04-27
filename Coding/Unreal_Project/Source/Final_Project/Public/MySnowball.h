@@ -28,7 +28,7 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
-	int GetDamage() { return iDamage; };
+	int32 GetDamage() const{ return iDamage; };
 
 protected:
 	// Called when the game starts or when spawned
@@ -46,7 +46,7 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)
-	int iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
+	int32 iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
 
 	// 디버깅용 (true - 날아가는 궤적 로그 띄우기)
 	bool bCheckTrajectory;

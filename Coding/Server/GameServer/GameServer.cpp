@@ -6,19 +6,27 @@
 #include "CorePch.h"
 #include "CLIENT.h"
 #include "Overlap.h"
-#include <thread>
+#include "ConcurrentQueue.h"
+#include "ConcurrentStack.h"
 
-#include <atomic>
+#include <thread>
+#include <cmath>
 
 HANDLE g_h_iocp;
+HANDLE g_timer;
+mutex  m;
+condition_variable cv;
 SOCKET sever_socket;
-concurrency::concurrent_priority_queue <timer_ev> timer_q;
+LockQueue<timer_ev> timer_q;
+
+//concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
+
 
 void show_err();
 int get_id();
@@ -37,32 +45,35 @@ void worker_thread();
 void ev_timer();
 
 //이동
-void send_hp_packet(int _id, int target)
+void send_hp_packet(int _id)
 {
 	sc_packet_hp_change packet;
-	packet.target = target;
+	packet.s_id = _id;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_HP;
-	packet.hp = clients[target]._hp;
+	packet.hp = clients[_id]._hp;
+
+	// printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
 	clients[_id].do_send(sizeof(packet), &packet);
 }
 
 void player_heal(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
-		if (clients[s_id]._hp < clients[s_id]._max_hp)
+		if (clients[s_id]._hp < clients[s_id]._max_hp) {
 			Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
+		}
 	}
 }
 
 void player_damage(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
-		if (clients[s_id]._hp > clients[s_id].iMinHP)
-			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);
+		if (clients[s_id]._hp > clients[s_id]._min_hp) {
+			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);;
+		}
 	}
 }
-
 
 //플레이어 판별
 bool is_player(int id)
@@ -109,13 +120,20 @@ int main()
 	ZeroMemory(&accept_ex._wsa_over, sizeof(accept_ex._wsa_over));
 	accept_ex._op = OP_ACCEPT;
 
+
+
 	AcceptEx(sever_socket, c_socket, accept_buf, 0, sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16, NULL, &accept_ex._wsa_over);
+
+	
+	g_timer = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	for (int i = 0; i < MAX_USER; ++i)
 		clients[i]._s_id = i;
 
 	vector <thread> worker_threads;
+
+
 
 	thread timer_thread{ ev_timer };
 
@@ -176,10 +194,11 @@ void send_login_ok_packet(int _s_id)
 	packet.x = clients[_s_id].x;
 	packet.y = clients[_s_id].y;
 	packet.z = clients[_s_id].z;
+	packet.yaw = clients[_s_id].Yaw;
 	//packet.Yaw = clients[_s_id].Yaw;
 	//packet.Pitch = clients[_s_id].Pitch;
 	//packet.Roll = clients[_s_id].Roll;*/
-	cout << "로그인 허용 전송" << "[" << _s_id <<"]" << " " << packet.x << " " << packet.y << " " << packet.z << endl;
+	printf("[Send login ok] id : %d, location : (%f,%f,%f) yaw : %f\n", _s_id, packet.x, packet.y, packet.z, packet.yaw);
 	clients[_s_id].do_send(sizeof(packet), &packet);
 }
 
@@ -245,6 +264,7 @@ void Disconnect(int _s_id)
 	cl.vl.lock();
 	unordered_set <int> my_vl = cl.viewlist;
 	cl.vl.unlock();
+
 	strcpy_s(clients[_s_id]._id, " ");
 	for (auto& other : my_vl) {
 		CLIENT& target = clients[other];
@@ -283,7 +303,7 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 	order.target_id = user_id;
 	order.order = ev;
 	order.start_t = chrono::system_clock::now() + ms;
-	timer_q.push(order);
+	timer_q.Push(order);
 }
 
 //패킷 판별
@@ -294,30 +314,32 @@ void process_packet(int s_id, unsigned char* p)
 
 	switch (packet_type) {
 	case CS_PACKET_LOGIN: {
-		printf("login\n");
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
 
 		CLIENT& cl = clients[s_id];
-		printf_s("[INFO] 로그인 시도 {%s}/{%s}\n", packet->id, packet->pw);
+		printf_s("[Recv login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
 
-	/*	for (int i = 0; i < MAX_USER; ++i) {
-			clients[i].state_lock.lock();
-			if (ST_INGAME == clients[i]._state) {
-				if (strcmp(packet->id, clients[i]._id) == 0) {
-					send_login_fail_packet(s_id);
-					cout << packet->id << "접속중인 플레이어" << endl;
-					clients[i].state_lock.unlock();
-					return;
+		/*	for (int i = 0; i < MAX_USER; ++i) {
+				clients[i].state_lock.lock();
+				if (ST_INGAME == clients[i]._state) {
+					if (strcmp(packet->id, clients[i]._id) == 0) {
+						send_login_fail_packet(s_id);
+						cout << packet->id << "접속중인 플레이어" << endl;
+						clients[i].state_lock.unlock();
+						return;
+					}
 				}
-			}
-			clients[i].state_lock.unlock();
-		}*/
+				clients[i].state_lock.unlock();
+			}*/
 		cl.state_lock.lock();
 		cl._state = ST_INGAME;
 		cl.state_lock.unlock();
-		cl.x = 0 + (s_id*300);
-		cl.y = 0 +(s_id * 300);
+		cl.x = 300.0f * cos(s_id + 45.0f);
+		cl.y = 300.0f * sin(s_id + 45.0f);
 		cl.z = packet->z;
+		cl.Yaw = s_id * 55.0f - 115.0f;
+		if (cl.Yaw > 180) cl.Yaw -= 360;
+
 		cl._hp = cl._max_hp;
 
 		//sc_packet_login_ok _packet;
@@ -352,7 +374,7 @@ void process_packet(int s_id, unsigned char* p)
 			//other.viewlist.insert(s_id);
 			//other.vl.unlock();
 			sc_packet_put_object packet;
-			packet.s_id = s_id;
+			packet.s_id = cl._s_id;
 			strcpy_s(packet.name, cl.name);
 			packet.object_type = 0;
 			packet.size = sizeof(packet);
@@ -360,7 +382,10 @@ void process_packet(int s_id, unsigned char* p)
 			packet.x = cl.x;
 			packet.y = cl.y;
 			packet.z = cl.z;
+			packet.yaw = cl.Yaw;
 
+			//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+			//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
 			other.do_send(sizeof(packet), &packet);
 		}
 
@@ -390,34 +415,32 @@ void process_packet(int s_id, unsigned char* p)
 			packet.x = other.x;
 			packet.y = other.y;
 			packet.z = other.z;
-			cout << cl._s_id << "에게 " << other._s_id << "을 " << endl;
+			packet.yaw = other.Yaw;
+
+			//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 			cl.do_send(sizeof(packet), &packet);
 		}
 
-	   break;
+		break;
 	}
 	case CS_PACKET_MOVE: {
-		
+
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
-		CLIENT& cl = clients[s_id];
+		CLIENT& cl = clients[packet->sessionID];
 		cl.x = packet->x;
 		cl.y = packet->y;
 		cl.z = packet->z;
 		cl.Yaw = packet->yaw;
-		cl.Pitch = packet->pitch;
-		cl.Roll = packet->roll;
 		cl.VX = packet->vx;
 		cl.VY = packet->vy;
 		cl.VZ = packet->vz;
-		//cout <<"플레이어["<< packet->sessionID<<"]" << "  x:" << packet->x << " y:" << packet->y << " z:" << packet->z << endl;
-		//클라 recv 확인용
+		cl.direction = packet->direction;
+		//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f), dir : %f\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ, cl.direction);
 
-		auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		//cout << packet->move_time << "-ms-" << endl;
+		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		//cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		//send_status_packet(s_id);
-		
 
 		unordered_set <int> near_list;
 		for (auto& other : clients) {
@@ -427,14 +450,14 @@ void process_packet(int s_id, unsigned char* p)
 				continue;
 			if (false == is_near(s_id, other._s_id))
 				continue;
-			
+
 			near_list.insert(other._s_id);
 		}
 
 		cl.vl.lock();
-		
+
 		unordered_set <int> my_vl{ cl.viewlist };
-		
+
 		cl.vl.unlock();
 
 		for (auto& other : clients) {
@@ -442,9 +465,9 @@ void process_packet(int s_id, unsigned char* p)
 				continue;
 			if (ST_INGAME != other._state)
 				continue;
-			send_move_packet( other._s_id, cl._s_id);
-		//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
-					
+			send_move_packet(other._s_id, cl._s_id);
+			//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+
 		}
 
 		//새로 시야에 들어온 플레이어
@@ -510,7 +533,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_ATTACK;
-			cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
 			other.do_send(sizeof(*packet), packet);
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 		}
@@ -519,15 +542,12 @@ void process_packet(int s_id, unsigned char* p)
 
 	}
 	case CS_PACKET_DAMAGE: {
-		sc_packet_hp_change packet;
+		cout << cl._s_id << "데미지 받음 " << endl;
 		cl._hp -= 10;
-		packet.hp = cl._hp;
-		packet.target = cl._s_id;
-		packet.type = SC_PACKET_HP;
-		packet.size = sizeof(packet);
-		cl.do_send(sizeof(packet), &packet);
+		if (cl._hp < 0) cl._hp = 0;
+		send_hp_packet(cl._s_id);
 
-		if (cl._hp <= cl.iMinHP)
+		if (cl._hp <= cl._min_hp)
 		{
 			sc_packet_status_change _packet;
 			_packet.size = sizeof(_packet);
@@ -542,10 +562,8 @@ void process_packet(int s_id, unsigned char* p)
 				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 			}
 		}
-		
-		cout << "플레이어[" << s_id << "가 데미지 받음"<< endl;
 
-	    break;
+		break;
 
 	}
 	case CS_PACKET_CHAT: {
@@ -595,21 +613,25 @@ void process_packet(int s_id, unsigned char* p)
 
 	case CS_PACKET_THROW_SNOW: {
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
-		cout << "throw";
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
 			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+
+			//printf_s("[Send throw snow]\n");
 			other.do_send(sizeof(*packet), packet);
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 
 		}
+
+
 		break;
+
 	}
 	case CS_PACKET_LOGOUT: {
 		cs_packet_logout* packet = reinterpret_cast<cs_packet_logout*>(p);
-		cout << "logout";
+		cout << "[Recv logout]";
 		for (auto& other : clients) {
 			if (s_id == other._s_id) continue;
 			if (ST_INGAME != other._state) continue;
@@ -620,7 +642,9 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case CS_PACKET_STATUS_CHANGE: {
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(p);
-		
+
+		//printf_s("[Recv status change] status : %d\n", packet->state);
+
 		if (packet->state == ST_INBURN)
 		{
 			if (true == cl.bIsSnowman) {
@@ -648,7 +672,7 @@ void process_packet(int s_id, unsigned char* p)
 			cout << s_id << "플레이어 모닥불 내부" << endl;
 
 		}
-		else if(packet->state == ST_OUTBURN)
+		else if (packet->state == ST_OUTBURN)
 		{
 			if (true == cl.bIsSnowman) {
 				cl.bIsSnowman = false;
@@ -671,10 +695,8 @@ void process_packet(int s_id, unsigned char* p)
 				cl.is_bone = false;
 				cl._is_active = true;
 				player_damage(cl._s_id);
-
 			}
 			cout << s_id << "플레이어 모닥불 밖" << endl;
-
 		}
 		else if (packet->state == ST_SNOWMAN)
 		{
@@ -696,10 +718,48 @@ void process_packet(int s_id, unsigned char* p)
 				}
 			}
 			cout << s_id << "플레이어 눈사람" << endl;
-		}	
+
+		}
+
 		break;
 	}
+	case CS_PACKET_READY: {
+		sc_packet_ready _packet;
+		_packet.size = sizeof(_packet);
+		_packet.type = SC_PACKET_READY;
+		_packet.s_id = s_id;
+		cl.b_ready = true;
+		for (auto& other : clients) {
+			if (s_id == other._s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			other.do_send(sizeof(_packet), &_packet);
+		}
+		cout << s_id << "플레이어 레디" << endl;
 
+		for (auto& other : clients) {
+			if (s_id == other._s_id)
+				continue;
+			if (ST_INGAME != other._state)
+				continue;
+			if (other.b_ready == false)
+				return;
+		}
+
+		sc_packet_start s_packet;
+		s_packet.size = sizeof(s_packet);
+		s_packet.type = SC_PACKET_START;
+
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state)
+				continue;
+			other.do_send(sizeof(s_packet), &s_packet);
+		}
+		SetEvent(g_timer);
+		cout << "게임 스타트" << endl;
+		break;
+	}
 	default:
 		printf("Unknown PACKET type\n");
 
@@ -714,7 +774,7 @@ void worker_thread()
 		LONG64 iocp_key;
 		WSAOVERLAPPED* p_over;
 		BOOL ret = GetQueuedCompletionStatus(g_h_iocp, &num_byte, (PULONG_PTR)&iocp_key, &p_over, INFINITE);
-
+	
 		int _s_id = static_cast<int>(iocp_key);
 		Overlap* exp_over = reinterpret_cast<Overlap*>(p_over);
 		if (FALSE == ret) {
@@ -726,7 +786,7 @@ void worker_thread()
 			if (exp_over->_op == OP_SEND)
 				delete exp_over;
 			continue;
-		}
+		} 
 
 		switch (exp_over->_op) {
 		case OP_RECV: {
@@ -766,6 +826,8 @@ void worker_thread()
 		case OP_ACCEPT: {
 			cout << "Accept Completed.\n";
 			SOCKET c_socket = *(reinterpret_cast<SOCKET*>(exp_over->_net_buf));
+			
+			
 			int n__s_id = get_id();
 			if (-1 == n__s_id) {
 				cout << "user over.\n";
@@ -790,9 +852,11 @@ void worker_thread()
 				cl._recv_over._wsa_buf.len = sizeof(cl._recv_over._net_buf);
 				ZeroMemory(&cl._recv_over._wsa_over, sizeof(cl._recv_over._wsa_over));
 				cl._socket = c_socket;
-				
+
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), g_h_iocp, n__s_id, 0);
 				cl.do_recv();
+	
+
 			}
 
 			ZeroMemory(&exp_over->_wsa_over, sizeof(exp_over->_wsa_over));
@@ -801,33 +865,29 @@ void worker_thread()
 			AcceptEx(sever_socket, c_socket, exp_over->_net_buf + 8, 0, sizeof(SOCKADDR_IN) + 16,
 				sizeof(SOCKADDR_IN) + 16, NULL, &exp_over->_wsa_over);
 		}
-		break;
+					  break;
 		case OP_PLAYER_HEAL: {
-		
-			if (clients[_s_id].is_bone == true) { 
-				if (clients[_s_id]._hp < clients[_s_id]._max_hp) {
-					if (clients[_s_id]._hp + 10 <= clients[_s_id]._max_hp) {
-						clients[_s_id]._hp += 10;
-						player_heal(_s_id);
-					}
-					else
-						clients[_s_id]._hp = clients[_s_id]._max_hp;
-					send_hp_packet(_s_id, _s_id);
+
+			if (clients[_s_id].is_bone == true) {
+				if (clients[_s_id]._hp + 10 <= clients[_s_id]._max_hp) {
+					clients[_s_id]._hp += 10;
+					player_heal(_s_id);
 				}
+				else
+					clients[_s_id]._hp = clients[_s_id]._max_hp;
+				send_hp_packet(_s_id);
 			}
-			
-			//cout << "hp +1" << endl;
 			delete exp_over;
 			break;
 		}
 		case OP_PLAYER_DAMAGE: {
 
 			if (clients[_s_id].is_bone == false) {
-				if (clients[_s_id]._hp > clients[_s_id].iMinHP) {
+				if (clients[_s_id]._hp > clients[_s_id]._min_hp) {
 					clients[_s_id]._hp -= 1;
 					player_damage(_s_id);
-					send_hp_packet(_s_id, _s_id);
-					cout << "hp -1" << endl;
+					send_hp_packet(_s_id);
+					//cout << "hp -1" << endl;
 
 				}
 			}
@@ -835,12 +895,11 @@ void worker_thread()
 			delete exp_over;
 			break;
 		}
-
 		}
-	
-	
+
+
 	}
-	
+
 }
 
 //이동
@@ -854,21 +913,25 @@ void send_move_packet(int _id, int target)
 	packet.y = clients[target].y;
 	packet.z = clients[target].z;
 	packet.yaw = clients[target].Yaw;
-	packet.pitch = clients[target].Pitch;
-	packet.roll = clients[target].Roll;
 	packet.vx = clients[target].VX;
 	packet.vy = clients[target].VY;
 	packet.vz = clients[target].VZ;
+	packet.direction = clients[target].direction;
 	//packet.move_time = clients[target].last_move_time;
+
+	//printf_s("[Send move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f)\n", packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);
 	clients[_id].do_send(sizeof(packet), &packet);
 }
 //타이머
-void ev_timer() 
+void ev_timer()
 {
-
+	WaitForSingleObject(g_timer, INFINITE);
+	{
+		timer_q.Clear();
+	}
 	while (true) {
 		timer_ev order;
-		timer_q.try_pop(order);
+		timer_q.WaitPop(order);
 		//auto t = order.start_t - chrono::system_clock::now();
 		int s_id = order.this_id;
 		if (false == is_player(s_id)) continue;
@@ -885,14 +948,12 @@ void ev_timer()
 				Player_Event(s_id, order.target_id, OP_PLAYER_DAMAGE);
 				this_thread::sleep_for(50ms);
 			}
+
 		}
 		else {
-			timer_q.push(order);
+			timer_q.Push(order);
 			this_thread::sleep_for(10ms);
-
 		}
-
-
 	}
 
 }

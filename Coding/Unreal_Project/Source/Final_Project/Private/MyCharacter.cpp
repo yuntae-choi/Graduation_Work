@@ -3,20 +3,32 @@
 
 #include "MyCharacter.h"
 #include "MyAnimInstance.h"
-#include "MyItem.h"
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
+#include "Debug.h"
+#include "MyPlayerController.h"
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
-//const int AMyCharacter::iMinHP = 0;
 const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
+const float fChangeSnowmanStunTime = 3.0f;	// 실제값 - 10.0f, 눈사람화 할 때 스턴 시간
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
-const float fChangeSnowmanStunTime = 3.0f;// 실제값 - 10.0f;
+
+// 색상별 곰 텍스쳐
+FString TextureStringArray[] = {
+	TEXT("/Game/Characters/Bear/bear_texture.bear_texture"),
+	TEXT("/Game/Characters/Bear/bear_texture_light_red.bear_texture_light_red"),
+	TEXT("/Game/Characters/Bear/bear_texture_yellow.bear_texture_yellow"),
+	TEXT("/Game/Characters/Bear/bear_texture_light_green.bear_texture_light_green"),
+	TEXT("/Game/Characters/Bear/bear_texture_cyan.bear_texture_cyan"),
+	TEXT("/Game/Characters/Bear/bear_texture_blue.bear_texture_blue"),
+	TEXT("/Game/Characters/Bear/bear_texture_light_gray.bear_texture_light_gray"),
+	TEXT("/Game/Characters/Bear/bear_texture_black.bear_texture_black") };
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -35,6 +47,7 @@ AMyCharacter::AMyCharacter()
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
 	GetCapsuleComponent()->SetUseCCD(true);
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
+	GetCapsuleComponent()->BodyInstance.bNotifyRigidBodyCollision = true;
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -74.0f), FRotator(0.0f, -90.0f, 0.0f));
 	springArm->TargetArmLength = 220.0f;
 	springArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
@@ -78,12 +91,34 @@ AMyCharacter::AMyCharacter()
 		snowmanAnim = SNOWMAN_ANIM.Class;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UMaterial>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear.M_Bear"));
+	if (BearMaterial.Succeeded())
+	{
+		bearMaterial = BearMaterial.Object;
+	}
+
+	// 모든 색상의 곰 텍스쳐 로드해서 저장
+	for (int i = 0; i < 8; ++i)
+	{
+		ConstructorHelpers::FObjectFinder<UTexture>BearTexture(*(TextureStringArray[i]));
+		if (BearTexture.Succeeded())
+		{
+			bearTextureArray.Add(BearTexture.Object);
+		}
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial>SnowmanMaterial(TEXT("/Game/Characters/Snowman/M_Snowman.M_Snowman"));
+	if (SnowmanMaterial.Succeeded())
+	{
+		snowmanMaterial = SnowmanMaterial.Object;
+	}
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
 	projectileClass = AMySnowball::StaticClass();
 
-	iSessionID = 0;
+	iSessionId = -1;
 	iCurrentHP = iMaxHP;	// 실제 설정값
 	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
@@ -99,16 +134,14 @@ AMyCharacter::AMyCharacter()
 	farmingItem = nullptr;
 	bIsFarming = false;
 	
-	bIsInsideOfBonfire = false;	// 초기값 : true로 설정해야함,  캐릭터 초기 생성위치 모닥불 내부여야 함
-	
+	bIsInsideOfBonfire = false;
+
 	//fMatchDuration = 3.0f;
 	//match = true;
 
 	iCharacterState = CharacterState::AnimalNormal;
 	bIsSnowman = false;
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
-
-	//playerController = Cast<APlayerController>(GetController());
 }
 
 // Called when the game starts or when spawned
@@ -116,10 +149,28 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 수정 필요 - 캐릭터의 session id가 결정될 때 이 함수가 호출되도록
+	SetCharacterMaterial(iSessionId);	// 캐릭터 머티리얼 설정(색상)
+
 	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
+	localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 
 	WaitForStartGame();	// 대기시간
+
+#ifdef SINGLEPLAY_DEBUG
+	UpdateUI();
+#endif
 }
+
+void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	MYLOG(Warning, TEXT("endplay"));
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	PlayerController->GetSocket()->Send_LogoutPacket(iSessionId);
+	//PlayerController->GetSocket()->CloseSocket();
+	//PlayerController->GetSocket()->StopListen();
+ }
+
 
 // Called every frame
 void AMyCharacter::Tick(float DeltaTime)
@@ -180,49 +231,68 @@ void AMyCharacter::SetItem(AMyItem* NewItem)
 
 void AMyCharacter::UpDown(float NewAxisValue)
 {
-	if (NewAxisValue != 0)
+	AddMovementInput(GetActorForwardVector(), NewAxisValue);
+
+	if (NewAxisValue != 0.0f) bIsUpDownZero = false;
+
+	if (!bIsUpDownZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
-	AddMovementInput(GetActorForwardVector(), NewAxisValue);
+
+	if (NewAxisValue == 0.0f) bIsUpDownZero = true;
 }
 
 void AMyCharacter::LeftRight(float NewAxisValue)
 {
-	if (NewAxisValue != 0)
+	AddMovementInput(GetActorRightVector(), NewAxisValue);
+
+	if (NewAxisValue != 0.0f) bIsLeftRightZero = false;
+
+	if (!bIsLeftRightZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
-	AddMovementInput(GetActorRightVector(), NewAxisValue);
+
+	if (NewAxisValue == 0.0f) bIsLeftRightZero = true;
 }
 
 void AMyCharacter::LookUp(float NewAxisValue)
 {
-	if (NewAxisValue != 0)
+	AddControllerPitchInput(NewAxisValue);
+
+	if (NewAxisValue != 0) bIsLookUpZero = false;
+
+	if (!bIsLookUpZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
-	AddControllerPitchInput(NewAxisValue);
 }
 
 void AMyCharacter::Turn(float NewAxisValue)
 {
-	if (NewAxisValue != 0)
+	AddControllerYawInput(NewAxisValue);
+
+	if (NewAxisValue != 0) bIsTurnZero = false;
+
+	if (!bIsTurnZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_MOVE);
+		PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
-	AddControllerYawInput(NewAxisValue);
 }
 
 void AMyCharacter::Attack()
 {
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (iSessionID == PlayerController->iMySessionId)  PlayerController->UpdatePlayerInfo(COMMAND_ATTACK);
+	if (iSessionId == PlayerController->iSessionId)  PlayerController->SendPlayerInfo(COMMAND_ATTACK);
 
+#ifdef SINGLEPLAY_DEBUG
+	SnowAttack();
+#endif
 }
 
 void AMyCharacter::SnowAttack()
@@ -267,19 +337,29 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 	if (!bIsSnowman)
 	{	// 동물인 경우 체력 감소
-		//iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
+#ifdef SINGLEPLAY_DEBUG
+		iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
+		UpdateUI();	// 변경된 체력으로 ui 갱신
 
-		//MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
+		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
+#endif
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		if (iSessionId == PlayerController->iSessionId)
+		{
+			PlayerController->SendPlayerInfo(COMMAND_DAMAGE);
+		}
 	}
 	else
 	{	// 눈사람인 경우 스턴
 		StartStun(fStunTime);
-		//MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
+#ifdef SINGLEPLAY_DEBUG
+		MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
+#endif
 	}
 	return FinalDamage;
 }
 
-void AMyCharacter::ReleaseSnowball(FVector MyLocation_, FVector MyDirection_)
+void AMyCharacter::ReleaseSnowball()
 {
 	if (IsValid(snowball))
 	{
@@ -289,16 +369,28 @@ void AMyCharacter::ReleaseSnowball(FVector MyLocation_, FVector MyDirection_)
 		if (snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
 			//던지는 순간 좌표값 보내는 코드
-			//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			//PlayerController->Throw_Snow(cameraLocation, cameraRotation.Vector());
+#ifdef MULTIPLAY_DEBUG
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			
-			MYLOG(Warning, TEXT("snow[%d] dir : %f, %f, %f"), iSessionID, MyDirection_.X, MyDirection_.Y, MyDirection_.Z);
-			II_Throwable::Execute_Throw(snowball, MyDirection_);
+			FVector direction_;
+			direction_.X = PlayerController->GetCharactersInfo()->players[iSessionId].fCDx;
+			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
+			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
+
+			II_Throwable::Execute_Throw(snowball, direction_);
+#endif
+#ifdef SINGLEPLAY_DEBUG
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+
+			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
+#endif
 			snowball = nullptr;
 		}
-	}
 
-	
+	}
 }
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
@@ -307,12 +399,15 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 
 	if (nullptr != MySnowball)
 	{
-		MYLOG(Warning, TEXT("snowball hit."));
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
+		//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		//if (iSessionId == PlayerController->iSessionId)
+		//{
+		//	MYLOG(Warning, TEXT("id: %d snowball hit."), iSessionId);
+
+		//	PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
+		//}
 
 	}
-
 	AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
 	if (!otherCharacter) return;
 
@@ -329,6 +424,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 			return;
 		}
 	}
+
 	//auto MyCharacter = Cast<AMyCharacter>(OtherActor);
 
 	//if (nullptr != MyCharacter)
@@ -336,7 +432,6 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	//	FDamageEvent DamageEvent;
 	//	MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
 	//}
-
 }
 
 void AMyCharacter::StartFarming()
@@ -348,7 +443,7 @@ void AMyCharacter::StartFarming()
 	{
 		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->UpdateFarming(ITEM_SNOW);
+		//PlayerController->UpdateFarming(ITEM_SNOW);
 		bIsFarming = true;
 
 	}
@@ -365,7 +460,7 @@ void AMyCharacter::StartFarming()
 			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
 			if (GetItem(itembox->GetItemType())) { 
 				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
-				PlayerController->UpdateFarming(itembox->GetItemType());
+				//PlayerController->UpdateFarming(itembox->GetItemType());
 				itembox->DeleteItem(); 			
 			}
 			break;
@@ -469,22 +564,28 @@ void AMyCharacter::UpdateSpeed()
 
 void AMyCharacter::ChangeSnowman()
 {
+	bIsSnowman = true;
+
 	// 스켈레탈메시, 애니메이션 블루프린트 변경
 	myAnim->SetDead();
-	//myAnim->SetDead(); // 무슨 용도?
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
+	SetCharacterMaterial();	// 눈사람으로 머티리얼 변경할 때는 색상 필요 x (디폴트값으로)
 
-	bIsSnowman = true;
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
+#ifdef SINGLEPLAY_DEBUG
+	UpdateUI();	// 변경된 체력으로 ui 갱신
+#endif
 
 	GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;	// 눈사람의 이동속도는 슬로우 상태인 캐릭터와 동일하게 설정
 	
 	StartStun(fChangeSnowmanStunTime);
 
 	ResetHasItems();
+
+	isAttacking = false;	// 공격 도중에 상태 변할 시 발생하는 오류 방지
 }
 
 void AMyCharacter::WaitForStartGame()
@@ -502,38 +603,42 @@ void AMyCharacter::UpdateTemperatureState()
 {
 	if (bIsSnowman) return;
 
-	//GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+#ifdef SINGLEPLAY_DEBUG
+	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
+#endif
 	//if (match)
 	//{
 	//	GetWorldTimerManager().SetTimer(temperatureHandle, this, &AMyCharacter::UpdateTemperatureByMatch, 1.0f, true);
 	//}
 	//else
 	//{
-
 		if (bIsInsideOfBonfire)
 		{	// 모닥불 내부인 경우 초당 체온 증가 (초당 호출되는 람다함수)
-			//GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
-				//{
-					//iCurrentHP += ABonfire::iHealAmount;
-					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
-
-				//}), 1.0f, true);
+#ifdef SINGLEPLAY_DEBUG
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP += ABonfire::iHealAmount;
+					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+					UpdateUI();	// 변경된 체력으로 ui 갱신
+				}), 1.0f, true);
+#endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			if (iSessionID == PlayerController->iMySessionId)
-			    PlayerController->UpdateStateInfo(ST_INBURN);
-			UE_LOG(LogTemp, Warning, TEXT("in burn"));
-
+			if (iSessionId == PlayerController->iSessionId)
+				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN);
 		}
 		else
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
-			//GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
-				//{
-					//iCurrentHP -= ABonfire::iDamageAmount;
-					//iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
-				//}), 1.0f, true);
+#ifdef SINGLEPLAY_DEBUG
+			GetWorldTimerManager().SetTimer(temperatureHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					iCurrentHP -= ABonfire::iDamageAmount;
+					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
+					UpdateUI();	// 변경된 체력으로 ui 갱신
+				}), 1.0f, true);
+#endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			if (iSessionID == PlayerController->iMySessionId)
-			   PlayerController->UpdateStateInfo(ST_OUTBURN);
+			if (iSessionId == PlayerController->iSessionId)
+				PlayerController->GetSocket()->Send_StatusPacket(ST_OUTBURN);
 		}
 	//}
 }
@@ -593,20 +698,50 @@ void AMyCharacter::ResetHasItems()
 
 void AMyCharacter::ChangeAnimal()
 {
+	bIsSnowman = false;
+
 	// 스켈레탈메시, 애니메이션 블루프린트 변경
 	GetMesh()->SetSkeletalMesh(bear);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(bearAnim);
+	SetCharacterMaterial(iSessionId);
 
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);
 	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
 
-	bIsSnowman = false;
 	iCurrentHP = iMaxHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
+#ifdef SINGLEPLAY_DEBUG
+	UpdateUI();	// 변경된 체력으로 ui 갱신
+#endif
 
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
 
 	iCharacterState = CharacterState::AnimalNormal;
+
+	isAttacking = false;	// 공격 도중에 상태 변할 시 발생하는 오류 방지
+}
+
+void AMyCharacter::SetCharacterMaterial(int id)
+{
+	if (id < 0) id = 0;	// id가 유효하지 않은 경우 (싱글플레이)
+	if (!bIsSnowman)
+	{	// 곰 머티리얼로 변경, 본인 색상의 곰 텍스쳐 적용
+		GetMesh()->SetMaterial(0, bearMaterial);
+		dynamicMaterialInstance = GetMesh()->CreateDynamicMaterialInstance(0);
+		dynamicMaterialInstance->SetTextureParameterValue(FName("Tex"), bearTextureArray[id]);	// 본인 색상의 곰 텍스쳐 사용
+	}
+	else
+	{	// 눈사람 머티리얼로 변경
+		GetMesh()->SetMaterial(0, snowmanMaterial);
+	}
+}
+
+void AMyCharacter::UpdateUI()
+{
+#ifdef SINGLEPLAY_DEBUG
+	//if (iSessionId != localPlayerController->iSessionId) return;	// 로컬플레이어인 경우만 update
+	localPlayerController->CallDelegateUpdateHP();	// 체력 ui 갱신
+#endif
 }

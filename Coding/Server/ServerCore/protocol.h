@@ -1,9 +1,11 @@
 #pragma once
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
+#define _CRT_SECURE_NO_WARNINGS
 
-const short SERVER_PORT = 8000;
+const short SERVER_PORT = 10000;
 
-const int BUFSIZE = 256;
+const int BUFSIZE = 1024;
 const int  ReZone_HEIGHT = 2000;
 const int  ReZone_WIDTH = 2000;
 const int  MAX_NAME_SIZE = 20;
@@ -21,6 +23,7 @@ const char CS_PACKET_DAMAGE = 7;
 const char CS_PACKET_GET_ITEM = 8;
 const char CS_PACKET_LOGOUT = 9;
 const char CS_PACKET_STATUS_CHANGE = 10;
+const char CS_PACKET_READY = 11;
 
 
 
@@ -36,6 +39,8 @@ const char SC_PACKET_HP = 9;
 const char SC_PACKET_THROW_SNOW = 10;
 const char SC_PACKET_ATTACK = 11;
 const char SC_PACKET_GET_ITEM = 12;
+const char SC_PACKET_READY = 13;
+const char SC_PACKET_START = 14;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -43,15 +48,7 @@ struct cs_packet_login {
 	char	type;
 	char	id[MAX_NAME_SIZE];
 	char	pw[MAX_NAME_SIZE];
-	float x, y, z;
-
-
-};
-
-struct cs_packet_logout {
-	unsigned char size;
-	char	type;
-	int     s_id;
+	float z;
 };
 
 struct sc_packet_login_ok {
@@ -60,26 +57,13 @@ struct sc_packet_login_ok {
 	// 세션 아이디
 	int		s_id;
 	float x, y, z;
-
+	float yaw;
 };
 
-struct cs_packet_start { // 게임 레디 요청
+struct cs_packet_logout {
 	unsigned char size;
 	char	type;
-	bool	ready;
-};
-struct sc_packet_ready { // 타 플레이어 레디
-	unsigned char size;
-	char	type;
-	char	name[MAX_NAME_SIZE];
-};
-
-struct sc_packet_start_ok { // 스폰
-	unsigned char size;
-	char type;
-	char	name[MAX_NAME_SIZE];
-	float x, y, z;
-	char image_num;
+	int     s_id;
 };
 
 struct cs_packet_move {
@@ -89,27 +73,63 @@ struct cs_packet_move {
 	int sessionID;
 	float x, y, z;
 	// 속도
-	float vx;
-	float vy;
-	float vz;
+	float vx, vy, vz;
 	// 회전값
 	float yaw;
-	float pitch;
-	float roll;
-	//char move_time[MAX_CHAT_SIZE];
+	float direction;
+	//long long move_time;
+};
 
-	long long		move_time;
+struct sc_packet_put_object {
+	unsigned char size;
+	char type;
+	int s_id;
+	float x, y, z;
+	float yaw;
+	char object_type;
+	char	name[MAX_NAME_SIZE];
+};
+
+struct cs_packet_throw_snow {
+	unsigned char size;
+	char	type;
+	int s_id;
+	float x, y, z;
+	float dx, dy, dz;
+};
+
+struct cs_packet_damage {
+	unsigned char size;
+	char type;
+};
+
+struct sc_packet_hp_change {
+	unsigned char size;
+	char type;
+	int s_id;
+	int hp;
+};
+
+struct cs_packet_ready { // 게임 레디 요청
+	unsigned char size;
+	char	type;
+};
+struct sc_packet_ready { // 타 플레이어 레디
+	unsigned char size;
+	char	type;
+	int	s_id;
+};
+
+struct sc_packet_start { // 스폰
+	unsigned char size;
+	char type;
+
 };
 
 struct cs_packet_attack {
 	unsigned char size;
 	char	type;
 	int s_id;
-};
-
-struct cs_packet_damage {
-	unsigned char size;
-	char	type;
 };
 
 struct cs_packet_get_item {
@@ -124,7 +144,7 @@ struct cs_packet_chat {
 	char	type;
 	int s_id;
 	float x, y, z;
-	char	message[100];
+	char	message[MAX_CHAT_SIZE];
 };
 
 struct cs_packet_teleport {
@@ -132,25 +152,6 @@ struct cs_packet_teleport {
 	// 더미 클라이언트에서 동접 테스트용으로 사용.
 	unsigned char size;
 	char	type;
-};
-
-struct cs_packet_throw_snow {
-	unsigned char size;
-	char	type;
-	int s_id;
-	float x, y, z;
-	float dx, dy, dz;
-
-};
-
-
-struct sc_packet_put_object {
-	unsigned char size;
-	char type;
-	int s_id;
-	short x, y, z;
-	char object_type;
-	char	name[MAX_NAME_SIZE];
 };
 
 struct sc_packet_remove_object {
@@ -177,13 +178,5 @@ struct sc_packet_status_change {
 	char type;
 	int s_id;
 	short   state;
-};
-
-
-struct sc_packet_hp_change {
-	unsigned char size;
-	char type;
-	int target;
-	int	hp;
 };
 #pragma pack(pop)
