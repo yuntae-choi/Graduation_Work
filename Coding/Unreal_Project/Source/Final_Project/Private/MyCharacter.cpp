@@ -623,7 +623,7 @@ void AMyCharacter::UpdateTemperatureState()
 				}), 1.0f, true);
 #endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			if (iSessionId == PlayerController->iSessionId)
+			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start())
 				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN);
 		}
 		else

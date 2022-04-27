@@ -885,11 +885,28 @@ void worker_thread()
 		case OP_PLAYER_DAMAGE: {
 
 			if (clients[_s_id].is_bone == false) {
-				if (clients[_s_id]._hp > clients[_s_id]._min_hp) {
+				if (clients[_s_id]._hp - 1 > clients[_s_id]._min_hp) {
 					clients[_s_id]._hp -= 1;
 					player_damage(_s_id);
 					send_hp_packet(_s_id);
 					//cout << "hp -1" << endl;
+
+				}
+				else if (clients[_s_id]._hp - 1 == clients[_s_id]._min_hp) 
+				{
+					clients[_s_id].bIsSnowman = true;
+					sc_packet_status_change _packet;
+					_packet.size = sizeof(_packet);
+					_packet.type = SC_PACKET_STATUS_CHANGE;
+					_packet.state = ST_SNOWMAN;
+					_packet.s_id = _s_id;
+					for (auto& other : clients) {
+						if (ST_INGAME != other._state)
+							continue;
+						other.do_send(sizeof(_packet), &_packet);
+						cout << "눈사람" << endl;
+						
+					}
 
 				}
 			}

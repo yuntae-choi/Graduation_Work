@@ -45,6 +45,10 @@ public:
 	{
 		bSetStart.store(true);
 	}
+	bool is_start()
+	{
+		return bSetStart;
+	}
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
