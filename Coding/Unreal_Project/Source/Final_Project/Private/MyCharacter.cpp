@@ -396,7 +396,9 @@ void AMyCharacter::ReleaseSnowball()
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+#ifdef MULTIPLAY_DEBUG
 	if (!iSessionId == PlayerController->iSessionId || !PlayerController->is_start()) return;
+#endif
 
 	auto MySnowball = Cast<AMySnowball>(OtherActor);
 
@@ -420,6 +422,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	{
 		if (!(otherCharacter->GetIsSnowman()))
 		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
+#ifdef MULTIPLAY_DEBUG
 			//bIsSnowman = false;
 			PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
 			ChangeAnimal();
@@ -430,6 +433,11 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 			//PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
 			//otherCharacter->ChangeSnowman();
 			//PlayerController->SetCharacterState(otherCharacter->iSessionId, ST_SNOWMAN);
+#endif
+#ifdef SINGLEPLAY_DEBUG
+			ChangeAnimal();
+			otherCharacter->ChangeSnowman();
+#endif
 			UE_LOG(LogTemp, Warning, TEXT("%s catch %s"), *GetName(), *(otherCharacter->GetName()));
 			return;
 		}
@@ -595,6 +603,7 @@ void AMyCharacter::ChangeSnowman()
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 #ifdef SINGLEPLAY_DEBUG
+	UpdateTemperatureState();
 	UpdateUI();	// 변경된 체력으로 ui 갱신
 #endif
 
@@ -732,6 +741,7 @@ void AMyCharacter::ChangeAnimal()
 	iCurrentHP = iMaxHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
 #ifdef SINGLEPLAY_DEBUG
+	UpdateTemperatureState();
 	UpdateUI();	// 변경된 체력으로 ui 갱신
 #endif
 

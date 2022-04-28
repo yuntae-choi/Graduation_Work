@@ -394,6 +394,9 @@ void AMyPlayerController::PlayerReady()
 	mySocket->Send_ReadyPacket();
 	UE_LOG(LogTemp, Warning, TEXT("PlayerReady"));
 	bIsReady = true;
+#ifdef SINGLEPLAY_DEBUG
+	StartGame();	// 디버깅용 - 레디버튼 누르면 startgame 호출
+#endif
 }
 
 void AMyPlayerController::PlayerUnready()
@@ -401,9 +404,6 @@ void AMyPlayerController::PlayerUnready()
 	// 서버에 언레디했다고 전송
 	UE_LOG(LogTemp, Warning, TEXT("PlayerUnready"));
 	bIsReady = false;
-#ifdef SINGLEPLAY_DEBUG
-	StartGame();	// 디버깅용 - 레디버튼 누르면 startgame 호출
-#endif
 }
 
 void AMyPlayerController::StartGame()
