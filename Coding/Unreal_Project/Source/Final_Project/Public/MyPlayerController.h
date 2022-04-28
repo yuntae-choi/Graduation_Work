@@ -138,4 +138,6 @@ private:
 	TSubclassOf<class ACharacter> WhoToSpawn;
 
 	//bool							bIsConnected;	// 辑滚客 立加 蜡公
+
+	AMyCharacter* localPlayerCharacter;
 };
