@@ -54,7 +54,14 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	//mySocket->Send_LogoutPacket(iSessionId);
 	//mySocket->CloseSocket();
 	//mySocket->StopListen();
-	FuncUpdateHPCont.Clear(); // 델리게이트 해제
+
+	// 델리게이트 해제
+	FuncUpdateHP.Clear();
+	FuncUpdateCurrentSnowballCount.Clear();
+	FuncUpdateCurrentMatchCount.Clear();
+	FuncUpdateMaxSnowballAndMatchCount.Clear();
+	FuncUpdateHasUmbrella.Clear();
+	FuncUpdateHasBag.Clear();
 }
 
 void AMyPlayerController::Tick(float DeltaTime)
@@ -431,16 +438,69 @@ void AMyPlayerController::LoadCharacterUI()
 		if (characterUI)
 		{
 			characterUI->AddToViewport();
-			CallDelegateUpdateHP();
+			CallDelegateUpdateAllOfUI();	// 모든 캐릭터 ui 갱신
 		}
 	}
+}
+
+void AMyPlayerController::CallDelegateUpdateAllOfUI()
+{
+	CallDelegateUpdateHP();
+	CallDelegateUpdateCurrentSnowballCount();
+	CallDelegateUpdateCurrentMatchCount();
+	CallDelegateUpdateMaxSnowballAndMatchCount();
+	CallDelegateUpdateHasUmbrella();
+	CallDelegateUpdateHasBag();
 }
 
 void AMyPlayerController::CallDelegateUpdateHP()
 {
 	if (!characterUI) return;	// CharacterUI가 생성되기 전이면 갱신 x
 	AMyCharacter* localPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (FuncUpdateHPCont.IsBound() == true) FuncUpdateHPCont.Broadcast(localPlayer->iCurrentHP);	// 델리게이트 호출
+	if (FuncUpdateHP.IsBound() == true) FuncUpdateHP.Broadcast(localPlayer->iCurrentHP);	// 델리게이트 호출
 
-	UE_LOG(LogTemp, Warning, TEXT("call delegate update hp %d"), localPlayer->iCurrentHP);
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update hp %d"), localPlayer->iCurrentHP);
+}
+
+void AMyPlayerController::CallDelegateUpdateCurrentSnowballCount()
+{
+	if (!characterUI) return;	// CharacterUI가 생성되기 전이면 갱신 x
+	AMyCharacter* localPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (FuncUpdateCurrentSnowballCount.IsBound() == true) FuncUpdateCurrentSnowballCount.Broadcast(localPlayer->iCurrentSnowballCount);	// 델리게이트 호출
+
+	UE_LOG(LogTemp, Warning, TEXT("call delegate update current snowball count %d"), localPlayer->iCurrentSnowballCount);
+}
+void AMyPlayerController::CallDelegateUpdateCurrentMatchCount()
+{
+	if (!characterUI) return;	// CharacterUI가 생성되기 전이면 갱신 x
+	AMyCharacter* localPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (FuncUpdateCurrentMatchCount.IsBound() == true) FuncUpdateCurrentMatchCount.Broadcast(localPlayer->iCurrentMatchCount);	// 델리게이트 호출
+
+	UE_LOG(LogTemp, Warning, TEXT("call delegate update current match count %d"), localPlayer->iCurrentMatchCount);
+}
+void AMyPlayerController::CallDelegateUpdateMaxSnowballAndMatchCount()
+{
+	if (!characterUI) return;	// CharacterUI가 생성되기 전이면 갱신 x
+	AMyCharacter* localPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (FuncUpdateMaxSnowballAndMatchCount.IsBound() == true)
+		FuncUpdateMaxSnowballAndMatchCount.Broadcast(localPlayer->iMaxSnowballCount, localPlayer->iMaxMatchCount);	// 델리게이트 호출
+
+	UE_LOG(LogTemp, Warning, TEXT("call delegate update max snowball count %d, max match count %d"), 
+		localPlayer->iMaxSnowballCount, localPlayer->iMaxMatchCount);
+}
+void AMyPlayerController::CallDelegateUpdateHasUmbrella()
+{
+	if (!characterUI) return;	// CharacterUI가 생성되기 전이면 갱신 x
+	AMyCharacter* localPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (FuncUpdateHasUmbrella.IsBound() == true) FuncUpdateHasUmbrella.Broadcast(localPlayer->bHasUmbrella);	// 델리게이트 호출
+
+	UE_LOG(LogTemp, Warning, TEXT("call delegate update has umbrella %d"), localPlayer->bHasUmbrella);
+}
+void AMyPlayerController::CallDelegateUpdateHasBag()
+{
+	if (!characterUI) return;	// CharacterUI가 생성되기 전이면 갱신 x
+	AMyCharacter* localPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (FuncUpdateHasBag.IsBound() == true) FuncUpdateHasBag.Broadcast(localPlayer->bHasBag);	// 델리게이트 호출
+
+	UE_LOG(LogTemp, Warning, TEXT("call delegate update has bag %d"), localPlayer->bHasBag);
 }
