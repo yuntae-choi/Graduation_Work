@@ -125,7 +125,8 @@ AMyCharacter::AMyCharacter()
 	snowball = nullptr;
 	
 	iMaxSnowballCount = iOriginMaxSnowballCount;
-	iCurrentSnowballCount = 0; 
+	//iCurrentSnowballCount = 0;	// 실제 설정값
+	iCurrentSnowballCount = 10;	// 디버깅용
 	iMaxMatchCount = iOriginMaxMatchCount;
 	iCurrentMatchCount = 0;
 	bHasUmbrella = false;
@@ -156,10 +157,6 @@ void AMyCharacter::BeginPlay()
 	localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 
 	WaitForStartGame();	// 대기시간
-
-#ifdef SINGLEPLAY_DEBUG
-	UpdateUI();
-#endif
 }
 
 void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -299,12 +296,13 @@ void AMyCharacter::SnowAttack()
 {
 	if (isAttacking) return;
 	if (bIsSnowman) return;
-	//if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
+	if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 
 	myAnim->PlayAttackMontage();
 	isAttacking = true;
 	// 디버깅용 - 실제는 주석 해제
-	//iSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
+	iCurrentSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
+	UpdateUI(UICategory::CurSnowball);
 
 	// Attempt to fire a projectile.
 	if (projectileClass)
@@ -339,7 +337,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{	// 동물인 경우 체력 감소
 #ifdef SINGLEPLAY_DEBUG
 		iCurrentHP = FMath::Clamp<int>(iCurrentHP - FinalDamage, iMinHP, iMaxHP);
-		UpdateUI();	// 변경된 체력으로 ui 갱신
+		UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 
 		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
 #endif
@@ -491,6 +489,11 @@ void AMyCharacter::StartFarming()
 				itembox->DeleteItem(); 			
 			}
 			break;
+		// 아이템박스가 열리는 중이거나 비어있는 경우
+		case ItemboxState::Opening:
+			break;
+		case ItemboxState::Empty:
+			break;
 		default:
 			break;
 		}
@@ -503,11 +506,13 @@ bool AMyCharacter::GetItem(int itemType)
 	case ItemTypeList::Match:
 		if (iCurrentMatchCount >= iMaxMatchCount) return false;	// 성냥 최대보유량을 넘어서 파밍하지 못하도록
 		iCurrentMatchCount += 1;
+		UpdateUI(UICategory::CurMatch);
 		return true;
 		break;
 	case ItemTypeList::Umbrella:
 		if (bHasUmbrella) return false;	// 우산을 소유 중이면 우산 파밍 못하도록
 		bHasUmbrella = true;
+		UpdateUI(UICategory::HasUmbrella);
 		return true;
 		break;
 	case ItemTypeList::Bag:
@@ -515,6 +520,8 @@ bool AMyCharacter::GetItem(int itemType)
 		bHasBag = true;
 		iMaxSnowballCount += 5;	// 눈덩이 10 -> 15 까지 보유 가능
 		iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
+		UpdateUI(UICategory::HasBag);
+		UpdateUI(UICategory::MaxSnowballAndMatch);
 		return true;
 		break;
 	default:
@@ -554,6 +561,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 		{
 			iCurrentSnowballCount += ASnowdrift::iNumOfSnowball;
 			iCurrentSnowballCount = FMath::Clamp<int>(iCurrentSnowballCount, 0, iMaxSnowballCount);
+			UpdateUI(UICategory::CurSnowball);
 			snowdrift->Destroy();
 		}
 	}
@@ -604,7 +612,7 @@ void AMyCharacter::ChangeSnowman()
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
-	UpdateUI();	// 변경된 체력으로 ui 갱신
+	UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 #endif
 
 	GetCharacterMovement()->MaxWalkSpeed = iSlowSpeed;	// 눈사람의 이동속도는 슬로우 상태인 캐릭터와 동일하게 설정
@@ -647,7 +655,7 @@ void AMyCharacter::UpdateTemperatureState()
 				{
 					iCurrentHP += ABonfire::iHealAmount;
 					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
-					UpdateUI();	// 변경된 체력으로 ui 갱신
+					UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 				}), 1.0f, true);
 #endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -661,7 +669,7 @@ void AMyCharacter::UpdateTemperatureState()
 				{
 					iCurrentHP -= ABonfire::iDamageAmount;
 					iCurrentHP = FMath::Clamp<int>(iCurrentHP, iMinHP, iMaxHP);
-					UpdateUI();	// 변경된 체력으로 ui 갱신
+					UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 				}), 1.0f, true);
 #endif
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -722,6 +730,8 @@ void AMyCharacter::ResetHasItems()
 	iMaxMatchCount = iOriginMaxMatchCount;
 	bHasUmbrella = false;
 	bHasBag = false;
+
+	UpdateUI(UICategory::AllOfUI);
 }
 
 void AMyCharacter::ChangeAnimal()
@@ -742,7 +752,7 @@ void AMyCharacter::ChangeAnimal()
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
-	UpdateUI();	// 변경된 체력으로 ui 갱신
+	UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 #endif
 
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
@@ -767,10 +777,35 @@ void AMyCharacter::SetCharacterMaterial(int id)
 	}
 }
 
-void AMyCharacter::UpdateUI()
+void AMyCharacter::UpdateUI(int uiCategory)
 {
-#ifdef SINGLEPLAY_DEBUG
-	//if (iSessionId != localPlayerController->iSessionId) return;	// 로컬플레이어인 경우만 update
-	localPlayerController->CallDelegateUpdateHP();	// 체력 ui 갱신
+#ifdef MULTIPLAY_DEBUG
+	if (iSessionId != localPlayerController->iSessionId) return;	// 로컬플레이어인 경우만 update
 #endif
+	switch (uiCategory)
+	{
+	case UICategory::HP:
+		localPlayerController->CallDelegateUpdateHP();	// 체력 ui 갱신
+		break;
+	case UICategory::CurSnowball:
+		localPlayerController->CallDelegateUpdateCurrentSnowballCount();	// CurSnowball ui 갱신
+		break;
+	case UICategory::CurMatch:
+		localPlayerController->CallDelegateUpdateCurrentMatchCount();	// CurMatch ui 갱신
+		break;
+	case UICategory::MaxSnowballAndMatch:
+		localPlayerController->CallDelegateUpdateMaxSnowballAndMatchCount();	// MaxSnowballAndMatch ui 갱신
+		break;
+	case UICategory::HasUmbrella:
+		localPlayerController->CallDelegateUpdateHasUmbrella();	// HasUmbrella ui 갱신
+		break;
+	case UICategory::HasBag:
+		localPlayerController->CallDelegateUpdateHasBag();	// HasBag ui 갱신
+		break;
+	case UICategory::AllOfUI:
+		localPlayerController->CallDelegateUpdateAllOfUI();	// 모든 캐릭터 ui 갱신
+		break;
+	default:
+		break;
+	}
 }
