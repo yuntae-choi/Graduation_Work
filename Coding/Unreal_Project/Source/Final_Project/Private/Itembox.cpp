@@ -4,17 +4,11 @@
 #include "Itembox.h"
 #include "MyCharacter.h"
 
-int RandomItemType()
-{
-	int value;
-	int random = UKismetMathLibrary::RandomIntegerInRange(1, 100);
-	// 성냥 / 우산 / 가방 확률
-	if (random <= 50) value = ItemTypeList::Match;
-	else if (random <= 75) value = ItemTypeList::Umbrella;
-	else value = ItemTypeList::Bag;
-
-	return value;
-}
+// 아이템별 스테틱메시
+FString ItemMeshStringArray[] = {
+	TEXT("/Game/NonCharacters/snowball1.snowball1"),						// 성냥 - 변경 필요
+	TEXT("/Game/NonCharacters/umbrellaForItemBox.umbrellaForItemBox"),		// 우산
+	TEXT("/Game/NonCharacters/snowdrift1.snowdrift1")};						// 가방 - 변경 필요
 
 // Sets default values
 AItembox::AItembox()
@@ -59,29 +53,14 @@ AItembox::AItembox()
 	{
 		itemMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 		
-		//iItemType = RandomItemType();	// 실제 적용해야 할 값 (아이템 랜덤으로 설정)
-		iItemType = ItemTypeList::Umbrella;	// 디버깅용
-
-		// 성냥, 가방 리소스 제작하면 해당 스테틱메시로 수정필요 (현재 임시로 다른 메시 사용)
-		static ConstructorHelpers::FObjectFinder<UStaticMesh>ItemMesh1(TEXT("/Game/NonCharacters/snowball1.snowball1"));	// 변경 필요
-		static ConstructorHelpers::FObjectFinder<UStaticMesh>ItemMesh2(TEXT("/Game/NonCharacters/umbrellaForItemBox.umbrellaForItemBox"));
-		static ConstructorHelpers::FObjectFinder<UStaticMesh>ItemMesh3(TEXT("/Game/NonCharacters/snowdrift1.snowdrift1"));	// 변경 필요
-
-		switch (iItemType) {
-		case ItemTypeList::Match:
-			if (ItemMesh1.Succeeded()) { itemMeshComponent->SetStaticMesh(ItemMesh1.Object); }
-			break;
-		case ItemTypeList::Umbrella:
-			if (ItemMesh2.Succeeded()) { itemMeshComponent->SetStaticMesh(ItemMesh2.Object); }
-			itemMeshComponent->SetRelativeLocation(FVector(0.0f, 31.0f, -3.0f));
-			itemMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
-			itemMeshComponent->SetRelativeScale3D(FVector(0.5f, 0.25f, 0.75f));
-			break;
-		case ItemTypeList::Bag:
-			if (ItemMesh3.Succeeded()) { itemMeshComponent->SetStaticMesh(ItemMesh3.Object); }
-			break;
-		default:
-			break;
+		// 모든 종류의 아이템 스테틱메시 로드해서 저장
+		for (int i = 0; i < 3; ++i)
+		{
+			ConstructorHelpers::FObjectFinder<UStaticMesh>ItemMesh(*(ItemMeshStringArray[i]));
+			if (ItemMesh.Succeeded())
+			{
+				itemMeshArray.Add(ItemMesh.Object);
+			}
 		}
 		itemMeshComponent->SetupAttachment(RootComponent);
 	}
@@ -91,6 +70,7 @@ AItembox::AItembox()
 
 	iItemboxState = ItemboxState::Closed;
 	fSumRotation = 0.0f;
+	iItemType = ItemTypeList::Random;
 }
 
 // Called when the game starts or when spawned
@@ -98,6 +78,13 @@ void AItembox::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// 실제로는 서버에서 SetItem(아이템 타입) 으로 아이템의 종류를 정해주면 됨
+	// 디버깅용 - 랜덤하게 아이템 타입 및 메시 설정
+	SetItem();
+	//// 디버깅용 - 특정 아이템으로 고정
+	//SetItem(ItemTypeList::Match);
+	//SetItem(ItemTypeList::Umbrella);
+	//SetItem(ItemTypeList::Bag);
 }
 
 // Called every frame
@@ -142,4 +129,44 @@ void AItembox::UpdateRotation(float DeltaTime)
 void AItembox::DeleteItem()
 {
 	itemMeshComponent->DestroyComponent();
+	iItemboxState = ItemboxState::Empty;
+}
+
+void AItembox::SetItem(int itemType)
+{
+	switch (itemType) {
+	case ItemTypeList::Match:
+		itemMeshComponent->SetStaticMesh(itemMeshArray[ItemTypeList::Match]);
+		iItemType = ItemTypeList::Match;
+		break;
+	case ItemTypeList::Umbrella:
+		itemMeshComponent->SetStaticMesh(itemMeshArray[ItemTypeList::Umbrella]);
+		itemMeshComponent->SetRelativeLocation(FVector(0.0f, 31.0f, -3.0f));
+		itemMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
+		itemMeshComponent->SetRelativeScale3D(FVector(0.5f, 0.25f, 0.75f));
+		iItemType = ItemTypeList::Umbrella;
+		break;
+	case ItemTypeList::Bag:
+		itemMeshComponent->SetStaticMesh(itemMeshArray[ItemTypeList::Bag]);
+		iItemType = ItemTypeList::Bag;
+		break;
+	case ItemTypeList::Random:
+		SetItem(RandomItemType());
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("Itembox set item failed"));
+		break;
+	}
+}
+
+int AItembox::RandomItemType()
+{
+	int value;
+	int random = UKismetMathLibrary::RandomIntegerInRange(1, 100);
+	// 성냥 / 우산 / 가방 확률	(50/25/25)
+	if (random <= 50) value = ItemTypeList::Match;
+	else if (random <= 75) value = ItemTypeList::Umbrella;
+	else value = ItemTypeList::Bag;
+
+	return value;
 }

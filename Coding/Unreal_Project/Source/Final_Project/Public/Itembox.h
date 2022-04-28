@@ -9,11 +9,11 @@
 #include "Itembox.generated.h"
 
 enum ItemboxState {
-	Closed, Opening, Opened
+	Closed, Opening, Opened, Empty
 };
 
 enum ItemTypeList {
-	Match, Umbrella, Bag
+	Match, Umbrella, Bag, Random
 };
 
 UCLASS()
@@ -38,13 +38,21 @@ public:
 	void UpdateRotation(float DeltaTime);
 	int GetItemType() { return iItemType; };
 	void DeleteItem();
+	void SetItem(int itemType = 3);
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+private:
+	int RandomItemType();	// 각 아이템별 확률에 따라 랜덤한 아이템 타입 반환
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<UStaticMesh*> itemMeshArray;		// 아이템별 스테틱메시를 담는 배열
+
+	UPROPERTY(VisibleAnyWhere)
+	int iItemType;	// 아이템박스에 들어있는 아이템 타입
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UBoxComponent* boxComponent;
@@ -60,5 +68,4 @@ private:
 
 	int iItemboxState;
 	float fSumRotation;
-	int iItemType;
 };
