@@ -125,8 +125,8 @@ AMyCharacter::AMyCharacter()
 	snowball = nullptr;
 	
 	iMaxSnowballCount = iOriginMaxSnowballCount;
-	//iCurrentSnowballCount = 0;	// 실제 설정값
-	iCurrentSnowballCount = 10;	// 디버깅용
+	iCurrentSnowballCount = 0;	// 실제 설정값
+	//iCurrentSnowballCount = 10;	// 디버깅용
 	iMaxMatchCount = iOriginMaxMatchCount;
 	iCurrentMatchCount = 0;
 	bHasUmbrella = false;
@@ -540,7 +540,11 @@ void AMyCharacter::EndFarming()
 	if (IsValid(farmingItem))
 	{
 		if (Cast<ASnowdrift>(farmingItem))
-		{	// F키로 눈 무더기 파밍 중 F키 release 시 눈 무더기 duration 초기화
+		{	
+
+			if (iCurrentSnowballCount >= iMaxSnowballCount) return;
+			
+			// F키로 눈 무더기 파밍 중 F키 release 시 눈 무더기 duration 초기화
 			ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
 			snowdrift->SetFarmDuration(ASnowdrift::fFarmDurationMax);
 			bIsFarming = false;
