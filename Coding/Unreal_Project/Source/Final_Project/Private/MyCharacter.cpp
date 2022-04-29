@@ -763,7 +763,7 @@ void AMyCharacter::ChangeAnimal()
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);
 	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
-	iCurrentSnowballCount = 10;	// µð¹ö±ë¿ë
+	//iCurrentSnowballCount = 10;	// µð¹ö±ë¿ë
 	iCurrentHP = iMaxHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
 	UpdateUI(UICategory::CurSnowball);
