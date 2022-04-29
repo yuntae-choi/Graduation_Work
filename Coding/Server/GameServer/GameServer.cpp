@@ -43,6 +43,7 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 void process_packet(int _s_id, unsigned char* p);
 void worker_thread();
 void ev_timer();
+void send_state_change(int s_id, int target, STATE_Type stat);
 
 //이동
 void send_hp_packet(int _id)
@@ -304,6 +305,17 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 	order.order = ev;
 	order.start_t = chrono::system_clock::now() + ms;
 	timer_q.Push(order);
+}
+
+
+void send_state_change(int s_id, int target, STATE_Type stat)
+{
+	sc_packet_status_change _packet;
+	_packet.size = sizeof(_packet);
+	_packet.type = SC_PACKET_STATUS_CHANGE;
+	_packet.state = stat;
+	_packet.s_id = s_id;
+	clients[target].do_send(sizeof(_packet), &_packet);
 }
 
 //패킷 판별
@@ -637,6 +649,8 @@ void process_packet(int s_id, unsigned char* p)
 		}
 	}
 	case CS_PACKET_THROW_SNOW: {
+		printf("attack\n");
+
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
@@ -693,47 +707,41 @@ void process_packet(int s_id, unsigned char* p)
 		}
 		else if (packet->state == ST_SNOWMAN)
 		{
+			cout << "플레이어" << s_id <<"가 플레이어" <<packet->s_id << "가 눈사람이라 전송함" << endl;
+
 			if (false == clients[packet->s_id].bIsSnowman) {
 				clients[packet->s_id].bIsSnowman = true;
 				clients[packet->s_id]._hp = clients[packet->s_id]._min_hp;
 				send_hp_packet(packet->s_id);
-				sc_packet_status_change _packet;
-				_packet.size = sizeof(_packet);
-				_packet.type = SC_PACKET_STATUS_CHANGE;
-				_packet.state = ST_SNOWMAN;
-				_packet.s_id = packet->s_id;
 				for (auto& other : clients) {
 					if (ST_INGAME != other._state)
 						continue;
-					other.do_send(sizeof(_packet), &_packet);
+					send_state_change(packet->s_id, other._s_id, ST_SNOWMAN);
 					cout << "눈사람" << endl;
 					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
 			}
-			cout << s_id << "플레이어 눈사람" << endl;
+			cout << "플레이어" << packet->s_id <<" 눈사람" << endl;
 
 		}
 
 		else if (packet->state == ST_ANIMAL)
 		{
+			cout << "플레이어" << s_id << "가 플레이어" << packet->s_id << "가 동물이라 전송함" << endl;
 			if (true == clients[packet->s_id].bIsSnowman) {
-				clients[packet->s_id].bIsSnowman = false;
 				clients[packet->s_id]._hp = clients[packet->s_id]._max_hp;
+				clients[packet->s_id].bIsSnowman = false;
 				send_hp_packet(packet->s_id);
-				sc_packet_status_change _packet;
-				_packet.size = sizeof(_packet);
-				_packet.type = SC_PACKET_STATUS_CHANGE;
-				_packet.state = ST_ANIMAL;
-				_packet.s_id = packet->s_id;
 				for (auto& other : clients) {
 					if (ST_INGAME != other._state)
 						continue;
-					other.do_send(sizeof(_packet), &_packet);
+					send_state_change(packet->s_id, other._s_id, ST_ANIMAL);
 					cout << "동물화" << endl;
 					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
 			}
-			cout << s_id << "플레이어 동물" << endl;
+			cout << "플레이어" << packet->s_id << " 동물" << endl;
+
 
 
 		}
@@ -911,15 +919,11 @@ void worker_thread()
 				else if (clients[_s_id]._hp - 1 == clients[_s_id]._min_hp) 
 				{
 					clients[_s_id].bIsSnowman = true;
-					sc_packet_status_change _packet;
-					_packet.size = sizeof(_packet);
-					_packet.type = SC_PACKET_STATUS_CHANGE;
-					_packet.state = ST_SNOWMAN;
-					_packet.s_id = _s_id;
+					clients[_s_id]._hp -= 1;
+					send_hp_packet(_s_id);
 					for (auto& other : clients) {
-						if (ST_INGAME != other._state)
-							continue;
-						other.do_send(sizeof(_packet), &_packet);
+						if (ST_INGAME != other._state) continue;
+						send_state_change(_s_id, other._s_id, ST_SNOWMAN);
 						cout << "눈사람" << endl;
 						
 					}
