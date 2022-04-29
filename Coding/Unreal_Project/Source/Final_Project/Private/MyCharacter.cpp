@@ -284,6 +284,8 @@ void AMyCharacter::Turn(float NewAxisValue)
 
 void AMyCharacter::Attack()
 {
+	MYLOG(Warning, TEXT("attack"));
+	if (bIsSnowman) return;
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId == PlayerController->iSessionId)  PlayerController->SendPlayerInfo(COMMAND_ATTACK);
 
@@ -747,9 +749,11 @@ void AMyCharacter::ChangeAnimal()
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);
 	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
-
+	iCurrentSnowballCount = 10;	// 디버깅용
 	iCurrentHP = iMaxHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
+	UpdateUI(UICategory::CurSnowball);
+
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
 	UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
