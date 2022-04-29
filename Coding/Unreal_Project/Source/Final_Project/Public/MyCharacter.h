@@ -14,6 +14,10 @@ enum CharacterState {
 	AnimalNormal, AnimalSlow, SnowmanNormal, SnowmanStunned
 };
 
+enum UICategory {
+	HP, CurSnowball, CurMatch, MaxSnowballAndMatch, HasUmbrella, HasBag, AllOfUI
+};
+
 UCLASS()
 class FINAL_PROJECT_API AMyCharacter : public ACharacter
 {
@@ -53,7 +57,7 @@ public:
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
-	void UpdateUI();
+	void UpdateUI(int uiCategory);
 
 	void StartFarming();
 	void EndFarming();

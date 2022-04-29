@@ -13,7 +13,13 @@
 
 #include "MyPlayerController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_OneParam, int32, NewHP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HP, int32, NewHP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_CurrentSnowballCount, int32, NewCurrentSnowballCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_CurrentMatchCount, int32, NewCurrentMatchCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDele_Dynamic_MaxSnowballAndMatchCount, int32, NewMaxSnowballCount, int32, NewMaxMatchCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasUmbrella, bool, NewHasUmbrella);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasBag, bool, NewHasBag);
+
 /**
  *
  */	
@@ -41,7 +47,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlayerUnready();
 	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
-	void CallDelegateUpdateHP();	// UpdateHP 델리게이트 이벤트 호출
+	
+	// UpdateUI 델리게이트 이벤트 호출
+	void CallDelegateUpdateAllOfUI();
+	void CallDelegateUpdateHP();
+	void CallDelegateUpdateCurrentSnowballCount();
+	void CallDelegateUpdateCurrentMatchCount();
+	void CallDelegateUpdateMaxSnowballAndMatchCount();
+	void CallDelegateUpdateHasUmbrella();
+	void CallDelegateUpdateHasBag();
+
 	void SetCharacterState(const int s_id, STATE_Type _state)
 	{
 		charactersInfo->players[s_id].My_State = _state;
@@ -85,8 +100,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	class UUserWidget* characterUI;	// 캐릭터 UI (체력, )
 
+	// 델리게이트 이벤트 UpdateUI
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
-	FDele_Dynamic_OneParam FuncUpdateHPCont;	// 델리게이트 이벤트 UpdateHP
+	FDele_Dynamic_HP FuncUpdateHP;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_CurrentSnowballCount FuncUpdateCurrentSnowballCount;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_CurrentMatchCount FuncUpdateCurrentMatchCount;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_MaxSnowballAndMatchCount FuncUpdateMaxSnowballAndMatchCount;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_HasUmbrella FuncUpdateHasUmbrella;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_HasBag FuncUpdateHasBag;
 
 private:
 	ClientSocket*			mySocket;
@@ -108,4 +139,6 @@ private:
 	TSubclassOf<class ACharacter> WhoToSpawn;
 
 	//bool							bIsConnected;	// 서버와 접속 유무
+
+	AMyCharacter* localPlayerCharacter;
 };
