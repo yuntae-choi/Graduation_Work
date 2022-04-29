@@ -606,11 +606,36 @@ void process_packet(int s_id, unsigned char* p)
 		default:
 			break;
 		}
-		cout << "플레이어[" << s_id << "]가 " << "아이템 [" << _item_no << "]얻음" << endl;
+		//cout << "플레이어[" << s_id << "]가 " << "아이템 [" << _item_no << "]얻음" << endl;
+		
+		for (auto& other : clients)
+		{
+			if (ST_INGAME != other._state)
+				continue;
+			if (s_id == other._s_id) continue;
+
+			packet->type = SC_PACKET_GET_ITEM;
+			//printf_s("[Send item] id : %d, item : %d\n", s_id, _item_no);
+			other.do_send(sizeof(*packet), packet);
+		}
+		
 		break;
-
 	}
+	case CS_PACKET_STOP_SNOW_FARMING: {
+		cs_packet_stop_snow_farming* packet = reinterpret_cast<cs_packet_stop_snow_farming*>(p);
+		int p_s_id = packet->s_id;
 
+		for (auto& other : clients)
+		{
+			if (ST_INGAME != other._state)
+				continue;
+			if (s_id == other._s_id) continue;
+
+			packet->type = SC_PACKET_STOP_SNOW_FARMING;
+			//printf_s("[Send Stop Snow Farming] id : %d\n", s_id);
+			other.do_send(sizeof(*packet), packet);
+		}
+	}
 	case CS_PACKET_THROW_SNOW: {
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		for (auto& other : clients) {

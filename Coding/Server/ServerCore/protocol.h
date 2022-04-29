@@ -24,6 +24,7 @@ const char CS_PACKET_GET_ITEM = 8;
 const char CS_PACKET_LOGOUT = 9;
 const char CS_PACKET_STATUS_CHANGE = 10;
 const char CS_PACKET_READY = 11;
+const char CS_PACKET_STOP_SNOW_FARMING = 12;
 
 
 
@@ -41,6 +42,7 @@ const char SC_PACKET_ATTACK = 11;
 const char SC_PACKET_GET_ITEM = 12;
 const char SC_PACKET_READY = 13;
 const char SC_PACKET_START = 14;
+const char SC_PACKET_STOP_SNOW_FARMING = 15;
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -136,7 +138,13 @@ struct cs_packet_get_item {
 	unsigned char size;
 	char	type;
 	int s_id;
-	char    item_num;
+	int  item_num;
+};
+
+struct cs_packet_stop_snow_farming {
+	unsigned char size;
+	char	type;
+	int s_id;
 };
 
 struct cs_packet_chat {

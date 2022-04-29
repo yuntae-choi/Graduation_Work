@@ -34,7 +34,8 @@ public:
 	void SetNewBall(const int s_id);
 
 	void SendPlayerInfo(int input);
-	//void UpdateFarming(int item_no);
+	//void SendFarming(int item_no);
+
 	UFUNCTION(BlueprintCallable)
 	void PlayerReady();	// 컨트롤러를 소유한 플레이어가 레디하면 호출되는 함수
 	UFUNCTION(BlueprintCallable)

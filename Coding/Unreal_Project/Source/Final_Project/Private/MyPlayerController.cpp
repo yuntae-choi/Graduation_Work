@@ -215,7 +215,20 @@ bool AMyPlayerController::UpdateWorldInfo()
 				player_->ChangeAnimal();
 			}
 		}
-		
+
+		//if (info->start_farming_item == ITEM_MAT);
+		//if (info->start_farming_item == ITEM_UMB);
+		//if (info->start_farming_item == ITEM_BAG);
+		if (info->start_farming_item == ITEM_SNOW)
+		{
+			player_->StartFarming();
+			info->start_farming_item = -1;
+		}
+		if (info->end_farming == true)
+		{
+			player_->EndFarming();
+			info->end_farming = false;
+		}
 	}
 	return true;
 }
@@ -346,29 +359,9 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 	}
 }
 
-
-//void AMyPlayerController::UpdateFarming(int item_no)
+//void AMyPlayerController::SendFarming(int item_no)
 //{
-//		mySocket->ReadyToSend_ItemPacket(item_no);
-//}
-//
-//void AMyPlayerController::UpdatePlayerS_id(int id)
-//{
-//	iMySessionId = id;
-//	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-//	if (!m_Player)
-//		return;
-//	m_Player->iSessionID = id;
-//	m_Player->SessionId = id;
-//	m_Player->SetActorLocationAndRotation(FVector(id * 100.0f, id * 100.0f, m_Player->GetActorLocation().Z), FRotator(0.0f, -90.0f, 0.0f));
-//}
-//
-//void AMyPlayerController::RecvNewPlayer(const cCharacter& info)
-//{
-//	//MYLOG(Warning, TEXT("recv ok player%d : %f, %f, %f"), sessionID, x, y, z);
-//
-//	UWorld* World = GetWorld();
-//	iNewPlayers.push(info.SessionId);
+//		mySocket->Send_ItemPacket(item_no);
 //}
 
 void AMyPlayerController::LoadReadyUI()

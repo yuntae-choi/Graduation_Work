@@ -119,6 +119,9 @@ public:
 
 	bool new_ball = false;
 
+	int start_farming_item = -1;
+	bool end_farming = false;
+
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
 		stream << info.SessionId << endl;
@@ -239,6 +242,7 @@ public:
 	void Send_ItemPacket(int item_no);
 	void Send_LogoutPacket(const int& s_id);
 	void Send_ReadyPacket();
+	void Send_StopSnowFarming();
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);

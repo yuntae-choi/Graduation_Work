@@ -16,8 +16,8 @@
 
 #define	MAX_BUFFER		4096
 #define SERVER_PORT		9090
-#define SERVER_IP		"112.148.142.95" // 외부 IP
-//#define SERVER_IP		"127.0.0.1" //로컬IP
+//#define SERVER_IP		"112.148.142.95" // 외부 IP
+#define SERVER_IP		"127.0.0.1" //로컬IP
 #define MAX_CLIENTS		100
 
 using std::chrono::duration_cast;
@@ -44,7 +44,8 @@ enum CS_PacketType
 	CS_PACKET_GET_ITEM,
 	CS_PACKET_LOGOUT,
 	CS_PACKET_STATUS_CHANGE,
-	CS_PACKET_READY
+	CS_PACKET_READY,
+	CS_PACKET_STOP_SNOW_FARMING
 };
 
 enum SC_PacketType
@@ -62,7 +63,8 @@ enum SC_PacketType
 	SC_PACKET_ATTACK,
 	SC_PACKET_GET_ITEM,
 	SC_PACKET_READY,
-	SC_PACKET_START
+	SC_PACKET_START,
+	SC_PACKET_STOP_SNOW_FARMING
 
 };
 
@@ -179,6 +181,12 @@ struct cs_packet_get_item {
 	char	type;
 	int s_id;
 	int item_no;
+};
+
+struct cs_packet_stop_snow_farming {
+	unsigned char size;
+	char	type;
+	int s_id;
 };
 
 struct sc_packet_move {

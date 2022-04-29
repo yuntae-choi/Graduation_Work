@@ -55,6 +55,9 @@ public:
 	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
 	void UpdateUI();
 
+	void StartFarming();
+	void EndFarming();
+
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
 
@@ -72,8 +75,6 @@ private:
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	void StartFarming();
-	void EndFarming();
 	void UpdateFarming(float deltaTime);
 	void UpdateHP();
 	bool GetItem(int itemType);
