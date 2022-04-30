@@ -137,15 +137,16 @@ struct cs_packet_attack {
 struct cs_packet_get_item {
 	unsigned char size;
 	char	type;
-	int s_id;
-	int  item_num;
+	int s_id;;
+	int item_type;
+	int destroy_obj_id;
 };
 
-struct cs_packet_stop_snow_farming {
-	unsigned char size;
-	char	type;
-	int s_id;
-};
+//struct cs_packet_stop_snow_farming {
+//	unsigned char size;
+//	char	type;
+//	int s_id;
+//};
 
 struct cs_packet_chat {
 	unsigned char size;

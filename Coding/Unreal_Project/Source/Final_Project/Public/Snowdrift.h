@@ -27,6 +27,8 @@ public:
 	float GetFarmDuration() { return fFarmDuration; };
 	void SetFarmDuration(float duration) { fFarmDuration = duration; };
 
+	int32 GetId() const { return iId; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -36,7 +38,6 @@ public:
 	static const int iNumOfSnowball;		// È¹µæÇÒ ¼ö ÀÖ´Â ´«µ¢ÀÌ ¼ö
 
 	static int iIdCountHelper;
-
 private:	
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UBoxComponent* boxComponent;

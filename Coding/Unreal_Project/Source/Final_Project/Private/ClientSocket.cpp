@@ -160,16 +160,10 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_GET_ITEM:
 	{
 		cs_packet_get_item* packet = reinterpret_cast<cs_packet_get_item*>(ptr);
-		MYLOG(Warning, TEXT("[Recv item] id : %d, item : %d"), packet->s_id, packet->item_no);
-		CharactersInfo.players[packet->s_id].start_farming_item = packet->item_no;
-		break;
-	}
-	case SC_PACKET_STOP_SNOW_FARMING:
-	{
-		cs_packet_stop_snow_farming* packet = reinterpret_cast<cs_packet_stop_snow_farming*>(ptr);
-		MYLOG(Warning, TEXT("[Recv stop snow farming] id : %d"), packet->s_id);
-		CharactersInfo.players[packet->s_id].end_farming = true;
-
+		//MYLOG(Warning, TEXT("[Recv item] id : %d, item : %d"), packet->s_id, packet->item_no);
+		//
+		//CharactersInfo.players[packet->s_id].start_farming_item = packet->item_no;
+		//break;
 	}
 	//case SC_PACKET_CHAT:
 	//{
@@ -299,30 +293,19 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 //	SendPacket(&packet);
 //};
 
-void ClientSocket::Send_ItemPacket(int item_no)
+void ClientSocket::Send_ItemPacket(int item_type, int destroy_obj_id)
 {
 	cs_packet_get_item packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_GET_ITEM;
 	packet.s_id = MyPlayerController->iSessionId;
-	packet.item_no = item_no;
+	packet.item_type = item_type;
+	packet.destroy_obj_id = destroy_obj_id;
 	size_t sent = 0;
 
-	MYLOG(Warning, TEXT("[Send item] id : %d, item : %d"), packet.s_id, item_no);
+	MYLOG(Warning, TEXT("[Send item] id : %d, objId : %d, item : %d"), packet.s_id, destroy_obj_id, item_type);
 	SendPacket(&packet);
 };
-
-void ClientSocket::Send_StopSnowFarming()
-{
-	cs_packet_stop_snow_farming packet;
-	packet.size = sizeof(packet);
-	packet.type = CS_PACKET_STOP_SNOW_FARMING;
-	packet.s_id = MyPlayerController->iSessionId;
-	size_t sent = 0;
-
-	MYLOG(Warning, TEXT("[Send stop snow farming] id : %d"), packet.s_id);
-	SendPacket(&packet);
-}
 
 void ClientSocket::Send_ChatPacket(int sessionID, float x, float y, float z)
 {

@@ -179,14 +179,9 @@ struct cs_packet_teleport {
 struct cs_packet_get_item {
 	unsigned char size;
 	char	type;
-	int s_id;
-	int item_no;
-};
-
-struct cs_packet_stop_snow_farming {
-	unsigned char size;
-	char	type;
-	int s_id;
+	int s_id;;
+	int item_type;
+	int destroy_obj_id;
 };
 
 struct sc_packet_move {

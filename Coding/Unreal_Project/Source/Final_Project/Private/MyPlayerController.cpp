@@ -242,16 +242,16 @@ bool AMyPlayerController::UpdateWorldInfo()
 		//if (info->start_farming_item == ITEM_MAT);
 		//if (info->start_farming_item == ITEM_UMB);
 		//if (info->start_farming_item == ITEM_BAG);
-		if (info->start_farming_item == ITEM_SNOW)
-		{
-			player_->StartFarming();
-			info->start_farming_item = -1;
-		}
-		if (info->end_farming == true)
-		{
-			player_->EndFarming();
-			info->end_farming = false;
-		}
+		//if (info->start_farming_item == ITEM_SNOW)
+		//{
+		//	player_->StartFarming();
+		//	info->start_farming_item = -1;
+		//}
+		//if (info->end_farming == true)
+		//{
+		//	player_->EndFarming();
+		//	info->end_farming = false;
+		//}
 	}
 	return true;
 }

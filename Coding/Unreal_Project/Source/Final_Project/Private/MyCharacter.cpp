@@ -470,12 +470,6 @@ void AMyCharacter::StartFarming()
 	{
 		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
 		bIsFarming = true;
-
-		//눈덩이 파밍 시 서버 전송
-#ifdef MULTIPLAY_DEBUG
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->GetSocket()->Send_ItemPacket(ITEM_SNOW);
-#endif
 	}
 	else if (Cast<AItembox>(farmingItem))
 	{
@@ -550,12 +544,6 @@ void AMyCharacter::EndFarming()
 			ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
 			snowdrift->SetFarmDuration(ASnowdrift::fFarmDurationMax);
 			bIsFarming = false;
-
-			//눈덩이 파밍 시 서버 전송
-#ifdef MULTIPLAY_DEBUG
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			PlayerController->GetSocket()->Send_StopSnowFarming();
-#endif
 		}
 	}
 }
@@ -574,6 +562,14 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 
 		if (newFarmDuration <= 0)
 		{
+			//눈덩이 파밍 시 서버 전송
+#ifdef MULTIPLAY_DEBUG
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			PlayerController->GetSocket()->Send_ItemPacket(ITEM_SNOW, snowdrift->GetId());
+#endif
+
+
+
 			iCurrentSnowballCount += ASnowdrift::iNumOfSnowball;
 			iCurrentSnowballCount = FMath::Clamp<int>(iCurrentSnowballCount, 0, iMaxSnowballCount);
 			UpdateUI(UICategory::CurSnowball);
