@@ -573,7 +573,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 			iCurrentSnowballCount += ASnowdrift::iNumOfSnowball; //서버에서 처리
 			iCurrentSnowballCount = FMath::Clamp<int>(iCurrentSnowballCount, 0, iMaxSnowballCount);	//서버에서 처리
 			UpdateUI(UICategory::CurSnowball);
-			snowdrift->Destroy(); //서버에서 처리
+			snowdrift->Destroy(); //서버에서 아이디 반환시 처리
 			snowdrift = nullptr;
 		}
 	}
