@@ -36,7 +36,7 @@ public:
 	static const int iNumOfSnowball;		// 획득할 수 있는 눈덩이 수
 
 	static int iIdCountHelper;
-	int iId;
+
 private:	
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UBoxComponent* boxComponent;
@@ -46,4 +46,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Farm)
 	float fFarmDuration;	// 파밍에 걸리는 시간 중 현재 남은 시간
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Data)
+	int32 iId;
 };
