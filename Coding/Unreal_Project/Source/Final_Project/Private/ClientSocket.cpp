@@ -284,7 +284,7 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	packet.dz = MyDirection.Z;
 	size_t sent = 0;
 
-	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
+	MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
 	SendPacket(&packet);
 };
 
