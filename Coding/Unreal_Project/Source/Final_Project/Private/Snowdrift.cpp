@@ -6,6 +6,7 @@
 
 const float ASnowdrift::fFarmDurationMax = 3.0f;
 const int ASnowdrift::iNumOfSnowball = 10;
+int ASnowdrift::iIdCountHelper = -1;
 
 // Sets default values
 ASnowdrift::ASnowdrift()
@@ -43,7 +44,8 @@ ASnowdrift::ASnowdrift()
 void ASnowdrift::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	iId = ++iIdCountHelper;
 }
 
 // Called every frame

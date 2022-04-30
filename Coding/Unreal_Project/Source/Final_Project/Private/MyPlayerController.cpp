@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Debug.h"
+#include "Snowdrift.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -69,6 +70,19 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMyPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+
+	//눈더미
+	//TArray<AActor*> Snowdrifts;
+	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), Snowdrifts);
+
+	//for (auto sd : Snowdrifts)
+	//{
+	//	ASnowdrift* snowdrift = Cast<ASnowdrift>(sd);
+
+	//	MYLOG(Warning, TEXT("id : %d"), snowdrift->iId);
+	//}
+
 
 	//플레이어 초기설정
 	if (bInitPlayerSetting)

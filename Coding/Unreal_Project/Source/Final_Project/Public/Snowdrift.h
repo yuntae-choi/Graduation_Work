@@ -34,6 +34,9 @@ protected:
 public:
 	static const float fFarmDurationMax;	// ´« ¹«´õ±â ÆÄ¹Ö¿¡ °É¸®´Â ½Ã°£
 	static const int iNumOfSnowball;		// È¹µæÇÒ ¼ö ÀÖ´Â ´«µ¢ÀÌ ¼ö
+
+	static int iIdCountHelper;
+	int iId;
 private:	
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UBoxComponent* boxComponent;
