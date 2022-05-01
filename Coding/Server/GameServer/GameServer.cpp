@@ -661,6 +661,7 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 	}
 	case CS_PACKET_THROW_SNOW: {
+		if (cl.iCurrentSnowballCount <= 0) break;
 		printf("attack\n");
 		cl.iCurrentSnowballCount--;
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);

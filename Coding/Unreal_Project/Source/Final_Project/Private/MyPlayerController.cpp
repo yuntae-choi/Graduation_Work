@@ -185,6 +185,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 		if (info->new_ball) { 
 			player_->SnowAttack();
 			info->new_ball = false;
+			info->current_snow_count--;
 		}
 
 	
@@ -240,6 +241,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 		{
 			if (info->My_State == ST_SNOWMAN)
 			{
+				info->current_snow_count = 0;
 				player_->ChangeSnowman();
 			}
 		}
@@ -250,7 +252,12 @@ bool AMyPlayerController::UpdateWorldInfo()
 				player_->ChangeAnimal();
 			}
 		}
-
+		// 캐릭터 속성 업데이트
+		if (player_->iCurrentSnowballCount != info->current_snow_count)
+		{
+			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
+			player_->iCurrentSnowballCount = info->current_snow_count;
+		}
 		//if (info->start_farming_item == ITEM_MAT);
 		//if (info->start_farming_item == ITEM_UMB);
 		//if (info->start_farming_item == ITEM_BAG);

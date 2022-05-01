@@ -160,9 +160,34 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_GET_ITEM:
 	{
 		cs_packet_get_item* packet = reinterpret_cast<cs_packet_get_item*>(ptr);
-		if (packet->s_id == my_s_id)
+
+		switch (packet->item_type)
+		{
+
+		case ITEM_BAG:
+		{
+			
+			break;
+		}
+		case ITEM_UMB:
+		{
+			
+			break;
+		}
+		case ITEM_MAT:
+		{
+			
+			break;
+		}
+		case ITEM_SNOW:
+		{
 			CharactersInfo.players[packet->s_id].current_snow_count++;
-		MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
+			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
+			break;
+		}
+		default:
+			break;
+		}
 
 		//MYLOG(Warning, TEXT("[Recv item] id : %d, item : %d"), packet->s_id, packet->item_no);
 		//
