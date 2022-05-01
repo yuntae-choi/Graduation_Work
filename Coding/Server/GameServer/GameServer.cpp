@@ -584,6 +584,7 @@ void process_packet(int s_id, unsigned char* p)
 
 		if (cl._hp <= cl._min_hp)
 		{
+			cl.iCurrentSnowballCount = 0;
 			sc_packet_status_change _packet;
 			_packet.size = sizeof(_packet);
 			_packet.type = SC_PACKET_STATUS_CHANGE;
@@ -661,7 +662,7 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case CS_PACKET_THROW_SNOW: {
 		printf("attack\n");
-
+		cl.iCurrentSnowballCount--;
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
@@ -932,6 +933,7 @@ void worker_thread()
 					clients[_s_id].bIsSnowman = true;
 					clients[_s_id]._hp -= 1;
 					send_hp_packet(_s_id);
+					clients[_s_id].iCurrentSnowballCount = 0;
 					for (auto& other : clients) {
 						if (ST_INGAME != other._state) continue;
 						send_state_change(_s_id, other._s_id, ST_SNOWMAN);
