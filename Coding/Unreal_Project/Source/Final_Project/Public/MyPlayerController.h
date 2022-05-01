@@ -62,6 +62,10 @@ public:
 	{
 		charactersInfo->players[s_id].My_State = _state;
 	}
+	void SetCharacterHP(const int s_id, int _hp)
+	{
+		charactersInfo->players[s_id].HealthValue = _hp;
+	}
 	void Start_Signal()
 	{
 		bSetStart.store(true);

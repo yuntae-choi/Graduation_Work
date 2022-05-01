@@ -426,6 +426,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 #ifdef MULTIPLAY_DEBUG
 			//bIsSnowman = false;
 			PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
+			PlayerController->SetCharacterHP(iSessionId, iMaxHP);
 			ChangeAnimal();
 			PlayerController->GetSocket()->Send_StatusPacket(ST_ANIMAL, iSessionId);
 			UpdateTemperatureState();
