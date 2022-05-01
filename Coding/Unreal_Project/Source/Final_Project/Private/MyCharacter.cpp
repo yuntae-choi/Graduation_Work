@@ -286,6 +286,7 @@ void AMyCharacter::Attack()
 {
 	MYLOG(Warning, TEXT("attack"));
 	if (bIsSnowman) return;
+	if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId == PlayerController->iSessionId)  PlayerController->SendPlayerInfo(COMMAND_ATTACK);
 
