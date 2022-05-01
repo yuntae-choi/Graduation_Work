@@ -637,7 +637,8 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			int snow_drift_num = packet->destroy_obj_id;
 			bool get_snowball = is_snowdrift(snow_drift_num);
-			if (get_snowball) cl.iCurrentSnowballCount++;
+			if (get_snowball && cl.iMaxSnowballCount > cl.iCurrentSnowballCount) 
+				cl.iCurrentSnowballCount++;
 			for (auto& other : clients) {
 				if (ST_INGAME != other._state)
 					continue;

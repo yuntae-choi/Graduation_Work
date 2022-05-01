@@ -374,14 +374,7 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
 			player_->iCurrentHP = info.HealthValue;
 			CallDelegateUpdateHP();
-			//// 피격 파티클 스폰
-			//FTransform transform(player_->GetActorLocation());
-			//UGameplayStatics::SpawnEmitterAtLocation(
-			//	world, HitEmiiter, transform, true
-			//);
-			// 피격 애니메이션 스폰
-			//player_->PlayDamagedAnimation();
-			//player_->HealthValue = info.HealthValue;
+			
 		}
 		//눈사람 변화
 		if (player_->IsSnowman())
@@ -391,6 +384,14 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 				player_->ChangeSnowman();
 			}
 		}
+		// 캐릭터 속성 업데이트
+		if (player_->iCurrentSnowballCount != info.current_snow_count)
+		{
+			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
+			player_->iCurrentSnowballCount = info.current_snow_count;
+			CallDelegateUpdateCurrentSnowballCount();
+		}
+
 	}
 }
 

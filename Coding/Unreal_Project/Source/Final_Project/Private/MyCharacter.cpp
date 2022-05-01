@@ -575,8 +575,6 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 #ifdef MULTIPLAY_DEBUG
 			PlayerController->GetSocket()->Send_ItemPacket(ITEM_SNOW, snowdrift->GetId());
 #endif
-			//iCurrentSnowballCount += ASnowdrift::iNumOfSnowball; //서버에서 처리
-			//iCurrentSnowballCount = FMath::Clamp<int>(iCurrentSnowballCount, 0, iMaxSnowballCount);	//서버에서 처리
 			UpdateUI(UICategory::CurSnowball);
 			//snowdrift->Destroy(); //서버에서 아이디 반환시 처리
 			snowdrift = nullptr;

@@ -35,11 +35,13 @@ public:
     int _at_range = 1; // 기본 공격 범위
     int _sk_range = 2; // 스킬 범위
     bool is_bone = true;
-    int32 iMaxSnowballCount;
-    int32 iCurrentSnowballCount;
-    int32 iCurrentMatchCount;
-    bool bHasUmbrella;
-    bool bHasBag;
+    int32 iMaxSnowballCount = 10;
+    int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
+
+    int32 iCurrentSnowballCount = 0;
+    int32 iCurrentMatchCount = 0;
+    bool bHasUmbrella = false;
+    bool bHasBag = false;
     bool bIsSnowman = false;	// 현재 캐릭터가 눈사람인지
     bool b_ready = false;
 
