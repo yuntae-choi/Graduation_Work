@@ -122,6 +122,12 @@ void AMyPlayerController::SetNewBall(const int s_id)
 	newBalls.Push(s_id);
 }
 
+void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
+{
+	UWorld* World = GetWorld();
+	destory_snowdrift.Push(obj_id);
+}
+
 void AMyPlayerController::InitPlayerSetting()
 {
 	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
@@ -161,6 +167,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 	while (newBalls.TryPop(new_ball))
 	{
 		charactersInfo->players[new_ball].new_ball = true;
+	}
+	int del_obj;
+	while (destory_snowdrift.TryPop(del_obj))
+	{
+	      
 	}
 
 	for (auto& Character_ : SpawnedCharacters)

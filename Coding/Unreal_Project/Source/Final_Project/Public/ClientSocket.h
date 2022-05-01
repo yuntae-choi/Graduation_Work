@@ -116,6 +116,7 @@ public:
 	//카메라 방향
 	float fCDx, fCDy, fCDz;
 	STATE_Type My_State = ST_ANIMAL;
+	int current_snow_count = 0;
 
 	bool new_ball = false;
 
@@ -299,9 +300,9 @@ public:
 
 	string _name;
 	int      _prev_size = 0;
-	bool _stop = false;
-	bool _login_ok =false;
-
+	bool     _stop = false;
+	bool     _login_ok =false;
+	int       my_s_id = -1;
 private:
 	cCharactersInfo CharactersInfo;		// 캐릭터 정보
 

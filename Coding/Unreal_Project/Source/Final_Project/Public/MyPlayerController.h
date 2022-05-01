@@ -38,6 +38,7 @@ public:
 	void SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_);
 	void SetInitInfo(const cCharacter& me);
 	void SetNewBall(const int s_id);
+	void SetDestroySnowdritt(const int s_id);
 
 	void SendPlayerInfo(int input);
 	//void SendFarming(int item_no);
@@ -127,6 +128,8 @@ private:
 	shared_ptr<cCharacter> newplayer;
 	//queue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
 	LockQueue<int> newBalls;
+	LockQueue<int> destory_snowdrift;
+
 	//queue <int>				newBalls;
 	cCharactersInfo*		charactersInfo;	// 다른 캐릭터들의 정보
 

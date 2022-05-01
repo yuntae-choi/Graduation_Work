@@ -465,7 +465,8 @@ void AMyCharacter::StartFarming()
 {
 	if (!IsValid(farmingItem)) return;	//오버랩하면 바로 넣어줌
 	if (bIsSnowman) return;
-
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (iSessionId != PlayerController->iSessionId || !PlayerController->is_start()) return;
 	if (Cast<ASnowdrift>(farmingItem))
 	{
 		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
@@ -474,7 +475,6 @@ void AMyCharacter::StartFarming()
 	else if (Cast<AItembox>(farmingItem))
 	{
 		AItembox* itembox = Cast<AItembox>(farmingItem);
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 		switch (itembox->GetItemboxState())
 		{
 		case ItemboxState::Closed:
@@ -488,7 +488,6 @@ void AMyCharacter::StartFarming()
 
 				//아이템 파밍 시 서버 전송
 #ifdef MULTIPLAY_DEBUG
-				AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 				PlayerController->GetSocket()->Send_ItemPacket(itembox->GetItemType(), itembox->GetId());
 #endif
 
@@ -509,6 +508,7 @@ void AMyCharacter::StartFarming()
 
 bool AMyCharacter::GetItem(int itemType)
 {
+	
 	switch (itemType) {
 	case ItemTypeList::Match:
 		if (iCurrentMatchCount >= iMaxMatchCount) return false;	// 성냥 최대보유량을 넘어서 파밍하지 못하도록
@@ -560,7 +560,8 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 {
 	if (!bIsFarming) return;
 	if (!IsValid(farmingItem)) return;
-
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (iSessionId != PlayerController->iSessionId || !PlayerController->is_start()) return;
 	ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
 	if (snowdrift)
 	{	// 눈 무더기 duration 만큼 F키를 누르고 있으면 캐릭터의 눈덩이 추가 
@@ -572,16 +573,12 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 		{
 			//눈덩이 파밍 시 서버 전송
 #ifdef MULTIPLAY_DEBUG
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			PlayerController->GetSocket()->Send_ItemPacket(ITEM_SNOW, snowdrift->GetId());
 #endif
-
-
-
-			iCurrentSnowballCount += ASnowdrift::iNumOfSnowball; //서버에서 처리
-			iCurrentSnowballCount = FMath::Clamp<int>(iCurrentSnowballCount, 0, iMaxSnowballCount);	//서버에서 처리
+			//iCurrentSnowballCount += ASnowdrift::iNumOfSnowball; //서버에서 처리
+			//iCurrentSnowballCount = FMath::Clamp<int>(iCurrentSnowballCount, 0, iMaxSnowballCount);	//서버에서 처리
 			UpdateUI(UICategory::CurSnowball);
-			snowdrift->Destroy(); //서버에서 아이디 반환시 처리
+			//snowdrift->Destroy(); //서버에서 아이디 반환시 처리
 			snowdrift = nullptr;
 		}
 	}
@@ -658,7 +655,8 @@ void AMyCharacter::WaitForStartGame()
 void AMyCharacter::UpdateTemperatureState()
 {
 	if (bIsSnowman) return;
-
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (iSessionId != PlayerController->iSessionId || !PlayerController->is_start()) return;
 #ifdef SINGLEPLAY_DEBUG
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
 #endif
@@ -678,7 +676,6 @@ void AMyCharacter::UpdateTemperatureState()
 					UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 				}), 1.0f, true);
 #endif
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start())
 				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN, iSessionId);
 		}
@@ -692,7 +689,6 @@ void AMyCharacter::UpdateTemperatureState()
 					UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 				}), 1.0f, true);
 #endif
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start())
 				PlayerController->GetSocket()->Send_StatusPacket(ST_OUTBURN, iSessionId);
 		}

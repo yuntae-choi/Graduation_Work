@@ -12,6 +12,8 @@ const int  MAX_NAME_SIZE = 20;
 const int  MAX_CHAT_SIZE = 100;
 const int  MAX_USER = 10000;
 const int  MAX_OBJ = 20;
+const int  MAX_SNOWDRIFT = 1000;
+
 
 const char CS_PACKET_LOGIN = 1;
 const char CS_PACKET_MOVE = 2;
@@ -90,6 +92,15 @@ struct sc_packet_put_object {
 	float yaw;
 	char object_type;
 	char	name[MAX_NAME_SIZE];
+};
+
+
+struct sc_packet_get_item {
+	unsigned char size;
+	char	type;
+	int     s_id;;
+	int     item_type;
+	int     destroy_obj_id;
 };
 
 struct cs_packet_throw_snow {

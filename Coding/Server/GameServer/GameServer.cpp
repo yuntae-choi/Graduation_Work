@@ -14,13 +14,14 @@
 
 HANDLE g_h_iocp;
 HANDLE g_timer;
-mutex  m;
+mutex  g_m;
 condition_variable cv;
 SOCKET sever_socket;
 LockQueue<timer_ev> timer_q;
 
 //concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
+bool g_snow_drift[MAX_SNOWDRIFT] = {};
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -44,6 +45,8 @@ void process_packet(int _s_id, unsigned char* p);
 void worker_thread();
 void ev_timer();
 void send_state_change(int s_id, int target, STATE_Type stat);
+bool is_snowdrift(int obj_id);
+
 
 //이동
 void send_hp_packet(int _id)
@@ -97,6 +100,21 @@ bool is_near(int a, int b)
 	if (RANGE < abs(clients[a].y - clients[b].y)) return false;
 	return true;
 }
+
+bool is_snowdrift(int obj_id)
+{
+	unique_lock<mutex> _lock(g_m);
+	if (g_snow_drift[obj_id]) {
+		g_snow_drift[obj_id] = false;
+		return true;
+	}
+	return false;
+}
+
+
+
+
+
 int main()
 {
 	wcout.imbue(locale("korean"));
@@ -128,7 +146,10 @@ int main()
 
 	
 	g_timer = CreateEvent(NULL, FALSE, FALSE, NULL);
-
+	
+	for (int i = 0; i < MAX_SNOWDRIFT; ++i)
+		g_snow_drift[i] = true;
+	
 	for (int i = 0; i < MAX_USER; ++i)
 		clients[i]._s_id = i;
 
@@ -137,6 +158,8 @@ int main()
 
 
 	thread timer_thread{ ev_timer };
+
+
 
 	// 시스템 정보 가져옴
 	//SYSTEM_INFO sysInfo;
@@ -590,46 +613,43 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case CS_PACKET_GET_ITEM: {
 		cs_packet_get_item* packet = reinterpret_cast<cs_packet_get_item*>(p);
-		//int p_s_id = packet->s_id;
-		//int _item_no = packet->item_type;
-		//switch (packet->item_type)
-		//{
+		int p_s_id = packet->s_id;
+		
+		switch (packet->item_type)
+		{
 
-		//case ITEM_BAG:
-		//{
-		//	cl.bHasBag = true;
-		//	break;
-		//}
-		//case ITEM_UMB:
-		//{
-		//	cl.bHasUmbrella = true;
-		//	break;
-		//}
-		//case ITEM_MAT:
-		//{
-		//	cl.iCurrentMatchCount++;
-		//	break;
-		//}
-		//case ITEM_SNOW:
-		//{
-		//	cl.iCurrentSnowballCount++;
-		//	break;
-		//}
-		//default:
-		//	break;
-		//}
-		////cout << "플레이어[" << s_id << "]가 " << "아이템 [" << _item_no << "]얻음" << endl;
-		//
-		//for (auto& other : clients)
-		//{
-		//	if (ST_INGAME != other._state)
-		//		continue;
-		//	if (s_id == other._s_id) continue;
-
-		//	packet->type = SC_PACKET_GET_ITEM;
-		//	//printf_s("[Send item] id : %d, item : %d\n", s_id, _item_no);
-		//	other.do_send(sizeof(*packet), packet);
-		//}
+		case ITEM_BAG:
+		{
+			cl.bHasBag = true;
+			break;
+		}
+		case ITEM_UMB:
+		{
+			cl.bHasUmbrella = true;
+			break;
+		}
+		case ITEM_MAT:
+		{
+			cl.iCurrentMatchCount++;
+			break;
+		}
+		case ITEM_SNOW:
+		{
+			int snow_drift_num = packet->destroy_obj_id;
+			bool get_snowball = is_snowdrift(snow_drift_num);
+			if (get_snowball) cl.iCurrentSnowballCount++;
+			for (auto& other : clients) {
+				if (ST_INGAME != other._state)
+					continue;
+				packet->type = SC_PACKET_GET_ITEM;
+				other.do_send(sizeof(*packet), packet);
+			}
+			break;
+		}
+		default:
+			break;
+		}
+		//cout << "플레이어[" << s_id << "]가 " << "아이템 [" << _item_no << "]얻음" << endl;
 		
 		break;
 	}
