@@ -637,14 +637,19 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			int snow_drift_num = packet->destroy_obj_id;
 			bool get_snowball = is_snowdrift(snow_drift_num);
-			if (get_snowball && cl.iMaxSnowballCount > cl.iCurrentSnowballCount) 
+			if (get_snowball && cl.iMaxSnowballCount > cl.iCurrentSnowballCount) {
 				cl.iCurrentSnowballCount++;
-			for (auto& other : clients) {
-				if (ST_INGAME != other._state)
-					continue;
 				packet->type = SC_PACKET_GET_ITEM;
-				other.do_send(sizeof(*packet), packet);
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					packet->type = SC_PACKET_GET_ITEM;
+					other.do_send(sizeof(*packet), packet);
+				}
+				cout <<"플레이어: ["<< cl._s_id << "] 눈무더기 파밍 성공" << endl;
 			}
+			else
+				cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
 			break;
 		}
 		default:
