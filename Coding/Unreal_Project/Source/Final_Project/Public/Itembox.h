@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "NetworkData.h"
 #include "Itembox.generated.h"
 
 enum ItemboxState {
@@ -13,7 +14,7 @@ enum ItemboxState {
 };
 
 enum ItemTypeList {
-	Match, Umbrella, Bag, Random
+	Match = ITEM_MAT, Umbrella = ITEM_UMB, Bag = ITEM_BAG, Random
 };
 
 UCLASS()

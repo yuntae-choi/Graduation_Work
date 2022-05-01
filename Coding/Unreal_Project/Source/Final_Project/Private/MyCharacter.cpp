@@ -484,8 +484,16 @@ void AMyCharacter::StartFarming()
 			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
 			if (GetItem(itembox->GetItemType())) { 
 				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
-				//PlayerController->UpdateFarming(itembox->GetItemType());
-				itembox->DeleteItem(); 			
+
+
+				//아이템 파밍 시 서버 전송
+#ifdef MULTIPLAY_DEBUG
+				AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+				PlayerController->GetSocket()->Send_ItemPacket(itembox->GetItemType(), itembox->GetId());
+#endif
+
+				itembox->DeleteItem(); //서버에서 패킷받았을 때 처리		
+				// 아이템박스 안에서 아이템 결정나면 동기화해줘야 됨
 			}
 			break;
 		// 아이템박스가 열리는 중이거나 비어있는 경우
