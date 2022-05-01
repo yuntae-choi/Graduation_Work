@@ -40,6 +40,8 @@ public:
 	void DeleteItem();
 	void SetItem(int itemType = 3);
 
+	int32 GetId() const { return iId; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -53,6 +55,9 @@ public:
 
 	UPROPERTY(VisibleAnyWhere)
 	int iItemType;	// 아이템박스에 들어있는 아이템 타입
+
+	static int iIdCountHelper;
+
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UBoxComponent* boxComponent;
@@ -65,6 +70,9 @@ private:
 
 	UPROPERTY(VisibleAnyWhere, Category = Component)
 	UStaticMeshComponent* itemMeshComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Data)
+	int32 iId;
 
 	int iItemboxState;
 	float fSumRotation;

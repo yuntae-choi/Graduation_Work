@@ -10,6 +10,8 @@ FString ItemMeshStringArray[] = {
 	TEXT("/Game/NonCharacters/umbrellaForItemBox.umbrellaForItemBox"),		// 우산
 	TEXT("/Game/NonCharacters/snowdrift1.snowdrift1")};						// 가방 - 변경 필요
 
+int AItembox::iIdCountHelper = -1;
+
 // Sets default values
 AItembox::AItembox()
 {
@@ -85,6 +87,8 @@ void AItembox::BeginPlay()
 	//SetItem(ItemTypeList::Match);
 	//SetItem(ItemTypeList::Umbrella);
 	//SetItem(ItemTypeList::Bag);
+
+	iId = ++iIdCountHelper;
 }
 
 // Called every frame

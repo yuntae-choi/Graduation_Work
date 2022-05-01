@@ -8,6 +8,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Debug.h"
 #include "Snowdrift.h"
+#include "Itembox.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -72,15 +73,15 @@ void AMyPlayerController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	//눈더미
-	//TArray<AActor*> Snowdrifts;
-	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), Snowdrifts);
+	////확인용
+	//TArray<AActor*> Itemboxes;
+	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), Itemboxes);
 
-	//for (auto sd : Snowdrifts)
+	//for (auto ib : Itemboxes)
 	//{
-	//	ASnowdrift* snowdrift = Cast<ASnowdrift>(sd);
+	//	AItembox* itembox = Cast<AItembox>(ib);
 
-	//	MYLOG(Warning, TEXT("id : %d"), snowdrift->iId);
+	//	MYLOG(Warning, TEXT("id : %d"), itembox->GetId());
 	//}
 
 
