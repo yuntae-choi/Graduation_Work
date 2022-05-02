@@ -473,6 +473,7 @@ void AMyCharacter::StartFarming()
 	{
 		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
 		bIsFarming = true;
+		UpdateUI(UICategory::IsFarmingSnowdrift);
 	}
 	else if (Cast<AItembox>(farmingItem))
 	{
@@ -554,6 +555,7 @@ void AMyCharacter::EndFarming()
 			ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
 			snowdrift->SetFarmDuration(ASnowdrift::fFarmDurationMax);
 			bIsFarming = false;
+			UpdateUI(UICategory::IsFarmingSnowdrift);
 		}
 	}
 }
@@ -570,6 +572,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 		float lastFarmDuration = snowdrift->GetFarmDuration();
 		float newFarmDuration = lastFarmDuration - deltaTime;
 		snowdrift->SetFarmDuration(newFarmDuration);
+		UpdateUI(UICategory::SnowdriftFarmDuration, newFarmDuration);
 
 		if (newFarmDuration <= 0)
 		{
@@ -578,6 +581,8 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 			PlayerController->GetSocket()->Send_ItemPacket(ITEM_SNOW, snowdrift->GetId());
 #endif
 			UpdateUI(UICategory::CurSnowball);
+			bIsFarming = false;	// 눈무더기 파밍 끝나면 false로 변경 후 UI 갱신 (눈무더기 파밍 바 ui 안보이도록)
+			UpdateUI(UICategory::IsFarmingSnowdrift);
 			//snowdrift->Destroy(); //서버에서 아이디 반환시 처리
 			//snowdrift = nullptr;
 		}
@@ -795,7 +800,7 @@ void AMyCharacter::SetCharacterMaterial(int id)
 	}
 }
 
-void AMyCharacter::UpdateUI(int uiCategory)
+void AMyCharacter::UpdateUI(int uiCategory, float farmDuration)
 {
 #ifdef MULTIPLAY_DEBUG
 	if (iSessionId != localPlayerController->iSessionId) return;	// 로컬플레이어인 경우만 update
@@ -819,6 +824,12 @@ void AMyCharacter::UpdateUI(int uiCategory)
 		break;
 	case UICategory::HasBag:
 		localPlayerController->CallDelegateUpdateHasBag();	// HasBag ui 갱신
+		break;
+	case UICategory::IsFarmingSnowdrift:
+		localPlayerController->CallDelegateUpdateIsFarmingSnowdrift();	// snowdrift farming ui visible 갱신
+		break;
+	case UICategory::SnowdriftFarmDuration:
+		localPlayerController->CallDelegateUpdateSnowdriftFarmDuration(farmDuration);	// snowdrift farm duration ui 갱신
 		break;
 	case UICategory::AllOfUI:
 		localPlayerController->CallDelegateUpdateAllOfUI();	// 모든 캐릭터 ui 갱신

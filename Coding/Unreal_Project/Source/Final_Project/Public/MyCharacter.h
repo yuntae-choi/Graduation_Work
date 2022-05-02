@@ -15,7 +15,7 @@ enum CharacterState {
 };
 
 enum UICategory {
-	HP, CurSnowball, CurMatch, MaxSnowballAndMatch, HasUmbrella, HasBag, AllOfUI
+	HP, CurSnowball, CurMatch, MaxSnowballAndMatch, HasUmbrella, HasBag, IsFarmingSnowdrift, SnowdriftFarmDuration, AllOfUI
 };
 
 UCLASS()
@@ -40,6 +40,7 @@ public:
 	bool CanSetItem();
 	void SetItem(class AMyItem* NewItem);
 	void SetIsFarming(bool value) { bIsFarming = value; };
+	bool GetIsFarming() { return bIsFarming; };
 	void SetCanFarmItem(AActor* item) { farmingItem = item; };
 
 	bool GetIsInsideOfBonfire() { return bIsInsideOfBonfire; };
@@ -57,7 +58,7 @@ public:
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
-	void UpdateUI(int uiCategory);
+	void UpdateUI(int uiCategory, float farmDuration=0.0f);
 
 	void StartFarming();
 	void EndFarming();
