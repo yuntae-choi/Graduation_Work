@@ -493,8 +493,8 @@ void AMyCharacter::StartFarming()
 				PlayerController->GetSocket()->Send_ItemPacket(itembox->GetItemType(), itembox->GetId());
 #endif
 
-				itembox->DeleteItem(); //서버에서 패킷받았을 때 처리		
-				// 아이템박스 안에서 아이템 결정나면 동기화해줘야 됨
+				itembox->DeleteItem(); //서버에서 패킷받았을 때 처리
+				//박스가 열리는 시점에서 아이템 동기화
 			}
 			break;
 		// 아이템박스가 열리는 중이거나 비어있는 경우

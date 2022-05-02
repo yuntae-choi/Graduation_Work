@@ -190,9 +190,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		}
 
 		//MYLOG(Warning, TEXT("[Recv item] id : %d, item : %d"), packet->s_id, packet->item_no);
-		//
-		//CharactersInfo.players[packet->s_id].start_farming_item = packet->item_no;
-		//break;
+		break;
 	}
 	//case SC_PACKET_CHAT:
 	//{
