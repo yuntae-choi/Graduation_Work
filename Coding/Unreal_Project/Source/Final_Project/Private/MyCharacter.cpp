@@ -579,7 +579,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 #endif
 			UpdateUI(UICategory::CurSnowball);
 			//snowdrift->Destroy(); //서버에서 아이디 반환시 처리
-			snowdrift = nullptr;
+			//snowdrift = nullptr;
 		}
 	}
 }

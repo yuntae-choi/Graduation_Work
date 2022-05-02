@@ -149,6 +149,33 @@ bool AMyPlayerController::UpdateWorldInfo()
 	if (world == nullptr)					return false;
 	if (charactersInfo == nullptr)	return false;
 
+
+	int id_ = -1;
+	while (newBalls.TryPop(id_))
+	{
+		charactersInfo->players[id_].canAttack = true;
+	}
+
+
+	id_ = -1;
+	while (destory_snowdrift.TryPop(id_))
+	{
+		TArray<AActor*> Snowdrifts;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), Snowdrifts);
+
+		for (auto sd : Snowdrifts)
+		{
+			ASnowdrift* snowdrift = Cast<ASnowdrift>(sd);
+
+			if (snowdrift->GetId() == id_)
+			{
+				snowdrift->Destroy();
+				snowdrift = nullptr;
+			}
+		}
+	}
+
+
 	// 플레이어자신 체력, 사망업데이트
 	UpdatePlayerInfo(charactersInfo->players[iSessionId]);
 
@@ -162,18 +189,6 @@ bool AMyPlayerController::UpdateWorldInfo()
 	TArray<AActor*> SpawnedCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
 
-	//새 눈덩이
-	int new_ball;
-	while (newBalls.TryPop(new_ball))
-	{
-		charactersInfo->players[new_ball].new_ball = true;
-	}
-	int del_obj;
-	while (destory_snowdrift.TryPop(del_obj))
-	{
-	      
-	}
-
 	for (auto& Character_ : SpawnedCharacters)
 	{
 		//자신포함 모든플레이어
@@ -182,13 +197,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 		cCharacter* info = &charactersInfo->players[player_->iSessionId];
 		if (!info->IsAlive) continue;
 
-		if (info->new_ball) { 
+		if (info->canAttack) { 
 			player_->SnowAttack();
-			info->new_ball = false;
+			info->canAttack = false;
 			info->current_snow_count--;
 		}
-
-	
 
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)

@@ -118,7 +118,7 @@ public:
 	STATE_Type My_State = ST_ANIMAL;
 	int current_snow_count = 0;
 
-	bool new_ball = false;
+	bool canAttack = false;
 
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
