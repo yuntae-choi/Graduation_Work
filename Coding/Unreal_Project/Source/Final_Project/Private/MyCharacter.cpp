@@ -768,8 +768,8 @@ void AMyCharacter::ChangeAnimal()
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);
 	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
-	//iCurrentSnowballCount = 10;	// 디버깅용
-	iCurrentHP = iMaxHP;
+	
+	iCurrentHP = iBeginSlowHP;	// 눈사람 -> 동물 부활 시 체력 동상 상태(슬로우)로 설정 (30.0 - 체력의 1/4)
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
 	UpdateUI(UICategory::AllOfUI);
 
