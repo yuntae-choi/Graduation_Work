@@ -771,7 +771,7 @@ void AMyCharacter::ChangeAnimal()
 	//iCurrentSnowballCount = 10;	// µð¹ö±ë¿ë
 	iCurrentHP = iMaxHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
-	UpdateUI(UICategory::CurSnowball);
+	UpdateUI(UICategory::AllOfUI);
 
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
