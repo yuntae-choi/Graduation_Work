@@ -19,6 +19,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_CurrentMatchCount, int
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDele_Dynamic_MaxSnowballAndMatchCount, int32, NewMaxSnowballCount, int32, NewMaxMatchCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasUmbrella, bool, NewHasUmbrella);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasBag, bool, NewHasBag);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_IsFarmingSnowdrift, bool, NewIsFarmingSnowdrift);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SnowdriftFarmDuration, float, NewSnowdriftFarmDuration);
 
 /**
  *
@@ -57,6 +59,8 @@ public:
 	void CallDelegateUpdateMaxSnowballAndMatchCount();
 	void CallDelegateUpdateHasUmbrella();
 	void CallDelegateUpdateHasBag();
+	void CallDelegateUpdateIsFarmingSnowdrift();
+	void CallDelegateUpdateSnowdriftFarmDuration(float farmDuration);
 
 	void SetCharacterState(const int s_id, STATE_Type _state)
 	{
@@ -123,6 +127,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_HasBag FuncUpdateHasBag;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_IsFarmingSnowdrift FuncUpdateIsFarmingSnowdrift;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_SnowdriftFarmDuration FuncUpdateSnowdriftFarmDuration;
 
 private:
 	ClientSocket*			mySocket;

@@ -66,6 +66,8 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	FuncUpdateMaxSnowballAndMatchCount.Clear();
 	FuncUpdateHasUmbrella.Clear();
 	FuncUpdateHasBag.Clear();
+	FuncUpdateIsFarmingSnowdrift.Clear();
+	FuncUpdateSnowdriftFarmDuration.Clear();
 }
 
 void AMyPlayerController::Tick(float DeltaTime)
@@ -545,4 +547,22 @@ void AMyPlayerController::CallDelegateUpdateHasBag()
 	if (FuncUpdateHasBag.IsBound() == true) FuncUpdateHasBag.Broadcast(localPlayerCharacter->bHasBag);
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update has bag %d"), localPlayerCharacter->bHasBag);
+}
+
+void AMyPlayerController::CallDelegateUpdateIsFarmingSnowdrift()
+{
+	if (!characterUI) return;
+
+	if (FuncUpdateIsFarmingSnowdrift.IsBound() == true) FuncUpdateIsFarmingSnowdrift.Broadcast(localPlayerCharacter->GetIsFarming());
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update is farming snowdrift %d"), localPlayerCharacter->GetIsFarming());
+}
+
+void AMyPlayerController::CallDelegateUpdateSnowdriftFarmDuration(float farmDuration)
+{
+	if (!characterUI) return;
+
+	if (FuncUpdateSnowdriftFarmDuration.IsBound() == true) FuncUpdateSnowdriftFarmDuration.Broadcast(farmDuration);
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update snowdrift farm duration %f"), farmDuration);
 }

@@ -71,5 +71,6 @@ void ASnowdrift::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp
 	{
 		mycharacter->SetCanFarmItem(nullptr);
 		mycharacter->SetIsFarming(false);
+		mycharacter->UpdateUI(UICategory::IsFarmingSnowdrift);
 	}
 }
