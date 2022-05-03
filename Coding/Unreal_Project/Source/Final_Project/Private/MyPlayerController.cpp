@@ -130,6 +130,12 @@ void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
 	destory_snowdrift.Push(obj_id);
 }
 
+void AMyPlayerController::SetDestroyitembox(const int obj_id)
+{
+	UWorld* World = GetWorld();
+	destory_itembox.Push(obj_id);
+}
+
 void AMyPlayerController::InitPlayerSetting()
 {
 	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
@@ -177,6 +183,23 @@ bool AMyPlayerController::UpdateWorldInfo()
 		}
 	}
 
+	id_ = -1;
+	while (destory_itembox.TryPop(id_))
+	{
+		TArray<AActor*> ItemBox;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), ItemBox);
+
+		for (auto sd : ItemBox)
+		{
+			ASnowdrift* itembox = Cast<ASnowdrift>(sd);
+
+			if (itembox->GetId() == id_)
+			{
+				itembox->Destroy();
+				itembox = nullptr;
+			}
+		}
+	}
 
 	// 플레이어자신 체력, 사망업데이트
 	UpdatePlayerInfo(charactersInfo->players[iSessionId]);

@@ -14,7 +14,9 @@
 
 HANDLE g_h_iocp;
 HANDLE g_timer;
-mutex  g_m;
+mutex  g_snow_mutex;
+mutex  g_item_mutex;
+
 condition_variable cv;
 SOCKET sever_socket;
 LockQueue<timer_ev> timer_q;
@@ -22,6 +24,7 @@ LockQueue<timer_ev> timer_q;
 //concurrency::concurrent_priority_queue <timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
 bool g_snow_drift[MAX_SNOWDRIFT] = {};
+bool g_item[MAX_ITEM] = {};
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -103,7 +106,7 @@ bool is_near(int a, int b)
 
 bool is_snowdrift(int obj_id)
 {
-	unique_lock<mutex> _lock(g_m);
+	unique_lock<mutex> _lock(g_snow_mutex);
 	if (g_snow_drift[obj_id]) {
 		g_snow_drift[obj_id] = false;
 		return true;
@@ -111,7 +114,15 @@ bool is_snowdrift(int obj_id)
 	return false;
 }
 
-
+bool is_item(int obj_id)
+{
+	unique_lock<mutex> _lock(g_item_mutex);
+	if (g_item[obj_id]) {
+		g_item[obj_id] = false;
+		return true;
+	}
+	return false;
+}
 
 
 
@@ -149,7 +160,10 @@ int main()
 	
 	for (int i = 0; i < MAX_SNOWDRIFT; ++i)
 		g_snow_drift[i] = true;
-	
+
+	for (int i = 0; i < MAX_ITEM; ++i)
+		g_item[i] = true;
+
 	for (int i = 0; i < MAX_USER; ++i)
 		clients[i]._s_id = i;
 
@@ -621,17 +635,64 @@ void process_packet(int s_id, unsigned char* p)
 
 		case ITEM_BAG:
 		{
-			cl.bHasBag = true;
+			int item_num = packet->destroy_obj_id;
+			bool get_item = is_item(item_num);
+			if (get_item && cl.bHasBag ==false) {
+				cl.bHasBag = true;
+				packet->type = SC_PACKET_GET_ITEM;
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					packet->type = SC_PACKET_GET_ITEM;
+					other.do_send(sizeof(*packet), packet);
+				}
+				cout << "플레이어: [" << cl._s_id << "] 가방 파밍 성공" << endl;
+			}
+			else
+				cout << "플레이어: [" << cl._s_id << "] 가방 파밍 실패" << endl;
+			
 			break;
 		}
 		case ITEM_UMB:
 		{
-			cl.bHasUmbrella = true;
+			int item_num = packet->destroy_obj_id;
+			bool get_item = is_item(item_num);
+			if (get_item && cl.bHasUmbrella == false) {
+				cl.bHasUmbrella = true;
+				packet->type = SC_PACKET_GET_ITEM;
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					packet->type = SC_PACKET_GET_ITEM;
+					other.do_send(sizeof(*packet), packet);
+				}
+				cout << "플레이어: [" << cl._s_id << "] 우산 파밍 성공" << endl;
+			}
+			else
+				cout << "플레이어: [" << cl._s_id << "] 우산 파밍 실패" << endl;
+
+			
 			break;
 		}
 		case ITEM_MAT:
 		{
-			cl.iCurrentMatchCount++;
+			int item_num = packet->destroy_obj_id;
+			bool get_item = is_item(item_num);
+			if (get_item && cl.iOriginMaxMatchCount > cl.iCurrentMatchCount) {
+				cl.iCurrentMatchCount++;
+				packet->type = SC_PACKET_GET_ITEM;
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					packet->type = SC_PACKET_GET_ITEM;
+					other.do_send(sizeof(*packet), packet);
+				}
+				cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 성공" << endl;
+			}
+			else
+				cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 실패" << endl;
+
+			
 			break;
 		}
 		case ITEM_SNOW:
