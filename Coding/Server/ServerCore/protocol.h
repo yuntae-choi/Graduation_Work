@@ -14,6 +14,7 @@ const int  MAX_USER = 10000;
 const int  MAX_OBJ = 20;
 const int  MAX_SNOWDRIFT = 1000;
 
+const int  MAX_ITEM = 100;
 
 const char CS_PACKET_LOGIN = 1;
 const char CS_PACKET_MOVE = 2;

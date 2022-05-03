@@ -167,16 +167,21 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		case ITEM_BAG:
 		{
 			
+			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 			break;
 		}
 		case ITEM_UMB:
 		{
 			
+			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
+
 			break;
 		}
 		case ITEM_MAT:
 		{
 			
+			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
+
 			break;
 		}
 		case ITEM_SNOW:
