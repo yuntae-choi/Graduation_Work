@@ -68,6 +68,7 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	FuncUpdateHasBag.Clear();
 	FuncUpdateIsFarmingSnowdrift.Clear();
 	FuncUpdateSnowdriftFarmDuration.Clear();
+	FuncUpdateSelectedItem.Clear();
 }
 
 void AMyPlayerController::Tick(float DeltaTime)
@@ -526,6 +527,8 @@ void AMyPlayerController::CallDelegateUpdateAllOfUI()
 	CallDelegateUpdateMaxSnowballAndMatchCount();
 	CallDelegateUpdateHasUmbrella();
 	CallDelegateUpdateHasBag();
+
+	CallDelegateUpdateSelectedItem();
 }
 
 void AMyPlayerController::CallDelegateUpdateHP()
@@ -596,4 +599,13 @@ void AMyPlayerController::CallDelegateUpdateSnowdriftFarmDuration(float farmDura
 	if (FuncUpdateSnowdriftFarmDuration.IsBound() == true) FuncUpdateSnowdriftFarmDuration.Broadcast(farmDuration);
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update snowdrift farm duration %f"), farmDuration);
+}
+
+void AMyPlayerController::CallDelegateUpdateSelectedItem()
+{
+	if (!characterUI) return;
+
+	if (FuncUpdateSelectedItem.IsBound() == true) FuncUpdateSelectedItem.Broadcast(localPlayerCharacter->iSelectedItem);
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected item %d"), localPlayerCharacter->iSelectedItem);
 }
