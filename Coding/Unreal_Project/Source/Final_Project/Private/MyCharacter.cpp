@@ -425,11 +425,11 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
 #ifdef MULTIPLAY_DEBUG
 			//bIsSnowman = false;
-			PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
-			PlayerController->SetCharacterHP(iSessionId, iMaxHP);
-			ChangeAnimal();
+			//PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
+			//PlayerController->SetCharacterHP(iSessionId, iMaxHP);
+			//ChangeAnimal();
 			PlayerController->GetSocket()->Send_StatusPacket(ST_ANIMAL, iSessionId);
-			UpdateTemperatureState();
+			//UpdateTemperatureState();
 			PlayerController->GetSocket()->Send_StatusPacket(ST_SNOWMAN, otherCharacter->iSessionId);
 			
 			//PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);

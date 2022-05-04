@@ -287,6 +287,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 		{
 			if (info->My_State == ST_ANIMAL)
 			{
+				info->current_snow_count = 0;
 				player_->ChangeAnimal();
 			}
 		}
@@ -425,6 +426,13 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 		if (player_->IsSnowman())
 		{
 			if (info.My_State != ST_SNOWMAN)
+			{
+				player_->ChangeAnimal();
+			}
+		}
+		if (!player_->IsSnowman())
+		{
+			if (info.My_State == ST_SNOWMAN)
 			{
 				player_->ChangeSnowman();
 			}
