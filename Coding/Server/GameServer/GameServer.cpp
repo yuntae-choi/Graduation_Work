@@ -778,9 +778,10 @@ void process_packet(int s_id, unsigned char* p)
 			if (cl.bIsSnowman) break;
 			if (false == cl.is_bone) {
 				cl.is_bone = true;
-				cl._is_active = true;
-				player_heal(cl._s_id);
 			}
+			cl._is_active = true;
+			player_heal(cl._s_id);
+
 			cout << s_id << "플레이어 모닥불 내부" << endl;
 
 		}
@@ -789,9 +790,10 @@ void process_packet(int s_id, unsigned char* p)
 			if (cl.bIsSnowman) break;
 			if (true == cl.is_bone) {
 				cl.is_bone = false;
-				cl._is_active = true;
-				player_damage(cl._s_id);
+				
 			}
+			cl._is_active = true;
+			player_damage(cl._s_id);
 			cout << s_id << "플레이어 모닥불 밖" << endl;
 		}
 		else if (packet->state == ST_SNOWMAN)

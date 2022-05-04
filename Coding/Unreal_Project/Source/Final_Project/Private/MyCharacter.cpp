@@ -618,7 +618,7 @@ void AMyCharacter::ChangeSnowman()
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 	ResetHasItems();
 	UpdateUI(UICategory::AllOfUI);
-	UpdateTemperatureState();
+	
 
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
