@@ -45,7 +45,9 @@ enum CS_PacketType
 	CS_PACKET_LOGOUT,
 	CS_PACKET_STATUS_CHANGE,
 	CS_PACKET_READY,
-	CS_PACKET_STOP_SNOW_FARMING
+	CS_PACKET_STOP_SNOW_FARMING,
+	CS_PACKET_MATCH
+
 };
 
 enum SC_PacketType
@@ -72,7 +74,8 @@ enum COMMAND_Type
 {
 	COMMAND_ATTACK = 1,
 	COMMAND_MOVE,
-	COMMAND_DAMAGE
+	COMMAND_DAMAGE,
+	COMMAND_MATCH
 };
 
 enum ITEM_Type
@@ -143,6 +146,11 @@ struct cs_packet_throw_snow {
 };
 
 struct cs_packet_damage {
+	unsigned char size;
+	char	type;
+};
+
+struct cs_packet_match {
 	unsigned char size;
 	char	type;
 };

@@ -28,6 +28,7 @@ const char CS_PACKET_LOGOUT = 9;
 const char CS_PACKET_STATUS_CHANGE = 10;
 const char CS_PACKET_READY = 11;
 const char CS_PACKET_STOP_SNOW_FARMING = 12;
+const char CS_PACKET_MATCH = 13;
 
 
 
@@ -171,6 +172,11 @@ struct cs_packet_chat {
 struct cs_packet_teleport {
 	// 서버에서 장애물이 없는 랜덤 좌표로 텔레포트 시킨다.
 	// 더미 클라이언트에서 동접 테스트용으로 사용.
+	unsigned char size;
+	char	type;
+};
+
+struct cs_packet_match {
 	unsigned char size;
 	char	type;
 };

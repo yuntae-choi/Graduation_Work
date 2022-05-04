@@ -240,6 +240,7 @@ public:
 	void Send_ItemPacket(int item_no, int destroy_obj_id);
 	void Send_LogoutPacket(const int& s_id);
 	void Send_ReadyPacket();
+	void Send_MatchPacket(); 
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);

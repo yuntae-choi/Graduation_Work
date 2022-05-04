@@ -274,6 +274,15 @@ void ClientSocket::Send_DamagePacket() {
 	SendPacket(&packet);
 };
 
+void ClientSocket::Send_MatchPacket() {
+	cs_packet_match packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_MATCH;
+
+	MYLOG(Warning, TEXT("[Send damage]"));
+	SendPacket(&packet);
+};
+
 void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir)
 {
 	if (_login_ok) {

@@ -384,6 +384,8 @@ void AMyPlayerController::SendPlayerInfo(int input)
 		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
 		mySocket->Send_DamagePacket();
+	else if (input == COMMAND_MATCH)
+		mySocket->Send_MatchPacket();
 }
 
 //플레이어 정보 업데이트

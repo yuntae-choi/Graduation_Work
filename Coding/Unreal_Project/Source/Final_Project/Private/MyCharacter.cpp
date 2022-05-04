@@ -617,6 +617,7 @@ void AMyCharacter::ChangeSnowman()
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
 	UpdateUI(UICategory::AllOfUI);
+	UpdateTemperatureState();
 
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
@@ -745,7 +746,7 @@ void AMyCharacter::ChangeAnimal()
 	iCurrentHP = iBeginSlowHP;	// 눈사람 -> 동물 부활 시 체력 동상 상태(슬로우)로 설정 (30.0 - 체력의 1/4)
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
 	UpdateUI(UICategory::AllOfUI);
-
+	UpdateTemperatureState();
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
 	UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신

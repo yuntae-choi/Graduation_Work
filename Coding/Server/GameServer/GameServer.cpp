@@ -591,7 +591,8 @@ void process_packet(int s_id, unsigned char* p)
 
 	}
 	case CS_PACKET_DAMAGE: {
-		cout << cl._s_id << "데미지 받음 " << endl;
+		if (cl.bIsSnowman) break;
+		cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
 		cl._hp -= 10;
 		if (cl._hp < 270) cl._hp = 270;
 		send_hp_packet(cl._s_id);
@@ -611,6 +612,20 @@ void process_packet(int s_id, unsigned char* p)
 				cout << "눈사람" << endl;
 				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 			}
+		}
+
+		break;
+
+	}
+	case CS_PACKET_MATCH: {
+		cout << "플레이어 " << cl._s_id << ": 성냥 사용 " << endl;
+		if (cl.bIsSnowman) break;
+		if (cl.iCurrentMatchCount > 0)
+		{
+			cl.iCurrentMatchCount--;
+			Timer_Event(s_id, s_id, CL_MATCH, 1000ms);
+			Timer_Event(s_id, s_id, CL_MATCH, 2000ms);
+			Timer_Event(s_id, s_id, CL_MATCH, 3000ms);
 		}
 
 		break;
@@ -966,16 +981,14 @@ void worker_thread()
 		}
 					  break;
 		case OP_PLAYER_HEAL: {
-
-			if (clients[_s_id].is_bone == true) {
-				if (clients[_s_id]._hp + 10 <= clients[_s_id]._max_hp) {
-					clients[_s_id]._hp += 10;
-					player_heal(_s_id);
-				}
-				else
-					clients[_s_id]._hp = clients[_s_id]._max_hp;
-				send_hp_packet(_s_id);
+			if (clients[_s_id]._hp + 10 <= clients[_s_id]._max_hp) {
+				clients[_s_id]._hp += 10;
+				player_heal(_s_id);
 			}
+			else
+				clients[_s_id]._hp = clients[_s_id]._max_hp;
+			send_hp_packet(_s_id);
+
 			delete exp_over;
 			break;
 		}
@@ -1060,6 +1073,10 @@ void ev_timer()
 			else if (order.order == CL_BONEOUT) {
 				if (clients[s_id].is_bone == true) continue;
 				Player_Event(s_id, order.target_id, OP_PLAYER_DAMAGE);
+				this_thread::sleep_for(50ms);
+			}
+			else if (order.order == CL_MATCH) {
+				Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
 				this_thread::sleep_for(50ms);
 			}
 
