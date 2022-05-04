@@ -98,6 +98,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 	if (bSetStart)
 		StartGame();
 
+
 	// 월드 동기화
 	UpdateWorldInfo();
 
@@ -440,7 +441,10 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 	}
 	else
 	{
-		
+		if (bisBone) { 
+			player_->UpdateTemperatureState();
+			bisBone = false;
+		}
 		//눈사람 변화
 		if (player_->IsSnowman())
 		{

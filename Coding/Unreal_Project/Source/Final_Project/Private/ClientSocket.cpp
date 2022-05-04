@@ -198,6 +198,11 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		//MYLOG(Warning, TEXT("[Recv item] id : %d, item : %d"), packet->s_id, packet->item_no);
 		break;
 	}
+	case SC_PACKET_IS_BONE:
+	{
+		MyPlayerController->get_bone();
+		break;
+	}
 	//case SC_PACKET_CHAT:
 	//{
 

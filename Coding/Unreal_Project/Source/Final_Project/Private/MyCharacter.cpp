@@ -837,12 +837,18 @@ void AMyCharacter::UseSelectedItem()
 	if (bIsSnowman) return;	// 눈사람은 아이템 사용 x
 
 	switch (iSelectedItem) {
-	case ItemTypeList::Match:		// 성냥 아이템 사용 시
+	case ItemTypeList::Match: {	// 성냥 아이템 사용 시
 		if (iCurrentMatchCount <= 0) return;	// 보유한 성냥이 없는 경우 리턴
 		// 체력 += 20 (체온으로는 2.0도)
+		AMyPlayerController* _PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		if (iSessionId == _PlayerController->iSessionId)
+		{
+			_PlayerController->SendPlayerInfo(COMMAND_MATCH);
+		}
 		iCurrentMatchCount -= 1;
 		UpdateUI(UICategory::CurMatch);
 		break;
+	}
 	case ItemTypeList::Umbrella:	// 우산 아이템 사용 시
 		break;
 	default:

@@ -37,6 +37,8 @@ public:
     int _at_range = 1; // 기본 공격 범위
     int _sk_range = 2; // 스킬 범위
     bool is_bone = true;
+    atomic_bool is_match = false;
+
     int32 iMaxSnowballCount = 10;
     int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 

@@ -47,6 +47,8 @@ const char SC_PACKET_GET_ITEM = 12;
 const char SC_PACKET_READY = 13;
 const char SC_PACKET_START = 14;
 const char SC_PACKET_STOP_SNOW_FARMING = 15;
+const char SC_PACKET_IS_BONE = 16;
+
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -177,6 +179,11 @@ struct cs_packet_teleport {
 };
 
 struct cs_packet_match {
+	unsigned char size;
+	char	type;
+};
+
+struct sc_packet_is_bone {
 	unsigned char size;
 	char	type;
 };

@@ -66,8 +66,8 @@ enum SC_PacketType
 	SC_PACKET_GET_ITEM,
 	SC_PACKET_READY,
 	SC_PACKET_START,
-	SC_PACKET_STOP_SNOW_FARMING
-
+	SC_PACKET_STOP_SNOW_FARMING,
+	SC_PACKET_IS_BONE
 };
 
 enum COMMAND_Type
@@ -240,6 +240,10 @@ struct cs_packet_ready { // 게임 레디 요청
 struct sc_packet_start { // 스폰
 	unsigned char size;
 	char type;
+};
+struct sc_packet_is_bone {
+	unsigned char size;
+	char	type;
 };
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };

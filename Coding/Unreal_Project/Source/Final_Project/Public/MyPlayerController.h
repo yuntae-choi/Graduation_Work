@@ -81,6 +81,10 @@ public:
 	{
 		return bInGame;
 	}
+	void get_bone()
+	{
+		bisBone = true;
+	}
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
@@ -159,6 +163,8 @@ private:
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
 	bool							bInGame;
+	bool							bisBone = false;
+
 	atomic<bool>                    bSetStart;
 	// 스폰시킬 다른 캐릭터
 	UPROPERTY(EditAnywhere, Category = "Spawning")

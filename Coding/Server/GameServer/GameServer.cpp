@@ -64,6 +64,17 @@ void send_hp_packet(int _id)
 	clients[_id].do_send(sizeof(packet), &packet);
 }
 
+//모닥불 확인
+void send_is_bone_packet(int _id)
+{
+	cout << "모닥불 확인" << endl;
+	sc_packet_is_bone packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_IS_BONE;
+	// printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
+	clients[_id].do_send(sizeof(packet), &packet);
+}
+
 void player_heal(int s_id)
 {
 	if (false == clients[s_id].bIsSnowman) {
@@ -623,9 +634,11 @@ void process_packet(int s_id, unsigned char* p)
 		if (cl.iCurrentMatchCount > 0)
 		{
 			cl.iCurrentMatchCount--;
+			cl.is_bone = true;
 			Timer_Event(s_id, s_id, CL_MATCH, 1000ms);
 			Timer_Event(s_id, s_id, CL_MATCH, 2000ms);
 			Timer_Event(s_id, s_id, CL_MATCH, 3000ms);
+			Timer_Event(s_id, s_id, CL_END_MATCH, 3100ms);
 		}
 
 		break;
@@ -1081,7 +1094,10 @@ void ev_timer()
 				Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
 				this_thread::sleep_for(50ms);
 			}
-
+			else if (order.order == CL_END_MATCH) {
+				send_is_bone_packet(s_id);
+				this_thread::sleep_for(50ms);
+			}
 		}
 		else {
 			timer_q.Push(order);
