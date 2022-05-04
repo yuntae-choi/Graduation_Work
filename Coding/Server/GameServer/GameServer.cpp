@@ -786,7 +786,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (false == clients[packet->s_id].bIsSnowman) {
 				clients[packet->s_id].bIsSnowman = true;
 				clients[packet->s_id]._hp = clients[packet->s_id]._min_hp;
-				send_hp_packet(packet->s_id);
+				//send_hp_packet(packet->s_id);
 				for (auto& other : clients) {
 					if (ST_INGAME != other._state)
 						continue;
@@ -805,7 +805,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (true == clients[packet->s_id].bIsSnowman) {
 				clients[packet->s_id]._hp = clients[packet->s_id]._max_hp;
 				clients[packet->s_id].bIsSnowman = false;
-				send_hp_packet(packet->s_id);
+				//send_hp_packet(packet->s_id);
 				for (auto& other : clients) {
 					if (ST_INGAME != other._state)
 						continue;

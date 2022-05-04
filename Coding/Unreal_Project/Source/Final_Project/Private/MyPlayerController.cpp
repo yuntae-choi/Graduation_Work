@@ -387,7 +387,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 }
 
 //플레이어 정보 업데이트
-void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
+void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 {
 	UWorld* const world = GetWorld();
 	if (!world)
@@ -415,28 +415,33 @@ void AMyPlayerController::UpdatePlayerInfo(const cCharacter& info)
 	}
 	else
 	{
+		
+		//눈사람 변화
+		if (player_->IsSnowman())
+		{
+			if (info.My_State == ST_ANIMAL)
+			{
+				info.current_snow_count = 0;
+				info.HealthValue = player_->iMaxHP;
+				player_->ChangeAnimal();
+			}
+		}
+		else if (!player_->IsSnowman())
+		{
+			if (info.My_State == ST_SNOWMAN)
+			{
+				info.current_snow_count = 0;
+				info.HealthValue = player_->iMinHP;
+				player_->ChangeSnowman();
+			}
+		}
 		// 캐릭터 속성 업데이트
 		if (player_->iCurrentHP != info.HealthValue)
 		{
 			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
 			player_->iCurrentHP = info.HealthValue;
 			CallDelegateUpdateHP();
-			
-		}
-		//눈사람 변화
-		if (player_->IsSnowman())
-		{
-			if (info.My_State != ST_SNOWMAN)
-			{
-				player_->ChangeAnimal();
-			}
-		}
-		if (!player_->IsSnowman())
-		{
-			if (info.My_State == ST_SNOWMAN)
-			{
-				player_->ChangeSnowman();
-			}
+
 		}
 		// 캐릭터 속성 업데이트
 		if (player_->iCurrentSnowballCount != info.current_snow_count)

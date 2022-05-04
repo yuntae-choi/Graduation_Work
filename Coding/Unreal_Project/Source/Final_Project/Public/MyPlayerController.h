@@ -90,7 +90,7 @@ private:
 	void InitPlayerSetting();
 	bool UpdateWorldInfo();		// 월드 동기화
 	void UpdateNewPlayer();
-	void UpdatePlayerInfo(const cCharacter& info);
+	void UpdatePlayerInfo(cCharacter& info);
 	void LoadReadyUI();	// ReadyUI 띄우기, UI에 대한 입력만 허용
 	void LoadCharacterUI();	// CharacterUI 띄우기, 게임에 대한 입력 허용
 

@@ -616,6 +616,8 @@ void AMyCharacter::ChangeSnowman()
 
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
+	UpdateUI(UICategory::AllOfUI);
+
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
 	UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
