@@ -21,6 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasUmbrella, bool, New
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasBag, bool, NewHasBag);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_IsFarmingSnowdrift, bool, NewIsFarmingSnowdrift);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SnowdriftFarmDuration, float, NewSnowdriftFarmDuration);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedItem, int32, NewSelectedItem);
 
 /**
  *
@@ -62,6 +63,7 @@ public:
 	void CallDelegateUpdateHasBag();
 	void CallDelegateUpdateIsFarmingSnowdrift();
 	void CallDelegateUpdateSnowdriftFarmDuration(float farmDuration);
+	void CallDelegateUpdateSelectedItem();
 
 	void SetCharacterState(const int s_id, STATE_Type _state)
 	{
@@ -134,6 +136,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_SnowdriftFarmDuration FuncUpdateSnowdriftFarmDuration;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_SelectedItem FuncUpdateSelectedItem;
 
 private:
 	ClientSocket*			mySocket;
