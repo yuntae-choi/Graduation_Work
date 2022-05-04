@@ -10,7 +10,7 @@
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
-const int iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
+const int AMyCharacter::iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
 const float fChangeSnowmanStunTime = 3.0f;	// 실제값 - 10.0f, 눈사람화 할 때 스턴 시간
@@ -616,6 +616,7 @@ void AMyCharacter::ChangeSnowman()
 
 	iCurrentHP = iMinHP;
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 체온 증감 핸들러 초기화 (체온 변화하지 않도록)
+	ResetHasItems();
 	UpdateUI(UICategory::AllOfUI);
 	UpdateTemperatureState();
 
@@ -726,6 +727,7 @@ void AMyCharacter::ResetHasItems()
 	bHasUmbrella = false;
 	bHasBag = false;
 
+
 	UpdateUI(UICategory::AllOfUI);
 }
 
@@ -745,8 +747,10 @@ void AMyCharacter::ChangeAnimal()
 	
 	iCurrentHP = iBeginSlowHP;	// 눈사람 -> 동물 부활 시 체력 동상 상태(슬로우)로 설정 (30.0 - 체력의 1/4)
 	GetWorldTimerManager().ClearTimer(temperatureHandle);
+	ResetHasItems();
 	UpdateUI(UICategory::AllOfUI);
 	UpdateTemperatureState();
+	
 #ifdef SINGLEPLAY_DEBUG
 	UpdateTemperatureState();
 	UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신

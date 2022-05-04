@@ -818,7 +818,7 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			cout << "플레이어" << s_id << "가 플레이어" << packet->s_id << "가 동물이라 전송함" << endl;
 			if (true == clients[packet->s_id].bIsSnowman) {
-				clients[packet->s_id]._hp = clients[packet->s_id]._max_hp;
+				clients[packet->s_id]._hp = clients[packet->s_id]._BeginSlowHP;
 				clients[packet->s_id].bIsSnowman = false;
 				//send_hp_packet(packet->s_id);
 				for (auto& other : clients) {

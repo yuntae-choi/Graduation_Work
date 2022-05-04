@@ -281,6 +281,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 			if (info->My_State == ST_SNOWMAN)
 			{
 				info->current_snow_count = 0;
+				Reset_Items(player_->iSessionId);
 				player_->ChangeSnowman();
 			}
 		}
@@ -288,7 +289,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 		{
 			if (info->My_State == ST_ANIMAL)
 			{
-				info->current_snow_count = 0;
+				Reset_Items(player_->iSessionId);
 				player_->ChangeAnimal();
 			}
 		}
@@ -365,6 +366,28 @@ void AMyPlayerController::UpdateNewPlayer()
 	//bNewPlayerEntered = false;
 }
 
+
+void AMyPlayerController::Reset_Items(int s_id)
+{
+	// 필드의 플레이어 정보에 추가
+	if (charactersInfo != nullptr)
+	{
+		charactersInfo->players[s_id].current_snow_count = 0;
+		//charactersInfo->players[s_id].current_match_count = 0;
+		//charactersInfo->players[s_id].bHasUmbrella = false;
+		//charactersInfo->players[s_id].bHasBag = false;;
+	
+	}
+	/*iCurrentSnowballCount = 0;
+	iMaxSnowballCount = iOriginMaxSnowballCount;
+	iCurrentMatchCount = 0;
+	iMaxMatchCount = iOriginMaxMatchCount;
+	bHasUmbrella = false;
+	bHasBag = false;*/
+
+	//UpdateUI(UICategory::AllOfUI);
+}
+
 void AMyPlayerController::SendPlayerInfo(int input)
 {
 	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
@@ -423,8 +446,8 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 		{
 			if (info.My_State == ST_ANIMAL)
 			{
-				info.current_snow_count = 0;
-				info.HealthValue = player_->iMaxHP;
+				Reset_Items(player_->iSessionId);
+				info.HealthValue = player_->iBeginSlowHP;
 				player_->ChangeAnimal();
 			}
 		}
@@ -432,7 +455,7 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 		{
 			if (info.My_State == ST_SNOWMAN)
 			{
-				info.current_snow_count = 0;
+				Reset_Items(player_->iSessionId);
 				info.HealthValue = player_->iMinHP;
 				player_->ChangeSnowman();
 			}

@@ -93,6 +93,7 @@ private:
 	void UpdatePlayerInfo(cCharacter& info);
 	void LoadReadyUI();	// ReadyUI 띄우기, UI에 대한 입력만 허용
 	void LoadCharacterUI();	// CharacterUI 띄우기, 게임에 대한 입력 허용
+	void Reset_Items(int s_id);
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디

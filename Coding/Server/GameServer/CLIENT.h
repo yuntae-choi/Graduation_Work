@@ -26,6 +26,8 @@ public:
 
 	int _max_hp = 390; // 최대 체력
     int _min_hp = 270;
+    int _BeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
+
     int _hp; // 체력
     int _level; // 레벨
     int _max_exp;
