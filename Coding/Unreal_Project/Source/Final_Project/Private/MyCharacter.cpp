@@ -137,12 +137,11 @@ AMyCharacter::AMyCharacter()
 	
 	bIsInsideOfBonfire = false;
 
-	//fMatchDuration = 3.0f;
-	//match = true;
-
 	iCharacterState = CharacterState::AnimalNormal;
 	bIsSnowman = false;
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
+
+	iSelectedItem = ItemTypeList::Match;	// 선택된 아이템 기본값 - 성냥
 }
 
 // Called when the game starts or when spawned
@@ -205,25 +204,10 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AMyCharacter::Attack);
 	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Pressed, this, &AMyCharacter::StartFarming);
 	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Released, this, &AMyCharacter::EndFarming);
-}
 
-bool AMyCharacter::CanSetItem()
-{
-	//return (nullptr == CurrentItem);
-	return 0;
-}
-
-void AMyCharacter::SetItem(AMyItem* NewItem)
-{
-	//MYCHECK(nullptr != NewItem && nullptr == CurrentItem);
-	//FName ItemSocket(TEXT("hand_rSocket"));
-	//auto CurItem = GetWorld()->SpawnActor<AMyItem>(FVector::ZeroVector, FRotator::ZeroRotator);
-	//if (nullptr != NewItem)
-	//{
-	//	NewItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemSocket);
-	//	NewItem->SetOwner(this);
-	//	CurrentItem = NewItem;
-	//}
+	PlayerInputComponent->BindAction(TEXT("SelectMatch"), EInputEvent::IE_Pressed, this, &AMyCharacter::SelectMatch);
+	PlayerInputComponent->BindAction(TEXT("SelectUmbrella"), EInputEvent::IE_Pressed, this, &AMyCharacter::SelectUmbrella);
+	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Pressed, this, &AMyCharacter::UseSelectedItem);
 }
 
 void AMyCharacter::UpDown(float NewAxisValue)
@@ -700,19 +684,6 @@ void AMyCharacter::UpdateTemperatureState()
 	//}
 }
 
-//void AMyCharacter::UpdateTemperatureByMatch()
-//{
-//	fMatchDuration -= 1.0f;
-//	iCurrentHP += 1.0f;
-//
-//	if (fMatchDuration <= 0.0f)
-//	{
-//		match = false;
-//		fMatchDuration = 3.0f;
-//		UpdateTemperatureState();
-//	}
-//}
-
 void AMyCharacter::StartStun(float waitTime)
 {
 	//if (!playerController) return;	// 다른 플레이어의 캐릭터는 플레이어 컨트롤러가 존재 x?
@@ -831,8 +802,41 @@ void AMyCharacter::UpdateUI(int uiCategory, float farmDuration)
 	case UICategory::SnowdriftFarmDuration:
 		localPlayerController->CallDelegateUpdateSnowdriftFarmDuration(farmDuration);	// snowdrift farm duration ui 갱신
 		break;
+	case UICategory::SelectedItem:
+		localPlayerController->CallDelegateUpdateSelectedItem();
+		break;
 	case UICategory::AllOfUI:
 		localPlayerController->CallDelegateUpdateAllOfUI();	// 모든 캐릭터 ui 갱신
+		break;
+	default:
+		break;
+	}
+}
+
+void AMyCharacter::SelectMatch()
+{
+	iSelectedItem = ItemTypeList::Match;
+	UpdateUI(UICategory::SelectedItem);
+}
+
+void AMyCharacter::SelectUmbrella()
+{
+	iSelectedItem = ItemTypeList::Umbrella;
+	UpdateUI(UICategory::SelectedItem);
+}
+
+void AMyCharacter::UseSelectedItem()
+{
+	if (bIsSnowman) return;	// 눈사람은 아이템 사용 x
+
+	switch (iSelectedItem) {
+	case ItemTypeList::Match:		// 성냥 아이템 사용 시
+		if (iCurrentMatchCount <= 0) return;	// 보유한 성냥이 없는 경우 리턴
+		// 체력 += 20 (체온으로는 2.0도)
+		iCurrentMatchCount -= 1;
+		UpdateUI(UICategory::CurMatch);
+		break;
+	case ItemTypeList::Umbrella:	// 우산 아이템 사용 시
 		break;
 	default:
 		break;

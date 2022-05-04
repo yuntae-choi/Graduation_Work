@@ -15,7 +15,7 @@ enum CharacterState {
 };
 
 enum UICategory {
-	HP, CurSnowball, CurMatch, MaxSnowballAndMatch, HasUmbrella, HasBag, IsFarmingSnowdrift, SnowdriftFarmDuration, AllOfUI
+	HP, CurSnowball, CurMatch, MaxSnowballAndMatch, HasUmbrella, HasBag, IsFarmingSnowdrift, SnowdriftFarmDuration, SelectedItem, AllOfUI
 };
 
 UCLASS()
@@ -37,8 +37,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void ReleaseSnowball();
 
-	bool CanSetItem();
-	void SetItem(class AMyItem* NewItem);
 	void SetIsFarming(bool value) { bIsFarming = value; };
 	bool GetIsFarming() { return bIsFarming; };
 	void SetCanFarmItem(AActor* item) { farmingItem = item; };
@@ -46,7 +44,6 @@ public:
 	bool GetIsInsideOfBonfire() { return bIsInsideOfBonfire; };
 	void SetIsInsideOfBonfire(bool value) { bIsInsideOfBonfire = value; };
 	void UpdateTemperatureState();
-	//void UpdateTemperatureByMatch();
 	void UpdateSpeed();
 	int GetCharacterState() { return iCharacterState; };
 	bool IsSnowman() { return bIsSnowman; };
@@ -62,6 +59,10 @@ public:
 
 	void StartFarming();
 	void EndFarming();
+
+	void SelectMatch();
+	void SelectUmbrella();
+	void UseSelectedItem();
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -86,14 +87,7 @@ private:
 	bool GetIsSnowman() { return bIsSnowman; };
 	void WaitForStartGame();	// 게임 시작 후 대기
 
-public:	
-
-	//UPROPERTY(VisibleAnywhere, Category = Item)
-	//class AMyItem* CurrentItem;
-
-	//UPROPERTY(VisibleAnywhere, Category = Item)
-	//USkeletalMeshComponent* Item;
-
+public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* springArm;
 
@@ -151,6 +145,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* snowmanMaterial;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iSelectedItem;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
@@ -188,11 +185,6 @@ private:
 
 	// 초당 체온 증감시키는 타이머 핸들러
 	FTimerHandle temperatureHandle;
-
-	//UPROPERTY(VisibleAnywhere, Category = Temperature)
-	//float fMatchDuration;	// 후에 성냥 클래스 생성하면 성냥 클래스 변수로 옮기기
-
-	//bool match;
 
 	UPROPERTY(VisibleAnywhere, Category = State)
 	int32 iCharacterState;	// 현재 캐릭터의 상태 (AnimalNormal, AnimalSlow, SnowmanNormal, SnowmanStunned)
