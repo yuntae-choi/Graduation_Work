@@ -11,6 +11,7 @@
 class AMyGameModeBase;
 class AMyPlayerController;
 
+
 using namespace std;
 
 //================================================================
@@ -21,6 +22,7 @@ enum STATE_Type { ST_SNOWMAN, ST_INBURN, ST_OUTBURN, ST_ANIMAL };
 //================================================================
 // 멀티쓰레드 상황에서 큐에 동시성을 보장해줌
 //================================================================
+
 template<typename T>
 class LockQueue
 {
@@ -206,30 +208,19 @@ public:
 // 서버와 통신을 담당하는 클래스
 // 클라이언트 소켓을 담고 있음
 //================================================================
+void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED recv_over, DWORD recv_flag);
+
 class FINAL_PROJECT_API ClientSocket : public FRunnable
 {
 public:
-	ClientSocket() {
-		WSAData wsaData;
-		if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-			MYLOG(Warning, TEXT("Failed to start wsa"));
-
-		_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-		//_login_ok = false;
-
-		/*	if (_socket == INVALID_SOCKET)
-				MYLOG(Warning, TEXT("Failed to start socket"));
-
-			u_long on = 1;
-			if (::ioctlsocket(_socket, FIONBIO, &on) == INVALID_SOCKET)
-				MYLOG(Warning, TEXT("Failed to start iostlsocket"));*/
-	};
+	ClientSocket(); 
 	~ClientSocket();
 
 	bool Connect();
-	void ProcessPacket(unsigned char* ptr);
+	void ProcessPacket(char* ptr);
 	void Send_LoginPacket();
 	void Send_StatusPacket(STATE_Type _state, int s_id);
+	void process_data(unsigned char* net_buf, size_t io_byte);
 
 	
 	void Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir);
@@ -252,10 +243,12 @@ public:
 		ZeroMemory(&_recv_over._wsa_over, sizeof(_recv_over._wsa_over));
 		_recv_over._wsa_buf.buf = reinterpret_cast<char*>(_recv_over._net_buf + _prev_size);
 		_recv_over._wsa_buf.len = sizeof(_recv_over._net_buf) - _prev_size;
-		int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, NULL);
-		if (SOCKET_ERROR == ret) {
-			int error_num = WSAGetLastError();
-		}
+		//int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, NULL);
+		int ret = WSARecv(_socket, &_recv_over._wsa_buf, 1, 0, &recv_flag, &_recv_over._wsa_over, recv_callback);
+
+		//if (SOCKET_ERROR == ret) {
+			//int error_num = WSAGetLastError();
+		//}
 	};
 	void SendPacket(void* packet)
 	{
@@ -303,9 +296,11 @@ public:
 	int      _prev_size = 0;
 	bool     _stop = false;
 	bool     _login_ok =false;
+	bool     _game_start = false;
 	int       my_s_id = -1;
 private:
 	cCharactersInfo CharactersInfo;		// 캐릭터 정보
 
 	AMyPlayerController* MyPlayerController;	// 플레이어 컨트롤러 정보	
 };
+

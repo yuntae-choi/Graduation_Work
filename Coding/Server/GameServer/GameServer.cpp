@@ -495,14 +495,14 @@ void process_packet(int s_id, unsigned char* p)
 		cl.VY = packet->vy;
 		cl.VZ = packet->vz;
 		cl.direction = packet->direction;
-		//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f), dir : %f\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ, cl.direction);
+		printf_s(" 플레이어 : %d, location : (%f,%f,%f)\n", packet->sessionID, cl.x, cl.y, cl.z);
 
 		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		//cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
 		//send_status_packet(s_id);
 
-		unordered_set <int> near_list;
+		/*unordered_set <int> near_list;
 		for (auto& other : clients) {
 			if (other._s_id == s_id)
 				continue;
@@ -518,7 +518,7 @@ void process_packet(int s_id, unsigned char* p)
 
 		unordered_set <int> my_vl{ cl.viewlist };
 
-		cl.vl.unlock();
+		cl.vl.unlock();*/
 
 		for (auto& other : clients) {
 			if (other._s_id == s_id)
@@ -526,7 +526,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (ST_INGAME != other._state)
 				continue;
 			send_move_packet(other._s_id, cl._s_id);
-			//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+			cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 
 		}
 
@@ -889,9 +889,10 @@ void process_packet(int s_id, unsigned char* p)
 		cout << "게임 스타트" << endl;
 		break;
 	}
+	break;
 	default:
-		cout <<" 오류패킷타입" << packet_type << endl;
-		printf("Unknown PACKET type\n");
+		//cout <<" 오류패킷타입" << packet_type << endl;
+		//printf("Unknown PACKET type\n");
 		break;
 	}
 }
@@ -929,7 +930,9 @@ void worker_thread()
 			int remain_data = num_byte + cl._prev_size;
 			unsigned char* packet_start = exp_over->_net_buf;
 			int packet_size = packet_start[0];
-
+			int packet_case = packet_start[1];
+			//cout << " 오류패킷타입" << packet_case << endl;
+			//cout << "packet_size" << packet_size << endl;
 			while (packet_size <= remain_data) {
 				process_packet(_s_id, packet_start);
 				remain_data -= packet_size;

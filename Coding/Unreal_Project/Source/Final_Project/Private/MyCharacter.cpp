@@ -219,7 +219,8 @@ void AMyCharacter::UpDown(float NewAxisValue)
 	if (!bIsUpDownZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->SendPlayerInfo(COMMAND_MOVE);
+		if (iSessionId == PlayerController->iSessionId)
+		   PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 
 	if (NewAxisValue == 0.0f) bIsUpDownZero = true;
@@ -234,7 +235,8 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 	if (!bIsLeftRightZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->SendPlayerInfo(COMMAND_MOVE);
+		if (iSessionId == PlayerController->iSessionId)
+		    PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 
 	if (NewAxisValue == 0.0f) bIsLeftRightZero = true;
@@ -249,7 +251,8 @@ void AMyCharacter::LookUp(float NewAxisValue)
 	if (!bIsLookUpZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->SendPlayerInfo(COMMAND_MOVE);
+		if (iSessionId == PlayerController->iSessionId) {}
+		    //PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 }
 
@@ -262,7 +265,8 @@ void AMyCharacter::Turn(float NewAxisValue)
 	if (!bIsTurnZero)
 	{
 		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		PlayerController->SendPlayerInfo(COMMAND_MOVE);
+		if (iSessionId == PlayerController->iSessionId) {}
+		    //PlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 }
 

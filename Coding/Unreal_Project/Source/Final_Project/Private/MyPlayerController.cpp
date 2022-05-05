@@ -12,12 +12,13 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
+extern ClientSocket* g_socket;
 
 AMyPlayerController::AMyPlayerController()
 {
-	mySocket = ClientSocket::GetSingleton();
-	mySocket->SetPlayerController(this);
-
+	g_socket = ClientSocket::GetSingleton();
+	g_socket->SetPlayerController(this);
+	AMyPlayerController::mySocket = g_socket;
 	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
 	bSetStart = false;
@@ -41,7 +42,7 @@ AMyPlayerController::AMyPlayerController()
 void AMyPlayerController::BeginPlay()
 {
 	MYLOG(Warning, TEXT("BeginPlay!"));
-	mySocket->StartListen();
+	g_socket->StartListen();
 
 	// 실행시 클릭없이 바로 조작
 	//FInputModeGameOnly InputMode;
@@ -55,9 +56,9 @@ void AMyPlayerController::BeginPlay()
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	//MYLOG(Warning, TEXT("EndPlay!"));
-	//mySocket->Send_LogoutPacket(iSessionId);
-	//mySocket->CloseSocket();
-	//mySocket->StopListen();
+	//g_socket->Send_LogoutPacket(iSessionId);
+	//g_socket->CloseSocket();
+	//g_socket->StopListen();
 
 	// 델리게이트 해제
 	FuncUpdateHP.Clear();
@@ -403,13 +404,13 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	float dir = m_Player->GetAnim()->GetDirection();
 
 	if (input == COMMAND_MOVE)
-		mySocket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity, dir);
+		g_socket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity, dir);
 	else if (input == COMMAND_ATTACK)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
+		g_socket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
-		mySocket->Send_DamagePacket();
+		g_socket->Send_DamagePacket();
 	else if (input == COMMAND_MATCH)
-		mySocket->Send_MatchPacket();
+		g_socket->Send_MatchPacket();
 }
 
 //플레이어 정보 업데이트
@@ -485,7 +486,7 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 
 //void AMyPlayerController::SendFarming(int item_no)
 //{
-//		mySocket->Send_ItemPacket(item_no);
+//		g_socket->Send_ItemPacket(item_no);
 //}
 
 void AMyPlayerController::LoadReadyUI()
@@ -508,7 +509,7 @@ void AMyPlayerController::LoadReadyUI()
 void AMyPlayerController::PlayerReady()
 {
 	// 서버에 레디했다고 전송
-	mySocket->Send_ReadyPacket();
+	g_socket->Send_ReadyPacket();
 	UE_LOG(LogTemp, Warning, TEXT("PlayerReady"));
 	bIsReady = true;
 #ifdef SINGLEPLAY_DEBUG
