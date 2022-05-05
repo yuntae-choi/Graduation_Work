@@ -2,38 +2,6 @@
 #include "ClientSocket.h"
 #include "MyPlayerController.h"
 
-
-ClientSocket* g_socket = nullptr;
-
-void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED recv_over, DWORD recv_flag)
-{
-	MYLOG(Warning, TEXT("recv_callback"));
-	if (num_bytes == 0) {
-		g_socket->RecvPacket();
-		//Disconnect();
-		return;
-	}
-	unsigned char* packet_start = g_socket->_recv_over._net_buf;
-	int packet_size = packet_start[0];
-	g_socket->process_data(g_socket->_recv_over._net_buf, num_bytes);
-	g_socket->RecvPacket();
-
-}
-ClientSocket::ClientSocket() {
-	WSAData wsaData;
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		MYLOG(Warning, TEXT("Failed to start wsa"));
-
-	_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	//_login_ok = false;
-
-	/*	if (_socket == INVALID_SOCKET)
-			MYLOG(Warning, TEXT("Failed to start socket"));
-
-		u_long on = 1;
-		if (::ioctlsocket(_socket, FIONBIO, &on) == INVALID_SOCKET)
-			MYLOG(Warning, TEXT("Failed to start iostlsocket"));*/
-};
 ClientSocket::~ClientSocket()
 {
 	closesocket(_socket);
@@ -55,33 +23,8 @@ bool ClientSocket::Connect()
 	MYLOG(Warning, TEXT("Connected to Server!"));
 	return true;
 }
-void ClientSocket::process_data(unsigned char* net_buf, size_t io_byte)
-{
-	MYLOG(Warning, TEXT("process_data!"));
 
-	unsigned char* ptr = net_buf;
-	static size_t in_packet_size = 0;
-	static size_t saved_packet_size = 0;
-	static char packet_buffer[BUF_SIZE];
-
-	while (0 != io_byte) {
-		if (0 == in_packet_size) in_packet_size = ptr[0];
-		if (io_byte + saved_packet_size >= in_packet_size) {
-			memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
-			ProcessPacket(packet_buffer);
-			ptr += in_packet_size - saved_packet_size;
-			io_byte -= in_packet_size - saved_packet_size;
-			in_packet_size = 0;
-			saved_packet_size = 0;
-		}
-		else {
-			memcpy(packet_buffer + saved_packet_size, ptr, io_byte);
-			saved_packet_size += io_byte;
-			io_byte = 0;
-		}
-	}
-}
-void ClientSocket::ProcessPacket(char* ptr)
+void ClientSocket::ProcessPacket(unsigned char* ptr)
 {
 	static bool first_time = true;
 	switch (ptr[1])
@@ -124,7 +67,6 @@ void ClientSocket::ProcessPacket(char* ptr)
 	{
 		// 게임시작
 		MyPlayerController->Start_Signal();
-		_game_start = true;
 		break;
 	}
 
@@ -329,14 +271,12 @@ void ClientSocket::Send_StatusPacket(STATE_Type _state, int s_id) {
 };
 
 void ClientSocket::Send_DamagePacket() {
-	if (_game_start) {
-		cs_packet_damage packet;
-		packet.size = sizeof(packet);
-		packet.type = CS_PACKET_DAMAGE;
+	cs_packet_damage packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_DAMAGE;
 
-		MYLOG(Warning, TEXT("[Send damage]"));
-		SendPacket(&packet);
-	}
+	MYLOG(Warning, TEXT("[Send damage]"));
+	SendPacket(&packet);
 };
 
 void ClientSocket::Send_MatchPacket() {
@@ -350,7 +290,7 @@ void ClientSocket::Send_MatchPacket() {
 
 void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir)
 {
-	if (_game_start) {
+	if (_login_ok) {
 		cs_packet_move packet;
 		packet.size = sizeof(packet);
 		packet.type = CS_PACKET_MOVE;
@@ -372,22 +312,21 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRota
 
 void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
 {
-	if (_game_start) {
-		cs_packet_throw_snow packet;
-		packet.size = sizeof(packet);
-		packet.type = CS_PACKET_THROW_SNOW;
-		packet.s_id = s_id;
-		packet.x = MyLocation.X;
-		packet.y = MyLocation.Y;
-		packet.z = MyLocation.Z;
-		packet.dx = MyDirection.X;
-		packet.dy = MyDirection.Y;
-		packet.dz = MyDirection.Z;
-		size_t sent = 0;
 
-		MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
-		SendPacket(&packet);
-	}
+	cs_packet_throw_snow packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_THROW_SNOW;
+	packet.s_id = s_id;
+	packet.x = MyLocation.X;
+	packet.y = MyLocation.Y;
+	packet.z = MyLocation.Z;
+	packet.dx = MyDirection.X;
+	packet.dy = MyDirection.Y;
+	packet.dz = MyDirection.Z;
+	size_t sent = 0;
+
+	MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
+	SendPacket(&packet);
 };
 
 //void ClientSocket::ReadyToSend_AttackPacket()
@@ -403,19 +342,16 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 
 void ClientSocket::Send_ItemPacket(int item_type, int destroy_obj_id)
 {
-	if (_game_start) {
+	cs_packet_get_item packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_GET_ITEM;
+	packet.s_id = MyPlayerController->iSessionId;
+	packet.item_type = item_type;
+	packet.destroy_obj_id = destroy_obj_id;
+	size_t sent = 0;
 
-		cs_packet_get_item packet;
-		packet.size = sizeof(packet);
-		packet.type = CS_PACKET_GET_ITEM;
-		packet.s_id = MyPlayerController->iSessionId;
-		packet.item_type = item_type;
-		packet.destroy_obj_id = destroy_obj_id;
-		size_t sent = 0;
-
-		MYLOG(Warning, TEXT("[Send item] id : %d, objId : %d, item : %d"), packet.s_id, destroy_obj_id, item_type);
-		SendPacket(&packet);
-	}
+	MYLOG(Warning, TEXT("[Send item] id : %d, objId : %d, item : %d"), packet.s_id, destroy_obj_id, item_type);
+	SendPacket(&packet);
 };
 
 void ClientSocket::Send_ChatPacket(int sessionID, float x, float y, float z)
@@ -465,69 +401,65 @@ uint32 ClientSocket::Run()
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
 	
-	RecvPacket();
-	FPlatformProcess::Sleep(0.03);
+	 RecvPacket();
+
 	Send_LoginPacket();
 
-	
+	FPlatformProcess::Sleep(0.03);
 
 	// recv while loop 시작
 	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
-	
-
-	
 	while (StopTaskCounter.GetValue() == 0 && MyPlayerController != nullptr)
 	{
-	
-		//DWORD num_byte;
-		//LONG64 iocp_key;
-		//WSAOVERLAPPED* p_over;
+		DWORD num_byte;
+		LONG64 iocp_key;
+		WSAOVERLAPPED* p_over;
 
-		//BOOL ret = GetQueuedCompletionStatus(h_iocp, &num_byte, (PULONG_PTR)&iocp_key, &p_over, INFINITE);
+		BOOL ret = GetQueuedCompletionStatus(h_iocp, &num_byte, (PULONG_PTR)&iocp_key, &p_over, INFINITE);
 
-		//Overlap* exp_over = reinterpret_cast<Overlap*>(p_over);
-		//
-		//if (FALSE == ret) {
-		//	int err_no = WSAGetLastError();
-		//	if (exp_over->_op == OP_SEND)
-		//		delete exp_over;
-		//	continue;
-		//}
+		Overlap* exp_over = reinterpret_cast<Overlap*>(p_over);
+		
+		if (FALSE == ret) {
+			int err_no = WSAGetLastError();
+			if (exp_over->_op == OP_SEND)
+				delete exp_over;
+			continue;
+		}
 
-		//switch (exp_over->_op) {
-		//case OP_RECV: {
-		//	if (num_byte == 0) {
-		//		//Disconnect();
-		//		continue;
-		//	}
-		//	int remain_data = num_byte + _prev_size;
-		//	unsigned char* packet_start = exp_over->_net_buf;
-		//	int packet_size = packet_start[0];
-		//	while (packet_size <= remain_data) {
-		//		ProcessPacket(packet_start);
-		//		remain_data -= packet_size;
-		//		packet_start += packet_size;
-		//		if (remain_data > 0) packet_size = packet_start[0];
-		//		else break;
-		//	}
+		switch (exp_over->_op) {
+		case OP_RECV: {
+			if (num_byte == 0) {
+				//Disconnect();
+				continue;
+			}
+			int remain_data = num_byte + _prev_size;
+			unsigned char* packet_start = exp_over->_net_buf;
+			int packet_size = packet_start[0];
+			while (packet_size <= remain_data) {
+				ProcessPacket(packet_start);
+				remain_data -= packet_size;
+				packet_start += packet_size;
+				if (remain_data > 0) packet_size = packet_start[0];
+				else break;
+			}
 
-		//	if (0 < remain_data) {
-		//		_prev_size = remain_data;
-		//		memcpy(&exp_over->_net_buf, packet_start, remain_data);
-		//	}
+			if (0 < remain_data) {
+				_prev_size = remain_data;
+				memcpy(&exp_over->_net_buf, packet_start, remain_data);
+			}
 
-		//	RecvPacket();
-		//	break;
-		//}
-		//case OP_SEND: {
-		//	if (num_byte != exp_over->_wsa_buf.len) {
-		//		//Disconnect();
-		//	}
-		//	delete exp_over;
-		//	break;
-		//}
+			RecvPacket();
+			break;
+		}
+		case OP_SEND: {
+			if (num_byte != exp_over->_wsa_buf.len) {
+				//Disconnect();
+			}
+			delete exp_over;
+			break;
+		}
 
-		//}
+		}
 
 	}
 	return 0;
