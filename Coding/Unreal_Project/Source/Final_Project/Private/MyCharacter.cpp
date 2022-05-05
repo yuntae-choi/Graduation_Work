@@ -179,6 +179,8 @@ void AMyCharacter::Tick(float DeltaTime)
 		UpdateHP();
 		UpdateSpeed();
 	}
+
+	CheckSpeed();
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -210,32 +212,26 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Pressed, this, &AMyCharacter::UseSelectedItem);
 }
 
-void AMyCharacter::UpDown(float NewAxisValue)
+void AMyCharacter::CheckSpeed()
 {
-	AddMovementInput(GetActorForwardVector(), NewAxisValue);
+	if (GetVelocity() != FVector(0.0f, 0.0f, 0.0f)) bIsVelocityZero = false;
 
-	if (NewAxisValue != 0.0f) bIsUpDownZero = false;
-
-	if (!bIsUpDownZero)
+	if (!bIsVelocityZero)
 	{
 		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
 
-	if (NewAxisValue == 0.0f) bIsUpDownZero = true;
+	if (GetVelocity() == FVector(0.0f, 0.0f, 0.0f)) bIsVelocityZero = true;
+}
+
+void AMyCharacter::UpDown(float NewAxisValue)
+{
+	AddMovementInput(GetActorForwardVector(), NewAxisValue);
 }
 
 void AMyCharacter::LeftRight(float NewAxisValue)
 {
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
-
-	if (NewAxisValue != 0.0f) bIsLeftRightZero = false;
-
-	if (!bIsLeftRightZero)
-	{
-		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
-	}
-
-	if (NewAxisValue == 0.0f) bIsLeftRightZero = true;
 }
 
 void AMyCharacter::LookUp(float NewAxisValue)

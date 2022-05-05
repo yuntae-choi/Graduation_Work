@@ -78,6 +78,8 @@ private:
 	void LookUp(float NewAxisValue);
 	void Turn(float NewAxisValue);
 
+	void CheckSpeed();
+
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
@@ -202,8 +204,7 @@ private:
 
 
 
-	bool bIsUpDownZero = false;
-	bool bIsLeftRightZero = false;
+	bool bIsVelocityZero = false;
 	bool bIsLookUpZero = false;
 	bool bIsTurnZero = false;
 };
