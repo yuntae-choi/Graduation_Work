@@ -242,24 +242,28 @@ void AMyCharacter::LookUp(float NewAxisValue)
 {
 	AddControllerPitchInput(NewAxisValue);
 
-	if (NewAxisValue != 0) bIsLookUpZero = false;
+	if (NewAxisValue != 0.0f) bIsLookUpZero = false;
 
 	if (!bIsLookUpZero)
 	{
 		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
+
+	if (NewAxisValue == 0.0f) bIsLookUpZero = true;
 }
 
 void AMyCharacter::Turn(float NewAxisValue)
 {
 	AddControllerYawInput(NewAxisValue);
 
-	if (NewAxisValue != 0) bIsTurnZero = false;
+	if (NewAxisValue != 0.0f) bIsTurnZero = false;
 
 	if (!bIsTurnZero)
 	{
 		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
 	}
+
+	if (NewAxisValue == 0.0f) bIsTurnZero = true;
 }
 
 void AMyCharacter::Attack()
