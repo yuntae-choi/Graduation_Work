@@ -79,6 +79,7 @@ private:
 	void Turn(float NewAxisValue);
 
 	void CheckSpeed();
+	void CheckRotation();
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -205,6 +206,5 @@ private:
 
 
 	bool bIsVelocityZero = false;
-	bool bIsLookUpZero = false;
-	bool bIsTurnZero = false;
+	bool bIsRotationZero = false;
 };
