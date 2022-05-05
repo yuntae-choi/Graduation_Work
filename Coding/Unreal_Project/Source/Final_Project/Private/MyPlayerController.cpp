@@ -37,19 +37,24 @@ AMyPlayerController::AMyPlayerController()
 	bIsReady = false;
 }
 
-
-void AMyPlayerController::BeginPlay()
+void AMyPlayerController::OnPossess(APawn* pawn_)
 {
-	MYLOG(Warning, TEXT("BeginPlay!"));
-	mySocket->StartListen();
+	Super::OnPossess(pawn_);
 
-	// 실행시 클릭없이 바로 조작
-	//FInputModeGameOnly InputMode;
-	//SetInputMode(InputMode);
+	mySocket->StartListen();
 
 	localPlayerCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
 	LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
+}
+
+void AMyPlayerController::BeginPlay()
+{
+	MYLOG(Warning, TEXT("BeginPlay!"));
+
+	// 실행시 클릭없이 바로 조작
+	//FInputModeGameOnly InputMode;
+	//SetInputMode(InputMode);
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -58,7 +63,7 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	//mySocket->Send_LogoutPacket(iSessionId);
 	//mySocket->CloseSocket();
 	//mySocket->StopListen();
-
+	
 	// 델리게이트 해제
 	FuncUpdateHP.Clear();
 	FuncUpdateCurrentSnowballCount.Clear();
