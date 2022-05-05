@@ -5,16 +5,16 @@
 
 const short SERVER_PORT = 9090;
 
-const int BUFSIZE = 1024;
-const int  ReZone_HEIGHT = 2000;
-const int  ReZone_WIDTH = 2000;
-const int  MAX_NAME_SIZE = 20;
-const int  MAX_CHAT_SIZE = 100;
-const int  MAX_USER = 10000;
-const int  MAX_OBJ = 20;
-const int  MAX_SNOWDRIFT = 1000;
+const int32 BUFSIZE = 512;
+const int32  ReZone_HEIGHT = 2000;
+const int32  ReZone_WIDTH = 2000;
+const int32  MAX_NAME_SIZE = 20;
+const int32  MAX_CHAT_SIZE = 100;
+const int32  MAX_USER = 10000;
+const int32  MAX_OBJ = 20;
+const int32  MAX_SNOWDRIFT = 1000;
 
-const int  MAX_ITEM = 100;
+const int32  MAX_ITEM = 100;
 
 const char CS_PACKET_LOGIN = 1;
 const char CS_PACKET_MOVE = 2;
@@ -63,7 +63,7 @@ struct sc_packet_login_ok {
 	unsigned char size;
 	char type;
 	// 세션 아이디
-	int		s_id;
+	int32		s_id;
 	float x, y, z;
 	float yaw;
 };
@@ -71,14 +71,14 @@ struct sc_packet_login_ok {
 struct cs_packet_logout {
 	unsigned char size;
 	char	type;
-	int     s_id;
+	int32     s_id;
 };
 
 struct cs_packet_move {
 	unsigned char size;
 	char	type;
 	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
-	int sessionID;
+	int32 sessionID;
 	float x, y, z;
 	// 속도
 	float vx, vy, vz;
@@ -91,7 +91,7 @@ struct cs_packet_move {
 struct sc_packet_put_object {
 	unsigned char size;
 	char type;
-	int s_id;
+	int32 s_id;
 	float x, y, z;
 	float yaw;
 	char object_type;
@@ -102,15 +102,15 @@ struct sc_packet_put_object {
 struct sc_packet_get_item {
 	unsigned char size;
 	char	type;
-	int     s_id;;
-	int     item_type;
-	int     destroy_obj_id;
+	int32     s_id;;
+	int32     item_type;
+	int32     destroy_obj_id;
 };
 
 struct cs_packet_throw_snow {
 	unsigned char size;
 	char	type;
-	int s_id;
+	int32 s_id;
 	float x, y, z;
 	float dx, dy, dz;
 };
@@ -123,8 +123,8 @@ struct cs_packet_damage {
 struct sc_packet_hp_change {
 	unsigned char size;
 	char type;
-	int s_id;
-	int hp;
+	int32 s_id;
+	int32 hp;
 };
 
 struct cs_packet_ready { // 게임 레디 요청
@@ -134,7 +134,7 @@ struct cs_packet_ready { // 게임 레디 요청
 struct sc_packet_ready { // 타 플레이어 레디
 	unsigned char size;
 	char	type;
-	int	s_id;
+	int32	s_id;
 };
 
 struct sc_packet_start { // 스폰
@@ -146,27 +146,27 @@ struct sc_packet_start { // 스폰
 struct cs_packet_attack {
 	unsigned char size;
 	char	type;
-	int s_id;
+	int32 s_id;
 };
 
 struct cs_packet_get_item {
 	unsigned char size;
 	char	type;
-	int s_id;;
-	int item_type;
-	int destroy_obj_id;
+	int32 s_id;;
+	int32 item_type;
+	int32 destroy_obj_id;
 };
 
 //struct cs_packet_stop_snow_farming {
 //	unsigned char size;
 //	char	type;
-//	int s_id;
+//	int32 s_id;
 //};
 
 struct cs_packet_chat {
 	unsigned char size;
 	char	type;
-	int s_id;
+	int32 s_id;
 	float x, y, z;
 	char	message[MAX_CHAT_SIZE];
 };
@@ -191,26 +191,26 @@ struct sc_packet_is_bone {
 struct sc_packet_remove_object {
 	unsigned char size;
 	char type;
-	int s_id;
+	int32 s_id;
 };
 
 struct sc_packet_chat {
 	unsigned char size;
 	char type;
-	int id;
+	int32 id;
 	char message[MAX_CHAT_SIZE];
 };
 
 struct sc_packet_login_fail {
 	unsigned char size;
 	char type;
-	int	 reason;		// 0: 중복 ID,  1:사용자 Full
+	int32	 reason;		// 0: 중복 ID,  1:사용자 Full
 };
 
 struct sc_packet_status_change {
 	unsigned char size;
 	char type;
-	int s_id;
+	int32 s_id;
 	short   state;
 };
 #pragma pack(pop)

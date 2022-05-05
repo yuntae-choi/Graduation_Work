@@ -259,7 +259,7 @@ public:
 	};
 	void SendPacket(void* packet)
 	{
-		//MYLOG(Warning, TEXT("Send to Server!"));
+		MYLOG(Warning, TEXT("Send to Server!"));
 		int psize = reinterpret_cast<unsigned char*>(packet)[0];
 		Overlap* ex_over = new Overlap(OP_SEND, psize, packet);
 		int ret = WSASend(_socket, &ex_over->_wsa_buf, 1, 0, 0, &ex_over->_wsa_over, NULL);

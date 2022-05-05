@@ -890,8 +890,9 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 	}
 	default:
+		cout <<" 오류패킷타입" << packet_type << endl;
 		printf("Unknown PACKET type\n");
-
+		break;
 	}
 }
 
