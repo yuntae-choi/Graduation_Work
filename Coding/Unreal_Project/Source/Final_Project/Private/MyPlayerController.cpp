@@ -35,14 +35,12 @@ void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over
 	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
 	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
 	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
-
+	SleepEx(0, true);
 }
 
 AMyPlayerController::AMyPlayerController()
 {
-	g_socket = ClientSocket::GetSingleton();
-	g_socket->SetPlayerController(this);
-	mySocket = g_socket;
+	
 	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
 	bSetStart = false;
@@ -70,14 +68,8 @@ void AMyPlayerController::OnPossess(APawn* pawn_)
 	localPlayerCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
 	LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
-	g_socket->Connect();
-
-	DWORD recv_flag = 0;
-	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
-	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
-	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
-	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
-	g_socket->Send_LoginPacket();
+	
+	FPlatformProcess::Sleep(0);
 }
 
 void AMyPlayerController::BeginPlay()
@@ -87,6 +79,17 @@ void AMyPlayerController::BeginPlay()
 	// 실행시 클릭없이 바로 조작
 	//FInputModeGameOnly InputMode;
 	//SetInputMode(InputMode);
+	g_socket = ClientSocket::GetSingleton();
+	g_socket->SetPlayerController(this);
+	mySocket = g_socket;
+	g_socket->Connect();
+	DWORD recv_flag = 0;
+	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
+	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
+	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
+	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
+	g_socket->Send_LoginPacket();
+	SleepEx(0, true);
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -139,7 +142,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 	// 월드 동기화
 	UpdateWorldInfo();
 
-	FPlatformProcess::Sleep(0);
+	SleepEx(0, true);
 
 	//UpdateRotation();
 }
