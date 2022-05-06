@@ -22,6 +22,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasBag, bool, NewHasBa
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_IsFarmingSnowdrift, bool, NewIsFarmingSnowdrift);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SnowdriftFarmDuration, float, NewSnowdriftFarmDuration);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedItem, int32, NewSelectedItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_GameResult, bool, GameResult);
 
 /**
  *
@@ -52,6 +53,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlayerUnready();
 	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
+	void LoadGameResultUI(int winnerSessionId);	// 게임 종료 시 결과창 ui 띄우기 (승자 id 인자로 받아서 승자, 패자 다르게 뜨도록)
 	
 	// UpdateUI 델리게이트 이벤트 호출
 	void CallDelegateUpdateAllOfUI();
@@ -64,6 +66,7 @@ public:
 	void CallDelegateUpdateIsFarmingSnowdrift();
 	void CallDelegateUpdateSnowdriftFarmDuration(float farmDuration);
 	void CallDelegateUpdateSelectedItem();
+	void CallDelegateUpdateGameResult(bool isWinner);
 
 	void SetCharacterState(const int s_id, STATE_Type _state)
 	{
@@ -118,6 +121,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	class UUserWidget* characterUI;	// 캐릭터 UI (체력, )
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> gameResultUIClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	class UUserWidget* gameResultUI;	// 게임 결과 UI (게임종료 후 승패 ui)
+
 	// 델리게이트 이벤트 UpdateUI
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_HP FuncUpdateHP;
@@ -145,6 +154,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_SelectedItem FuncUpdateSelectedItem;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_GameResult FuncUpdateGameResult;
 
 private:
 	ClientSocket*			mySocket;
