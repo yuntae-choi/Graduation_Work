@@ -206,5 +206,7 @@ private:
 
 
 	bool bIsVelocityZero = false;
-	bool bIsRotationZero = false;
+
+	bool bIsLookUpZero = false;
+	bool bIsTurnZero = false;
 };

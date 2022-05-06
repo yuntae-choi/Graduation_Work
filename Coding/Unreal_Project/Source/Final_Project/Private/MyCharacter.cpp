@@ -181,7 +181,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	}
 
 	CheckSpeed();
-	CheckRotation();
+	//CheckRotation();
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -227,14 +227,14 @@ void AMyCharacter::CheckSpeed()
 
 void AMyCharacter::CheckRotation()
 {
-	if (!GetActorRotation().IsZero()) bIsRotationZero = false;
+	//if (!GetRotation().IsZero()) bIsRotationZero = false;
 
-	if (!bIsRotationZero)
-	{
-		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
-	}
+	//if (!bIsRotationZero)
+	//{
+	//	localPlayerController->SendPlayerInfo(COMMAND_MOVE);
+	//}
 
-	if (GetActorRotation().IsZero()) bIsRotationZero = true;
+	//if (GetActorRotation().IsZero()) bIsRotationZero = true;
 }
 
 void AMyCharacter::UpDown(float NewAxisValue)
@@ -250,11 +250,29 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 void AMyCharacter::LookUp(float NewAxisValue)
 {
 	AddControllerPitchInput(NewAxisValue);
+
+	if (NewAxisValue != 0.0f) bIsLookUpZero = false;
+
+	if (!bIsLookUpZero)
+	{
+		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
+	}
+
+	if (NewAxisValue == 0.0f) bIsLookUpZero = true;
 }
 
 void AMyCharacter::Turn(float NewAxisValue)
 {
 	AddControllerYawInput(NewAxisValue);
+
+	if (NewAxisValue != 0.0f) bIsTurnZero = false;
+
+	if (!bIsTurnZero)
+	{
+		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
+	}
+
+	if (NewAxisValue == 0.0f) bIsTurnZero = true;
 }
 
 void AMyCharacter::Attack()
