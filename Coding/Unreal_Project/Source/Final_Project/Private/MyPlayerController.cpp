@@ -184,15 +184,14 @@ void AMyPlayerController::SetDestroyitembox(const int obj_id)
 
 void AMyPlayerController::InitPlayerSetting()
 {
-	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (!player_) return;
-	player_->SetActorLocation(FVector(initInfo.X, initInfo.Y, initInfo.Z));
-	player_->iSessionId = initInfo.SessionId;
+	if (!localPlayerCharacter) return;
+	localPlayerCharacter->SetActorLocation(FVector(initInfo.X, initInfo.Y, initInfo.Z));
+	localPlayerCharacter->iSessionId = initInfo.SessionId;
 
-	//컨트롤러는 초기설정이 불가능함
+	//컨트롤러의 회전
 	SetControlRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
 
-	player_->SetCharacterMaterial(iSessionId);
+	localPlayerCharacter->SetCharacterMaterial(iSessionId);
 
 	bInitPlayerSetting = false;
 }
@@ -435,19 +434,25 @@ void AMyPlayerController::Reset_Items(int s_id)
 
 void AMyPlayerController::SendPlayerInfo(int input)
 {
-	auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (!m_Player)
+	if (!localPlayerCharacter)
 		return;
-	auto MyLocation = m_Player->GetActorLocation();
-	auto MyRotation = m_Player->GetActorRotation();
-	auto MyVelocity = m_Player->GetVelocity();
+	auto loc = localPlayerCharacter->GetActorLocation();
+	float fNewYaw = localPlayerCharacter->GetActorRotation().Yaw;		//yaw 값만 필요함
+	auto vel = localPlayerCharacter->GetVelocity();
 	FVector MyCameraLocation;
 	FRotator MyCameraRotation;
-	m_Player->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
-	float dir = m_Player->GetAnim()->GetDirection();
+	localPlayerCharacter->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
+	float dir = localPlayerCharacter->GetAnim()->GetDirection();
 
-	if (input == COMMAND_MOVE)
-		g_socket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity, dir);
+	if (input == COMMAND_MOVE) {
+		if (!vel.IsZero()) bIsSpeedZero = false;
+
+		if (fOldYaw != fNewYaw || !bIsSpeedZero)
+			g_socket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
+
+		fOldYaw = fNewYaw;
+		if (vel.IsZero()) bIsSpeedZero = true;
+	}
 	else if (input == COMMAND_ATTACK)
 		g_socket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)

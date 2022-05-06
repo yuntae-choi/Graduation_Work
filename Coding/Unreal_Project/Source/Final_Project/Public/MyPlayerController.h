@@ -174,4 +174,7 @@ private:
 	//bool							bIsConnected;	// 辑滚客 立加 蜡公
 
 	AMyCharacter* localPlayerCharacter;
+
+	float fOldYaw = 0.0f;
+	float bIsSpeedZero = false;
 };

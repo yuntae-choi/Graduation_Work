@@ -232,7 +232,7 @@ public:
 	void Send_StatusPacket(STATE_Type _state, int s_id);
 
 	
-	void Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir);
+	void Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVector MyVelocity, float dir);
 	//void ReadyToSend_AttackPacket();
 	void Send_ChatPacket(int sessionID, float x, float y, float z);
 	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);

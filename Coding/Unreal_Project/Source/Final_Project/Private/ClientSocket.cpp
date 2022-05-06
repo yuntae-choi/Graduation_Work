@@ -288,7 +288,7 @@ void ClientSocket::Send_MatchPacket() {
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRotation, FVector MyVelocity, float dir)
+void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVector MyVelocity, float dir)
 {
 	if (_login_ok) {
 		cs_packet_move packet;
@@ -298,13 +298,13 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, FRotator MyRota
 		packet.x = MyLocation.X;
 		packet.y = MyLocation.Y;
 		packet.z = MyLocation.Z;
-		packet.yaw = MyRotation.Yaw;
+		packet.yaw = yaw;
 		packet.vx = MyVelocity.X;
 		packet.vy = MyVelocity.Y;
 		packet.vz = MyVelocity.Z;
 		packet.direction = dir;
 
-		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), s_id, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz, dir);
+		MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), s_id, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz, dir);
 		SendPacket(&packet);
 	}
 };
