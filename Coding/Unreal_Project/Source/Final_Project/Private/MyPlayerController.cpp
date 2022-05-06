@@ -12,12 +12,37 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
+ClientSocket* g_socket = nullptr;
+
+void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over, DWORD recv_flag)
+{
+	MYLOG(Warning, TEXT("recv_callback"));
+	if (num_byte == 0) {
+		recv_flag = 0;
+		/*ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
+		g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
+		g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
+		WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);*/
+		MYLOG(Warning, TEXT("recv_error"));
+
+		return;
+	}
+	unsigned char* packet_start = g_socket->_recv_over._net_buf;
+	int packet_size = packet_start[0];
+	g_socket->process_data(g_socket->_recv_over._net_buf, num_byte);
+	recv_flag = 0;
+	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
+	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
+	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
+	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
+
+}
 
 AMyPlayerController::AMyPlayerController()
 {
-	mySocket = ClientSocket::GetSingleton();
-	mySocket->SetPlayerController(this);
-
+	g_socket = ClientSocket::GetSingleton();
+	g_socket->SetPlayerController(this);
+	mySocket = g_socket;
 	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
 	bSetStart = false;
@@ -41,11 +66,18 @@ void AMyPlayerController::OnPossess(APawn* pawn_)
 {
 	Super::OnPossess(pawn_);
 
-	mySocket->StartListen();
-
+	//g_socket->StartListen();
 	localPlayerCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
 	LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
+	g_socket->Connect();
+
+	DWORD recv_flag = 0;
+	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
+	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
+	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
+	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
+	g_socket->Send_LoginPacket();
 }
 
 void AMyPlayerController::BeginPlay()
@@ -60,9 +92,9 @@ void AMyPlayerController::BeginPlay()
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	//MYLOG(Warning, TEXT("EndPlay!"));
-	//mySocket->Send_LogoutPacket(iSessionId);
-	//mySocket->CloseSocket();
-	//mySocket->StopListen();
+	//g_socket->Send_LogoutPacket(iSessionId);
+	//g_socket->CloseSocket();
+	//g_socket->StopListen();
 	
 	// 델리게이트 해제
 	FuncUpdateHP.Clear();
@@ -106,6 +138,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	// 월드 동기화
 	UpdateWorldInfo();
+
+	FPlatformProcess::Sleep(0);
 
 	//UpdateRotation();
 }
@@ -408,13 +442,13 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	float dir = m_Player->GetAnim()->GetDirection();
 
 	if (input == COMMAND_MOVE)
-		mySocket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity, dir);
+		g_socket->Send_MovePacket(iSessionId, MyLocation, MyRotation, MyVelocity, dir);
 	else if (input == COMMAND_ATTACK)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
+		g_socket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
-		mySocket->Send_DamagePacket();
+		g_socket->Send_DamagePacket();
 	else if (input == COMMAND_MATCH)
-		mySocket->Send_MatchPacket();
+		g_socket->Send_MatchPacket();
 }
 
 //플레이어 정보 업데이트
@@ -490,7 +524,7 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 
 //void AMyPlayerController::SendFarming(int item_no)
 //{
-//		mySocket->Send_ItemPacket(item_no);
+//		g_socket->Send_ItemPacket(item_no);
 //}
 
 void AMyPlayerController::LoadReadyUI()
@@ -513,7 +547,7 @@ void AMyPlayerController::LoadReadyUI()
 void AMyPlayerController::PlayerReady()
 {
 	// 서버에 레디했다고 전송
-	mySocket->Send_ReadyPacket();
+	g_socket->Send_ReadyPacket();
 	UE_LOG(LogTemp, Warning, TEXT("PlayerReady"));
 	bIsReady = true;
 #ifdef SINGLEPLAY_DEBUG
