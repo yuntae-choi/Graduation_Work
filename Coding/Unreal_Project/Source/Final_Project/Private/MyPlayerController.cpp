@@ -57,6 +57,11 @@ AMyPlayerController::AMyPlayerController()
 	{
 		characterUIClass = CHARACTER_UI.Class;
 	}
+	static ConstructorHelpers::FClassFinder<UUserWidget> GAMERESULT_UI(TEXT("/Game/Blueprints/GameOverUI.GameOverUI_C"));
+	if (GAMERESULT_UI.Succeeded() && (GAMERESULT_UI.Class != nullptr))
+	{
+		gameResultUIClass = GAMERESULT_UI.Class;
+	}
 	bIsReady = false;
 }
 
@@ -109,6 +114,7 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	FuncUpdateIsFarmingSnowdrift.Clear();
 	FuncUpdateSnowdriftFarmDuration.Clear();
 	FuncUpdateSelectedItem.Clear();
+	FuncUpdateGameResult.Clear();
 }
 
 void AMyPlayerController::Tick(float DeltaTime)
@@ -602,6 +608,28 @@ void AMyPlayerController::LoadCharacterUI()
 	}
 }
 
+// 게임 종료 시 결과창 ui 띄우기 (승자 id 인자로 받아서 승자, 패자 ui 다르게 뜨도록)
+void AMyPlayerController::LoadGameResultUI(int winnerSessionId)
+{	// remove character ui 
+	if (gameResultUIClass)
+	{
+		gameResultUI = CreateWidget<UUserWidget>(GetWorld(), gameResultUIClass);
+		if (gameResultUI)
+		{
+			characterUI->RemoveFromParent();	// character ui 제거
+			gameResultUI->AddToViewport();		// game result ui 띄우기
+			
+			bool bIsWinner = (iSessionId == winnerSessionId) ? true : false;
+			CallDelegateUpdateGameResult(bIsWinner);
+
+			FInputModeUIOnly InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputMode);
+			bShowMouseCursor = true;
+		}
+	}
+}
+
 void AMyPlayerController::CallDelegateUpdateAllOfUI()
 {
 	CallDelegateUpdateHP();
@@ -689,6 +717,15 @@ void AMyPlayerController::CallDelegateUpdateSelectedItem()
 	if (!characterUI) return;
 
 	if (FuncUpdateSelectedItem.IsBound() == true) FuncUpdateSelectedItem.Broadcast(localPlayerCharacter->iSelectedItem);
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected item %d"), localPlayerCharacter->iSelectedItem);
+}
+
+void AMyPlayerController::CallDelegateUpdateGameResult(bool isWinner)
+{
+	if (!gameResultUI) return;
+	
+	if (FuncUpdateGameResult.IsBound() == true) FuncUpdateGameResult.Broadcast(isWinner);
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected item %d"), localPlayerCharacter->iSelectedItem);
 }
