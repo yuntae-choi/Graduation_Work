@@ -142,6 +142,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 	// 월드 동기화
 	UpdateWorldInfo();
 
+	SendPlayerInfo(COMMAND_MOVE);
+
 	SleepEx(0, true);
 
 	//UpdateRotation();

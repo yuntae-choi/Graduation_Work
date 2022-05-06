@@ -78,9 +78,6 @@ private:
 	void LookUp(float NewAxisValue);
 	void Turn(float NewAxisValue);
 
-	void CheckSpeed();
-	void CheckRotation();
-
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
@@ -201,12 +198,4 @@ private:
 
 	// 스턴 관리하는 타이머 핸들러
 	FTimerHandle stunHandle;
-
-
-
-
-	bool bIsVelocityZero = false;
-
-	bool bIsLookUpZero = false;
-	bool bIsTurnZero = false;
 };

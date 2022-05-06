@@ -179,9 +179,6 @@ void AMyCharacter::Tick(float DeltaTime)
 		UpdateHP();
 		UpdateSpeed();
 	}
-
-	CheckSpeed();
-	//CheckRotation();
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -213,30 +210,6 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Pressed, this, &AMyCharacter::UseSelectedItem);
 }
 
-void AMyCharacter::CheckSpeed()
-{
-	if (GetVelocity() != FVector(0.0f, 0.0f, 0.0f)) bIsVelocityZero = false;
-
-	if (!bIsVelocityZero)
-	{
-		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
-	}
-
-	if (GetVelocity() == FVector(0.0f, 0.0f, 0.0f)) bIsVelocityZero = true;
-}
-
-void AMyCharacter::CheckRotation()
-{
-	//if (!GetRotation().IsZero()) bIsRotationZero = false;
-
-	//if (!bIsRotationZero)
-	//{
-	//	localPlayerController->SendPlayerInfo(COMMAND_MOVE);
-	//}
-
-	//if (GetActorRotation().IsZero()) bIsRotationZero = true;
-}
-
 void AMyCharacter::UpDown(float NewAxisValue)
 {
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
@@ -250,29 +223,11 @@ void AMyCharacter::LeftRight(float NewAxisValue)
 void AMyCharacter::LookUp(float NewAxisValue)
 {
 	AddControllerPitchInput(NewAxisValue);
-
-	if (NewAxisValue != 0.0f) bIsLookUpZero = false;
-
-	if (!bIsLookUpZero)
-	{
-		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
-	}
-
-	if (NewAxisValue == 0.0f) bIsLookUpZero = true;
 }
 
 void AMyCharacter::Turn(float NewAxisValue)
 {
 	AddControllerYawInput(NewAxisValue);
-
-	if (NewAxisValue != 0.0f) bIsTurnZero = false;
-
-	if (!bIsTurnZero)
-	{
-		localPlayerController->SendPlayerInfo(COMMAND_MOVE);
-	}
-
-	if (NewAxisValue == 0.0f) bIsTurnZero = true;
 }
 
 void AMyCharacter::Attack()

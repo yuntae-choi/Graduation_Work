@@ -16,8 +16,8 @@
 
 #define	MAX_BUFFER		4096
 #define SERVER_PORT		9090
-//#define SERVER_IP		"112.148.142.95" // 외부 IP
-#define SERVER_IP		"192.168.219.106" //로컬IP
+#define SERVER_IP		"112.148.142.95" // 외부 IP
+//#define SERVER_IP		"192.168.219.106" //로컬IP
 //#define SERVER_IP		"127.0.0.1" //로컬IP
 #define MAX_CLIENTS		100
 
@@ -28,7 +28,7 @@ using std::chrono::system_clock;
 
 const int32  MAX_NAME_SIZE = 20;
 const int32  MAX_CHAT_SIZE = 100;
-const int32 BUF_SIZE = 512;
+const int32 BUF_SIZE = 1024;
 
 // 소켓 통신 구조체
 
