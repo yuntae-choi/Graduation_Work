@@ -18,8 +18,9 @@ ABonfire::ABonfire()
 	{
 		sphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("sphereComponent"));
 		sphereComponent->BodyInstance.SetCollisionProfileName(TEXT("Trigger"));
-		sphereComponent->SetSphereRadius(500.0f);
-		sphereComponent->SetHiddenInGame(false);	// 디버깅용 (모닥불 범위 보이도록)
+		sphereComponent->SetSphereRadius(1000.0f);
+		//sphereComponent->SetHiddenInGame(false);	// 디버깅용 (모닥불 범위 보이도록)
+		sphereComponent->SetHiddenInGame(true);
 
 		RootComponent = sphereComponent;
 	}
