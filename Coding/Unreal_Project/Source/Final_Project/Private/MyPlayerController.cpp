@@ -255,7 +255,22 @@ void AMyPlayerController::SetGameEnd(const int target_id)
 void AMyPlayerController::SetDestroyitembox(const int obj_id)
 {
 	UWorld* World = GetWorld();
-	destory_itembox.Push(obj_id);
+	
+	
+		TArray<AActor*> ItemBox;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), ItemBox);
+
+		for (auto sd : ItemBox)
+		{
+			AItembox* itembox = Cast<AItembox>(sd);
+
+			if (itembox->GetId() == obj_id)
+			{
+				itembox->DeleteItem();
+
+			}
+		}
+	
 }
 
 
@@ -283,11 +298,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 	// 플레이어자신 체력, 사망업데이트
 	UpdatePlayerInfo(charactersInfo->players[iSessionId]);
 
-	if (charactersInfo->players.size() == 1)
-	{
-		//MYLOG(Warning, TEXT("Only one player"));
-		return false;
-	}
+	//if (charactersInfo->players.size() == 1)
+	//{
+	//	//MYLOG(Warning, TEXT("Only one player"));
+	//	return false;
+	//}
 
 	// 스폰캐릭터들배열 하나 생성하고 월드에 있는 캐릭터들을 배열에 넣어주기
 	TArray<AActor*> SpawnedCharacters;
