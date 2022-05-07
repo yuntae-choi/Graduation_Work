@@ -303,8 +303,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 
 			if (itembox->GetId() == id_)
 			{
-				itembox->Destroy();
-				itembox = nullptr;
+				itembox->DeleteItem();
 
 			}
 		}

@@ -727,7 +727,7 @@ void process_packet(int s_id, unsigned char* p)
 				cl.iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
 				cl.bHasBag = true;
 			}
-			if (get_item && cl.bHasBag ==false) {
+			if (get_item && cl.bHasBag == true) {
 				cl.bHasBag = true;
 				packet->type = SC_PACKET_GET_ITEM;
 				for (auto& other : clients) {
