@@ -232,12 +232,16 @@ void AMyCharacter::Turn(float NewAxisValue)
 
 void AMyCharacter::Attack()
 {
+	if (isAttacking) return;
 	MYLOG(Warning, TEXT("attack"));
 	if (bIsSnowman) return;
 	if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (iSessionId == PlayerController->iSessionId)  PlayerController->SendPlayerInfo(COMMAND_ATTACK);
-
+	if (iSessionId == PlayerController->iSessionId)
+	{
+		PlayerController->SendPlayerInfo(COMMAND_ATTACK);
+		isAttacking = true;
+	}
 #ifdef SINGLEPLAY_DEBUG
 	SnowAttack();
 #endif
@@ -245,12 +249,11 @@ void AMyCharacter::Attack()
 
 void AMyCharacter::SnowAttack()
 {
-	if (isAttacking) return;
-	if (bIsSnowman) return;
-	if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
+	//if (bIsSnowman) return;
+	//if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 
 	myAnim->PlayAttackMontage();
-	isAttacking = true;
+
 	// 디버깅용 - 실제는 주석 해제
 	iCurrentSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
 	UpdateUI(UICategory::CurSnowball);
