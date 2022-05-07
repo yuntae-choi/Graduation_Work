@@ -12,31 +12,31 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-//ClientSocket* mySocket = nullptr;
+ClientSocket* g_socket = nullptr;
 
-//void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over, DWORD recv_flag)
-//{
-//	MYLOG(Warning, TEXT("recv_callback"));
-//	if (num_byte == 0) {
-//		recv_flag = 0;
-//		/*ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
-//		mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
-//		mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
-//		WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);*/
-//		MYLOG(Warning, TEXT("recv_error"));
-//
-//		return;
-//	}
-//	unsigned char* packet_start = mySocket->_recv_over._net_buf;
-//	int packet_size = packet_start[0];
-//	mySocket->process_data(mySocket->_recv_over._net_buf, num_byte);
-//	recv_flag = 0;
-//	ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
-//	mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
-//	mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
-//	WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);
-//	SleepEx(0, true);
-//}
+void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over, DWORD recv_flag)
+{
+	MYLOG(Warning, TEXT("recv_callback"));
+	if (num_byte == 0) {
+		recv_flag = 0;
+		/*ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
+		mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
+		mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
+		WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);*/
+		MYLOG(Warning, TEXT("recv_error"));
+
+		return;
+	}
+	unsigned char* packet_start = g_socket->_recv_over._net_buf;
+	int packet_size = packet_start[0];
+	g_socket->process_data(g_socket->_recv_over._net_buf, num_byte);
+	recv_flag = 0;
+	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
+	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
+	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
+	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
+	SleepEx(0, true);
+}
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -64,6 +64,7 @@ AMyPlayerController::AMyPlayerController()
 		gameResultUIClass = GAMERESULT_UI.Class;
 	}
 	bIsReady = false;
+	
 }
 
 void AMyPlayerController::OnPossess(APawn* pawn_)
@@ -85,20 +86,32 @@ void AMyPlayerController::BeginPlay()
 	// 실행시 클릭없이 바로 조작
 	//FInputModeGameOnly InputMode;
 	//SetInputMode(InputMode);
-	mySocket = ClientSocket::GetSingleton();
-	mySocket->SetPlayerController(this);
-	mySocket = ClientSocket::GetSingleton();
-	mySocket->SetPlayerController(this);
+	//mySocket = ClientSocket::GetSingleton();
+	//mySocket->SetPlayerController(this);
+	//mySocket = ClientSocket::GetSingleton();
+	//mySocket->SetPlayerController(this);
 	//mySocket = mySocket;
 	//mySocket->Connect();
-	mySocket->Connect();
+	//mySocket->Connect();
 	/*DWORD recv_flag = 0;
 	ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
 	mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
 	mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
 	WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);
 	mySocket->Send_LoginPacket();*/
-	mySocket->StartListen();
+	g_socket = ClientSocket::GetSingleton();
+	g_socket->SetPlayerController(this);
+	mySocket = g_socket;
+	g_socket->Connect();
+	DWORD recv_flag = 0;
+	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
+	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
+	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
+	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
+	g_socket->Send_LoginPacket();
+	SleepEx(0, true);
+	
+	//mySocket->StartListen();
 	SleepEx(0, true);
 }
 
