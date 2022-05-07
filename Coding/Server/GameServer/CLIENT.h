@@ -40,7 +40,8 @@ public:
     atomic_bool is_match = false;
 
     int32 iMaxSnowballCount = 10;
-    int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
+    int32 iMaxMatchCount = 3;
+    //int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 
     int32 iCurrentSnowballCount = 0;
     int32 iCurrentMatchCount = 0;

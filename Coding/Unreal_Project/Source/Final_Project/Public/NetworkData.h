@@ -186,8 +186,9 @@ struct cs_packet_teleport {
 struct cs_packet_get_item {
 	unsigned char size;
 	char	type;
-	int32 s_id;;
+	int32 s_id;
 	int32 item_type;
+	int32 current_snowball;
 	int32 destroy_obj_id;
 };
 

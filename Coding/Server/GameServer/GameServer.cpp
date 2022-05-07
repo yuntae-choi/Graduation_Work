@@ -722,6 +722,11 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			int item_num = packet->destroy_obj_id;
 			bool get_item = is_item(item_num);
+			if (!cl.bHasBag) {
+				cl.iMaxSnowballCount += 5;	// 눈덩이 10 -> 15 까지 보유 가능
+				cl.iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
+				cl.bHasBag = true;
+			}
 			if (get_item && cl.bHasBag ==false) {
 				cl.bHasBag = true;
 				packet->type = SC_PACKET_GET_ITEM;
@@ -763,7 +768,7 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			int item_num = packet->destroy_obj_id;
 			bool get_item = is_item(item_num);
-			if (get_item && cl.iOriginMaxMatchCount > cl.iCurrentMatchCount) {
+			if (get_item && cl.iMaxMatchCount > cl.iCurrentMatchCount) {
 				cl.iCurrentMatchCount++;
 				packet->type = SC_PACKET_GET_ITEM;
 				for (auto& other : clients) {
@@ -784,9 +789,14 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			int snow_drift_num = packet->destroy_obj_id;
 			bool get_snowball = is_snowdrift(snow_drift_num);
-			if (get_snowball && cl.iMaxSnowballCount > cl.iCurrentSnowballCount) {
-				cl.iCurrentSnowballCount = 10;
+			if (get_snowball) {
+				if (cl.iMaxSnowballCount >= cl.iCurrentSnowballCount + 10)
+					cl.iCurrentSnowballCount += 10;
+				else
+					cl.iCurrentSnowballCount = cl.iMaxSnowballCount;
+
 				packet->type = SC_PACKET_GET_ITEM;
+				packet->current_snowball = cl.iCurrentSnowballCount;
 				for (auto& other : clients) {
 					if (ST_INGAME != other._state)
 						continue;

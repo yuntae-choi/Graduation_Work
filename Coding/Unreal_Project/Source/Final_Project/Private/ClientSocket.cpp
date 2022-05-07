@@ -167,7 +167,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		case ITEM_BAG:
 		{
-			
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 			break;
 		}
@@ -187,7 +186,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		}
 		case ITEM_SNOW:
 		{
-			CharactersInfo.players[packet->s_id].current_snow_count = 10;
+			CharactersInfo.players[packet->s_id].current_snow_count = packet->current_snowball;
 			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
 			break;
 		}

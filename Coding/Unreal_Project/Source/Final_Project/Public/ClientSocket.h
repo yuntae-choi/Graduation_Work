@@ -117,6 +117,8 @@ public:
 	float fCDx, fCDy, fCDz;
 	STATE_Type My_State = ST_ANIMAL;
 	int current_snow_count = 0;
+	int max_snow_count = 10;
+
 
 	bool canAttack = false;
 
