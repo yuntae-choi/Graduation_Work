@@ -222,6 +222,16 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		break;
 	}
+	case SC_PACKET_OPEN_BOX:
+	{
+		cs_packet_open_box* packet = reinterpret_cast<cs_packet_open_box*>(ptr);
+		int open_obj_id = packet->open_obj_id;
+		MYLOG(Warning, TEXT("open box "));
+		MyPlayerController->SetOpenItembox(open_obj_id);
+
+		break;
+	}
+
 	//case SC_PACKET_CHAT:
 	//{
 
@@ -372,6 +382,16 @@ void ClientSocket::Send_ItemPacket(int item_type, int destroy_obj_id)
 	MYLOG(Warning, TEXT("[Send item] id : %d, objId : %d, item : %d"), packet.s_id, destroy_obj_id, item_type);
 	SendPacket(&packet);
 };
+
+void ClientSocket::Send_OpenBoxPacket(int open_box_id)
+{
+	cs_packet_open_box packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_OPEN_BOX;
+	packet.open_obj_id = open_box_id;
+	SendPacket(&packet);
+};
+
 
 void ClientSocket::Send_ChatPacket(int sessionID, float x, float y, float z)
 {

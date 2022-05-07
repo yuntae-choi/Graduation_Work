@@ -194,6 +194,12 @@ void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
 	destory_snowdrift.Push(obj_id);
 }
 
+void AMyPlayerController::SetOpenItembox(const int obj_id)
+{
+	UWorld* World = GetWorld();
+	open_itembox.Push(obj_id);
+}
+
 void AMyPlayerController::SetGameEnd(const int target_id)
 {
 	UWorld* World = GetWorld();
@@ -249,6 +255,24 @@ bool AMyPlayerController::UpdateWorldInfo()
 			{
 				snowdrift->Destroy();
 				snowdrift = nullptr;
+			}
+		}
+		id_ = -1;
+	}
+
+	id_ = -1;
+	while (open_itembox.TryPop(id_))
+	{
+		TArray<AActor*> ItemBox;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), ItemBox);
+
+		for (auto sd : ItemBox)
+		{
+			AItembox* itembox = Cast<AItembox>(sd);
+			//if (!itembox) continue;
+			if (itembox->GetId() == id_)
+			{
+				itembox->SetItemboxState(ItemboxState::Opening);
 			}
 		}
 		id_ = -1;

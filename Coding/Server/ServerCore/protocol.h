@@ -29,6 +29,7 @@ const char CS_PACKET_STATUS_CHANGE = 10;
 const char CS_PACKET_READY = 11;
 const char CS_PACKET_STOP_SNOW_FARMING = 12;
 const char CS_PACKET_MATCH = 13;
+const char CS_PACKET_OPEN_BOX = 14;
 
 
 
@@ -50,6 +51,7 @@ const char SC_PACKET_STOP_SNOW_FARMING = 15;
 const char SC_PACKET_IS_BONE = 16;
 const char SC_PACKET_LOGOUT = 17;
 const char SC_PACKET_END = 18;
+const char SC_PACKET_OPEN_BOX = 19;
 
 
 #pragma pack (push, 1)
@@ -157,6 +159,12 @@ struct cs_packet_get_item {
 	int32 s_id;;
 	int32 item_type;
 	int32 destroy_obj_id;
+};
+
+struct cs_packet_open_box {
+	unsigned char size;
+	char	type;
+	int32 open_obj_id;
 };
 
 //struct cs_packet_stop_snow_farming {

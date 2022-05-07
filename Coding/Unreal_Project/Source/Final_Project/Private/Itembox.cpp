@@ -72,7 +72,9 @@ AItembox::AItembox()
 
 	iItemboxState = ItemboxState::Closed;
 	fSumRotation = 0.0f;
-	iItemType = ItemTypeList::Random;
+	
+	//iItemType = ItemTypeList::Random;
+	//BeginPlay()로 옮겨감
 	
 	// 아이템별 메시 테스트용
 	//SetItem(ItemTypeList::Match);
@@ -87,13 +89,19 @@ void AItembox::BeginPlay()
 	
 	// 실제로는 서버에서 SetItem(아이템 타입) 으로 아이템의 종류를 정해주면 됨
 	// 디버깅용 - 랜덤하게 아이템 타입 및 메시 설정
-	SetItem();
+	
+	//임시로 랜덤하게 설정된 아이템타입을 아이템 id%3으로 바꿔줌
+	iId = ++iIdCountHelper;
+	iItemType = iId % 3;
+	UE_LOG(LogTemp, Warning, TEXT("iItemType %d"), iItemType);
+
+	SetItem(iItemType);
 	//// 디버깅용 - 특정 아이템으로 고정
 	//SetItem(ItemTypeList::Match);
 	//SetItem(ItemTypeList::Umbrella);
 	//SetItem(ItemTypeList::Bag);
 
-	iId = ++iIdCountHelper;
+	//iId = ++iIdCountHelper;
 }
 
 // Called every frame

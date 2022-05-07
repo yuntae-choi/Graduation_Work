@@ -965,6 +965,18 @@ void process_packet(int s_id, unsigned char* p)
 		cout << "게임 스타트" << endl;
 		break;
 	}
+	case CS_PACKET_OPEN_BOX: {
+		if (cl.bIsSnowman) break;
+		printf("OPEN_BOX\n");
+		cs_packet_open_box* packet = reinterpret_cast<cs_packet_open_box*>(p);
+		for (auto& other : clients) {
+			if (s_id == other._s_id) continue;
+			if (ST_INGAME != other._state) continue;
+			packet->type = SC_PACKET_OPEN_BOX;
+			other.do_send(sizeof(*packet), packet);
+		}
+		break;
+	}
 	default:
 		cout <<" 오류패킷타입" << packet_type << endl;
 		printf("Unknown PACKET type\n");
