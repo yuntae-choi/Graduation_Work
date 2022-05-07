@@ -53,7 +53,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlayerUnready();
 	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
-	void LoadGameResultUI(int winnerSessionId);	// 게임 종료 시 결과창 ui 띄우기 (승자 id 인자로 받아서 승자, 패자 다르게 뜨도록)
+	void LoadGameResultUI(int winnerSessionId);	// 게임 종료 시 결과창 ui 띄우기 (CharacterUI 제거, 승자 id 인자로 받아서 결과 출력)
 	
 	// UpdateUI 델리게이트 이벤트 호출
 	void CallDelegateUpdateAllOfUI();
