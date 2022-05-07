@@ -6,9 +6,9 @@
 
 // 아이템별 스테틱메시
 FString ItemMeshStringArray[] = {
-	TEXT("/Game/NonCharacters/snowball1.snowball1"),						// 성냥 - 변경 필요
+	TEXT("/Game/NonCharacters/match.match"),								// 성냥
 	TEXT("/Game/NonCharacters/umbrellaForItemBox.umbrellaForItemBox"),		// 우산
-	TEXT("/Game/NonCharacters/snowdrift1.snowdrift1")};						// 가방 - 변경 필요
+	TEXT("/Game/NonCharacters/bag.bag")};									// 가방 - 임시 (리소스 제작 필요)
 
 int AItembox::iIdCountHelper = -1;
 
@@ -73,6 +73,11 @@ AItembox::AItembox()
 	iItemboxState = ItemboxState::Closed;
 	fSumRotation = 0.0f;
 	iItemType = ItemTypeList::Random;
+	
+	// 아이템별 메시 테스트용
+	//SetItem(ItemTypeList::Match);
+	//SetItem(ItemTypeList::Umbrella);
+	//SetItem(ItemTypeList::Bag);
 }
 
 // Called when the game starts or when spawned
@@ -141,6 +146,8 @@ void AItembox::SetItem(int itemType)
 	switch (itemType) {
 	case ItemTypeList::Match:
 		itemMeshComponent->SetStaticMesh(itemMeshArray[ItemTypeList::Match]);
+		itemMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
+		itemMeshComponent->SetRelativeLocation(FVector(0.0f, 30.0f, 0.0f));
 		iItemType = ItemTypeList::Match;
 		break;
 	case ItemTypeList::Umbrella:
@@ -152,6 +159,8 @@ void AItembox::SetItem(int itemType)
 		break;
 	case ItemTypeList::Bag:
 		itemMeshComponent->SetStaticMesh(itemMeshArray[ItemTypeList::Bag]);
+		itemMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
+		itemMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -5.0f));
 		iItemType = ItemTypeList::Bag;
 		break;
 	case ItemTypeList::Random:
