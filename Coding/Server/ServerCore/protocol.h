@@ -5,7 +5,7 @@
 
 const short SERVER_PORT = 9090;
 
-const int32 BUFSIZE = 512;
+const int32 BUFSIZE = 1024;
 const int32  ReZone_HEIGHT = 2000;
 const int32  ReZone_WIDTH = 2000;
 const int32  MAX_NAME_SIZE = 20;
@@ -48,6 +48,8 @@ const char SC_PACKET_READY = 13;
 const char SC_PACKET_START = 14;
 const char SC_PACKET_STOP_SNOW_FARMING = 15;
 const char SC_PACKET_IS_BONE = 16;
+const char SC_PACKET_LOGOUT = 17;
+const char SC_PACKET_END = 18;
 
 
 #pragma pack (push, 1)
@@ -187,6 +189,13 @@ struct sc_packet_is_bone {
 	unsigned char size;
 	char	type;
 };
+
+struct sc_packet_game_end {
+	unsigned char size;
+	char	type;
+	int     s_id;
+};
+
 
 struct sc_packet_remove_object {
 	unsigned char size;

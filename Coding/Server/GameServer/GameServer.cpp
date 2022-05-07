@@ -310,12 +310,12 @@ void send_status_packet(int _s_id)
 void Disconnect(int _s_id)
 {
 	CLIENT& cl = clients[_s_id];
-	cl.vl.lock();
-	unordered_set <int> my_vl = cl.viewlist;
-	cl.vl.unlock();
+	//cl.vl.lock();
+	//unordered_set <int> my_vl = cl.viewlist;
+	//cl.vl.unlock();
 
 	strcpy_s(clients[_s_id]._id, " ");
-	for (auto& other : my_vl) {
+	/*for (auto& other : my_vl) {
 		CLIENT& target = clients[other];
 
 		if (ST_INGAME != target._state)
@@ -327,6 +327,27 @@ void Disconnect(int _s_id)
 			send_remove_object(other, _s_id);
 		}
 		else target.vl.unlock();
+	}*/
+	for (auto& other : clients) {
+		if (other._s_id == _s_id) continue;
+		other.state_lock.lock();
+		if (ST_INGAME != other._state) {
+			other.state_lock.unlock();
+			continue;
+		}
+		else other.state_lock.unlock();
+
+		//if (false == is_near(other._id, client_id))
+			//continue;
+
+		//other.vl.lock();
+		//other.viewlist.insert(s_id);
+		//other.vl.unlock();
+		cs_packet_logout packet;
+		packet.size = sizeof(packet);
+		packet.type = SC_PACKET_LOGOUT;
+		packet.s_id = cl._s_id;
+		other.do_send(sizeof(packet), &packet);
 	}
 	//clients[_s_id].state_lock.lock();
 	clients[_s_id]._state = ST_FREE;
@@ -362,6 +383,15 @@ void send_state_change(int s_id, int target, STATE_Type stat)
 	_packet.size = sizeof(_packet);
 	_packet.type = SC_PACKET_STATUS_CHANGE;
 	_packet.state = stat;
+	_packet.s_id = s_id;
+	clients[target].do_send(sizeof(_packet), &_packet);
+}
+
+void send_game_end(int s_id, int target)
+{
+	sc_packet_game_end _packet;
+	_packet.size = sizeof(_packet);
+	_packet.type = SC_PACKET_END;
 	_packet.s_id = s_id;
 	clients[target].do_send(sizeof(_packet), &_packet);
 }
@@ -415,7 +445,7 @@ void process_packet(int s_id, unsigned char* p)
 		//cout << "로그인 허용 전송" << s_id << endl;
 		//cl.do_send(sizeof(_packet), &_packet);
 		send_login_ok_packet(s_id);
-		//cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
+		cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
 
 		// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
 		for (auto& other : clients) {
@@ -611,6 +641,7 @@ void process_packet(int s_id, unsigned char* p)
 		if (cl._hp <= cl._min_hp)
 		{
 			cl.iCurrentSnowballCount = 0;
+			cl.bIsSnowman = true;
 			sc_packet_status_change _packet;
 			_packet.size = sizeof(_packet);
 			_packet.type = SC_PACKET_STATUS_CHANGE;
@@ -623,6 +654,27 @@ void process_packet(int s_id, unsigned char* p)
 				cout << "눈사람" << endl;
 				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 			}
+			int cnt = 0;
+			int target_s_id;
+			for (auto& other : clients) {
+				if (cl._s_id == other._s_id) continue;
+				if (ST_INGAME != other._state) continue;
+				if (false == other.bIsSnowman)
+				{
+					cnt++;
+					cout << "눈덩이 cnt" << endl;
+
+					target_s_id = other._s_id;
+				}
+			}
+			if (cnt == 1) {
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					send_game_end(target_s_id, other._s_id);
+				}
+				cout << "게임종료" << endl;
+			}
 		}
 
 		break;
@@ -634,11 +686,16 @@ void process_packet(int s_id, unsigned char* p)
 		if (cl.iCurrentMatchCount > 0)
 		{
 			cl.iCurrentMatchCount--;
-			cl.is_bone = true;
-			Timer_Event(s_id, s_id, CL_MATCH, 1000ms);
-			Timer_Event(s_id, s_id, CL_MATCH, 2000ms);
-			Timer_Event(s_id, s_id, CL_MATCH, 3000ms);
-			Timer_Event(s_id, s_id, CL_END_MATCH, 3100ms);
+			if (cl._hp + 30 > cl._max_hp)
+				cl._hp = cl._max_hp;
+			else
+				cl._hp +=30;
+			send_hp_packet(cl._s_id);
+			//cl.is_bone = true;
+			//Timer_Event(s_id, s_id, CL_MATCH, 1000ms);
+			//Timer_Event(s_id, s_id, CL_MATCH, 2000ms);
+			//Timer_Event(s_id, s_id, CL_MATCH, 3000ms);
+			//Timer_Event(s_id, s_id, CL_END_MATCH, 3100ms);
 		}
 
 		break;
@@ -728,7 +785,7 @@ void process_packet(int s_id, unsigned char* p)
 			int snow_drift_num = packet->destroy_obj_id;
 			bool get_snowball = is_snowdrift(snow_drift_num);
 			if (get_snowball && cl.iMaxSnowballCount > cl.iCurrentSnowballCount) {
-				cl.iCurrentSnowballCount++;
+				cl.iCurrentSnowballCount = 10;
 				packet->type = SC_PACKET_GET_ITEM;
 				for (auto& other : clients) {
 					if (ST_INGAME != other._state)
@@ -773,11 +830,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_LOGOUT: {
 		cs_packet_logout* packet = reinterpret_cast<cs_packet_logout*>(p);
 		cout << "[Recv logout]";
-		for (auto& other : clients) {
-			if (s_id == other._s_id) continue;
-			if (ST_INGAME != other._state) continue;
-			send_remove_object(other._s_id, s_id);
-		}
+	
 		Disconnect(s_id);
 		break;
 	}
@@ -824,6 +877,29 @@ void process_packet(int s_id, unsigned char* p)
 					cout << "눈사람" << endl;
 					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
+
+				int cnt = 0;
+				int target_s_id;
+				for (auto& other : clients) {
+					//if (cl._s_id == other._s_id) continue;
+					if (ST_INGAME != other._state) continue;
+					if (false == other.bIsSnowman)
+					{
+						cnt++;
+						cout << "충돌 cnt" << endl;
+
+						target_s_id = other._s_id;
+					}
+				}
+				if (cnt == 1) {
+					for (auto& other : clients) {
+						if (ST_INGAME != other._state)
+							continue;
+						send_game_end(target_s_id, other._s_id);
+					}
+					cout << "게임종료" << endl;
+				}
+
 			}
 			cout << "플레이어" << packet->s_id <<" 눈사람" << endl;
 
@@ -1021,6 +1097,7 @@ void worker_thread()
 				}
 				else if (clients[_s_id]._hp - 1 == clients[_s_id]._min_hp) 
 				{
+					cout << "모닥불 데미지 눈사람" << endl;
 					clients[_s_id].bIsSnowman = true;
 					clients[_s_id]._hp -= 1;
 					send_hp_packet(_s_id);
@@ -1028,10 +1105,29 @@ void worker_thread()
 					for (auto& other : clients) {
 						if (ST_INGAME != other._state) continue;
 						send_state_change(_s_id, other._s_id, ST_SNOWMAN);
-						cout << "눈사람" << endl;
+						
 						
 					}
-
+					int cnt = 0;
+					int target_s_id;
+					for (auto& other : clients) {
+						if (_s_id== other._s_id) continue;
+						if (ST_INGAME != other._state) continue;
+						if (false == other.bIsSnowman)
+						{
+							cnt++;
+							cout << "모닥불 cnt" << endl;
+							target_s_id = other._s_id;
+						}
+					}
+					if (cnt == 1) {
+						for (auto& other : clients) {
+							if (ST_INGAME != other._state)
+								continue;
+							send_game_end(target_s_id, other._s_id);
+						}
+						cout << "게임종료" << endl;
+					}
 				}
 			}
 

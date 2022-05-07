@@ -44,6 +44,8 @@ public:
 	void SetNewBall(const int s_id);
 	void SetDestroySnowdritt(const int s_id);
 	void SetDestroyitembox(const int obj_id);
+	void SetDestroyPlayer(const int del_sid);
+	void SetGameEnd(const int target_id);
 
 	void SendPlayerInfo(int input);
 	//void SendFarming(int item_no);
@@ -168,6 +170,8 @@ private:
 	LockQueue<int> newBalls;
 	LockQueue<int> destory_snowdrift;
 	LockQueue<int> destory_itembox;
+	LockQueue<int> destory_player;
+	atomic<int> victory_player;
 
 
 	//queue <int>				newBalls;

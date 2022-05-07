@@ -16,9 +16,9 @@
 
 #define	MAX_BUFFER		4096
 #define SERVER_PORT		9090
-#define SERVER_IP		"112.148.142.95" // 외부 IP
+//#define SERVER_IP		"112.148.142.95" // 외부 IP
 //#define SERVER_IP		"192.168.219.106" //로컬IP
-//#define SERVER_IP		"127.0.0.1" //로컬IP
+#define SERVER_IP		"127.0.0.1" //로컬IP
 #define MAX_CLIENTS		100
 
 using std::chrono::duration_cast;
@@ -65,7 +65,8 @@ const char SC_PACKET_READY = 13;
 const char SC_PACKET_START = 14;
 const char SC_PACKET_STOP_SNOW_FARMING = 15;
 const char SC_PACKET_IS_BONE = 16;
-
+const char SC_PACKET_LOGOUT = 17;
+const char SC_PACKET_END = 18;
 
 enum COMMAND_Type
 {
@@ -243,6 +244,14 @@ struct sc_packet_is_bone {
 	char	type;
 	
 };
+
+struct sc_packet_game_end {
+	unsigned char size;
+	char	type;
+	int     s_id;
+};
+
+
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
 
