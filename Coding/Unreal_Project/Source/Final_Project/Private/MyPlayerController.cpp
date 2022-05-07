@@ -12,38 +12,39 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-ClientSocket* g_socket = nullptr;
+//ClientSocket* mySocket = nullptr;
 
-void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over, DWORD recv_flag)
-{
-	MYLOG(Warning, TEXT("recv_callback"));
-	if (num_byte == 0) {
-		recv_flag = 0;
-		/*ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
-		g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
-		g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
-		WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);*/
-		MYLOG(Warning, TEXT("recv_error"));
-
-		return;
-	}
-	unsigned char* packet_start = g_socket->_recv_over._net_buf;
-	int packet_size = packet_start[0];
-	g_socket->process_data(g_socket->_recv_over._net_buf, num_byte);
-	recv_flag = 0;
-	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
-	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
-	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
-	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
-	SleepEx(0, true);
-}
+//void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over, DWORD recv_flag)
+//{
+//	MYLOG(Warning, TEXT("recv_callback"));
+//	if (num_byte == 0) {
+//		recv_flag = 0;
+//		/*ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
+//		mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
+//		mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
+//		WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);*/
+//		MYLOG(Warning, TEXT("recv_error"));
+//
+//		return;
+//	}
+//	unsigned char* packet_start = mySocket->_recv_over._net_buf;
+//	int packet_size = packet_start[0];
+//	mySocket->process_data(mySocket->_recv_over._net_buf, num_byte);
+//	recv_flag = 0;
+//	ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
+//	mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
+//	mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
+//	WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);
+//	SleepEx(0, true);
+//}
 
 AMyPlayerController::AMyPlayerController()
 {
 	
 	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
-	bSetStart = false;
+	bSetStart.store(false);
+	victory_player.store(-1);
 	bInGame = false;
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -69,7 +70,7 @@ void AMyPlayerController::OnPossess(APawn* pawn_)
 {
 	Super::OnPossess(pawn_);
 
-	//g_socket->StartListen();
+	//mySocket->StartListen();
 	localPlayerCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
 	LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
@@ -84,25 +85,29 @@ void AMyPlayerController::BeginPlay()
 	// 실행시 클릭없이 바로 조작
 	//FInputModeGameOnly InputMode;
 	//SetInputMode(InputMode);
-	g_socket = ClientSocket::GetSingleton();
-	g_socket->SetPlayerController(this);
-	mySocket = g_socket;
-	g_socket->Connect();
-	DWORD recv_flag = 0;
-	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
-	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
-	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
-	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
-	g_socket->Send_LoginPacket();
+	mySocket = ClientSocket::GetSingleton();
+	mySocket->SetPlayerController(this);
+	mySocket = ClientSocket::GetSingleton();
+	mySocket->SetPlayerController(this);
+	//mySocket = mySocket;
+	//mySocket->Connect();
+	mySocket->Connect();
+	/*DWORD recv_flag = 0;
+	ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
+	mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
+	mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
+	WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);
+	mySocket->Send_LoginPacket();*/
+	mySocket->StartListen();
 	SleepEx(0, true);
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	//MYLOG(Warning, TEXT("EndPlay!"));
-	//g_socket->Send_LogoutPacket(iSessionId);
-	//g_socket->CloseSocket();
-	//g_socket->StopListen();
+	//mySocket->Send_LogoutPacket(iSessionId);
+	//mySocket->CloseSocket();
+	//mySocket->StopListen();
 	
 	// 델리게이트 해제
 	FuncUpdateHP.Clear();
@@ -143,7 +148,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	if (bSetStart)
 		StartGame();
-
+	if (victory_player != -1)
+		LoadGameResultUI(victory_player);
 
 	// 월드 동기화
 	UpdateWorldInfo();
@@ -176,10 +182,22 @@ void AMyPlayerController::SetNewBall(const int s_id)
 	newBalls.Push(s_id);
 }
 
+void AMyPlayerController::SetDestroyPlayer(const int del_sid)
+{
+	UWorld* World = GetWorld();
+	destory_player.Push(del_sid);
+}
+
 void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
 {
 	UWorld* World = GetWorld();
 	destory_snowdrift.Push(obj_id);
+}
+
+void AMyPlayerController::SetGameEnd(const int target_id)
+{
+	UWorld* World = GetWorld();
+	victory_player.store(target_id);
 }
 
 void AMyPlayerController::SetDestroyitembox(const int obj_id)
@@ -213,6 +231,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 	while (newBalls.TryPop(id_))
 	{
 		charactersInfo->players[id_].canAttack = true;
+		id_ = -1;
 	}
 
 
@@ -232,25 +251,52 @@ bool AMyPlayerController::UpdateWorldInfo()
 				snowdrift = nullptr;
 			}
 		}
+		id_ = -1;
 	}
 
 	id_ = -1;
 	while (destory_itembox.TryPop(id_))
 	{
 		TArray<AActor*> ItemBox;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), ItemBox);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), ItemBox);
 
 		for (auto sd : ItemBox)
 		{
-			ASnowdrift* itembox = Cast<ASnowdrift>(sd);
+			AItembox* itembox = Cast<AItembox>(sd);
 
 			if (itembox->GetId() == id_)
 			{
 				itembox->Destroy();
 				itembox = nullptr;
+
 			}
 		}
+		id_ = -1;
 	}
+	
+	TArray<AActor*> delCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), delCharacters);
+
+	id_ = -1;
+	while (destory_player.TryPop(id_))
+	{
+
+		for (auto sd : delCharacters)
+		{
+			AMyCharacter* Del_Player = Cast<AMyCharacter>(sd);
+
+			if (Del_Player->iSessionId == id_)
+			{
+				charactersInfo->players.erase(Del_Player->iSessionId);
+				Del_Player->Destroy();
+				Del_Player = nullptr;
+				
+			}
+		}
+		id_ = -1;
+	}
+
+
 
 	// 플레이어자신 체력, 사망업데이트
 	UpdatePlayerInfo(charactersInfo->players[iSessionId]);
@@ -264,7 +310,8 @@ bool AMyPlayerController::UpdateWorldInfo()
 	// 스폰캐릭터들배열 하나 생성하고 월드에 있는 캐릭터들을 배열에 넣어주기
 	TArray<AActor*> SpawnedCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
-
+	
+	
 	for (auto& Character_ : SpawnedCharacters)
 	{
 		//자신포함 모든플레이어
@@ -454,17 +501,17 @@ void AMyPlayerController::SendPlayerInfo(int input)
 		if (!vel.IsZero()) bIsSpeedZero = false;
 
 		if (fOldYaw != fNewYaw || !bIsSpeedZero)
-			g_socket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
+			mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
 
 		fOldYaw = fNewYaw;
 		if (vel.IsZero()) bIsSpeedZero = true;
 	}
 	else if (input == COMMAND_ATTACK)
-		g_socket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
-		g_socket->Send_DamagePacket();
+		mySocket->Send_DamagePacket();
 	else if (input == COMMAND_MATCH)
-		g_socket->Send_MatchPacket();
+		mySocket->Send_MatchPacket();
 }
 
 //플레이어 정보 업데이트
@@ -540,7 +587,7 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 
 //void AMyPlayerController::SendFarming(int item_no)
 //{
-//		g_socket->Send_ItemPacket(item_no);
+//		mySocket->Send_ItemPacket(item_no);
 //}
 
 void AMyPlayerController::LoadReadyUI()
@@ -563,7 +610,7 @@ void AMyPlayerController::LoadReadyUI()
 void AMyPlayerController::PlayerReady()
 {
 	// 서버에 레디했다고 전송
-	g_socket->Send_ReadyPacket();
+	mySocket->Send_ReadyPacket();
 	UE_LOG(LogTemp, Warning, TEXT("PlayerReady"));
 	bIsReady = true;
 #ifdef SINGLEPLAY_DEBUG

@@ -187,7 +187,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		}
 		case ITEM_SNOW:
 		{
-			CharactersInfo.players[packet->s_id].current_snow_count++;
+			CharactersInfo.players[packet->s_id].current_snow_count = 10;
 			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
 			break;
 		}
@@ -201,6 +201,25 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_IS_BONE:
 	{
 		MyPlayerController->get_bone();
+		break;
+	}
+	case SC_PACKET_LOGOUT:
+	{
+		cs_packet_logout* packet = reinterpret_cast<cs_packet_logout*>(ptr);
+		int del_s_id = packet->s_id;
+		MYLOG(Warning, TEXT("player%d logout "), del_s_id);
+		MyPlayerController->SetDestroyPlayer(del_s_id);
+
+		break;
+	}
+
+	case SC_PACKET_END:
+	{
+		sc_packet_game_end* packet = reinterpret_cast<sc_packet_game_end*>(ptr);
+		int end_s_id = packet->s_id;
+		MYLOG(Warning, TEXT("player%d victory "), end_s_id);
+		MyPlayerController->SetGameEnd(end_s_id);
+
 		break;
 	}
 	//case SC_PACKET_CHAT:
@@ -424,15 +443,15 @@ uint32 ClientSocket::Run()
 	// 초기 init 과정을 기다림
 	FPlatformProcess::Sleep(0.03);
 
-	Connect();
+	//Connect();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
 	
-	 RecvPacket();
+	RecvPacket();
 
 	Send_LoginPacket();
 
-	FPlatformProcess::Sleep(0.03);
+	SleepEx(0, true);
 
 	// recv while loop 시작
 	// StopTaskCounter 클래스 변수를 사용해 Thread Safety하게 해줌
@@ -476,6 +495,7 @@ uint32 ClientSocket::Run()
 			}
 
 			RecvPacket();
+			SleepEx(0, true);
 			break;
 		}
 		case OP_SEND: {
