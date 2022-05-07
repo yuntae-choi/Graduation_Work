@@ -150,20 +150,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	//	MYLOG(Warning, TEXT("id : %d"), itembox->GetId());
 	//}
-
-
-	//플레이어 초기설정
-	if (bInitPlayerSetting)
-		InitPlayerSetting();
-
-	if (newPlayers.TryPop(newplayer))
-		UpdateNewPlayer();
-
-	if (bSetStart)
-		StartGame();
-	if (victory_player != -1)
-		LoadGameResultUI(victory_player);
-
+	
 	// 월드 동기화
 	UpdateWorldInfo();
 
@@ -178,6 +165,7 @@ void AMyPlayerController::SetInitInfo(const cCharacter& me)
 {
 	initInfo = me;
 	bInitPlayerSetting = true;
+	InitPlayerSetting();
 }
 
 void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
@@ -185,38 +173,83 @@ void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
 	if (NewPlayer_ != nullptr)
 	{
 		//bNewPlayerEntered = true;
-		newPlayers.Push(NewPlayer_);
+		newplayer = NewPlayer_;
+		UpdateNewPlayer();
 	}
 }
 
 void AMyPlayerController::SetNewBall(const int s_id)
 {
 	UWorld* World = GetWorld();
-	newBalls.Push(s_id);
+	
+	charactersInfo->players[s_id].canAttack = true;
+	
 }
 
 void AMyPlayerController::SetDestroyPlayer(const int del_sid)
 {
 	UWorld* World = GetWorld();
-	destory_player.Push(del_sid);
+
+	TArray<AActor*> delCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), delCharacters);
+
+	for (auto sd : delCharacters)
+	{
+		AMyCharacter* Del_Player = Cast<AMyCharacter>(sd);
+
+		if (Del_Player->iSessionId == del_sid)
+		{
+			charactersInfo->players.erase(Del_Player->iSessionId);
+			Del_Player->Destroy();
+			Del_Player = nullptr;
+
+		}
+	}
+	
 }
 
 void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
 {
 	UWorld* World = GetWorld();
-	destory_snowdrift.Push(obj_id);
+	TArray<AActor*> Snowdrifts;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), Snowdrifts);
+
+	for (auto sd : Snowdrifts)
+	{
+		ASnowdrift* snowdrift = Cast<ASnowdrift>(sd);
+
+		if (snowdrift->GetId() == obj_id)
+		{
+			snowdrift->Destroy();
+			snowdrift = nullptr;
+		}
+	}
+		
 }
 
 void AMyPlayerController::SetOpenItembox(const int obj_id)
 {
 	UWorld* World = GetWorld();
-	open_itembox.Push(obj_id);
+	TArray<AActor*> ItemBox;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), ItemBox);
+
+	for (auto sd : ItemBox)
+	{
+		AItembox* itembox = Cast<AItembox>(sd);
+		//if (!itembox) continue;
+		if (itembox->GetId() == obj_id)
+		{
+			itembox->SetItemboxState(ItemboxState::Opening);
+		}
+	}
+
+	
 }
 
 void AMyPlayerController::SetGameEnd(const int target_id)
 {
 	UWorld* World = GetWorld();
-	victory_player.store(target_id);
+	LoadGameResultUI(target_id);
 }
 
 void AMyPlayerController::SetDestroyitembox(const int obj_id)
@@ -224,6 +257,8 @@ void AMyPlayerController::SetDestroyitembox(const int obj_id)
 	UWorld* World = GetWorld();
 	destory_itembox.Push(obj_id);
 }
+
+
 
 void AMyPlayerController::InitPlayerSetting()
 {
@@ -244,96 +279,6 @@ bool AMyPlayerController::UpdateWorldInfo()
 	UWorld* const world = GetWorld();
 	if (world == nullptr)					return false;
 	if (charactersInfo == nullptr)	return false;
-
-
-	int id_ = -1;
-	while (newBalls.TryPop(id_))
-	{
-		charactersInfo->players[id_].canAttack = true;
-		id_ = -1;
-	}
-
-
-	id_ = -1;
-	while (destory_snowdrift.TryPop(id_))
-	{
-		TArray<AActor*> Snowdrifts;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), Snowdrifts);
-
-		for (auto sd : Snowdrifts)
-		{
-			ASnowdrift* snowdrift = Cast<ASnowdrift>(sd);
-
-			if (snowdrift->GetId() == id_)
-			{
-				snowdrift->Destroy();
-				snowdrift = nullptr;
-			}
-		}
-		id_ = -1;
-	}
-
-	id_ = -1;
-	while (open_itembox.TryPop(id_))
-	{
-		TArray<AActor*> ItemBox;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), ItemBox);
-
-		for (auto sd : ItemBox)
-		{
-			AItembox* itembox = Cast<AItembox>(sd);
-			//if (!itembox) continue;
-			if (itembox->GetId() == id_)
-			{
-				itembox->SetItemboxState(ItemboxState::Opening);
-			}
-		}
-		id_ = -1;
-	}
-
-	id_ = -1;
-	while (destory_itembox.TryPop(id_))
-	{
-		TArray<AActor*> ItemBox;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), ItemBox);
-
-		for (auto sd : ItemBox)
-		{
-			AItembox* itembox = Cast<AItembox>(sd);
-
-			if (itembox->GetId() == id_)
-			{
-				itembox->Destroy();
-				itembox = nullptr;
-
-			}
-		}
-		id_ = -1;
-	}
-	
-	TArray<AActor*> delCharacters;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), delCharacters);
-
-	id_ = -1;
-	while (destory_player.TryPop(id_))
-	{
-
-		for (auto sd : delCharacters)
-		{
-			AMyCharacter* Del_Player = Cast<AMyCharacter>(sd);
-
-			if (Del_Player->iSessionId == id_)
-			{
-				charactersInfo->players.erase(Del_Player->iSessionId);
-				Del_Player->Destroy();
-				Del_Player = nullptr;
-				
-			}
-		}
-		id_ = -1;
-	}
-
-
 
 	// 플레이어자신 체력, 사망업데이트
 	UpdatePlayerInfo(charactersInfo->players[iSessionId]);
