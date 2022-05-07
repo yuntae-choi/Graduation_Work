@@ -634,7 +634,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_DAMAGE: {
 		if (cl.bIsSnowman) break;
 		cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
-		cl._hp -= 10;
+		cl._hp -= 30;
 		if (cl._hp < 270) cl._hp = 270;
 		send_hp_packet(cl._s_id);
 
