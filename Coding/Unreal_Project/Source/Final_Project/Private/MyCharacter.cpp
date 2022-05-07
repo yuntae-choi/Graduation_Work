@@ -48,7 +48,7 @@ AMyCharacter::AMyCharacter()
 	GetCapsuleComponent()->SetUseCCD(true);
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
 	GetCapsuleComponent()->BodyInstance.bNotifyRigidBodyCollision = true;
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -74.0f), FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -77.0f), FRotator(0.0f, -90.0f, 0.0f));
 	springArm->TargetArmLength = 220.0f;
 	springArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator::ZeroRotator);
 	springArm->bUsePawnControlRotation = true;
