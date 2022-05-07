@@ -16,7 +16,7 @@ ClientSocket* g_socket = nullptr;
 
 void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over, DWORD recv_flag)
 {
-	MYLOG(Warning, TEXT("recv_callback"));
+	//MYLOG(Warning, TEXT("recv_callback"));
 	if (num_byte == 0) {
 		recv_flag = 0;
 		/*ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
@@ -534,15 +534,8 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	localPlayerCharacter->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
 	float dir = localPlayerCharacter->GetAnim()->GetDirection();
 
-	if (input == COMMAND_MOVE) {
-		if (!vel.IsZero()) bIsSpeedZero = false;
-
-		if (fOldYaw != fNewYaw || !bIsSpeedZero)
-			mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
-
-		fOldYaw = fNewYaw;
-		if (vel.IsZero()) bIsSpeedZero = true;
-	}
+	if (input == COMMAND_MOVE) 
+	mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
 	else if (input == COMMAND_ATTACK)
 		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)

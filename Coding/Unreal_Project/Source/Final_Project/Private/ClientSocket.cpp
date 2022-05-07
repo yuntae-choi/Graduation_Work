@@ -47,7 +47,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		MyPlayerController->SetCharactersInfo(&CharactersInfo);
 		MyPlayerController->SetInitInfo(info);
 
-		MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
+		//MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
 
 		break;
 	}
@@ -59,7 +59,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		sc_packet_ready* packet = reinterpret_cast<sc_packet_ready*>(ptr);
 		int _s_id = packet->s_id;
-		MYLOG(Warning, TEXT("[player %d ] : READY"), packet->s_id);
+		//MYLOG(Warning, TEXT("[player %d ] : READY"), packet->s_id);
 		break;
 	}
 
@@ -84,7 +84,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		MyPlayerController->SetNewCharacterInfo(info);
 
-		MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+		//MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
 		break;
 	}
@@ -138,7 +138,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
 
-		MYLOG(Warning, TEXT("[Recv remove object] id : %d"), packet->s_id);
+		//MYLOG(Warning, TEXT("[Recv remove object] id : %d"), packet->s_id);
 
 		break;
 	}
@@ -146,7 +146,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_STATUS_CHANGE:
 	{
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
-		MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
+		//MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
 		if (ST_SNOWMAN == packet->state) {
 		
 			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
@@ -206,7 +206,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_logout* packet = reinterpret_cast<cs_packet_logout*>(ptr);
 		int del_s_id = packet->s_id;
-		MYLOG(Warning, TEXT("player%d logout "), del_s_id);
+		//MYLOG(Warning, TEXT("player%d logout "), del_s_id);
 		MyPlayerController->SetDestroyPlayer(del_s_id);
 
 		break;
@@ -216,7 +216,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		sc_packet_game_end* packet = reinterpret_cast<sc_packet_game_end*>(ptr);
 		int end_s_id = packet->s_id;
-		MYLOG(Warning, TEXT("player%d victory "), end_s_id);
+		//MYLOG(Warning, TEXT("player%d victory "), end_s_id);
 		MyPlayerController->SetGameEnd(end_s_id);
 
 		break;
@@ -225,7 +225,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_open_box* packet = reinterpret_cast<cs_packet_open_box*>(ptr);
 		int open_obj_id = packet->open_obj_id;
-		MYLOG(Warning, TEXT("open box "));
+		//MYLOG(Warning, TEXT("open box "));
 		MyPlayerController->SetOpenItembox(open_obj_id);
 
 		break;
@@ -271,7 +271,7 @@ void ClientSocket::Send_LoginPacket()
 	size_t sent = 0;
 
 
-	MYLOG(Warning, TEXT("[Send login] z : %f"), packet.z);
+	//MYLOG(Warning, TEXT("[Send login] z : %f"), packet.z);
 	SendPacket(&packet);
 	
 };
@@ -294,7 +294,7 @@ void ClientSocket::Send_StatusPacket(STATE_Type _state, int s_id) {
 	packet.type = CS_PACKET_STATUS_CHANGE;
 	packet.state = _state;
 
-	MYLOG(Warning, TEXT("[Send status] status : %d"), _state);
+	//MYLOG(Warning, TEXT("[Send status] status : %d"), _state);
 	SendPacket(&packet);
 };
 
@@ -303,7 +303,7 @@ void ClientSocket::Send_DamagePacket() {
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_DAMAGE;
 
-	MYLOG(Warning, TEXT("[Send damage]"));
+	//MYLOG(Warning, TEXT("[Send damage]"));
 	SendPacket(&packet);
 };
 
@@ -312,7 +312,7 @@ void ClientSocket::Send_MatchPacket() {
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_MATCH;
 
-	MYLOG(Warning, TEXT("[Send damage]"));
+	//MYLOG(Warning, TEXT("[Send damage]"));
 	SendPacket(&packet);
 };
 
@@ -332,7 +332,7 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVec
 		packet.vz = MyVelocity.Z;
 		packet.direction = dir;
 
-		MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), s_id, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz, dir);
+		//MYLOG(Warning, TEXT("[Send move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), s_id, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz, dir);
 		SendPacket(&packet);
 	}
 };
@@ -353,7 +353,7 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	packet.dz = MyDirection.Z;
 	size_t sent = 0;
 
-	MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
+	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
 	SendPacket(&packet);
 };
 
@@ -378,7 +378,7 @@ void ClientSocket::Send_ItemPacket(int item_type, int destroy_obj_id)
 	packet.destroy_obj_id = destroy_obj_id;
 	size_t sent = 0;
 
-	MYLOG(Warning, TEXT("[Send item] id : %d, objId : %d, item : %d"), packet.s_id, destroy_obj_id, item_type);
+	//MYLOG(Warning, TEXT("[Send item] id : %d, objId : %d, item : %d"), packet.s_id, destroy_obj_id, item_type);
 	SendPacket(&packet);
 };
 
@@ -414,7 +414,7 @@ void ClientSocket::Send_LogoutPacket(const int& s_id)
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGOUT;
 	packet.s_id = MyPlayerController->iSessionId;
-	MYLOG(Warning, TEXT("[Send Logout] id : %d"), packet.s_id);
+	//MYLOG(Warning, TEXT("[Send Logout] id : %d"), packet.s_id);
 	SendPacket(&packet);
 }
 
@@ -432,7 +432,7 @@ bool ClientSocket::Init()
 
 void ClientSocket::process_data(unsigned char* net_buf, size_t io_byte)
 {
-	MYLOG(Warning, TEXT("process_data!"));
+	//MYLOG(Warning, TEXT("process_data!"));
 
 	unsigned char* ptr = net_buf;
 	static size_t in_packet_size = 0;
