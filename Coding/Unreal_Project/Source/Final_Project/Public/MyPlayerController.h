@@ -47,6 +47,7 @@ public:
 	void SetDestroyPlayer(const int del_sid);
 	void SetGameEnd(const int target_id);
 	void SetOpenItembox(const int obj_id);
+	
 
 	void SendPlayerInfo(int input);
 	//void SendFarming(int item_no);
@@ -81,7 +82,7 @@ public:
 	}
 	void Start_Signal()
 	{
-		bSetStart.store(true);
+		StartGame();
 	}
 	bool is_start()
 	{
