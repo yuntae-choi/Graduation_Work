@@ -258,7 +258,7 @@ void AMyCharacter::SnowAttack()
 	myAnim->PlayAttackMontage();
 
 	// 디버깅용 - 실제는 주석 해제
-	iCurrentSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
+	//iCurrentSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
 	UpdateUI(UICategory::CurSnowball);
 
 	// Attempt to fire a projectile.
