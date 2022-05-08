@@ -78,7 +78,7 @@ void AMySnowball::Throw_Implementation(FVector Direction)
 {
 	collisionComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	projectileMovementComponent->bSimulationEnabled = true;	// 눈덩이가 움직일 수 있도록 활성화
-	projectileMovementComponent->Velocity = (Direction + FVector(0.0f, 0.0f, 0.1f)) * (projectileMovementComponent->InitialSpeed);
+	projectileMovementComponent->Velocity = (Direction + FVector(0.0f, 0.0f, 0.2f)) * (projectileMovementComponent->InitialSpeed);
 
 	//Delay 함수
 	FTimerHandle WaitHandle;

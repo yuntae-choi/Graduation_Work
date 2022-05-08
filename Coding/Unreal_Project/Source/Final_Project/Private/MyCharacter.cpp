@@ -140,7 +140,8 @@ AMyCharacter::AMyCharacter()
 	iCharacterState = CharacterState::AnimalNormal;
 	bIsSnowman = false;
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;	// 캐릭터 이동속도 설정
-	GetCharacterMovement()->JumpZVelocity = 450;
+	GetCharacterMovement()->JumpZVelocity = 600.0f;
+	GetCharacterMovement()->PushForceFactor = 75000.0f;		// 기본값 750000.0f
 
 	iSelectedItem = ItemTypeList::Match;	// 선택된 아이템 기본값 - 성냥
 }
