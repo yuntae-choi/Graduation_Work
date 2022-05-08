@@ -1045,6 +1045,8 @@ void worker_thread()
 				cl._prev_size = remain_data;
 				memcpy(&exp_over->_net_buf, packet_start, remain_data);
 			}
+			if (remain_data == 0)
+				cl._prev_size = 0;
 			cl.do_recv();
 			break;
 		}
