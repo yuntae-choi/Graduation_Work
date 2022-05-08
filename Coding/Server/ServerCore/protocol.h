@@ -5,7 +5,7 @@
 
 const short SERVER_PORT = 9090;
 
-const int32 BUFSIZE = 1024;
+const int32 BUFSIZE = 2048;
 const int32  ReZone_HEIGHT = 2000;
 const int32  ReZone_WIDTH = 2000;
 const int32  MAX_NAME_SIZE = 20;
