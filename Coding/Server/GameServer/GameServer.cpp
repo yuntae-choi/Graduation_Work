@@ -632,9 +632,16 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_DAMAGE: {
 		if (cl.bIsSnowman) break;
 		cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
+		int current_hp = cl._hp;
 		cl._hp -= 30;
 		if (cl._hp < 270) cl._hp = 270;
 		send_hp_packet(cl._s_id);
+
+		if (current_hp == cl._max_hp && cl.is_bone == true)
+		{
+			cl._is_active = true;
+			player_heal(cl._s_id);
+		}
 
 		if (cl._hp <= cl._min_hp)
 		{
