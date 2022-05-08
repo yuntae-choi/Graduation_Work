@@ -158,7 +158,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	SleepEx(0, true);
 
-	//UpdateRotation();
+	UpdateRotation();
 }
 
 void AMyPlayerController::SetInitInfo(const cCharacter& me)
@@ -780,4 +780,13 @@ void AMyPlayerController::CallDelegateUpdateGameResult(bool isWinner)
 	if (FuncUpdateGameResult.IsBound() == true) FuncUpdateGameResult.Broadcast(isWinner);
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected item %d"), localPlayerCharacter->iSelectedItem);
+}
+
+void AMyPlayerController::UpdateRotation()
+{
+	float pitch, yaw, roll;
+	UKismetMathLibrary::BreakRotator(GetControlRotation(), roll, pitch, yaw);
+	pitch = UKismetMathLibrary::ClampAngle(pitch, -15.0f, 30.0f);
+	FRotator newRotator = UKismetMathLibrary::MakeRotator(roll, pitch, yaw);
+	SetControlRotation(newRotator);
 }
