@@ -23,7 +23,7 @@ AMySnowball::AMySnowball()
 	{
 		collisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("ProjectileCollisionComponent"));
 		collisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
-		collisionComponent->InitSphereRadius(10.0f);
+		collisionComponent->InitSphereRadius(13.0f);
 		collisionComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 		collisionComponent->OnComponentHit.AddDynamic(this, &AMySnowball::OnHit);
 		collisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -35,7 +35,7 @@ AMySnowball::AMySnowball()
 	if (!meshComponent)
 	{
 		meshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMeshComponent"));
-		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SNOWBALL(TEXT("/Game/NonCharacters/snowball1.snowball1"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SNOWBALL(TEXT("/Game/NonCharacters/snowball1_130.snowball1_130"));
 		if (SM_SNOWBALL.Succeeded())
 		{
 			meshComponent->SetStaticMesh(SM_SNOWBALL.Object);
@@ -49,8 +49,8 @@ AMySnowball::AMySnowball()
 	{
 		projectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 		projectileMovementComponent->SetUpdatedComponent(collisionComponent);
-		projectileMovementComponent->InitialSpeed = 4000.0f;	// 눈덩이 속도 설정
-		projectileMovementComponent->MaxSpeed = 4000.0f;
+		projectileMovementComponent->InitialSpeed = 2500.0f;	// 눈덩이 속도 설정
+		projectileMovementComponent->MaxSpeed = 2500.0f;
 		projectileMovementComponent->bSimulationEnabled = false;	// 생성 후 움직이지 않도록 (눈덩이 릴리즈 시 활성화)
 	}
 
