@@ -618,8 +618,6 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_ATTACK: {
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(p);
 		for (auto& other : clients) {
-			if (other._s_id == s_id)
-				continue;
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_ATTACK;

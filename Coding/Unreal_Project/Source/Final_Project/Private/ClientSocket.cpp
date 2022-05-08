@@ -231,11 +231,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		break;
 	}
 
-	//case SC_PACKET_CHAT:
-	//{
-
-	//	break;
-	//}
+	case SC_PACKET_ATTACK:
+	{
+		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
+		int attack_s_id = packet->s_id;
+		MyPlayerController->SetAttack(attack_s_id);
+		break;
+	}
 	//case SC_PACKET_ATTACK:
 	//{
 
@@ -302,6 +304,16 @@ void ClientSocket::Send_DamagePacket() {
 	cs_packet_damage packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_DAMAGE;
+
+	//MYLOG(Warning, TEXT("[Send damage]"));
+	SendPacket(&packet);
+};
+
+void ClientSocket::Send_AttackPacket(int s_id) {
+	cs_packet_attack packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_ATTACK;
+	packet.s_id = s_id;
 
 	//MYLOG(Warning, TEXT("[Send damage]"));
 	SendPacket(&packet);

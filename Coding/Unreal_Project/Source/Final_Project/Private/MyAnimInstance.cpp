@@ -60,7 +60,7 @@ void UMyAnimInstance::AnimNotify_SnowballRelease()
 	auto MyCharacter = Cast<AMyCharacter>(Pawn);
 	if (nullptr == MyCharacter) return;
 
-	MyCharacter->ReleaseSnowball();
+	MyCharacter->SendReleaseSnowball();
 }
 
 void UMyAnimInstance::Anim_SnowballRelease()
