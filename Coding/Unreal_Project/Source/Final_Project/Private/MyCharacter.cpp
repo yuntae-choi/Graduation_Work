@@ -296,10 +296,9 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 		MYLOG(Warning, TEXT("Actor : %s took Damage : %f, HP : %d"), *GetName(), FinalDamage, iCurrentHP);
 #endif
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		if (iSessionId == PlayerController->iSessionId)
+		if (iSessionId == localPlayerController->iSessionId)
 		{
-			PlayerController->SendPlayerInfo(COMMAND_DAMAGE);
+			localPlayerController->SendPlayerInfo(COMMAND_DAMAGE);
 		}
 	}
 	else
@@ -310,6 +309,16 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 #endif
 	}
 	return FinalDamage;
+}
+
+void AMyCharacter::SendReleaseSnowball()
+{
+	if (iSessionId != localPlayerController->iSessionId) return;
+	if (IsValid(snowball))
+	{
+		localPlayerController->SendPlayerInfo(COMMAND_THROW);
+
+	}
 }
 
 void AMyCharacter::ReleaseSnowball()

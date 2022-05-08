@@ -182,8 +182,16 @@ void AMyPlayerController::SetNewBall(const int s_id)
 {
 	UWorld* World = GetWorld();
 	
-	charactersInfo->players[s_id].canAttack = true;
+	charactersInfo->players[s_id].canSnowBall = true;
 	
+}
+
+void AMyPlayerController::SetAttack(const int s_id)
+{
+	UWorld* World = GetWorld();
+
+	charactersInfo->players[s_id].canAttack = true;
+
 }
 
 void AMyPlayerController::SetDestroyPlayer(const int del_sid)
@@ -320,6 +328,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 		if (info->canAttack) { 
 			player_->SnowAttack();
 			info->canAttack = false;
+		}
+		
+		if (info->canSnowBall) {
+			player_->ReleaseSnowball();
+			info->canSnowBall = false;
 			info->current_snow_count--;
 		}
 
@@ -497,6 +510,8 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	if (input == COMMAND_MOVE) 
 	mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
 	else if (input == COMMAND_ATTACK)
+		mySocket->Send_AttackPacket(iSessionId);
+	else if (input == COMMAND_THROW)
 		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
 		mySocket->Send_DamagePacket();

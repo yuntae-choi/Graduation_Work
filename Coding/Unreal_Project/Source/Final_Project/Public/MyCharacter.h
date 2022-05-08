@@ -36,6 +36,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void ReleaseSnowball();
+	void SendReleaseSnowball();
 
 	void SetIsFarming(bool value) { bIsFarming = value; };
 	bool GetIsFarming() { return bIsFarming; };
