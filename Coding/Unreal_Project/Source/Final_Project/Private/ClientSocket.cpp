@@ -450,7 +450,7 @@ void ClientSocket::process_data(unsigned char* net_buf, size_t io_byte)
 	static size_t in_packet_size = 0;
 	static size_t saved_packet_size = 0;
 	static unsigned char packet_buffer[BUF_SIZE];
-
+	
 	while (0 != io_byte) {
 		if (0 == in_packet_size) in_packet_size = ptr[0];
 		if (io_byte + saved_packet_size >= in_packet_size) {
@@ -467,6 +467,8 @@ void ClientSocket::process_data(unsigned char* net_buf, size_t io_byte)
 			io_byte = 0;
 		}
 	}
+	if (io_byte == 0)
+		_prev_size = 0;
 }
 
 uint32 ClientSocket::Run()
