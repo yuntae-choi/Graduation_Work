@@ -29,7 +29,8 @@ void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over
 	}
 	unsigned char* packet_start = g_socket->_recv_over._net_buf;
 	int packet_size = packet_start[0];
-	g_socket->process_data(g_socket->_recv_over._net_buf, num_byte);
+	int remain_data = num_byte + g_socket->_prev_size;
+	g_socket->process_data(g_socket->_recv_over._net_buf, remain_data);
 	recv_flag = 0;
 	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
 	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
