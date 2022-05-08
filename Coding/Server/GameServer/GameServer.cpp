@@ -788,8 +788,8 @@ void process_packet(int s_id, unsigned char* p)
 			int snow_drift_num = packet->destroy_obj_id;
 			bool get_snowball = is_snowdrift(snow_drift_num);
 			if (get_snowball) {
-				if (cl.iMaxSnowballCount >= cl.iCurrentSnowballCount + 10)
-					cl.iCurrentSnowballCount += 10;
+				if (cl.iMaxSnowballCount >= cl.iCurrentSnowballCount + 5)
+					cl.iCurrentSnowballCount += 5;
 				else
 					cl.iCurrentSnowballCount = cl.iMaxSnowballCount;
 
