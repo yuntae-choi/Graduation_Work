@@ -786,7 +786,7 @@ void AMyPlayerController::UpdateRotation()
 {
 	float pitch, yaw, roll;
 	UKismetMathLibrary::BreakRotator(GetControlRotation(), roll, pitch, yaw);
-	pitch = UKismetMathLibrary::ClampAngle(pitch, -25.0f, 30.0f);
+	pitch = UKismetMathLibrary::ClampAngle(pitch, -15.0f, 30.0f);
 	FRotator newRotator = UKismetMathLibrary::MakeRotator(roll, pitch, yaw);
 	SetControlRotation(newRotator);
 }
