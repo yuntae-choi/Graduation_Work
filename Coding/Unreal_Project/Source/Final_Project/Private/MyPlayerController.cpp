@@ -65,7 +65,6 @@ AMyPlayerController::AMyPlayerController()
 		gameResultUIClass = GAMERESULT_UI.Class;
 	}
 	bIsReady = false;
-	
 }
 
 void AMyPlayerController::OnPossess(APawn* pawn_)
@@ -159,7 +158,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	SleepEx(0, true);
 
-	UpdateRotation();
+	//UpdateRotation();	// 캐릭터 피칭(상하)제한
 }
 
 void AMyPlayerController::SetInitInfo(const cCharacter& me)

@@ -145,6 +145,9 @@ AMyCharacter::AMyCharacter()
 	GetCharacterMovement()->MaxAcceleration = 1024.0f;		// 기본값 2048.0f
 
 	iSelectedItem = ItemTypeList::Match;	// 선택된 아이템 기본값 - 성냥
+	
+	bIsInTornado = false;
+	rotateCont = false;
 }
 
 // Called when the game starts or when spawned
@@ -182,6 +185,9 @@ void AMyCharacter::Tick(float DeltaTime)
 		UpdateHP();
 		UpdateSpeed();
 	}
+
+	UpdateZByTornado();		// 캐릭터가 토네이도 내부인 경우 z값 증가
+	UpdateControllerRotateByTornado();	// 토네이도로 인한 스턴상태인 경우 회전하도록
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -678,11 +684,17 @@ void AMyCharacter::StartStun(float waitTime)
 	}
 
 	// 플레이어의 입력을 무시하도록 (움직일 수 없음, 시야도 고정, 상태 - Stunned)
-	iCharacterState = CharacterState::SnowmanStunned;
+	iCharacterState = bIsSnowman ? CharacterState::SnowmanStunned : CharacterState::AnimalStunned;
 	DisableInput(playerController);
 	GetMesh()->bPauseAnims = true;	// 캐릭터 애니메이션도 정지
 
 	EndStun(waitTime);	// waitTime이 지나면 stun이 끝나도록
+
+	if (bIsInTornado)
+	{	// 토네이도에 의한 스턴이면 캐릭터가 회전하도록, 애니메이션은 재생되도록
+		rotateCont = true;
+		GetMesh()->bPauseAnims = false;
+	}
 }
 
 void AMyCharacter::EndStun(float waitTime)
@@ -692,9 +704,11 @@ void AMyCharacter::EndStun(float waitTime)
 	// x초 후에 다시 입력을 받을 수 있도록 (움직임과 시야 제한 해제, 상태 - Snowman)
 	GetWorld()->GetTimerManager().SetTimer(stunHandle, FTimerDelegate::CreateLambda([&]()
 		{
-			iCharacterState = CharacterState::SnowmanNormal;
+			iCharacterState = bIsSnowman ? CharacterState::SnowmanNormal : CharacterState::AnimalNormal;
 			EnableInput(playerController);
 			GetMesh()->bPauseAnims = false;
+
+			rotateCont = false;		// 토네이도에 의해서 회전 중이면 멈추기
 		}), waitTime, false);
 }
 
@@ -833,5 +847,23 @@ void AMyCharacter::UseSelectedItem()
 		break;
 	default:
 		break;
+	}
+}
+
+void AMyCharacter::UpdateZByTornado()
+{	// 캐릭터가 토네이도 내부인 경우 z값 증가
+	if (bIsInTornado)
+	{
+		LaunchCharacter(FVector(0.0f, 0.0f, 20.0f), true, false);
+	}
+}
+
+void AMyCharacter::UpdateControllerRotateByTornado()
+{
+	if (rotateCont)
+	{
+		FRotator contRot = localPlayerController->GetControlRotation();
+		FRotator newContRot = FRotator(contRot.Pitch, contRot.Yaw + 5.0f, contRot.Roll);
+		localPlayerController->SetControlRotation(newContRot);
 	}
 }

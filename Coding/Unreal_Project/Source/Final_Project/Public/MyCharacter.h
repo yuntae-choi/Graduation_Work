@@ -10,8 +10,8 @@
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
-	// 동물,		동물,		눈사람,			눈사람
-	AnimalNormal, AnimalSlow, SnowmanNormal, SnowmanStunned
+	// 동물,		동물,			동물,		눈사람,			눈사람
+	AnimalNormal, AnimalSlow, AnimalStunned, SnowmanNormal, SnowmanStunned
 };
 
 enum UICategory {
@@ -48,7 +48,9 @@ public:
 	void UpdateSpeed();
 	int GetCharacterState() { return iCharacterState; };
 	bool IsSnowman() { return bIsSnowman; };
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void StartStun(float waitTime);
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
@@ -64,6 +66,11 @@ public:
 	void SelectMatch();
 	void SelectUmbrella();
 	void UseSelectedItem();
+
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
+	bool GetIsInTornado() { return bIsInTornado; };
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
+	void SetIsInTornado(bool value) { bIsInTornado = value; };
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -87,6 +94,9 @@ private:
 	bool GetItem(int itemType);
 	bool GetIsSnowman() { return bIsSnowman; };
 	void WaitForStartGame();	// 게임 시작 후 대기
+
+	void UpdateZByTornado();
+	void UpdateControllerRotateByTornado();
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -150,6 +160,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iSelectedItem;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool rotateCont;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
@@ -199,4 +212,6 @@ private:
 
 	// 스턴 관리하는 타이머 핸들러
 	FTimerHandle stunHandle;
+
+	bool bIsInTornado;
 };
