@@ -1,0 +1,18 @@
+# 추가
+Binaries/*
+DerivedDataCache/*
+Intermediate/*
+Saved/*
+
+# 상위에서 ignore할 것을 제외시킨 것
+*.lib
+*.sln
+*.pdb
+*.idb
+
+Content/Map/map1.umap
+Content/Map/tmp_map.umap
+Content/Map/DevelopSH.umap
+Content/Map/TitleLevel.umap
+
+Content/ThirdPersonBP/Maps/ThirdPersonExampleMap.umap
