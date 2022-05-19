@@ -9,6 +9,7 @@
 #include "Debug.h"
 #include "Snowdrift.h"
 #include "Itembox.h"
+#include "Tornado.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -296,7 +297,41 @@ void AMyPlayerController::InitPlayerSetting()
 
 	bInitPlayerSetting = false;
 }
+void AMyPlayerController::UpdateTornado()
+{
+	UWorld* World = GetWorld();
+	TArray<AActor*> SpawnedTornado;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATornado::StaticClass(), SpawnedTornado);
 
+	for (auto sd : SpawnedTornado)
+	{
+		ATornado* tornado = Cast<ATornado>(sd);
+
+		cCharacter* info = &charactersInfo->players[Tornado_id];
+		FVector CharacterLocation;
+		CharacterLocation.X = info->X;
+		CharacterLocation.Y = info->Y;
+		CharacterLocation.Z = info->Z;
+
+		FRotator CharacterRotation;
+		CharacterRotation.Yaw = 0.0f;
+		CharacterRotation.Pitch = 0.0f;
+		CharacterRotation.Roll = 0.0f;
+
+		FVector CharacterVelocity;
+		CharacterVelocity.X = info->VX;
+		CharacterVelocity.Y = info->VY;
+		CharacterVelocity.Z = info->VZ;
+
+		tornado->AddMovementInput(CharacterVelocity);
+		tornado->SetActorRotation(CharacterRotation);
+		tornado->SetActorLocation(CharacterLocation);
+		MYLOG(Warning, TEXT("tornado %f, %f, %f"), info->X, info->Y, info->Z);
+
+	}
+
+
+}
 bool AMyPlayerController::UpdateWorldInfo()
 {
 	UWorld* const world = GetWorld();
@@ -305,13 +340,14 @@ bool AMyPlayerController::UpdateWorldInfo()
 
 	// 플레이어자신 체력, 사망업데이트
 	UpdatePlayerInfo(charactersInfo->players[iSessionId]);
-
+	UpdateTornado();
 	//if (charactersInfo->players.size() == 1)
 	//{
 	//	//MYLOG(Warning, TEXT("Only one player"));
 	//	return false;
 	//}
-
+	
+	
 	// 스폰캐릭터들배열 하나 생성하고 월드에 있는 캐릭터들을 배열에 넣어주기
 	TArray<AActor*> SpawnedCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
@@ -446,12 +482,20 @@ void AMyPlayerController::UpdateNewPlayer()
 	SpawnParams.Instigator = GetInstigator();
 	SpawnParams.Name = FName(*FString(to_string(newplayer.get()->SessionId).c_str()));
 
-	WhoToSpawn = AMyCharacter::StaticClass();
-	AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
-	SpawnCharacter->SpawnDefaultController();
-	SpawnCharacter->iSessionId = newplayer.get()->SessionId;
-	SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
-
+	if (newplayer.get()->SessionId != Tornado_id)
+	{
+		WhoToSpawn = AMyCharacter::StaticClass();
+		AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
+		SpawnCharacter->SpawnDefaultController();
+		SpawnCharacter->iSessionId = newplayer.get()->SessionId;
+		SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
+	}
+	else if(newplayer.get()->SessionId == Tornado_id)
+	{
+		TornadoToSpawn = ATornado::StaticClass();
+		ATornado* SpawnTornado = World->SpawnActor<ATornado>(TornadoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
+		SpawnTornado -> SpawnDefaultController();
+	}
 	// 필드의 플레이어 정보에 추가
 	if (charactersInfo != nullptr)
 	{

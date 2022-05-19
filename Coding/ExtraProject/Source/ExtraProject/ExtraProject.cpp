@@ -3,4 +3,5 @@
 #include "ExtraProject.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, ExtraProject, "ExtraProject" );
+IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, ExtraProject, "ExtraProject");
+DEFINE_LOG_CATEGORY(ExtraProject);

@@ -25,6 +25,8 @@ LockQueue<timer_ev> timer_q;
 array <CLIENT, MAX_USER> clients;
 bool g_snow_drift[MAX_SNOWDRIFT] = {};
 bool g_item[MAX_ITEM] = {};
+bool g_start_game = false;
+
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -401,218 +403,272 @@ void process_packet(int s_id, unsigned char* p)
 {
 	unsigned char packet_type = p[1];
 	CLIENT& cl = clients[s_id];
-
+	
 	switch (packet_type) {
 	case CS_PACKET_LOGIN: {
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
+		if (strcmp("Tornado", packet->id) != 0) {
+			CLIENT& cl = clients[s_id];
+			printf_s("[Recv login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
 
-		CLIENT& cl = clients[s_id];
-		printf_s("[Recv login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
-
-		/*	for (int i = 0; i < MAX_USER; ++i) {
-				clients[i].state_lock.lock();
-				if (ST_INGAME == clients[i]._state) {
-					if (strcmp(packet->id, clients[i]._id) == 0) {
-						send_login_fail_packet(s_id);
-						cout << packet->id << "접속중인 플레이어" << endl;
-						clients[i].state_lock.unlock();
-						return;
+			/*	for (int i = 0; i < MAX_USER; ++i) {
+					clients[i].state_lock.lock();
+					if (ST_INGAME == clients[i]._state) {
+						if (strcmp(packet->id, clients[i]._id) == 0) {
+							send_login_fail_packet(s_id);
+							cout << packet->id << "접속중인 플레이어" << endl;
+							clients[i].state_lock.unlock();
+							return;
+						}
 					}
+					clients[i].state_lock.unlock();
+				}*/
+			cl.state_lock.lock();
+			cl._state = ST_INGAME;
+			cl.state_lock.unlock();
+			cl.x = 600.0f * cos(s_id + 45.0f);
+			cl.y = 600.0f * sin(s_id + 45.0f);
+			cl.z = packet->z;
+			cl.Yaw = s_id * 55.0f - 115.0f;
+			if (cl.Yaw > 180) cl.Yaw -= 360;
+
+			cl._hp = cl._max_hp;
+
+			//sc_packet_login_ok _packet;
+			//_packet.size = sizeof(_packet);
+			//_packet.type = SC_PACKET_LOGIN_OK;
+			//_packet.s_id = s_id;
+			/*packet.x = clients[_s_id].x;
+			packet.y = clients[_s_id].y;
+			packet.z = clients[_s_id].z;
+			packet.Yaw = clients[_s_id].Yaw;
+			packet.Pitch = clients[_s_id].Pitch;
+			packet.Roll = clients[_s_id].Roll;*/
+			//cout << "로그인 허용 전송" << s_id << endl;
+			//cl.do_send(sizeof(_packet), &_packet);
+			send_login_ok_packet(s_id);
+			cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
+
+			// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
+			for (auto& other : clients) {
+				if (other._s_id == s_id) continue;
+				other.state_lock.lock();
+				if (ST_INGAME != other._state) {
+					other.state_lock.unlock();
+					continue;
 				}
-				clients[i].state_lock.unlock();
-			}*/
-		cl.state_lock.lock();
-		cl._state = ST_INGAME;
-		cl.state_lock.unlock();
-		cl.x = 600.0f * cos(s_id + 45.0f);
-		cl.y = 600.0f * sin(s_id + 45.0f);
-		cl.z = packet->z;
-		cl.Yaw = s_id * 55.0f - 115.0f;
-		if (cl.Yaw > 180) cl.Yaw -= 360;
+				else other.state_lock.unlock();
 
-		cl._hp = cl._max_hp;
+				//if (false == is_near(other._id, client_id))
+					//continue;
 
-		//sc_packet_login_ok _packet;
-		//_packet.size = sizeof(_packet);
-		//_packet.type = SC_PACKET_LOGIN_OK;
-		//_packet.s_id = s_id;
-		/*packet.x = clients[_s_id].x;
-		packet.y = clients[_s_id].y;
-		packet.z = clients[_s_id].z;
-		packet.Yaw = clients[_s_id].Yaw;
-		packet.Pitch = clients[_s_id].Pitch;
-		packet.Roll = clients[_s_id].Roll;*/
-		//cout << "로그인 허용 전송" << s_id << endl;
-		//cl.do_send(sizeof(_packet), &_packet);
-		send_login_ok_packet(s_id);
-		cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
+				//other.vl.lock();
+				//other.viewlist.insert(s_id);
+				//other.vl.unlock();
+				sc_packet_put_object packet;
+				packet.s_id = cl._s_id;
+				strcpy_s(packet.name, cl.name);
+				packet.object_type = 0;
+				packet.size = sizeof(packet);
+				packet.type = SC_PACKET_PUT_OBJECT;
+				packet.x = cl.x;
+				packet.y = cl.y;
+				packet.z = cl.z;
+				packet.yaw = cl.Yaw;
 
-		// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
-		for (auto& other : clients) {
-			if (other._s_id == s_id) continue;
-			other.state_lock.lock();
-			if (ST_INGAME != other._state) {
-				other.state_lock.unlock();
-				continue;
+				//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+				//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
+				other.do_send(sizeof(packet), &packet);
 			}
-			else other.state_lock.unlock();
 
-			//if (false == is_near(other._id, client_id))
-				//continue;
+			// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
+			for (auto& other : clients) {
+				if (other._s_id == s_id) continue;
+				other.state_lock.lock();
+				
+				if (ST_INGAME != other._state) {
+					if (Tornado_id == other._s_id) {
+						//토네이도 생성위치 보내기
+						sc_packet_put_object packet;
+						packet.s_id = other._s_id;
+						packet.size = sizeof(packet);
+						packet.type = SC_PACKET_PUT_OBJECT;
+						packet.x = other.x;
+						packet.y = other.y;
+						packet.z = other.z;
+						packet.yaw = 0.0f;
 
-			//other.vl.lock();
-			//other.viewlist.insert(s_id);
-			//other.vl.unlock();
-			sc_packet_put_object packet;
-			packet.s_id = cl._s_id;
-			strcpy_s(packet.name, cl.name);
-			packet.object_type = 0;
-			packet.size = sizeof(packet);
-			packet.type = SC_PACKET_PUT_OBJECT;
-			packet.x = cl.x;
-			packet.y = cl.y;
-			packet.z = cl.z;
-			packet.yaw = cl.Yaw;
+						printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+						cl.do_send(sizeof(packet), &packet);
+						continue;
+					}
+					other.state_lock.unlock();
+					continue;
+				}
+				else other.state_lock.unlock();
 
-			//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-			//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
-			other.do_send(sizeof(packet), &packet);
-		}
+				//if (false == is_near(other._s_id, s_id))
+					//continue;
 
-		// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
-		for (auto& other : clients) {
-			if (other._s_id == s_id) continue;
-			other.state_lock.lock();
-			if (ST_INGAME != other._state) {
-				other.state_lock.unlock();
-				continue;
+				//clients[s_id].vl.lock();
+				//clients[s_id].viewlist.insert(other._id);
+				//clients[s_id].vl.unlock();
+
+				sc_packet_put_object packet;
+				packet.s_id = other._s_id;
+				strcpy_s(packet.name, other.name);
+				packet.object_type = 0;
+				packet.size = sizeof(packet);
+				packet.type = SC_PACKET_PUT_OBJECT;
+				packet.x = other.x;
+				packet.y = other.y;
+				packet.z = other.z;
+				packet.yaw = other.Yaw;
+
+				//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+				cl.do_send(sizeof(packet), &packet);
 			}
-			else other.state_lock.unlock();
-
-			//if (false == is_near(other._s_id, s_id))
-				//continue;
-
-			//clients[s_id].vl.lock();
-			//clients[s_id].viewlist.insert(other._id);
-			//clients[s_id].vl.unlock();
-
-			sc_packet_put_object packet;
-			packet.s_id = other._s_id;
-			strcpy_s(packet.name, other.name);
-			packet.object_type = 0;
-			packet.size = sizeof(packet);
-			packet.type = SC_PACKET_PUT_OBJECT;
-			packet.x = other.x;
-			packet.y = other.y;
-			packet.z = other.z;
-			packet.yaw = other.Yaw;
-
-			//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-			cl.do_send(sizeof(packet), &packet);
 		}
-
+		else 
+        {
+		    cl._s_id = 100;
+			send_login_ok_packet(s_id);
+			//cout << "토네이도" << endl;
+		}
 		break;
 	}
 	case CS_PACKET_MOVE: {
 
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
-		CLIENT& cl = clients[packet->sessionID];
-		cl.x = packet->x;
-		cl.y = packet->y;
-		cl.z = packet->z;
-		cl.Yaw = packet->yaw;
-		cl.VX = packet->vx;
-		cl.VY = packet->vy;
-		cl.VZ = packet->vz;
-		cl.direction = packet->direction;
-		//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f), dir : %f\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ, cl.direction);
+		if (packet->sessionID != Tornado_id) {
+			CLIENT& cl = clients[packet->sessionID];
+			cl.x = packet->x;
+			cl.y = packet->y;
+			cl.z = packet->z;
+			cl.Yaw = packet->yaw;
+			cl.VX = packet->vx;
+			cl.VY = packet->vy;
+			cl.VZ = packet->vz;
+			cl.direction = packet->direction;
+			//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f), dir : %f\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ, cl.direction);
 
-		//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		//cout << millisec_since_epoch - packet->move_time << "ms" << endl;
+			//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+			//cout << millisec_since_epoch - packet->move_time << "ms" << endl;
 
-		//send_status_packet(s_id);
+			//send_status_packet(s_id);
 
-		unordered_set <int> near_list;
-		for (auto& other : clients) {
-			if (other._s_id == s_id)
-				continue;
-			if (ST_INGAME != other._state)
-				continue;
-			if (false == is_near(s_id, other._s_id))
-				continue;
+			unordered_set <int> near_list;
+			for (auto& other : clients) {
+				if (other._s_id == s_id)
+					continue;
+				if (ST_INGAME != other._state)
+					continue;
+				if (false == is_near(s_id, other._s_id))
+					continue;
 
-			near_list.insert(other._s_id);
+				near_list.insert(other._s_id);
+			}
+
+			cl.vl.lock();
+
+			unordered_set <int> my_vl{ cl.viewlist };
+
+			cl.vl.unlock();
+
+			for (auto& other : clients) {
+				if (other._s_id == s_id)
+					continue;
+				if (ST_INGAME != other._state)
+					continue;
+				send_move_packet(other._s_id, cl._s_id);
+				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+
+			}
+
+			//새로 시야에 들어온 플레이어
+			//for (auto other_id : near_list) {
+			//	if (0 == my_vl.count(other_id)) {
+			//		cl.vl.lock();
+			//		cl.viewlist.insert(other_id);
+			//		cl.vl.unlock();
+			//		send_put_object(cl._s_id, other_id);
+
+
+			//		clients[other_id].vl.lock();
+			//		if (0 == clients[other_id].viewlist.count(cl._s_id)) {
+			//			clients[other_id].viewlist.insert(cl._s_id);
+			//			clients[other_id].vl.unlock();
+			//			send_put_object(other_id, cl._s_id);
+			//		}
+			//		else {
+			//			clients[other_id].vl.unlock();
+			//			send_move_packet(other_id, cl._s_id);
+			//		}
+			//	}
+			//	//시야에 존재하는 플레이어
+			//	else {
+			//		clients[other_id].vl.lock();
+			//		if (0 != clients[other_id].viewlist.count(cl._s_id)) {
+			//			clients[other_id].vl.unlock();
+			//			send_move_packet(other_id, cl._s_id);
+			//		}
+			//		else {
+			//			clients[other_id].viewlist.insert(cl._s_id);
+			//			clients[other_id].vl.unlock();
+			//			send_put_object(other_id, cl._s_id);
+			//		}
+			//	}
+			//}
+			//// 시야에서 벗어난 플레이어 
+			//for (auto other_id : my_vl) {
+			//	if (0 == near_list.count(other_id)) {
+			//		cl.vl.lock();
+			//		cl.viewlist.erase(other_id);
+			//		cl.vl.unlock();
+			//		send_remove_object(cl._s_id, other_id);
+			//		clients[other_id].vl.lock();
+			//		if (0 != clients[other_id].viewlist.count(cl._s_id)) {
+			//			clients[other_id].viewlist.erase(cl._s_id);
+			//			clients[other_id].vl.unlock();
+			//			send_remove_object(other_id, cl._s_id);
+			//		}
+			//		else clients[other_id].vl.unlock();
+			//	}
+			//}
+
+
+			//printf("Move\n");
 		}
-
-		cl.vl.lock();
-
-		unordered_set <int> my_vl{ cl.viewlist };
-
-		cl.vl.unlock();
-
-		for (auto& other : clients) {
-			if (other._s_id == s_id)
-				continue;
-			if (ST_INGAME != other._state)
-				continue;
-			send_move_packet(other._s_id, cl._s_id);
-			//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
-
+		else
+		{
+			if (g_start_game) {
+				// cout << "토네이도 move" << endl;
+				cl.x = packet->x;
+				cl.y = packet->y;
+				cl.z = packet->z;
+				cl.VX = packet->vx;
+				cl.VY = packet->vy;
+				cl.VZ = packet->vz;
+				for (auto& other : clients) {
+					if (other._s_id == s_id)
+						continue;
+					if (ST_INGAME != other._state)
+						continue;
+					cs_packet_move packet;
+					packet.sessionID = Tornado_id;
+					packet.size = sizeof(packet);
+					packet.type = SC_PACKET_MOVE;
+					packet.x = cl.x;
+					packet.y = cl.y;
+					packet.z = cl.z;
+					packet.vx = cl.VX;
+					packet.vy = cl.VY;
+					packet.vz = cl.VZ;
+					other.do_send(sizeof(packet), &packet);
+					//cout << "토네이도 보낼 플레이어" << other._s_id << endl;
+				}
+			}
 		}
-
-		//새로 시야에 들어온 플레이어
-		//for (auto other_id : near_list) {
-		//	if (0 == my_vl.count(other_id)) {
-		//		cl.vl.lock();
-		//		cl.viewlist.insert(other_id);
-		//		cl.vl.unlock();
-		//		send_put_object(cl._s_id, other_id);
-
-
-		//		clients[other_id].vl.lock();
-		//		if (0 == clients[other_id].viewlist.count(cl._s_id)) {
-		//			clients[other_id].viewlist.insert(cl._s_id);
-		//			clients[other_id].vl.unlock();
-		//			send_put_object(other_id, cl._s_id);
-		//		}
-		//		else {
-		//			clients[other_id].vl.unlock();
-		//			send_move_packet(other_id, cl._s_id);
-		//		}
-		//	}
-		//	//시야에 존재하는 플레이어
-		//	else {
-		//		clients[other_id].vl.lock();
-		//		if (0 != clients[other_id].viewlist.count(cl._s_id)) {
-		//			clients[other_id].vl.unlock();
-		//			send_move_packet(other_id, cl._s_id);
-		//		}
-		//		else {
-		//			clients[other_id].viewlist.insert(cl._s_id);
-		//			clients[other_id].vl.unlock();
-		//			send_put_object(other_id, cl._s_id);
-		//		}
-		//	}
-		//}
-		//// 시야에서 벗어난 플레이어 
-		//for (auto other_id : my_vl) {
-		//	if (0 == near_list.count(other_id)) {
-		//		cl.vl.lock();
-		//		cl.viewlist.erase(other_id);
-		//		cl.vl.unlock();
-		//		send_remove_object(cl._s_id, other_id);
-		//		clients[other_id].vl.lock();
-		//		if (0 != clients[other_id].viewlist.count(cl._s_id)) {
-		//			clients[other_id].viewlist.erase(cl._s_id);
-		//			clients[other_id].vl.unlock();
-		//			send_remove_object(other_id, cl._s_id);
-		//		}
-		//		else clients[other_id].vl.unlock();
-		//	}
-		//}
-
-
-		//printf("Move\n");
 		break;
 	}
 	case CS_PACKET_ATTACK: {
@@ -631,7 +687,7 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case CS_PACKET_DAMAGE: {
 		if (cl.bIsSnowman) break;
-		cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
+		//cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
 		int current_hp = cl._hp;
 		cl._hp -= 30;
 		if (cl._hp < 270) cl._hp = 270;
@@ -656,7 +712,7 @@ void process_packet(int s_id, unsigned char* p)
 				if (ST_INGAME != other._state)
 					continue;
 				other.do_send(sizeof(_packet), &_packet);
-				cout << "눈사람" << endl;
+				//cout << "눈사람" << endl;
 				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 			}
 			int cnt = 0;
@@ -667,7 +723,7 @@ void process_packet(int s_id, unsigned char* p)
 				if (false == other.bIsSnowman)
 				{
 					cnt++;
-					cout << "눈덩이 cnt" << endl;
+					//cout << "눈덩이 cnt" << endl;
 
 					target_s_id = other._s_id;
 				}
@@ -744,7 +800,7 @@ void process_packet(int s_id, unsigned char* p)
 				cout << "플레이어: [" << cl._s_id << "] 가방 파밍 성공" << endl;
 			}
 			else
-				cout << "플레이어: [" << cl._s_id << "] 가방 파밍 실패" << endl;
+				//cout << "플레이어: [" << cl._s_id << "] 가방 파밍 실패" << endl;
 			
 			break;
 		}
@@ -764,7 +820,7 @@ void process_packet(int s_id, unsigned char* p)
 				cout << "플레이어: [" << cl._s_id << "] 우산 파밍 성공" << endl;
 			}
 			else
-				cout << "플레이어: [" << cl._s_id << "] 우산 파밍 실패" << endl;
+				//cout << "플레이어: [" << cl._s_id << "] 우산 파밍 실패" << endl;
 
 			
 			break;
@@ -785,7 +841,7 @@ void process_packet(int s_id, unsigned char* p)
 				cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 성공" << endl;
 			}
 			else
-				cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 실패" << endl;
+				//cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 실패" << endl;
 
 			
 			break;
@@ -811,7 +867,7 @@ void process_packet(int s_id, unsigned char* p)
 				cout <<"플레이어: ["<< cl._s_id << "] 눈무더기 파밍 성공" << endl;
 			}
 			else
-				cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
+				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
 			break;
 		}
 		default:
@@ -863,7 +919,7 @@ void process_packet(int s_id, unsigned char* p)
 			cl._is_active = true;
 			player_heal(cl._s_id);
 
-			cout << s_id << "플레이어 모닥불 내부" << endl;
+			//cout << s_id << "플레이어 모닥불 내부" << endl;
 
 		}
 		else if (packet->state == ST_OUTBURN)
@@ -875,11 +931,11 @@ void process_packet(int s_id, unsigned char* p)
 			}
 			cl._is_active = true;
 			player_damage(cl._s_id);
-			cout << s_id << "플레이어 모닥불 밖" << endl;
+			//cout << s_id << "플레이어 모닥불 밖" << endl;
 		}
 		else if (packet->state == ST_SNOWMAN)
 		{
-			cout << "플레이어" << s_id <<"가 플레이어" <<packet->s_id << "가 눈사람이라 전송함" << endl;
+			//cout << "플레이어" << s_id <<"가 플레이어" <<packet->s_id << "가 눈사람이라 전송함" << endl;
 
 			if (false == clients[packet->s_id].bIsSnowman) {
 				clients[packet->s_id].bIsSnowman = true;
@@ -889,7 +945,7 @@ void process_packet(int s_id, unsigned char* p)
 					if (ST_INGAME != other._state)
 						continue;
 					send_state_change(packet->s_id, other._s_id, ST_SNOWMAN);
-					cout << "눈사람" << endl;
+					//cout << "눈사람" << endl;
 					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
 
@@ -901,7 +957,7 @@ void process_packet(int s_id, unsigned char* p)
 					if (false == other.bIsSnowman)
 					{
 						cnt++;
-						cout << "충돌 cnt" << endl;
+						//cout << "충돌 cnt" << endl;
 
 						target_s_id = other._s_id;
 					}
@@ -916,13 +972,13 @@ void process_packet(int s_id, unsigned char* p)
 				}
 
 			}
-			cout << "플레이어" << packet->s_id <<" 눈사람" << endl;
+			//cout << "플레이어" << packet->s_id <<" 눈사람" << endl;
 
 		}
 
 		else if (packet->state == ST_ANIMAL)
 		{
-			cout << "플레이어" << s_id << "가 플레이어" << packet->s_id << "가 동물이라 전송함" << endl;
+			//cout << "플레이어" << s_id << "가 플레이어" << packet->s_id << "가 동물이라 전송함" << endl;
 			if (true == clients[packet->s_id].bIsSnowman) {
 				clients[packet->s_id]._hp = clients[packet->s_id]._BeginSlowHP;
 				clients[packet->s_id].bIsSnowman = false;
@@ -931,11 +987,11 @@ void process_packet(int s_id, unsigned char* p)
 					if (ST_INGAME != other._state)
 						continue;
 					send_state_change(packet->s_id, other._s_id, ST_ANIMAL);
-					cout << "동물화" << endl;
+					//cout << "동물화" << endl;
 					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
 			}
-			cout << "플레이어" << packet->s_id << " 동물" << endl;
+			//cout << "플레이어" << packet->s_id << " 동물" << endl;
 
 
 
@@ -976,7 +1032,10 @@ void process_packet(int s_id, unsigned char* p)
 				continue;
 			other.do_send(sizeof(s_packet), &s_packet);
 		}
+
 		SetEvent(g_timer);
+		g_start_game = true;
+
 		cout << "게임 스타트" << endl;
 		break;
 	}
@@ -1126,7 +1185,7 @@ void worker_thread()
 				}
 				else if (clients[_s_id]._hp - 1 == clients[_s_id]._min_hp) 
 				{
-					cout << "모닥불 데미지 눈사람" << endl;
+					//cout << "모닥불 데미지 눈사람" << endl;
 					clients[_s_id].bIsSnowman = true;
 					clients[_s_id]._hp -= 1;
 					send_hp_packet(_s_id);
@@ -1145,7 +1204,7 @@ void worker_thread()
 						if (false == other.bIsSnowman)
 						{
 							cnt++;
-							cout << "모닥불 cnt" << endl;
+							//cout << "모닥불 cnt" << endl;
 							target_s_id = other._s_id;
 						}
 					}
