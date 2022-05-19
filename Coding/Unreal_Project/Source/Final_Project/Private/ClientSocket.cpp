@@ -75,16 +75,17 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
 
-		auto info = make_shared<cCharacter>();
-		info->SessionId = packet->s_id;
-		info->X = packet->x;
-		info->Y = packet->y;
-		info->Z = packet->z;
-		info->Yaw = packet->yaw;
+			auto info = make_shared<cCharacter>();
+			info->SessionId = packet->s_id;
+			info->X = packet->x;
+			info->Y = packet->y;
+			info->Z = packet->z;
+			info->Yaw = packet->yaw;
 
-		MyPlayerController->SetNewCharacterInfo(info);
-
-		//MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+			MyPlayerController->SetNewCharacterInfo(info);
+		
+		
+		MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
 		break;
 	}

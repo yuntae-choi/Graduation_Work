@@ -48,6 +48,7 @@ public:
 	void SetGameEnd(const int target_id);
 	void SetOpenItembox(const int obj_id);
 	void SetAttack(const int s_id);
+	void UpdateTornado();
 
 
 	void SendPlayerInfo(int input);
@@ -192,6 +193,8 @@ private:
 	// 스폰시킬 다른 캐릭터
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<class ACharacter> WhoToSpawn;
+	TSubclassOf<class APawn> TornadoToSpawn;
+
 
 	//bool							bIsConnected;	// 서버와 접속 유무
 

@@ -29,7 +29,7 @@ using std::chrono::system_clock;
 const int32  MAX_NAME_SIZE = 20;
 const int32  MAX_CHAT_SIZE = 100;
 const int32 BUF_SIZE = 2048;
-
+const int32 Tornado_id = 100;
 // 소켓 통신 구조체
 
 // 패킷 정보
