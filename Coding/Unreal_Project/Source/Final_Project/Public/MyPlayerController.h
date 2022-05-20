@@ -48,6 +48,8 @@ public:
 	void SetGameEnd(const int target_id);
 	void SetOpenItembox(const int obj_id);
 	void SetAttack(const int s_id);
+	void SetSocket();
+
 	void UpdateTornado();
 
 

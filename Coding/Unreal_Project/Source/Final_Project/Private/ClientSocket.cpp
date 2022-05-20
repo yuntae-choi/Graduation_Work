@@ -2,6 +2,7 @@
 #include "ClientSocket.h"
 #include "MyPlayerController.h"
 
+
 ClientSocket::~ClientSocket()
 {
 	closesocket(_socket);
@@ -10,6 +11,7 @@ ClientSocket::~ClientSocket()
 
 bool ClientSocket::Connect()
 {
+	MYLOG(Warning, TEXT("Connected begin!"));
 	SOCKADDR_IN serverAddr;
 	::memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
@@ -434,8 +436,22 @@ void ClientSocket::Send_LogoutPacket(const int& s_id)
 
 void ClientSocket::CloseSocket()
 {
+	struct linger stLinger = { 0, 0 };	// SO_DONTLINGER 로 설정
+										// 강제 종료 시킨다. 데이터 손실이 있을 수 있음
+
+	stLinger.l_onoff = true;
+	// _socket 소켓의 데이터 송수신을 모두 중단
+	shutdown(_socket, SD_BOTH);
+	// 소켓 옵션을 설정
+	setsockopt(_socket, SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
+	 //소켓 연결을 종료
 	closesocket(_socket);
+
+	_socket = INVALID_SOCKET;
+	
 	WSACleanup();
+	MYLOG(Warning, TEXT("CloseSocket"));
+
 }
 
 bool ClientSocket::Init()

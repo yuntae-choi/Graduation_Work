@@ -160,16 +160,14 @@ void AMyCharacter::BeginPlay()
 
 	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
 	localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-
+	
 	WaitForStartGame();	// 대기시간
 }
 
 void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	MYLOG(Warning, TEXT("endplay"));
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	PlayerController->GetSocket()->Send_LogoutPacket(iSessionId);
-	//PlayerController->GetSocket()->CloseSocket();
+	//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	//PlayerController->GetSocket()->StopListen();
  }
 
