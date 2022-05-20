@@ -215,11 +215,11 @@ class FINAL_PROJECT_API ClientSocket : public FRunnable
 {
 public:
 	ClientSocket() {
-		WSAData wsaData;
+		/*WSAData wsaData;
 		if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 			MYLOG(Warning, TEXT("Failed to start wsa"));
 
-		_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+		_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);*/
 		//_login_ok = false;
 
 		/*	if (_socket == INVALID_SOCKET)

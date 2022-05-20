@@ -317,6 +317,7 @@ void Disconnect(int _s_id)
 	//cl.vl.unlock();
 
 	strcpy_s(clients[_s_id]._id, " ");
+	
 	/*for (auto& other : my_vl) {
 		CLIENT& target = clients[other];
 
@@ -353,8 +354,21 @@ void Disconnect(int _s_id)
 	}
 	//clients[_s_id].state_lock.lock();
 	clients[_s_id]._state = ST_FREE;
-	//clients[_s_id].state_lock.unlock();
+
+	struct linger stLinger = { 0, 0 };	// SO_DONTLINGER 로 설정
+										// 강제 종료 시킨다. 데이터 손실이 있을 수 있음
+
+	stLinger.l_onoff = true;
+	// _socket 소켓의 데이터 송수신을 모두 중단
+	shutdown(clients[_s_id]._socket, SD_BOTH);
+	// 소켓 옵션을 설정
+	setsockopt(clients[_s_id]._socket, SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
+	//소켓 연결을 종료
+	clients[_s_id].data_init();
 	closesocket(clients[_s_id]._socket);
+	clients[_s_id]._socket = INVALID_SOCKET;
+	//clients[_s_id].state_lock.unlock();
+	
 	cout << "------------플레이어 " << _s_id << " 연결 종료------------" << endl;
 }
 

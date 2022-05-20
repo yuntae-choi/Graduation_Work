@@ -6,7 +6,7 @@
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
 #include "Debug.h"
-#include "MyPlayerController.h"
+
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
@@ -29,10 +29,14 @@ FString TextureStringArray[] = {
 	TEXT("/Game/Characters/Bear/bear_texture_light_gray.bear_texture_light_gray"),
 	TEXT("/Game/Characters/Bear/bear_texture_black.bear_texture_black") };
 
+
+
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
@@ -169,6 +173,15 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	MYLOG(Warning, TEXT("endplay"));
 	//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	//PlayerController->GetSocket()->StopListen();
+
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		localPlayerController->mySocket->Send_LogoutPacket(iSessionId);
+		SleepEx(0, true);
+		localPlayerController->mySocket->CloseSocket();
+		localPlayerController->mySocket->~ClientSocket();
+		//delete[] localPlayerController->mySocket;
+	}
  }
 
 
@@ -186,6 +199,24 @@ void AMyCharacter::Tick(float DeltaTime)
 
 	UpdateZByTornado();		// 캐릭터가 토네이도 내부인 경우 z값 증가
 	UpdateControllerRotateByTornado();	// 토네이도로 인한 스턴상태인 경우 회전하도록
+}
+
+void AMyCharacter::init_Socket()
+{
+	/*AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	PlayerController->mySocket = nullptr;
+	PlayerController->mySocket = new ClientSocket();
+	PlayerController->mySocket->SetPlayerController(PlayerController);
+	g_socket = PlayerController->mySocket;
+	PlayerController->mySocket->Connect();
+	
+	DWORD recv_flag = 0;
+	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
+	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
+	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
+	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
+	g_socket->Send_LoginPacket();
+	SleepEx(0, true);*/
 }
 
 void AMyCharacter::PostInitializeComponents()

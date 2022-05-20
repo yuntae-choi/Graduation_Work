@@ -12,6 +12,12 @@ ClientSocket::~ClientSocket()
 bool ClientSocket::Connect()
 {
 	MYLOG(Warning, TEXT("Connected begin!"));
+	WSAData wsaData;
+	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		MYLOG(Warning, TEXT("Failed to start wsa"));
+
+	_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+
 	SOCKADDR_IN serverAddr;
 	::memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
@@ -437,12 +443,12 @@ void ClientSocket::Send_LogoutPacket(const int& s_id)
 void ClientSocket::CloseSocket()
 {
 	struct linger stLinger = { 0, 0 };	// SO_DONTLINGER 로 설정
-										// 강제 종료 시킨다. 데이터 손실이 있을 수 있음
+										 //강제 종료 시킨다. 데이터 손실이 있을 수 있음
 
 	stLinger.l_onoff = true;
-	// _socket 소켓의 데이터 송수신을 모두 중단
+	 //_socket 소켓의 데이터 송수신을 모두 중단
 	shutdown(_socket, SD_BOTH);
-	// 소켓 옵션을 설정
+	 //소켓 옵션을 설정
 	setsockopt(_socket, SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
 	 //소켓 연결을 종료
 	closesocket(_socket);
