@@ -81,7 +81,10 @@ void ASpringPlatform::OnComponentBeginOverlap(class UPrimitiveComponent* Overlap
 	{
 		iSpringPlatformState = SpringPlatformState::Increasing;	// 스프링이 늘어나도록
 
-		mycharacter->GetCharacterMovement()->AddImpulse(FVector(0.0f, 0.0f, 2500.0f), true);	// 캐릭터가 튀어오르도록
+		float velX = mycharacter->GetVelocity().X;
+		float velY = mycharacter->GetVelocity().Y;
+		float multiple = 2.5f;	// 이동하던 방향으로의 속도에 몇배의 힘으로 튀어오르게 할지
+		mycharacter->GetCharacterMovement()->AddImpulse(FVector(velX * multiple, velY * multiple, 2000.0f), true);	// 캐릭터가 튀어오르도록
 
 		//FTimerHandle WaitHandle;
 		//float WaitTime = 0.2f;
