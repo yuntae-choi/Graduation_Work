@@ -19,11 +19,8 @@ void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over
 {
 	//MYLOG(Warning, TEXT("recv_callback"));
 	if (num_byte == 0) {
-		recv_flag = 0;
-		/*ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
-		mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
-		mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
-		WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);*/
+		g_socket->CloseSocket();
+		g_socket = nullptr; 
 		MYLOG(Warning, TEXT("recv_error"));
 
 		return;
@@ -42,7 +39,6 @@ void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over
 
 AMyPlayerController::AMyPlayerController()
 {
-	
 	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
 	bSetStart.store(false);
@@ -73,8 +69,8 @@ void AMyPlayerController::OnPossess(APawn* pawn_)
 	Super::OnPossess(pawn_);
 
 	//mySocket->StartListen();
+	
 	localPlayerCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-
 	LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
 	
 	FPlatformProcess::Sleep(0);
@@ -83,46 +79,22 @@ void AMyPlayerController::OnPossess(APawn* pawn_)
 void AMyPlayerController::BeginPlay()
 {
 	MYLOG(Warning, TEXT("BeginPlay!"));
-
-	// 실행시 클릭없이 바로 조작
-	//FInputModeGameOnly InputMode;
-	//SetInputMode(InputMode);
-	//mySocket = ClientSocket::GetSingleton();
-	//mySocket->SetPlayerController(this);
-	//mySocket = ClientSocket::GetSingleton();
-	//mySocket->SetPlayerController(this);
-	//mySocket = mySocket;
-	//mySocket->Connect();
-	//mySocket->Connect();
-	/*DWORD recv_flag = 0;
-	ZeroMemory(&mySocket->_recv_over._wsa_over, sizeof(mySocket->_recv_over._wsa_over));
-	mySocket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(mySocket->_recv_over._net_buf + mySocket->_prev_size);
-	mySocket->_recv_over._wsa_buf.len = sizeof(mySocket->_recv_over._net_buf) - mySocket->_prev_size;
-	WSARecv(mySocket->_socket, &mySocket->_recv_over._wsa_buf, 1, 0, &recv_flag, &mySocket->_recv_over._wsa_over, recv_callback);
-	mySocket->Send_LoginPacket();*/
-	g_socket = ClientSocket::GetSingleton();
-	g_socket->SetPlayerController(this);
-	mySocket = g_socket;
-	g_socket->Connect();
-	DWORD recv_flag = 0;
-	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
-	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
-	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
-	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
-	g_socket->Send_LoginPacket();
-	SleepEx(0, true);
 	
+	// 실행시 클릭없이 바로 조작
+	//SetSocket();
+	//SleepEx(0, true);
+	SetSocket();
 	//mySocket->StartListen();
 	SleepEx(0, true);
 }
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	//MYLOG(Warning, TEXT("EndPlay!"));
+	MYLOG(Warning, TEXT("EndPlay!"));
 	//mySocket->Send_LogoutPacket(iSessionId);
+	////SleepEx(0, true);
 	//mySocket->CloseSocket();
-	//mySocket->StopListen();
-	
+	//g_socket = nullptr;
 	// 델리게이트 해제
 	FuncUpdateHP.Clear();
 	FuncUpdateCurrentSnowballCount.Clear();
@@ -160,6 +132,23 @@ void AMyPlayerController::Tick(float DeltaTime)
 	SleepEx(0, true);
 
 	//UpdateRotation();	// 캐릭터 피칭(상하)제한
+}
+
+void AMyPlayerController::SetSocket()
+{
+	mySocket = new ClientSocket();
+	mySocket->SetPlayerController(this);
+	g_socket = mySocket;
+	mySocket->Connect();
+
+	DWORD recv_flag = 0;
+	ZeroMemory(&g_socket->_recv_over._wsa_over, sizeof(g_socket->_recv_over._wsa_over));
+	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
+	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
+	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
+	g_socket->Send_LoginPacket();
+	SleepEx(0, true); 
+	
 }
 
 void AMyPlayerController::SetInitInfo(const cCharacter& me)

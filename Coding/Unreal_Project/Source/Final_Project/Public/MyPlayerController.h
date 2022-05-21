@@ -48,6 +48,8 @@ public:
 	void SetGameEnd(const int target_id);
 	void SetOpenItembox(const int obj_id);
 	void SetAttack(const int s_id);
+	void SetSocket();
+
 	void UpdateTornado();
 
 
@@ -166,8 +168,10 @@ public:
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_GameResult FuncUpdateGameResult;
 
+public:
+	ClientSocket* mySocket;
 private:
-	ClientSocket*			mySocket;
+	
 	cCharacter				initInfo;
 	LockQueue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
 		//새 플레이어 스폰

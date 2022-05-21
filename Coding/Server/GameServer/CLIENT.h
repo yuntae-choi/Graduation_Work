@@ -63,8 +63,7 @@ public:
     COMBAT _combat;
 
     atomic_int    _count;
-    int      _type;   // 1.Player 2.고블린  3.오거 4.드래곤(Boss)   
-
+  
     Overlap _recv_over;
     SOCKET  _socket;
     int      _prev_size;
@@ -82,7 +81,26 @@ public:
     {
         closesocket(_socket);
     }
+    void data_init()
+    {
 
+        int _max_hp = 390; // 최대 체력
+        int _min_hp = 270;
+        int _BeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
+
+        int _hp = _max_hp; // 체력 범위
+        bool is_bone = true;
+        atomic_bool is_match = false;
+        atomic_bool   _is_active = false;
+        int32 iMaxSnowballCount = 10;
+        int32 iMaxMatchCount = 3;
+        int32 iCurrentSnowballCount = 0;
+        int32 iCurrentMatchCount = 0;
+        bool bHasUmbrella = false;
+        bool bHasBag = false;
+        bool bIsSnowman = false;	// 현재 캐릭터가 눈사람인지
+        bool b_ready = false;
+    }
     void do_recv()
     {
         DWORD recv_flag = 0;

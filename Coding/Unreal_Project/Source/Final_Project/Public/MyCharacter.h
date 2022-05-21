@@ -7,6 +7,7 @@
 #include "MySnowball.h"
 #include "Itembox.h"
 #include "Bonfire.h"
+#include "ClientSocket.h"
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -67,6 +68,7 @@ public:
 	void SelectUmbrella();
 	void UseSelectedItem();
 
+
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	bool GetIsInTornado() { return bIsInTornado; };
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
@@ -75,6 +77,7 @@ public:
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
 
+	void init_Socket();
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
