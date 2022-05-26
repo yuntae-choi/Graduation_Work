@@ -11,10 +11,15 @@ UMyAnimInstance::UMyAnimInstance()
 	bIsInAir = false;
 	bIsDead = false;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> ATTACK_MONTAGE(TEXT("/Game/Animations/Bear/BearThrowMontage.BearThrowMontage"));
-
 	if (ATTACK_MONTAGE.Succeeded())
 	{
 		attackMontage = ATTACK_MONTAGE.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ATTACK_SHOTGUN_MONTAGE(TEXT("/Game/Animations/Bear/BearShotgunMontage.BearShotgunMontage"));
+	if (ATTACK_SHOTGUN_MONTAGE.Succeeded())
+	{
+		attackShotgunMontage = ATTACK_SHOTGUN_MONTAGE.Object;
 	}
 }
 
@@ -63,13 +68,41 @@ void UMyAnimInstance::AnimNotify_SnowballRelease()
 	MyCharacter->SendReleaseSnowball();
 }
 
-void UMyAnimInstance::Anim_SnowballRelease()
+void UMyAnimInstance::PlayAttackShotgunMontage()
 {
-	//auto Pawn = TryGetPawnOwner();
-	//if (!::IsValid(Pawn)) return;
+	if (!bIsDead)
+		Montage_Play(attackShotgunMontage, 1.0f);
+}
 
-	//auto MyCharacter = Cast<AMyCharacter>(Pawn);
-	//if (nullptr == MyCharacter) return;
+void UMyAnimInstance::AnimNotify_SpawnShotgun()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
 
-	//MyCharacter->ReleaseSnowball();
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	MyCharacter->ShowShotgun();
+}
+
+void UMyAnimInstance::AnimNotify_DestroyShotgun()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
+
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	MyCharacter->HideShotgun();
+}
+
+void UMyAnimInstance::AnimNotify_SpawnSnowballBomb()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
+
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	MyCharacter->SpawnSnowballBomb();
 }

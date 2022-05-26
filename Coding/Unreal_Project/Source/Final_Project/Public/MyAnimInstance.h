@@ -22,6 +22,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	void PlayAttackMontage();
+	void PlayAttackShotgunMontage();
 	void SetDead() { bIsDead = true; }
 
 	float GetDirection() const { return fCurrentPawnDirection; }
@@ -30,7 +31,13 @@ public:
 private:
 	UFUNCTION()
 	void AnimNotify_SnowballRelease();
-	void Anim_SnowballRelease();
+
+	UFUNCTION()
+	void AnimNotify_SpawnShotgun();
+	UFUNCTION()
+	void AnimNotify_DestroyShotgun();
+	UFUNCTION()
+	void AnimNotify_SpawnSnowballBomb();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
@@ -44,6 +51,9 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* attackMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* attackShotgunMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	bool bIsDead;
