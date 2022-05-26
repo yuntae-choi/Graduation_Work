@@ -19,6 +19,10 @@ enum UICategory {
 	HP, CurSnowball, CurMatch, MaxSnowballAndMatch, HasUmbrella, HasBag, IsFarmingSnowdrift, SnowdriftFarmDuration, SelectedItem, AllOfUI
 };
 
+enum Weapon {
+	Hand, Shotgun
+};
+
 UCLASS()
 class FINAL_PROJECT_API AMyCharacter : public ACharacter
 {
@@ -74,6 +78,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void SetIsInTornado(bool value) { bIsInTornado = value; };
 
+	void ShowShotgun();
+	void HideShotgun();
+	void SpawnSnowballBomb();
+
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
 
@@ -100,6 +108,9 @@ private:
 
 	void UpdateZByTornado();
 	void UpdateControllerRotateByTornado();
+
+	void AttackShotgun();
+	void ChangeWeapon();
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -166,9 +177,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool rotateCont;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iSelectedWeapon;	// 현재 선택된 무기
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* shotgunMeshComponent;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AMySnowball> shotgunProjectileClass;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))

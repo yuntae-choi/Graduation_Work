@@ -17,6 +17,7 @@ const float fChangeSnowmanStunTime = 3.0f;	// 실제값 - 10.0f, 눈사람화 할 때 스�
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
+const int iNumOfWeapons = 2;	// 무기 종류 수
 
 // 색상별 곰 텍스쳐
 FString TextureStringArray[] = {
@@ -117,10 +118,28 @@ AMyCharacter::AMyCharacter()
 		snowmanMaterial = SnowmanMaterial.Object;
 	}
 
+	if (!shotgunMeshComponent)
+	{
+		shotgunMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("shotgunMeshComponent"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SHOTGUN(TEXT("/Game/NonCharacters/Shotgun_SM.Shotgun_SM"));
+		if (SM_SHOTGUN.Succeeded())
+		{
+			shotgunMeshComponent->SetStaticMesh(SM_SHOTGUN.Object);
+			shotgunMeshComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+
+			FAttachmentTransformRules atr = FAttachmentTransformRules(
+				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
+			shotgunMeshComponent->AttachToComponent(GetMesh(), atr, TEXT("ShotgunSocket"));
+			
+			shotgunMeshComponent->SetVisibility(false);
+		}
+	}
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
 	projectileClass = AMySnowball::StaticClass();
+	shotgunProjectileClass = AMySnowball::StaticClass();	// snowball bomb 클래스 제작해서 변경해야함
 
 	iSessionId = -1;
 	iCurrentHP = iMaxHP;	// 실제 설정값
@@ -152,6 +171,9 @@ AMyCharacter::AMyCharacter()
 	
 	bIsInTornado = false;
 	rotateCont = false;
+
+	iSelectedWeapon = Weapon::Hand;	// 실제 설정값
+	//iSelectedWeapon = Weapon::Shotgun;	// 디버깅용 - 샷건
 }
 
 // Called when the game starts or when spawned
@@ -246,6 +268,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("SelectMatch"), EInputEvent::IE_Pressed, this, &AMyCharacter::SelectMatch);
 	PlayerInputComponent->BindAction(TEXT("SelectUmbrella"), EInputEvent::IE_Pressed, this, &AMyCharacter::SelectUmbrella);
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Pressed, this, &AMyCharacter::UseSelectedItem);
+
+	PlayerInputComponent->BindAction(TEXT("ChangeWeapon"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeWeapon);
 }
 
 void AMyCharacter::UpDown(float NewAxisValue)
@@ -277,8 +301,19 @@ void AMyCharacter::Attack()
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId == PlayerController->iSessionId)
 	{
-		PlayerController->SendPlayerInfo(COMMAND_ATTACK);
-		isAttacking = true;
+		switch (iSelectedWeapon) {
+		case Weapon::Hand:
+			PlayerController->SendPlayerInfo(COMMAND_ATTACK);
+			isAttacking = true;
+			break;
+		case Weapon::Shotgun:
+			if (iCurrentSnowballCount < 4) return;	// 눈덩이가 4개 이상 없으면 공격 x
+			AttackShotgun();
+			isAttacking = true;
+			break;
+		default:
+			break;
+		}
 	}
 #ifdef SINGLEPLAY_DEBUG
 	SnowAttack();
@@ -894,5 +929,65 @@ void AMyCharacter::UpdateControllerRotateByTornado()
 		FRotator contRot = localPlayerController->GetControlRotation();
 		FRotator newContRot = FRotator(contRot.Pitch, contRot.Yaw + 5.0f, contRot.Roll);
 		localPlayerController->SetControlRotation(newContRot);
+	}
+}
+
+void AMyCharacter::AttackShotgun()
+{
+	myAnim->PlayAttackShotgunMontage();
+
+	// 디버깅용 - 실제는 주석 해제
+	//iCurrentSnowballCount -= 4;	// 공격 시 눈덩이 소유량 4 감소
+	UpdateUI(UICategory::CurSnowball);
+
+}
+
+void AMyCharacter::ChangeWeapon()
+{
+	iSelectedWeapon = (iSelectedWeapon + 1) % iNumOfWeapons;
+}
+
+void AMyCharacter::ShowShotgun()
+{
+	shotgunMeshComponent->SetVisibility(true);
+}
+
+void AMyCharacter::HideShotgun()
+{
+	shotgunMeshComponent->SetVisibility(false);
+}
+
+void AMyCharacter::SpawnSnowballBomb()
+{
+	if (shotgunProjectileClass)
+	{
+		UWorld* World = GetWorld();
+
+		if (World)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+
+			FTransform Muzzle1SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle1Socket"));
+			AMySnowball* snowballBomb1 = World->SpawnActor<AMySnowball>(shotgunProjectileClass, Muzzle1SocketTransform, SpawnParams);
+
+			FTransform Muzzle2SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle2Socket"));
+			AMySnowball* snowballBomb2 = World->SpawnActor<AMySnowball>(shotgunProjectileClass, Muzzle2SocketTransform, SpawnParams);
+			FTransform Muzzle3SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle3Socket"));
+			AMySnowball* snowballBomb3 = World->SpawnActor<AMySnowball>(shotgunProjectileClass, Muzzle3SocketTransform, SpawnParams);
+			FTransform Muzzle4SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle4Socket"));
+			AMySnowball* snowballBomb4 = World->SpawnActor<AMySnowball>(shotgunProjectileClass, Muzzle4SocketTransform, SpawnParams);
+
+			//if (snowballBomb1->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
+			//{
+			//	FVector cameraLocation;
+			//	FRotator cameraRotation;
+			//	GetActorEyesViewPoint(cameraLocation, cameraRotation);
+			//	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+
+			//	II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
+			//}
+		}
 	}
 }
