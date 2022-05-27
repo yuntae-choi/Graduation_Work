@@ -47,6 +47,9 @@ const char CS_PACKET_READY = 11;
 const char CS_PACKET_STOP_SNOW_FARMING = 12;
 const char CS_PACKET_MATCH = 13;
 const char CS_PACKET_OPEN_BOX = 14;
+const char CS_PACKET_GUNATTACK = 15;
+const char CS_PACKET_GUNFIRE = 16;
+
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -68,6 +71,8 @@ const char SC_PACKET_IS_BONE = 16;
 const char SC_PACKET_LOGOUT = 17;
 const char SC_PACKET_END = 18;
 const char SC_PACKET_OPEN_BOX = 19;
+const char SC_PACKET_GUNATTACK = 20;
+const char SC_PACKET_GUNFIRE = 21;
 
 enum COMMAND_Type
 {
@@ -75,7 +80,10 @@ enum COMMAND_Type
 	COMMAND_MOVE,
 	COMMAND_DAMAGE,
 	COMMAND_MATCH,
-	COMMAND_THROW
+	COMMAND_THROW,
+	COMMAND_GUNATTACK,
+	COMMAND_GUNFIRE
+
 
 };
 
@@ -168,6 +176,13 @@ struct cs_packet_attack {
 	char	type;
 	int32 s_id;
 };
+
+struct cs_packet_shotattack {
+	unsigned char size;
+	char	type;
+	int32 s_id;
+};
+
 
 
 struct cs_packet_chat {

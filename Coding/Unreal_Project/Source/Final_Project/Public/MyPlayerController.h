@@ -42,12 +42,15 @@ public:
 	void SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_);
 	void SetInitInfo(const cCharacter& me);
 	void SetNewBall(const int s_id);
+	void SetGunFire(const int s_id);
+
 	void SetDestroySnowdritt(const int s_id);
 	void SetDestroyitembox(const int obj_id);
 	void SetDestroyPlayer(const int del_sid);
 	void SetGameEnd(const int target_id);
 	void SetOpenItembox(const int obj_id);
 	void SetAttack(const int s_id);
+	void SetShotGun(const int s_id);
 	void SetSocket();
 
 	void UpdateTornado();

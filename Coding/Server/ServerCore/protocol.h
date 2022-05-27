@@ -30,7 +30,8 @@ const char CS_PACKET_READY = 11;
 const char CS_PACKET_STOP_SNOW_FARMING = 12;
 const char CS_PACKET_MATCH = 13;
 const char CS_PACKET_OPEN_BOX = 14;
-
+const char CS_PACKET_GUNATTACK = 15;
+const char CS_PACKET_GUNFIRE = 16;
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -52,7 +53,8 @@ const char SC_PACKET_IS_BONE = 16;
 const char SC_PACKET_LOGOUT = 17;
 const char SC_PACKET_END = 18;
 const char SC_PACKET_OPEN_BOX = 19;
-
+const char SC_PACKET_GUNATTACK = 20;
+const char SC_PACKET_GUNFIRE = 21;
 
 #pragma pack (push, 1)
 struct cs_packet_login {

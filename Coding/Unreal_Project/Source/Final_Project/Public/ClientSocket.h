@@ -120,9 +120,11 @@ public:
 	int current_snow_count = 0;
 	int max_snow_count = 10;
 
-
+	bool canShot = false;
 	bool canAttack = false;
 	bool canSnowBall = false;
+	bool canSnowBomb = false;
+
 
 
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
@@ -239,8 +241,12 @@ public:
 	
 	void Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVector MyVelocity, float dir);
 	void Send_AttackPacket(int s_id);
+	void Send_GunAttackPacket(int s_id);
+
 	void Send_ChatPacket(int sessionID, float x, float y, float z);
 	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
+	void Send_GunFire_Packet(int s_id, FVector MyLocation, FVector MyDirection);
+
 	void Send_DamagePacket();
 	void Send_ItemPacket(int item_no, int destroy_obj_id);
 	void Send_LogoutPacket(const int& s_id);

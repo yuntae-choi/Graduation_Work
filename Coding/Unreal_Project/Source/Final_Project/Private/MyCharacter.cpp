@@ -129,8 +129,9 @@ AMyCharacter::AMyCharacter()
 
 			FAttachmentTransformRules atr = FAttachmentTransformRules(
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
-			shotgunMeshComponent->AttachToComponent(GetMesh(), atr, TEXT("ShotgunSocket"));
-			
+			shotgunMeshComponent->SetupAttachment(GetMesh(), TEXT("ShotgunSocket"));
+			//shotgunMeshComponent->AttachToComponent(GetMesh(), atr, TEXT("ShotgunSocket"));
+
 			shotgunMeshComponent->SetVisibility(false);
 		}
 	}
@@ -295,7 +296,7 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	if (isAttacking) return;
-	MYLOG(Warning, TEXT("attack"));
+	
 	if (bIsSnowman) return;
 	if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -304,11 +305,15 @@ void AMyCharacter::Attack()
 		switch (iSelectedWeapon) {
 		case Weapon::Hand:
 			PlayerController->SendPlayerInfo(COMMAND_ATTACK);
+			MYLOG(Warning, TEXT("attack"));
 			isAttacking = true;
 			break;
 		case Weapon::Shotgun:
 			if (iCurrentSnowballCount < 4) return;	// 눈덩이가 4개 이상 없으면 공격 x
-			AttackShotgun();
+			
+			PlayerController->SendPlayerInfo(COMMAND_GUNATTACK);
+			MYLOG(Warning, TEXT("gunattack"));
+			//AttackShotgun();
 			isAttacking = true;
 			break;
 		default:
@@ -349,6 +354,18 @@ void AMyCharacter::SnowAttack()
 			snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
 		}
 	}
+}
+
+void AMyCharacter::AttackShotgun()
+{
+	MYLOG(Warning, TEXT("AttackShotGun"));
+
+	myAnim->PlayAttackShotgunMontage();
+
+	// 디버깅용 - 실제는 주석 해제
+	//iCurrentSnowballCount -= 4;	// 공격 시 눈덩이 소유량 4 감소
+	UpdateUI(UICategory::CurSnowball);
+
 }
 
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -392,6 +409,18 @@ void AMyCharacter::SendReleaseSnowball()
 
 	}
 }
+
+void AMyCharacter::SendSpawnSnowballBomb()
+{
+	if (iSessionId != localPlayerController->iSessionId) return;
+	if (shotgunProjectileClass)
+	{
+		MYLOG(Warning, TEXT("SendSpawnSnowballBomb"));
+		localPlayerController->SendPlayerInfo(COMMAND_GUNFIRE);
+
+	}
+}
+
 
 void AMyCharacter::ReleaseSnowball()
 {
@@ -932,15 +961,7 @@ void AMyCharacter::UpdateControllerRotateByTornado()
 	}
 }
 
-void AMyCharacter::AttackShotgun()
-{
-	myAnim->PlayAttackShotgunMontage();
 
-	// 디버깅용 - 실제는 주석 해제
-	//iCurrentSnowballCount -= 4;	// 공격 시 눈덩이 소유량 4 감소
-	UpdateUI(UICategory::CurSnowball);
-
-}
 
 void AMyCharacter::ChangeWeapon()
 {

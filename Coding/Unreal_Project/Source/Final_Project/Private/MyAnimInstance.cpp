@@ -103,6 +103,6 @@ void UMyAnimInstance::AnimNotify_SpawnSnowballBomb()
 
 	auto MyCharacter = Cast<AMyCharacter>(Pawn);
 	if (nullptr == MyCharacter) return;
-
-	MyCharacter->SpawnSnowballBomb();
+	MyCharacter->SendSpawnSnowballBomb(); //샷건 발사 전송
+	//MyCharacter->SpawnSnowballBomb();
 }

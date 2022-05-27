@@ -130,7 +130,21 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		break;
 	}
+	case SC_PACKET_GUNFIRE:
+	{
+		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
+		CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCz = packet->z;		// 카메라 위치
+		CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
 
+		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
+		MyPlayerController->SetGunFire(packet->s_id);
+
+		break;
+	}
 	case SC_PACKET_HP:
 	{
 		sc_packet_hp_change* packet = reinterpret_cast<sc_packet_hp_change*>(ptr);
@@ -247,13 +261,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		MyPlayerController->SetAttack(attack_s_id);
 		break;
 	}
-	//case SC_PACKET_ATTACK:
-	//{
-
-	//	cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
-	//	MYLOG(Warning, TEXT("player%d attack "), packet->s_id);
-	//	break;
-	//}
+	case SC_PACKET_GUNATTACK:
+	{
+		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
+		int attack_s_id = packet->s_id;
+		MyPlayerController->SetShotGun(attack_s_id);
+		break;
+	}
 	}
 }
 
@@ -328,6 +342,16 @@ void ClientSocket::Send_AttackPacket(int s_id) {
 	SendPacket(&packet);
 };
 
+void ClientSocket::Send_GunAttackPacket(int s_id) {
+	cs_packet_attack packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_GUNATTACK;
+	packet.s_id = s_id;
+
+	//MYLOG(Warning, TEXT("[Send damage]"));
+	SendPacket(&packet);
+};
+
 void ClientSocket::Send_MatchPacket() {
 	cs_packet_match packet;
 	packet.size = sizeof(packet);
@@ -377,6 +401,26 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
 	SendPacket(&packet);
 };
+
+void ClientSocket::Send_GunFire_Packet(int s_id, FVector MyLocation, FVector MyDirection)
+{
+	MYLOG(Warning, TEXT("Send_GunFire_Packet"));
+	cs_packet_throw_snow packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_GUNFIRE;
+	packet.s_id = s_id;
+	packet.x = MyLocation.X;
+	packet.y = MyLocation.Y;
+	packet.z = MyLocation.Z;
+	packet.dx = MyDirection.X;
+	packet.dy = MyDirection.Y;
+	packet.dz = MyDirection.Z;
+	size_t sent = 0;
+
+	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
+	SendPacket(&packet);
+};
+
 
 //void ClientSocket::ReadyToSend_AttackPacket()
 //{

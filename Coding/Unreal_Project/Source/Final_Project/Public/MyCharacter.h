@@ -44,6 +44,9 @@ public:
 	void ReleaseSnowball();
 	void SendReleaseSnowball();
 
+	void SendSpawnSnowballBomb();
+
+
 	void SetIsFarming(bool value) { bIsFarming = value; };
 	bool GetIsFarming() { return bIsFarming; };
 	void SetCanFarmItem(AActor* item) { farmingItem = item; };
@@ -60,7 +63,8 @@ public:
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
-	void SnowAttack();
+	void SnowAttack();    // 일반 공격
+	void AttackShotgun(); //샷건 공격
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
@@ -110,7 +114,6 @@ private:
 	void UpdateZByTornado();
 	void UpdateControllerRotateByTornado();
 
-	void AttackShotgun();
 	void ChangeWeapon();
 
 public:

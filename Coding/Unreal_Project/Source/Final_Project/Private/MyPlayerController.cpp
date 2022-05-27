@@ -183,6 +183,20 @@ void AMyPlayerController::SetAttack(const int s_id)
 	charactersInfo->players[s_id].canAttack = true;
 
 }
+void AMyPlayerController::SetShotGun(const int s_id)
+{
+	UWorld* World = GetWorld();
+	charactersInfo->players[s_id].canShot = true;
+	MYLOG(Warning, TEXT("SetShotGun %d"), s_id);
+}
+
+void AMyPlayerController::SetGunFire(const int s_id)
+{
+	UWorld* World = GetWorld();
+
+	charactersInfo->players[s_id].canSnowBomb = true;
+
+}
 
 void AMyPlayerController::SetDestroyPlayer(const int del_sid)
 {
@@ -355,10 +369,24 @@ bool AMyPlayerController::UpdateWorldInfo()
 			info->canAttack = false;
 		}
 		
+		if (info->canShot) {
+			player_->AttackShotgun();
+			info->canShot = false;
+		}
+
+
 		if (info->canSnowBall) {
 			player_->ReleaseSnowball();
 			info->canSnowBall = false;
 			info->current_snow_count--;
+		}
+
+		if (info->canSnowBomb) {
+			MYLOG(Warning, TEXT("canSnowBomb"));
+
+			player_->SpawnSnowballBomb();
+			info->canSnowBomb = false;
+			info->current_snow_count-=4;
 		}
 
 		//타플레이어 구별
@@ -544,8 +572,12 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
 	else if (input == COMMAND_ATTACK)
 		mySocket->Send_AttackPacket(iSessionId);
+	else if (input == COMMAND_GUNATTACK)
+		mySocket->Send_GunAttackPacket(iSessionId);
 	else if (input == COMMAND_THROW)
 		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
+	else if (input == COMMAND_GUNFIRE)
+		mySocket->Send_GunFire_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_DAMAGE)
 		mySocket->Send_DamagePacket();
 	else if (input == COMMAND_MATCH)
