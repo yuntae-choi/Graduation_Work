@@ -136,8 +136,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 void AMyPlayerController::SetSocket()
 {
-	//mySocket = new ClientSocket();         // 에디터용
-	mySocket = ClientSocket::GetSingleton(); // 패키징 용
+	mySocket = new ClientSocket();         // 에디터용
+	//mySocket = ClientSocket::GetSingleton(); // 패키징 용
 
 	mySocket->SetPlayerController(this);
 	g_socket = mySocket;
