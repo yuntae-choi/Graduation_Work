@@ -931,7 +931,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_GUNFIRE: {
 		if (cl.iCurrentSnowballCount < 4) break;
 		printf("gunfire\n");
-		cl.iCurrentSnowballCount-=4;
+		cl.iCurrentSnowballCount-=5;
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)

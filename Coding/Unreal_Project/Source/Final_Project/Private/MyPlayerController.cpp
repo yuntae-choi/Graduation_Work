@@ -136,8 +136,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 void AMyPlayerController::SetSocket()
 {
-	mySocket = new ClientSocket();         // 에디터용
-	//mySocket = ClientSocket::GetSingleton(); // 패키징 용
+	//mySocket = new ClientSocket();         // 에디터용
+	mySocket = ClientSocket::GetSingleton(); // 패키징 용
 
 	mySocket->SetPlayerController(this);
 	g_socket = mySocket;
@@ -189,7 +189,7 @@ void AMyPlayerController::SetShotGun(const int s_id)
 {
 	UWorld* World = GetWorld();
 	charactersInfo->players[s_id].canShot = true;
-	MYLOG(Warning, TEXT("SetShotGun %d"), s_id);
+	//MYLOG(Warning, TEXT("SetShotGun %d"), s_id);
 }
 
 void AMyPlayerController::SetGunFire(const int s_id)
@@ -388,7 +388,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 
 			player_->SpawnSnowballBomb();
 			info->canSnowBomb = false;
-			info->current_snow_count-=4;
+			info->current_snow_count-=5;
 		}
 
 		//타플레이어 구별
