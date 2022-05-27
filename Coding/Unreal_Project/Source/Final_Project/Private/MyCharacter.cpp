@@ -139,7 +139,7 @@ AMyCharacter::AMyCharacter()
 	isAttacking = false;
 
 	projectileClass = AMySnowball::StaticClass();
-	shotgunProjectileClass = AMySnowball::StaticClass();	// snowball bomb 클래스 제작해서 변경해야함
+	shotgunProjectileClass = ASnowballBomb::StaticClass();
 
 	iSessionId = -1;
 	iCurrentHP = iMaxHP;	// 실제 설정값
@@ -970,24 +970,31 @@ void AMyCharacter::SpawnSnowballBomb()
 			SpawnParams.Instigator = GetInstigator();
 
 			FTransform Muzzle1SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle1Socket"));
-			AMySnowball* snowballBomb1 = World->SpawnActor<AMySnowball>(shotgunProjectileClass, Muzzle1SocketTransform, SpawnParams);
-
+			ASnowballBomb* snowballBomb1 = World->SpawnActor<ASnowballBomb>(shotgunProjectileClass, Muzzle1SocketTransform, SpawnParams);
 			FTransform Muzzle2SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle2Socket"));
-			AMySnowball* snowballBomb2 = World->SpawnActor<AMySnowball>(shotgunProjectileClass, Muzzle2SocketTransform, SpawnParams);
+			ASnowballBomb* snowballBomb2 = World->SpawnActor<ASnowballBomb>(shotgunProjectileClass, Muzzle2SocketTransform, SpawnParams);
 			FTransform Muzzle3SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle3Socket"));
-			AMySnowball* snowballBomb3 = World->SpawnActor<AMySnowball>(shotgunProjectileClass, Muzzle3SocketTransform, SpawnParams);
+			ASnowballBomb* snowballBomb3 = World->SpawnActor<ASnowballBomb>(shotgunProjectileClass, Muzzle3SocketTransform, SpawnParams);
 			FTransform Muzzle4SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle4Socket"));
-			AMySnowball* snowballBomb4 = World->SpawnActor<AMySnowball>(shotgunProjectileClass, Muzzle4SocketTransform, SpawnParams);
+			ASnowballBomb* snowballBomb4 = World->SpawnActor<ASnowballBomb>(shotgunProjectileClass, Muzzle4SocketTransform, SpawnParams);
 
 			//if (snowballBomb1->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 			//{
-			//	FVector cameraLocation;
-			//	FRotator cameraRotation;
-			//	GetActorEyesViewPoint(cameraLocation, cameraRotation);
-			//	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-
-			//	II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
 			//}
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+
+			FVector rightVec = GetActorRightVector() / 20;
+
+			FVector secondDir = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, 0.05f));
+			FVector thirdDir = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, -0.03f) + rightVec);
+			FVector fourthDir = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, -0.03f) - rightVec);
+
+			II_Throwable::Execute_Throw(snowballBomb1, cameraRotation.Vector());
+			II_Throwable::Execute_Throw(snowballBomb2, secondDir);
+			II_Throwable::Execute_Throw(snowballBomb3, thirdDir);
+			II_Throwable::Execute_Throw(snowballBomb4, fourthDir);
 		}
 	}
 }

@@ -8,6 +8,7 @@
 #include "Itembox.h"
 #include "Bonfire.h"
 #include "ClientSocket.h"
+#include "SnowballBomb.h"
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -188,7 +189,7 @@ protected:
 	TSubclassOf<class AMySnowball> projectileClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMySnowball> shotgunProjectileClass;
+	TSubclassOf<class ASnowballBomb> shotgunProjectileClass;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
