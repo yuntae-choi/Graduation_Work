@@ -83,6 +83,14 @@ public:
 	void HideShotgun();
 	void SpawnSnowballBomb();
 
+	void Cheat_Teleport1();
+	void Cheat_Teleport2();
+	void Cheat_Teleport3();
+	void Cheat_Teleport4();
+	void Cheat_IncreaseHP();
+	void Cheat_DecreaseHP();
+	void Cheat_IncreaseSnowball();
+
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
 

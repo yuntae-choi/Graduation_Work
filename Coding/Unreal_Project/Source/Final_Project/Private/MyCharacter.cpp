@@ -273,6 +273,17 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Pressed, this, &AMyCharacter::UseSelectedItem);
 
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeWeapon);
+
+	// Cheat Key
+	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport1"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport1);
+	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport2"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport2);
+	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport3"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport3);
+	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport4"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport4);
+
+	PlayerInputComponent->BindAction(TEXT("Cheat_IncreaseHP"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_IncreaseHP);
+	PlayerInputComponent->BindAction(TEXT("Cheat_DecreaseHP"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_DecreaseHP);
+
+	PlayerInputComponent->BindAction(TEXT("Cheat_IncreaseSnowball"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_IncreaseSnowball);
 }
 
 void AMyCharacter::UpDown(float NewAxisValue)
@@ -1026,4 +1037,33 @@ void AMyCharacter::SpawnSnowballBomb()
 			//}
 		}
 	}
+}
+
+void AMyCharacter::Cheat_Teleport1()
+{
+
+}
+void AMyCharacter::Cheat_Teleport2()
+{
+
+}
+void AMyCharacter::Cheat_Teleport3()
+{
+
+}
+void AMyCharacter::Cheat_Teleport4()
+{
+
+}
+void AMyCharacter::Cheat_IncreaseHP()
+{
+
+}
+void AMyCharacter::Cheat_DecreaseHP()
+{
+
+}
+void AMyCharacter::Cheat_IncreaseSnowball()
+{
+
 }
