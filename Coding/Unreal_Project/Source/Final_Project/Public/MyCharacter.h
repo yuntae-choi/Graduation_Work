@@ -8,7 +8,7 @@
 #include "Itembox.h"
 #include "Bonfire.h"
 #include "ClientSocket.h"
-#include "SnowballBomb.h"
+#include "SnowballBomb.h"	
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -183,6 +183,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UStaticMeshComponent* shotgunMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FVector> snowballBombDirArray;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
