@@ -75,8 +75,8 @@ void ASnowballBomb::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 		FDamageEvent DamageEvent;
 		MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
 	}
-	else
-		MYLOG(Warning, TEXT("no damage"));
+
+	if (Cast<ASnowballBomb>(OtherActor)) return;	// snowball bomb끼리 충돌 시 무시
 
 	Destroy();
 }

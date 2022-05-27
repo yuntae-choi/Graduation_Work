@@ -6,6 +6,7 @@
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
 #include "Debug.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 const int AMyCharacter::iMaxHP = 390;
@@ -29,9 +30,6 @@ FString TextureStringArray[] = {
 	TEXT("/Game/Characters/Bear/bear_texture_blue.bear_texture_blue"),
 	TEXT("/Game/Characters/Bear/bear_texture_light_gray.bear_texture_light_gray"),
 	TEXT("/Game/Characters/Bear/bear_texture_black.bear_texture_black") };
-
-
-
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -133,6 +131,11 @@ AMyCharacter::AMyCharacter()
 			//shotgunMeshComponent->AttachToComponent(GetMesh(), atr, TEXT("ShotgunSocket"));
 
 			shotgunMeshComponent->SetVisibility(false);
+
+			for (int i = 0; i < 8; ++i)
+			{
+				snowballBombDirArray.Add(FVector());
+			}
 		}
 	}
 
@@ -271,6 +274,17 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Pressed, this, &AMyCharacter::UseSelectedItem);
 
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeWeapon);
+
+	// Cheat Key
+	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport1"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport1);
+	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport2"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport2);
+	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport3"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport3);
+	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport4"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport4);
+
+	PlayerInputComponent->BindAction(TEXT("Cheat_IncreaseHP"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_IncreaseHP);
+	PlayerInputComponent->BindAction(TEXT("Cheat_DecreaseHP"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_DecreaseHP);
+
+	PlayerInputComponent->BindAction(TEXT("Cheat_IncreaseSnowball"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_IncreaseSnowball);
 }
 
 void AMyCharacter::UpDown(float NewAxisValue)
@@ -305,7 +319,6 @@ void AMyCharacter::Attack()
 		switch (iSelectedWeapon) {
 		case Weapon::Hand:
 			PlayerController->SendPlayerInfo(COMMAND_ATTACK);
-			MYLOG(Warning, TEXT("attack"));
 			isAttacking = true;
 			break;
 		case Weapon::Shotgun:
@@ -986,36 +999,90 @@ void AMyCharacter::SpawnSnowballBomb()
 
 		if (World)
 		{
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-			SpawnParams.Instigator = GetInstigator();
-
-			FTransform Muzzle1SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle1Socket"));
-			ASnowballBomb* snowballBomb1 = World->SpawnActor<ASnowballBomb>(shotgunProjectileClass, Muzzle1SocketTransform, SpawnParams);
-			FTransform Muzzle2SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle2Socket"));
-			ASnowballBomb* snowballBomb2 = World->SpawnActor<ASnowballBomb>(shotgunProjectileClass, Muzzle2SocketTransform, SpawnParams);
-			FTransform Muzzle3SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle3Socket"));
-			ASnowballBomb* snowballBomb3 = World->SpawnActor<ASnowballBomb>(shotgunProjectileClass, Muzzle3SocketTransform, SpawnParams);
-			FTransform Muzzle4SocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle4Socket"));
-			ASnowballBomb* snowballBomb4 = World->SpawnActor<ASnowballBomb>(shotgunProjectileClass, Muzzle4SocketTransform, SpawnParams);
-
-			//if (snowballBomb1->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
-			//{
-			//}
 			FVector cameraLocation;
 			FRotator cameraRotation;
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
 
-			FVector rightVec = GetActorRightVector() / 20;
+			FVector rightVec1 = GetActorRightVector() / 15;
+			FVector rightVec2 = GetActorRightVector() / 25;
+			FVector rightVec3 = GetActorRightVector() / 35;
 
-			FVector secondDir = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, 0.05f));
-			FVector thirdDir = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, -0.03f) + rightVec);
-			FVector fourthDir = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, -0.03f) - rightVec);
+			float up1 = 0.055f;
+			float up2 = 0.035f;
+			float up3 = -0.025f;
+			float up4 = -0.05f;
 
-			II_Throwable::Execute_Throw(snowballBomb1, cameraRotation.Vector());
-			II_Throwable::Execute_Throw(snowballBomb2, secondDir);
-			II_Throwable::Execute_Throw(snowballBomb3, thirdDir);
-			II_Throwable::Execute_Throw(snowballBomb4, fourthDir);
+			snowballBombDirArray[0] = cameraRotation.Vector();
+			snowballBombDirArray[1] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up1));
+			snowballBombDirArray[2] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up2) + rightVec2);
+			snowballBombDirArray[3] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up2) - rightVec2);
+			snowballBombDirArray[4] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up3) + rightVec1);
+			snowballBombDirArray[5] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up3) - rightVec1);
+			snowballBombDirArray[6] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up4) + rightVec3);
+			snowballBombDirArray[7] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up4) - rightVec3);
+
+			TArray<int> randInt;
+			// 0~7 중에서 중복없이 5개의 숫자 설정
+			while (randInt.Num() < 5)
+			{
+				int random = UKismetMathLibrary::RandomIntegerInRange(0, 7);
+				if (randInt.Find(random) == -1)
+				{
+					randInt.Add(random);
+				}
+			}
+
+
+			// 랜덤한 5개의 위치에 snowball bomb 생성 및 던지기
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+			FTransform muzzleSocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle1Socket"));
+
+			for (int i = 0; i < 5; ++i)
+			{
+				ASnowballBomb* snowballBomb = GetWorld()->SpawnActor<ASnowballBomb>(shotgunProjectileClass, muzzleSocketTransform, SpawnParams);
+
+				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[randInt[i]]);
+			}
+			
+
+			// 디버깅용 - muzzle socket 8곳에서 모두 발사
+			//for (int i = 0; i < 8; ++i)
+			//{
+			//	ASnowballBomb* snowballBomb = GetWorld()->SpawnActor<ASnowballBomb>(shotgunProjectileClass, muzzleSocketTransform, SpawnParams);
+
+			//	II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[i]);
+			//}
 		}
 	}
+}
+
+void AMyCharacter::Cheat_Teleport1()
+{
+
+}
+void AMyCharacter::Cheat_Teleport2()
+{
+
+}
+void AMyCharacter::Cheat_Teleport3()
+{
+
+}
+void AMyCharacter::Cheat_Teleport4()
+{
+
+}
+void AMyCharacter::Cheat_IncreaseHP()
+{
+
+}
+void AMyCharacter::Cheat_DecreaseHP()
+{
+
+}
+void AMyCharacter::Cheat_IncreaseSnowball()
+{
+
 }

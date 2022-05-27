@@ -8,7 +8,7 @@
 #include "Itembox.h"
 #include "Bonfire.h"
 #include "ClientSocket.h"
-#include "SnowballBomb.h"
+#include "SnowballBomb.h"	
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -86,6 +86,14 @@ public:
 	void ShowShotgun();
 	void HideShotgun();
 	void SpawnSnowballBomb();
+
+	void Cheat_Teleport1();
+	void Cheat_Teleport2();
+	void Cheat_Teleport3();
+	void Cheat_Teleport4();
+	void Cheat_IncreaseHP();
+	void Cheat_DecreaseHP();
+	void Cheat_IncreaseSnowball();
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -186,6 +194,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UStaticMeshComponent* shotgunMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FVector> snowballBombDirArray;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
