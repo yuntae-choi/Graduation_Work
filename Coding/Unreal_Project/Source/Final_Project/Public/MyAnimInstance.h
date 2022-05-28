@@ -23,6 +23,8 @@ public:
 
 	void PlayAttackMontage();
 	void PlayAttackShotgunMontage();
+	void PlayUmbrellaMontage();
+	void ResumeUmbrellaMontage();
 	void SetDead() { bIsDead = true; }
 
 	float GetDirection() const { return fCurrentPawnDirection; }
@@ -39,6 +41,13 @@ private:
 	UFUNCTION()
 	void AnimNotify_SpawnSnowballBomb();
 
+	UFUNCTION()
+	void AnimNotify_SpawnUmbrella();
+	UFUNCTION()
+	void AnimNotify_DestroyUmbrella();
+	UFUNCTION()
+	void AnimNotify_FullyOpenedUmbrella();
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	float fCurrentPawnSpeed;
@@ -54,6 +63,9 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* attackShotgunMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* umbrellaMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	bool bIsDead;

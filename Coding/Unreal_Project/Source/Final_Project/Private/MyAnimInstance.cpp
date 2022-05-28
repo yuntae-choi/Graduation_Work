@@ -21,6 +21,12 @@ UMyAnimInstance::UMyAnimInstance()
 	{
 		attackShotgunMontage = ATTACK_SHOTGUN_MONTAGE.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> UMBRELLA_MONTAGE(TEXT("/Game/Animations/Bear/BearUmbrellaMontage.BearUmbrellaMontage"));
+	if (UMBRELLA_MONTAGE.Succeeded())
+	{
+		umbrellaMontage = UMBRELLA_MONTAGE.Object;
+	}
 }
 
 void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -105,4 +111,56 @@ void UMyAnimInstance::AnimNotify_SpawnSnowballBomb()
 	if (nullptr == MyCharacter) return;
 	MyCharacter->SendSpawnSnowballBomb(); //샷건 발사 전송
 	//MyCharacter->SpawnSnowballBomb();
+}
+
+void UMyAnimInstance::PlayUmbrellaMontage()
+{
+	if (!bIsDead)
+		Montage_Play(umbrellaMontage, 1.0f);
+}
+
+void UMyAnimInstance::ResumeUmbrellaMontage()
+{
+	if (!bIsDead)
+		Montage_Resume(umbrellaMontage);
+}
+
+void UMyAnimInstance::AnimNotify_SpawnUmbrella()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
+
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	MyCharacter->ShowUmbrella();
+}
+
+void UMyAnimInstance::AnimNotify_DestroyUmbrella()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
+
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	MyCharacter->HideUmbrella();
+}
+
+void UMyAnimInstance::AnimNotify_FullyOpenedUmbrella()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
+
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	if (MyCharacter->bReleaseUmbrella)
+	{
+		MyCharacter->CloseUmbrellaAnim();
+		return;
+	}
+	
+	Montage_Pause(umbrellaMontage);
+	MyCharacter->SetUmbrellaState(UmbrellaState::UmbOpened);
 }
