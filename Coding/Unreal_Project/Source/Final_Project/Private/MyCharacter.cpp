@@ -1084,7 +1084,10 @@ void AMyCharacter::SpawnSnowballBomb()
 		{
 			FVector cameraLocation;
 			FRotator cameraRotation;
+
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+			
+		
 
 			FVector rightVec1 = GetActorRightVector() / 15;
 			FVector rightVec2 = GetActorRightVector() / 25;
@@ -1094,6 +1097,10 @@ void AMyCharacter::SpawnSnowballBomb()
 			float up2 = 0.035f;
 			float up3 = -0.025f;
 			float up4 = -0.05f;
+			
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			
+			cameraRotation.Pitch = PlayerController->GetCharactersInfo()->players[iSessionId].Pitch;
 
 			snowballBombDirArray[0] = cameraRotation.Vector();
 			snowballBombDirArray[1] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up1));
@@ -1103,6 +1110,9 @@ void AMyCharacter::SpawnSnowballBomb()
 			snowballBombDirArray[5] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up3) - rightVec1);
 			snowballBombDirArray[6] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up4) + rightVec3);
 			snowballBombDirArray[7] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up4) - rightVec3);
+
+			MYLOG(Warning, TEXT("pitch %f"), cameraRotation.Pitch);
+
 
 			//TArray<int> randInt;
 			//// 0~7 중에서 중복없이 5개의 숫자 설정
@@ -1121,8 +1131,7 @@ void AMyCharacter::SpawnSnowballBomb()
 			SpawnParams.Owner = this;
 			SpawnParams.Instigator = GetInstigator();
 			FTransform muzzleSocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle1Socket"));
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-
+			
 
 			for (int i = 0; i < 5; ++i)
 			{

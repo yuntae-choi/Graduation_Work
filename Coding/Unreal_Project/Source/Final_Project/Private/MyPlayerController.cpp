@@ -620,7 +620,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	else if (input == COMMAND_THROW)
 		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
 	else if (input == COMMAND_GUNFIRE)
-		mySocket->Send_GunFire_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
+		mySocket->Send_GunFire_Packet(iSessionId, MyCameraLocation, MyCameraRotation);
 	else if (input == COMMAND_DAMAGE)
 		mySocket->Send_DamagePacket();
 	else if (input == COMMAND_MATCH)

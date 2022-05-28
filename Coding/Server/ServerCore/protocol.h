@@ -130,7 +130,8 @@ struct cs_packet_fire {
 	unsigned char size;
 	char	type;
 	int32 s_id;
-	int32 rand_int[MAX_BULLET_RANG];
+	float pitch;
+    int32 rand_int[MAX_BULLET_RANG];
 };
 
 struct cs_packet_damage {

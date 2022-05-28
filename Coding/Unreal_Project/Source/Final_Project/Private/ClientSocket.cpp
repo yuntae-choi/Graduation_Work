@@ -135,6 +135,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		cs_packet_fire* packet = reinterpret_cast<cs_packet_fire*>(ptr);
 		for (int i = 0; i < MAX_BULLET_RANG; ++i)
 			CharactersInfo.players[packet->s_id].random_bullet[i]= packet->rand_int[i];
+		CharactersInfo.players[packet->s_id].Pitch = packet->pitch;		// Ä«¸Þ¶ó pitch
 		MyPlayerController->SetGunFire(packet->s_id);
 		break;
 	}
@@ -422,13 +423,14 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_GunFire_Packet(int s_id, FVector MyLocation, FVector MyDirection)
+void ClientSocket::Send_GunFire_Packet(int s_id, FVector MyLocation, FRotator MyRotation)
 {
 	//MYLOG(Warning, TEXT("Send_GunFire_Packet"));
 	cs_packet_fire packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_GUNFIRE;
 	packet.s_id = s_id;
+	packet.pitch = MyRotation.Pitch;
 	size_t sent = 0;
 	SendPacket(&packet);
 };

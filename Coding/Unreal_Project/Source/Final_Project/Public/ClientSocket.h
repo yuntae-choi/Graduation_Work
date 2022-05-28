@@ -250,7 +250,7 @@ public:
 
 	void Send_ChatPacket(int cheat_num);
 	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
-	void Send_GunFire_Packet(int s_id, FVector MyLocation, FVector MyDirection);
+	void Send_GunFire_Packet(int s_id, FVector MyLocation, FRotator MyRotation);
 
 	void Send_DamagePacket();
 	void Send_ItemPacket(int item_no, int destroy_obj_id);
