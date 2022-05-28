@@ -310,7 +310,6 @@ void AMyCharacter::Turn(float NewAxisValue)
 void AMyCharacter::Attack()
 {
 	if (isAttacking) return;
-	
 	if (bIsSnowman) return;
 	if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -322,8 +321,7 @@ void AMyCharacter::Attack()
 			isAttacking = true;
 			break;
 		case Weapon::Shotgun:
-			if (iCurrentSnowballCount < 4) return;	// 눈덩이가 4개 이상 없으면 공격 x
-			
+			if (iCurrentSnowballCount < 5) return;	// 눈덩이가 5개 이상 없으면 공격 x
 			PlayerController->SendPlayerInfo(COMMAND_GUNATTACK);
 			MYLOG(Warning, TEXT("gunattack"));
 			//AttackShotgun();
@@ -1021,16 +1019,16 @@ void AMyCharacter::SpawnSnowballBomb()
 			snowballBombDirArray[6] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up4) + rightVec3);
 			snowballBombDirArray[7] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up4) - rightVec3);
 
-			TArray<int> randInt;
-			// 0~7 중에서 중복없이 5개의 숫자 설정
-			while (randInt.Num() < 5)
-			{
-				int random = UKismetMathLibrary::RandomIntegerInRange(0, 7);
-				if (randInt.Find(random) == -1)
-				{
-					randInt.Add(random);
-				}
-			}
+			//TArray<int> randInt;
+			//// 0~7 중에서 중복없이 5개의 숫자 설정
+			//while (randInt.Num() < 5)
+			//{
+			//	int random = UKismetMathLibrary::RandomIntegerInRange(0, 7);
+			//	if (randInt.Find(random) == -1)
+			//	{
+			//		randInt.Add(random);
+			//	}
+			//}
 
 
 			// 랜덤한 5개의 위치에 snowball bomb 생성 및 던지기
@@ -1038,12 +1036,14 @@ void AMyCharacter::SpawnSnowballBomb()
 			SpawnParams.Owner = this;
 			SpawnParams.Instigator = GetInstigator();
 			FTransform muzzleSocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle1Socket"));
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+
 
 			for (int i = 0; i < 5; ++i)
 			{
 				ASnowballBomb* snowballBomb = GetWorld()->SpawnActor<ASnowballBomb>(shotgunProjectileClass, muzzleSocketTransform, SpawnParams);
 
-				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[randInt[i]]);
+				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[PlayerController->GetCharactersInfo()->players[iSessionId].random_bullet[i]]);
 			}
 			
 
