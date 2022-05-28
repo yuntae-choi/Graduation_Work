@@ -156,6 +156,7 @@ void AMyPlayerController::SetInitInfo(const cCharacter& me)
 	initInfo = me;
 	bInitPlayerSetting = true;
 	InitPlayerSetting();
+	
 }
 
 void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)

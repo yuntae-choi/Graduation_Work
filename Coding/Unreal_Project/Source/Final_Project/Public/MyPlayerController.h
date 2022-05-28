@@ -168,8 +168,8 @@ public:
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_GameResult FuncUpdateGameResult;
 
-public:
 	ClientSocket* mySocket;
+	bool	bInGame = false;
 private:
 	
 	cCharacter				initInfo;
@@ -190,7 +190,6 @@ private:
 
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
-	bool							bInGame = false;
 	bool							bisBone = false;
 
 	atomic<bool>                    bSetStart;
