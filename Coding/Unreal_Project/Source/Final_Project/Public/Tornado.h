@@ -6,7 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "Components/CapsuleComponent.h"
 #include "NiagaraFunctionLibrary.h"
-//#include "NiagaraComponent.h"
+#include "NiagaraComponent.h"
 #include "Tornado.generated.h"
 
 UCLASS()

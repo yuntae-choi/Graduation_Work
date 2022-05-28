@@ -10,11 +10,16 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"UMG"
+				"UMG",
+				"Niagara"
 			]
 		}
 	],
 	"Plugins": [
+		{
+			"Name": "CascadeToNiagaraConverter",
+			"Enabled": true
+		},
 		{
 			"Name": "NiagaraExtras",
 			"Enabled": true

@@ -4,6 +4,7 @@
 
 // winsock2 사용을 위해 아래 코멘트 추가
 #pragma comment(lib, "ws2_32.lib")
+#include "HoloLens/AllowWindowsPlatformAtomics.h"
 #include <winsock2.h>
 #include <mswsock.h>
 #include <ws2tcpip.h>
@@ -12,6 +13,8 @@
 #include <vector>
 #include <chrono>
 #include <mutex>
+#include "HoloLens/HideWindowsPlatformAtomics.h"
+
 #include "Final_Project.h"
 
 #define	MAX_BUFFER		4096

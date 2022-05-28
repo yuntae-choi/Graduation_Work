@@ -245,6 +245,8 @@ AMyCharacter::AMyCharacter()
 
 	iUmbrellaState = UmbrellaState::UmbClosed;
 	bReleaseUmbrella = true;
+
+	smokeNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/NS_Smoke.NS_Smoke"), nullptr, LOAD_None, nullptr);
 }
 
 // Called when the game starts or when spawned
@@ -1120,6 +1122,13 @@ void AMyCharacter::SpawnSnowballBomb()
 				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[PlayerController->GetCharactersInfo()->players[iSessionId].random_bullet[i]]);
 			}
 			
+			FVector smokeLocation = muzzleSocketTransform.GetLocation();
+			smokeLocation.Z += 100.0f;
+
+			if (smokeNiagara) {
+				UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), smokeNiagara, smokeLocation, FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+				//NiagaraComp->SetNiagaraVariableFloat(FString("StrengthCoef"), CoefStrength);
+			}
 
 			// 디버깅용 - muzzle socket 8곳에서 모두 발사
 			//for (int i = 0; i < 8; ++i)

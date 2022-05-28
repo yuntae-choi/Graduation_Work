@@ -43,6 +43,8 @@ ASnowballBomb::ASnowballBomb()
 		projectileMovementComponent->MaxSpeed = 2500.0f;
 	}
 
+	explosionNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/NS_Explosion_MV.NS_Explosion_MV"), nullptr, LOAD_None, nullptr);
+
 	iDamage = 10;
 }
 
@@ -50,7 +52,6 @@ ASnowballBomb::ASnowballBomb()
 void ASnowballBomb::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -77,6 +78,11 @@ void ASnowballBomb::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	}
 
 	if (Cast<ASnowballBomb>(OtherActor)) return;	// snowball bomb끼리 충돌 시 무시
+
+	if (explosionNiagara) {
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), explosionNiagara, GetActorLocation(), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+		//NiagaraComp->SetNiagaraVariableFloat(FString("StrengthCoef"), CoefStrength);
+	}
 
 	Destroy();
 }

@@ -2,15 +2,17 @@
 
 #pragma once
 
+#include "HoloLens/AllowWindowsPlatformAtomics.h"
 #include <thread>
 #include <atomic>
 //#include <queue>
+#include "HoloLens/HideWindowsPlatformAtomics.h"
+
 #include "Final_Project.h"
 #include "MyCharacter.h"
 #include "GameFramework/PlayerController.h"
 #include "ClientSocket.h"
 #include "Kismet/KismetMathLibrary.h"
-
 #include "MyPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HP, int32, NewHP);
@@ -116,7 +118,7 @@ private:
 	void LoadReadyUI();	// ReadyUI 띄우기, UI에 대한 입력만 허용
 	void LoadCharacterUI();	// CharacterUI 띄우기, 게임에 대한 입력 허용
 	void Reset_Items(int s_id);
-	void UpdateRotation();
+	void FixRotation();
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디

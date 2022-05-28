@@ -1,10 +1,13 @@
 #pragma once
 
+#include "HoloLens/AllowWindowsPlatformAtomics.h"
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <queue>
 #include <mutex>
+#include "HoloLens/HideWindowsPlatformAtomics.h"
+
 #include "Final_Project.h"
 #include "NetworkData.h"
 

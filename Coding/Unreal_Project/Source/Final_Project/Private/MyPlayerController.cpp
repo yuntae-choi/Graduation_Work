@@ -131,7 +131,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	SleepEx(0, true);
 
-	//UpdateRotation();	// 캐릭터 피칭(상하)제한
+	//FixRotation();	// 캐릭터 피칭(상하)제한
 }
 
 void AMyPlayerController::SetSocket()
@@ -896,7 +896,7 @@ void AMyPlayerController::CallDelegateUpdateGameResult(bool isWinner)
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected item %d"), localPlayerCharacter->iSelectedItem);
 }
 
-void AMyPlayerController::UpdateRotation()
+void AMyPlayerController::FixRotation()
 {
 	float pitch, yaw, roll;
 	UKismetMathLibrary::BreakRotator(GetControlRotation(), roll, pitch, yaw);

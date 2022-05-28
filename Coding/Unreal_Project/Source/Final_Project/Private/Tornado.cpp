@@ -24,12 +24,14 @@ ATornado::ATornado()
 	collisionComponent->OnComponentEndOverlap.AddDynamic(this, &ATornado::OnComponentEndOverlap);
 
 	//¿Ã∆Â∆Æ
-	//tornadoNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
-	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TORNADO(TEXT("/Game/FX/NS_Tornado.NS_Tornado"));
-	//if (NS_TORNADO.Succeeded())
-	//{
-	//	tornadoNiagara->SetTemplate(NS_TORNADO.Object);
-	//}
+	tornadoNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TORNADO(TEXT("/Game/FX/NS_Tornado.NS_Tornado"));
+	if (NS_TORNADO.Succeeded())
+	{
+		tornadoNiagara->SetAsset(NS_TORNADO.Object);
+		tornadoNiagara->SetRelativeLocation(FVector(0.0f, 0.0f, -300.0f));
+		tornadoNiagara->SetupAttachment(collisionComponent);
+	}
 }
 
 // Called when the game starts or when spawned

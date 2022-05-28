@@ -9,6 +9,8 @@
 #include "Bonfire.h"
 #include "ClientSocket.h"
 #include "SnowballBomb.h"	
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -226,6 +228,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UBoxComponent* umb2CollisionComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraSystem* smokeNiagara;
 
 	bool bReleaseUmbrella;
 
