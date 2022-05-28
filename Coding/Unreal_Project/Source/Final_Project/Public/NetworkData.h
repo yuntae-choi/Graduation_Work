@@ -30,6 +30,8 @@ const int32  MAX_NAME_SIZE = 20;
 const int32  MAX_CHAT_SIZE = 100;
 const int32 BUF_SIZE = 2048;
 const int32 Tornado_id = 100;
+const int32  MAX_BULLET_RANG = 8;
+
 // 소켓 통신 구조체
 
 // 패킷 정보
@@ -152,6 +154,13 @@ struct cs_packet_throw_snow {
 	int32 s_id;
 	float x, y, z;
 	float dx, dy, dz;
+};
+
+struct cs_packet_fire {
+	unsigned char size;
+	char	type;
+	int32 s_id;
+	int32 rand_int[MAX_BULLET_RANG];
 };
 
 struct cs_packet_damage {

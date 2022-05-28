@@ -124,7 +124,7 @@ public:
 	bool canAttack = false;
 	bool canSnowBall = false;
 	bool canSnowBomb = false;
-
+	int random_bullet[MAX_BULLET_RANG] = {};
 
 
 	friend ostream& operator<<(ostream& stream, cCharacter& info)

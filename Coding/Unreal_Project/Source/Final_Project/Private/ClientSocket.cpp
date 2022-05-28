@@ -132,17 +132,10 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	}
 	case SC_PACKET_GUNFIRE:
 	{
-		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
-		CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
-		CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
-		CharactersInfo.players[packet->s_id].fCz = packet->z;		// 카메라 위치
-		CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
-		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
-		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
-
-		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
+		cs_packet_fire* packet = reinterpret_cast<cs_packet_fire*>(ptr);
+		for (int i = 0; i < MAX_BULLET_RANG; ++i)
+			CharactersInfo.players[packet->s_id].random_bullet[i]= packet->rand_int[i];
 		MyPlayerController->SetGunFire(packet->s_id);
-
 		break;
 	}
 	case SC_PACKET_HP:
@@ -397,41 +390,21 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	packet.dy = MyDirection.Y;
 	packet.dz = MyDirection.Z;
 	size_t sent = 0;
-
 	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
 	SendPacket(&packet);
 };
 
 void ClientSocket::Send_GunFire_Packet(int s_id, FVector MyLocation, FVector MyDirection)
 {
-	MYLOG(Warning, TEXT("Send_GunFire_Packet"));
-	cs_packet_throw_snow packet;
+	//MYLOG(Warning, TEXT("Send_GunFire_Packet"));
+	cs_packet_fire packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_GUNFIRE;
 	packet.s_id = s_id;
-	packet.x = MyLocation.X;
-	packet.y = MyLocation.Y;
-	packet.z = MyLocation.Z;
-	packet.dx = MyDirection.X;
-	packet.dy = MyDirection.Y;
-	packet.dz = MyDirection.Z;
 	size_t sent = 0;
-
-	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
 	SendPacket(&packet);
 };
 
-
-//void ClientSocket::ReadyToSend_AttackPacket()
-//{
-//
-//	cs_packet_attack packet;
-//	packet.size = sizeof(packet);
-//	packet.type = CS_PACKET_ATTACK;
-//	//packet.s_id = iMy_s_id;
-//	size_t sent = 0;
-//	SendPacket(&packet);
-//};
 
 void ClientSocket::Send_ItemPacket(int item_type, int destroy_obj_id)
 {

@@ -15,6 +15,7 @@ const int32  MAX_OBJ = 20;
 const int32  MAX_SNOWDRIFT = 1000;
 
 const int32  MAX_ITEM = 100;
+const int32  MAX_BULLET_RANG = 8;
 
 const char CS_PACKET_LOGIN = 1;
 const char CS_PACKET_MOVE = 2;
@@ -119,6 +120,13 @@ struct cs_packet_throw_snow {
 	int32 s_id;
 	float x, y, z;
 	float dx, dy, dz;
+};
+
+struct cs_packet_fire {
+	unsigned char size;
+	char	type;
+	int32 s_id;
+	int32 rand_int[MAX_BULLET_RANG];
 };
 
 struct cs_packet_damage {

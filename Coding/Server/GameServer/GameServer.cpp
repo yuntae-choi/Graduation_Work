@@ -11,6 +11,8 @@
 
 #include <thread>
 #include <cmath>
+#include<random>
+
 
 HANDLE g_h_iocp;
 HANDLE g_timer;
@@ -32,7 +34,10 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
+using namespace std;
 
+default_random_engine dre;
+uniform_int_distribution<> uid{ 0,7 };// 범위 지정
 
 void show_err();
 int get_id();
@@ -52,6 +57,19 @@ void ev_timer();
 void send_state_change(int s_id, int target, STATE_Type stat);
 bool is_snowdrift(int obj_id);
 
+void rand_arr(int* r_arr) {
+	int cnt = 0;
+	int test[MAX_BULLET_RANG];
+	memset(test, 0, MAX_BULLET_RANG * 4);
+	while (cnt < MAX_BULLET_RANG) {
+		int32 num = uid(dre);
+		if (test[num] == 0) {
+			test[num] = 1;
+			r_arr[cnt] = num;
+			cnt++;
+		}
+	}
+}
 
 //이동
 void send_hp_packet(int _id)
@@ -932,20 +950,14 @@ void process_packet(int s_id, unsigned char* p)
 		if (cl.iCurrentSnowballCount < 4) break;
 		printf("gunfire\n");
 		cl.iCurrentSnowballCount-=5;
-		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
+		cs_packet_fire* packet = reinterpret_cast<cs_packet_fire*>(p);
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_GUNFIRE;
-			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
-
-			//printf_s("[Send throw snow]\n");
+			rand_arr(packet->rand_int);
 			other.do_send(sizeof(*packet), packet);
-			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
-
 		}
-
-
 		break;
 
 	}
