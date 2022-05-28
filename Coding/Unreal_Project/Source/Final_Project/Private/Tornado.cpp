@@ -24,7 +24,7 @@ ATornado::ATornado()
 	collisionComponent->OnComponentEndOverlap.AddDynamic(this, &ATornado::OnComponentEndOverlap);
 
 	//¿Ã∆Â∆Æ
-	tornadoNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+	//tornadoNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
 	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TORNADO(TEXT("/Game/FX/NS_Tornado.NS_Tornado"));
 	//if (NS_TORNADO.Succeeded())
 	//{
