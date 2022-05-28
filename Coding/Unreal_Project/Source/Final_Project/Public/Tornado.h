@@ -2,9 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Final_Project.h"
 #include "GameFramework/Pawn.h"
 #include "Components/CapsuleComponent.h"
+#include "NiagaraFunctionLibrary.h"
+//#include "NiagaraComponent.h"
 #include "Tornado.generated.h"
 
 UCLASS()
@@ -36,4 +38,6 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UCapsuleComponent* collisionComponent;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	class UNiagaraComponent* tornadoNiagara;
 };

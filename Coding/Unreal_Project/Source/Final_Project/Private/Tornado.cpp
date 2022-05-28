@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Tornado.h"
 #include "MyCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -23,6 +22,14 @@ ATornado::ATornado()
 
 	collisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ATornado::OnComponentBeginOverlap);
 	collisionComponent->OnComponentEndOverlap.AddDynamic(this, &ATornado::OnComponentEndOverlap);
+
+	//¿Ã∆Â∆Æ
+	//tornadoNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TORNADO(TEXT("/Game/FX/NS_Tornado.NS_Tornado"));
+	//if (NS_TORNADO.Succeeded())
+	//{
+	//	tornadoNiagara->SetTemplate(NS_TORNADO.Object);
+	//}
 }
 
 // Called when the game starts or when spawned
