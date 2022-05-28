@@ -238,12 +238,12 @@ public:
 	void Send_LoginPacket();
 	void Send_StatusPacket(STATE_Type _state, int s_id);
 
-	
+	void Send_TelePortPacket(int point_num);
 	void Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVector MyVelocity, float dir);
 	void Send_AttackPacket(int s_id);
 	void Send_GunAttackPacket(int s_id);
 
-	void Send_ChatPacket(int sessionID, float x, float y, float z);
+	void Send_ChatPacket(int cheat_num);
 	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection);
 	void Send_GunFire_Packet(int s_id, FVector MyLocation, FVector MyDirection);
 

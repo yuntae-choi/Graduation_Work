@@ -228,7 +228,8 @@ void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
 	UWorld* World = GetWorld();
 	TArray<AActor*> Snowdrifts;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), Snowdrifts);
-
+	 
+	if (obj_id == -1) return;
 	for (auto sd : Snowdrifts)
 	{
 		ASnowdrift* snowdrift = Cast<ASnowdrift>(sd);
@@ -286,6 +287,15 @@ void AMyPlayerController::SetDestroyitembox(const int obj_id)
 			}
 		}
 	
+}
+
+void AMyPlayerController::get_item(int itemType)
+{
+
+	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!player_)
+		return;
+	player_->GetItem(itemType);
 }
 
 
@@ -585,6 +595,42 @@ void AMyPlayerController::SendPlayerInfo(int input)
 		mySocket->Send_DamagePacket();
 	else if (input == COMMAND_MATCH)
 		mySocket->Send_MatchPacket();
+}
+
+void AMyPlayerController::SendTeleportInfo(int input)
+{
+	/*if (!localPlayerCharacter)
+		return;
+	
+	if (input == TEL_FIRE)
+		
+	else if (input == TEL_BRIDGE)
+		
+	else if (input == TEL_TOWER)
+		
+	else if (input == TEL_ICE)
+	*/	
+}
+
+void AMyPlayerController::SendCheatInfo(int input)
+{
+	if (!localPlayerCharacter)
+		return;
+	auto loc = localPlayerCharacter->GetActorLocation();
+	float fNewYaw = localPlayerCharacter->GetActorRotation().Yaw;		//yaw 값만 필요함
+	auto vel = localPlayerCharacter->GetVelocity();
+	FVector MyCameraLocation;
+	FRotator MyCameraRotation;
+	localPlayerCharacter->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
+	float dir = localPlayerCharacter->GetAnim()->GetDirection();
+
+	if (input == CHEAT_HP_UP)
+		mySocket->Send_ChatPacket(CHEAT_HP_UP);
+	else if (input == CHEAT_HP_DOWN)
+		mySocket->Send_ChatPacket(CHEAT_HP_DOWN);
+	else if (input == CHEAT_SNOW_PLUS)
+		mySocket->Send_ChatPacket(CHEAT_SNOW_PLUS);
+
 }
 
 //플레이어 정보 업데이트

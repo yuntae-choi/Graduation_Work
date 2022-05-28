@@ -52,12 +52,14 @@ public:
 	void SetAttack(const int s_id);
 	void SetShotGun(const int s_id);
 	void SetSocket();
+	void get_item(int itemType);
 
 	void UpdateTornado();
 
 
 	void SendPlayerInfo(int input);
-	//void SendFarming(int item_no);
+	void SendTeleportInfo(int input);
+	void SendCheatInfo(int input);
 
 	UFUNCTION(BlueprintCallable)
 	void PlayerReady();	// 컨트롤러를 소유한 플레이어가 레디하면 호출되는 함수

@@ -75,6 +75,7 @@ const char SC_PACKET_END = 18;
 const char SC_PACKET_OPEN_BOX = 19;
 const char SC_PACKET_GUNATTACK = 20;
 const char SC_PACKET_GUNFIRE = 21;
+const char SC_PACKET_TELEPORT = 22;
 
 enum COMMAND_Type
 {
@@ -85,8 +86,21 @@ enum COMMAND_Type
 	COMMAND_THROW,
 	COMMAND_GUNATTACK,
 	COMMAND_GUNFIRE
+};
 
+enum TELEPORT_Type
+{
+	TEL_FIRE = 1,
+	TEL_BRIDGE,
+	TEL_TOWER,
+	TEL_ICE
+};
 
+enum CHEAT_Type
+{
+	CHEAT_HP_UP = 1,
+	CHEAT_HP_DOWN,
+	CHEAT_SNOW_PLUS
 };
 
 enum ITEM_Type
@@ -198,15 +212,14 @@ struct cs_packet_chat {
 	unsigned char size;
 	char	type;
 	int32 s_id;
-	float x, y, z;
-	char	message[MAX_CHAT_SIZE];
+	int32 cheat_type;
 };
 
 struct cs_packet_teleport {
-	// 서버에서 장애물이 없는 랜덤 좌표로 텔레포트 시킨다.
-	// 더미 클라이언트에서 동접 테스트용으로 사용.
 	unsigned char size;
 	char	type;
+	int	    Point;
+
 };
 
 struct cs_packet_get_item {

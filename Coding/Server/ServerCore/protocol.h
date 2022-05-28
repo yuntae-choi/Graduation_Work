@@ -56,6 +56,8 @@ const char SC_PACKET_END = 18;
 const char SC_PACKET_OPEN_BOX = 19;
 const char SC_PACKET_GUNATTACK = 20;
 const char SC_PACKET_GUNFIRE = 21;
+const char SC_PACKET_TELEPORT = 22;
+
 
 #pragma pack (push, 1)
 struct cs_packet_login {
@@ -188,15 +190,14 @@ struct cs_packet_chat {
 	unsigned char size;
 	char	type;
 	int32 s_id;
-	float x, y, z;
-	char	message[MAX_CHAT_SIZE];
+	int32 cheat_type;
 };
 
+
 struct cs_packet_teleport {
-	// 서버에서 장애물이 없는 랜덤 좌표로 텔레포트 시킨다.
-	// 더미 클라이언트에서 동접 테스트용으로 사용.
 	unsigned char size;
 	char	type;
+	int	    Point;
 };
 
 struct cs_packet_match {

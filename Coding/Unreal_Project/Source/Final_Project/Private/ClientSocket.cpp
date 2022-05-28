@@ -183,19 +183,23 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		case ITEM_BAG:
 		{
+			if (MyPlayerController->iSessionId == packet->s_id) 
+				MyPlayerController->get_item(ITEM_BAG);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 			break;
 		}
 		case ITEM_UMB:
 		{
-			
+			if (MyPlayerController->iSessionId == packet->s_id)
+				MyPlayerController->get_item(ITEM_UMB);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 
 			break;
 		}
 		case ITEM_MAT:
 		{
-			
+			if (MyPlayerController->iSessionId == packet->s_id)
+				MyPlayerController->get_item(ITEM_MAT);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 
 			break;
@@ -353,7 +357,13 @@ void ClientSocket::Send_MatchPacket() {
 	//MYLOG(Warning, TEXT("[Send damage]"));
 	SendPacket(&packet);
 };
-
+void ClientSocket::Send_TelePortPacket(int point_num) {
+	cs_packet_teleport packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_TELEPORT;
+	packet.Point = point_num;
+	SendPacket(&packet);
+};
 void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVector MyVelocity, float dir)
 {
 	if (_login_ok) {
@@ -430,18 +440,13 @@ void ClientSocket::Send_OpenBoxPacket(int open_box_id)
 };
 
 
-void ClientSocket::Send_ChatPacket(int sessionID, float x, float y, float z)
+void ClientSocket::Send_ChatPacket(int cheat_num)
 {
-
-	cs_packet_chat packet;
+    cs_packet_chat packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_CHAT;
-	packet.s_id = sessionID;
-	packet.x = x;
-	packet.y = y;
-	packet.z = z;
-
-	//packet.direction = dr;
+	packet.s_id = MyPlayerController->iSessionId;
+	packet.cheat_type = cheat_num;
 	size_t sent = 0;
 	SendPacket(&packet);
 };

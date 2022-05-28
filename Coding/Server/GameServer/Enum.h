@@ -19,4 +19,21 @@ enum ITEM_STATE { STATE_EQUIP, STATE_UNEQUIP, STATE_END };
 
 enum ITEM_Type{ ITEM_MAT, ITEM_UMB, ITEM_BAG, ITEM_SNOW};
 
+
+enum TELEPORT_Type
+{
+	TEL_FIRE = 1,
+	TEL_BRIDGE,
+	TEL_TOWER,
+	TEL_ICE
+};
+
+enum CHEAT_Type
+{
+	CHEAT_HP_UP = 1,
+	CHEAT_HP_DOWN,
+	CHEAT_SNOW_PLUS
+};
+
+
 #endif // !__ENUM_H__

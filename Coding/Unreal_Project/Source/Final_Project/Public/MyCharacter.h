@@ -50,6 +50,7 @@ public:
 	void SetIsFarming(bool value) { bIsFarming = value; };
 	bool GetIsFarming() { return bIsFarming; };
 	void SetCanFarmItem(AActor* item) { farmingItem = item; };
+	bool GetItem(int itemType);
 
 	bool GetIsInsideOfBonfire() { return bIsInsideOfBonfire; };
 	void SetIsInsideOfBonfire(bool value) { bIsInsideOfBonfire = value; };
@@ -115,7 +116,7 @@ private:
 
 	void UpdateFarming(float deltaTime);
 	void UpdateHP();
-	bool GetItem(int itemType);
+	
 	bool GetIsSnowman() { return bIsSnowman; };
 	void WaitForStartGame();	// 게임 시작 후 대기
 

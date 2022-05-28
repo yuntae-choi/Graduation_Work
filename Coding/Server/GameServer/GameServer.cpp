@@ -812,10 +812,99 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_CHAT: {
 		cs_packet_chat* packet = reinterpret_cast<cs_packet_chat*>(p);
 		int p_s_id = packet->s_id;
-		float x = packet->x;
-		float y = packet->y;
-		float z = packet->z;
-		//cout << "플레이어[" << s_id << "]가  받음" << "[" << p_s_id << "] " << x << " " << y << " " << z << endl;
+		switch (packet->cheat_type)
+		{
+		case CHEAT_HP_UP:
+		{
+			cout << "플레이어 " << cl._s_id << ": 치트 1 사용 " << endl;
+			if (cl._hp + 30 > cl._max_hp)
+				cl._hp = cl._max_hp;
+			else
+				cl._hp += 30;
+			send_hp_packet(cl._s_id);
+			break;
+		}
+		case CHEAT_HP_DOWN:
+		{
+			if (cl.bIsSnowman) break;
+			cout << "플레이어 " << cl._s_id << "치트 2 사용 " << endl;
+			int current_hp = cl._hp;
+			cl._hp -= 30;
+			if (cl._hp < 270) cl._hp = 270;
+			send_hp_packet(cl._s_id);
+
+			if (current_hp == cl._max_hp && cl.is_bone == true)
+			{
+				cl._is_active = true;
+				player_heal(cl._s_id);
+			}
+
+			if (cl._hp <= cl._min_hp)
+			{
+				cl.iCurrentSnowballCount = 0;
+				cl.bIsSnowman = true;
+				sc_packet_status_change _packet;
+				_packet.size = sizeof(_packet);
+				_packet.type = SC_PACKET_STATUS_CHANGE;
+				_packet.state = ST_SNOWMAN;
+				_packet.s_id = s_id;
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					other.do_send(sizeof(_packet), &_packet);
+					//cout << "눈사람" << endl;
+					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+				}
+				int cnt = 0;
+				int target_s_id;
+				for (auto& other : clients) {
+					if (cl._s_id == other._s_id) continue;
+					if (ST_INGAME != other._state) continue;
+					if (false == other.bIsSnowman)
+					{
+						cnt++;
+						//cout << "눈덩이 cnt" << endl;
+
+						target_s_id = other._s_id;
+					}
+				}
+				if (cnt == 1) {
+					for (auto& other : clients) {
+						if (ST_INGAME != other._state)
+							continue;
+						send_game_end(target_s_id, other._s_id);
+					}
+					cout << "게임종료" << endl;
+				}
+			}
+
+			break;
+		}
+		case CHEAT_SNOW_PLUS:
+		{
+			cout << "플레이어 " << cl._s_id << "치트 3 사용 " << endl;
+
+			if (cl.iMaxSnowballCount >= cl.iCurrentSnowballCount + 5)
+				cl.iCurrentSnowballCount += 5;
+			else
+				cl.iCurrentSnowballCount = cl.iMaxSnowballCount;
+			cs_packet_get_item packet;
+			packet.size = sizeof(packet);
+			packet.type = SC_PACKET_GET_ITEM;
+			packet.s_id = cl._s_id;
+			packet.item_type = ITEM_SNOW;
+			packet.destroy_obj_id = -1;
+			packet.current_snowball = cl.iCurrentSnowballCount;
+			for (auto& other : clients) {
+				if (ST_INGAME != other._state) continue;
+				other.do_send(sizeof(packet), &packet);
+			}
+			break;
+		}
+		default:
+			break;
+		}
+		
 		break;
 
 	}
@@ -1114,6 +1203,7 @@ void process_packet(int s_id, unsigned char* p)
 		}
 		break;
 	}
+
 	default:
 		cout <<" 오류패킷타입" << packet_type << endl;
 		printf("Unknown PACKET type\n");

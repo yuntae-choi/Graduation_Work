@@ -559,18 +559,18 @@ void AMyCharacter::StartFarming()
 			break;
 		case ItemboxState::Opened:
 			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
-			if (GetItem(itembox->GetItemType())) { 
+			//if (GetItem(itembox->GetItemType())) { 
+				//MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
+
 				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
-
-
 				//아이템 파밍 시 서버 전송
 #ifdef MULTIPLAY_DEBUG
 				PlayerController->GetSocket()->Send_ItemPacket(itembox->GetItemType(), itembox->GetId());
 #endif
 
-				itembox->DeleteItem(); //서버에서 패킷받았을 때 처리
+				//itembox->DeleteItem(); //서버에서 패킷받았을 때 처리
 				//박스가 열리는 시점에서 아이템 동기화
-			}
+			//}
 			break;
 		// 아이템박스가 열리는 중이거나 비어있는 경우
 		case ItemboxState::Opening:
@@ -1060,29 +1060,61 @@ void AMyCharacter::SpawnSnowballBomb()
 
 void AMyCharacter::Cheat_Teleport1()
 {
-
+	//모닥불
+	if (iSessionId != localPlayerController->iSessionId) return;
+	FVector CharacterLocation;
+	CharacterLocation.X = -1441.876221;
+	CharacterLocation.Y = 349.000549;
+	CharacterLocation.Z = -2801.376953;
+	SetActorLocation(CharacterLocation);
+	//localPlayerController->SendTeleportInfo(TEL_FIRE);
 }
 void AMyCharacter::Cheat_Teleport2()
 {
+	//다리
+	if (iSessionId != localPlayerController->iSessionId) return;
+	FVector CharacterLocation;
+	CharacterLocation.X = 1077.395142;
+	CharacterLocation.Y = 4947.352051;
+	CharacterLocation.Z = -3300.918213;
+	SetActorLocation(CharacterLocation);
+	//localPlayerController->SendTeleportInfo(TEL_BRIDGE);
 
 }
+
 void AMyCharacter::Cheat_Teleport3()
 {
+	//탑 위(섬 앞에 탑)
+	if (iSessionId != localPlayerController->iSessionId) return;
+	FVector CharacterLocation;
+	CharacterLocation.X = -2666.638428;
+	CharacterLocation.Y = 11660.651367;
+	CharacterLocation.Z = 940.448914;
+	SetActorLocation(CharacterLocation);
+	//localPlayerController->SendTeleportInfo(TEL_TOWER);
 
 }
 void AMyCharacter::Cheat_Teleport4()
 {
+	//빙판
+	if (iSessionId != localPlayerController->iSessionId) return;
+	FVector CharacterLocation;
+	CharacterLocation.X = -7328.154785;
+	CharacterLocation.Y = -1974.412354;
+	CharacterLocation.Z = -3816.000000;
+	SetActorLocation(CharacterLocation);
+	//localPlayerController->SendCheatInfo(TEL_ICE);
 
 }
 void AMyCharacter::Cheat_IncreaseHP()
 {
-
+	localPlayerController->SendCheatInfo(CHEAT_HP_UP);
 }
 void AMyCharacter::Cheat_DecreaseHP()
 {
-
+	localPlayerController->SendCheatInfo(CHEAT_HP_DOWN);
 }
 void AMyCharacter::Cheat_IncreaseSnowball()
 {
-
+	localPlayerController->SendCheatInfo(CHEAT_SNOW_PLUS);
 }
