@@ -100,6 +100,7 @@ public:
 	void OpenUmbrellaAnim();
 	void CloseUmbrellaAnim();
 
+
 	int GetUmbrellaState() { return iUmbrellaState; };
 	void SetUmbrellaState(int umbrellaState) { iUmbrellaState = umbrellaState; };
 	void ReleaseUmbrella();

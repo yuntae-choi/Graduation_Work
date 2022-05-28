@@ -659,8 +659,8 @@ bool AMyCharacter::GetItem(int itemType)
 	
 	switch (itemType) {
 	case ItemTypeList::Match:
-		if (iCurrentMatchCount >= iMaxMatchCount) return false;	// 성냥 최대보유량을 넘어서 파밍하지 못하도록
-		iCurrentMatchCount += 1;
+		//if (iCurrentMatchCount >= iMaxMatchCount) return false;	// 성냥 최대보유량을 넘어서 파밍하지 못하도록
+		//iCurrentMatchCount += 1;
 		UpdateUI(UICategory::CurMatch);
 		return true;
 		break;
@@ -1009,19 +1009,24 @@ void AMyCharacter::UseSelectedItem()
 	case ItemTypeList::Match: {	// 성냥 아이템 사용 시
 		if (iCurrentMatchCount <= 0) return;	// 보유한 성냥이 없는 경우 리턴
 		// 체력 += 20 (체온으로는 2.0도)
-		AMyPlayerController* _PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		if (iSessionId == _PlayerController->iSessionId)
+		if (iSessionId == localPlayerController->iSessionId)
 		{
-			_PlayerController->SendPlayerInfo(COMMAND_MATCH);
+			localPlayerController->SendPlayerInfo(COMMAND_MATCH);
 		}
 		iCurrentMatchCount -= 1;
 		UpdateUI(UICategory::CurMatch);
 		break;
 	}
 	case ItemTypeList::Umbrella:	// 우산 아이템 사용 시
+		if(!bHasUmbrella) break;   // 우산 아이템이 없는 경우 리턴
+		if (iSessionId == localPlayerController->iSessionId)
+		{
+			MYLOG(Warning, TEXT("select_umb"));
+			localPlayerController->SendPlayerInfo(COMMAND_UMB_START);
+		}
+		
 		// 디버깅용 - 실제로는 주석 해제
-		//if (!bHasUmbrella) return;	// 우산 아이템이 없는 경우 리턴
-		StartUmbrella();
+		//StartUmbrella();
 		break;
 	default:
 		break;
@@ -1198,6 +1203,7 @@ void AMyCharacter::ReleaseRightMouseButton()
 {
 	switch (iSelectedItem) {
 	case ItemTypeList::Umbrella:	// 우산 사용 해제
+		MYLOG(Warning, TEXT("relese_mouse"));
 		ReleaseUmbrella();
 		break;
 	default:
@@ -1276,8 +1282,13 @@ void AMyCharacter::ReleaseUmbrella()
 	case UmbrellaState::UmbOpening:
 		break;
 	case UmbrellaState::UmbOpened:
-		myAnim->ResumeUmbrellaMontage();
-		CloseUmbrellaAnim();
+		if (iSessionId == localPlayerController->iSessionId)
+		{
+			MYLOG(Warning, TEXT("ReleaseUmbrella"));
+			localPlayerController->SendPlayerInfo(COMMAND_UMB_END);
+		}
+		//myAnim->ResumeUmbrellaMontage();
+		//CloseUmbrellaAnim();
 		break;
 	case UmbrellaState::UmbClosing:
 		break;

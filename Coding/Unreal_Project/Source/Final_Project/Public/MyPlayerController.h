@@ -51,6 +51,7 @@ public:
 	void SetOpenItembox(const int obj_id);
 	void SetAttack(const int s_id);
 	void SetShotGun(const int s_id);
+	void SetUmb(const int s_id, bool end);
 	void SetSocket();
 	void get_item(int itemType);
 
