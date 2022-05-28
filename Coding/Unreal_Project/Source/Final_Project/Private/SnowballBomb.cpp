@@ -73,8 +73,21 @@ void ASnowballBomb::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 
 	if (nullptr != MyCharacter)
 	{
-		FDamageEvent DamageEvent;
-		MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
+		// 우산과 충돌했는지 확인
+		UBoxComponent* boxCollision = Cast<UBoxComponent>(OtherComponent);
+		if (boxCollision)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("no damage, hit umbrella"));
+		}
+		else
+		{
+			FDamageEvent DamageEvent;
+			MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
+		}
+	}
+	else
+	{
+		//MYLOG(Warning, TEXT("no damage"));
 	}
 
 	if (Cast<ASnowballBomb>(OtherActor)) return;	// snowball bomb끼리 충돌 시 무시

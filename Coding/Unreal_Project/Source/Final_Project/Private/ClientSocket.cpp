@@ -263,6 +263,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
 		int attack_s_id = packet->s_id;
 		MyPlayerController->SetShotGun(attack_s_id);
+
+		break;
+	}
+	case SC_PACKET_UMB:
+	{
+		cs_packet_umb* packet = reinterpret_cast<cs_packet_umb*>(ptr);
+		MyPlayerController->SetUmb(packet->s_id, packet->end);
 		break;
 	}
 	}
@@ -357,6 +364,17 @@ void ClientSocket::Send_MatchPacket() {
 	//MYLOG(Warning, TEXT("[Send damage]"));
 	SendPacket(&packet);
 };
+
+void ClientSocket::Send_UmbPacket(bool umb_use) {
+	cs_packet_umb packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_UMB;
+	packet.s_id = MyPlayerController->iSessionId;
+	packet.end = umb_use;
+	//MYLOG(Warning, TEXT("[Send damage]"));
+	SendPacket(&packet);
+};
+
 void ClientSocket::Send_TelePortPacket(int point_num) {
 	cs_packet_teleport packet;
 	packet.size = sizeof(packet);

@@ -179,6 +179,19 @@ void AMyPlayerController::SetNewBall(const int s_id)
 	
 }
 
+void AMyPlayerController::SetUmb(const int s_id, bool end)
+{
+	UWorld* World = GetWorld();
+	if (!end) {
+		//charactersInfo->players[s_id].end_umb = true;
+		charactersInfo->players[s_id].start_umb = true;
+	}
+	else {
+		//charactersInfo->players[s_id].start_umb = true;
+		charactersInfo->players[s_id].end_umb = true;
+	}
+}
+
 void AMyPlayerController::SetAttack(const int s_id)
 {
 	UWorld* World = GetWorld();
@@ -186,6 +199,7 @@ void AMyPlayerController::SetAttack(const int s_id)
 	charactersInfo->players[s_id].canAttack = true;
 
 }
+
 void AMyPlayerController::SetShotGun(const int s_id)
 {
 	UWorld* World = GetWorld();
@@ -288,6 +302,8 @@ void AMyPlayerController::SetDestroyitembox(const int obj_id)
 		}
 	
 }
+
+
 
 void AMyPlayerController::get_item(int itemType)
 {
@@ -400,6 +416,20 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->SpawnSnowballBomb();
 			info->canSnowBomb = false;
 			info->current_snow_count-=5;
+		}
+
+		if (info->start_umb) {
+			MYLOG(Warning, TEXT("start_umb"));
+			player_->StartUmbrella();
+			info->start_umb = false;
+		}
+
+		if (info->end_umb) {
+			MYLOG(Warning, TEXT("end_umb"));
+			//player_->ReleaseUmbrella();
+			player_->GetAnim()->ResumeUmbrellaMontage();
+			player_->CloseUmbrellaAnim();
+			info->end_umb = false;
 		}
 
 		//타플레이어 구별
@@ -595,6 +625,10 @@ void AMyPlayerController::SendPlayerInfo(int input)
 		mySocket->Send_DamagePacket();
 	else if (input == COMMAND_MATCH)
 		mySocket->Send_MatchPacket();
+	else if (input == COMMAND_UMB_START)
+		mySocket->Send_UmbPacket(false);
+	else if (input == COMMAND_UMB_END)
+		mySocket->Send_UmbPacket(true);
 }
 
 void AMyPlayerController::SendTeleportInfo(int input)

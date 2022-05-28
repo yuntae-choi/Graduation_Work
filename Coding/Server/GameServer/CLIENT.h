@@ -41,8 +41,8 @@ public:
 
     int32 iMaxSnowballCount = 10;
     int32 iMaxMatchCount = 3;
-    //int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
-
+    int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
+    int32 iOriginMaxSnowballCount = 10;
     int32 iCurrentSnowballCount = 0;
     int32 iCurrentMatchCount = 0;
     bool bHasUmbrella = false;
@@ -93,6 +93,8 @@ public:
         atomic_bool is_match = false;
         atomic_bool   _is_active = false;
         int32 iMaxSnowballCount = 10;
+        int32 iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
+        int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
         int32 iMaxMatchCount = 3;
         int32 iCurrentSnowballCount = 0;
         int32 iCurrentMatchCount = 0;

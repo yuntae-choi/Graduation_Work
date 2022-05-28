@@ -33,6 +33,7 @@ const char CS_PACKET_MATCH = 13;
 const char CS_PACKET_OPEN_BOX = 14;
 const char CS_PACKET_GUNATTACK = 15;
 const char CS_PACKET_GUNFIRE = 16;
+const char CS_PACKET_UMB = 17;
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -57,6 +58,7 @@ const char SC_PACKET_OPEN_BOX = 19;
 const char SC_PACKET_GUNATTACK = 20;
 const char SC_PACKET_GUNFIRE = 21;
 const char SC_PACKET_TELEPORT = 22;
+const char SC_PACKET_UMB = 23;
 
 
 #pragma pack (push, 1)
@@ -204,7 +206,13 @@ struct cs_packet_match {
 	unsigned char size;
 	char	type;
 };
+struct cs_packet_umb {
+	unsigned char size;
+	char	type;
+	int     s_id;
+	bool    end;
 
+};
 struct sc_packet_is_bone {
 	unsigned char size;
 	char	type;

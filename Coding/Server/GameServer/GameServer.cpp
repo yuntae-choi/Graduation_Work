@@ -749,6 +749,11 @@ void process_packet(int s_id, unsigned char* p)
 		if (cl._hp <= cl._min_hp)
 		{
 			cl.iCurrentSnowballCount = 0;
+			cl.iCurrentMatchCount = 0;
+			cl.iMaxSnowballCount = cl.iOriginMaxSnowballCount;
+			cl.iMaxMatchCount = cl.iOriginMaxMatchCount;
+			cl.bHasBag = false;
+			cl.bHasUmbrella = false;
 			cl.bIsSnowman = true;
 			sc_packet_status_change _packet;
 			_packet.size = sizeof(_packet);
@@ -809,6 +814,27 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 
 	}
+	case CS_PACKET_UMB: {
+		
+		if (cl.bIsSnowman) break;
+		if (cl.bHasUmbrella)
+		{
+			cs_packet_umb* packet = reinterpret_cast<cs_packet_umb*>(p);
+			if(!packet->end)
+			    cout << "플레이어 " << cl._s_id << ": 우산 사용 " << endl;
+			else
+				cout << "플레이어 " << cl._s_id << ": 우산 접기" << endl;
+			for (auto& other : clients) {
+				if (ST_INGAME != other._state)
+					continue;
+				packet->type = SC_PACKET_UMB;
+				other.do_send(sizeof(*packet), packet);
+			}
+		}
+
+		break;
+
+	}
 	case CS_PACKET_CHAT: {
 		cs_packet_chat* packet = reinterpret_cast<cs_packet_chat*>(p);
 		int p_s_id = packet->s_id;
@@ -842,6 +868,11 @@ void process_packet(int s_id, unsigned char* p)
 			if (cl._hp <= cl._min_hp)
 			{
 				cl.iCurrentSnowballCount = 0;
+				cl.iCurrentMatchCount = 0;
+				cl.iMaxSnowballCount = cl.iOriginMaxSnowballCount;
+				cl.iMaxMatchCount = cl.iOriginMaxMatchCount;
+				cl.bHasBag = false;
+				cl.bHasUmbrella = false;
 				cl.bIsSnowman = true;
 				sc_packet_status_change _packet;
 				_packet.size = sizeof(_packet);
@@ -1339,10 +1370,15 @@ void worker_thread()
 				else if (clients[_s_id]._hp - 1 == clients[_s_id]._min_hp) 
 				{
 					//cout << "모닥불 데미지 눈사람" << endl;
+					clients[_s_id].iCurrentSnowballCount = 0;
+					clients[_s_id].iCurrentMatchCount = 0;
+					clients[_s_id].iMaxSnowballCount = clients[_s_id].iOriginMaxSnowballCount;
+					clients[_s_id].iMaxMatchCount = clients[_s_id].iOriginMaxMatchCount;
+					clients[_s_id].bHasBag = false;
+					clients[_s_id].bHasUmbrella = false;
 					clients[_s_id].bIsSnowman = true;
 					clients[_s_id]._hp -= 1;
 					send_hp_packet(_s_id);
-					clients[_s_id].iCurrentSnowballCount = 0;
 					for (auto& other : clients) {
 						if (ST_INGAME != other._state) continue;
 						send_state_change(_s_id, other._s_id, ST_SNOWMAN);

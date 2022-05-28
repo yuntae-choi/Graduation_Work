@@ -127,6 +127,8 @@ public:
 	bool canAttack = false;
 	bool canSnowBall = false;
 	bool canSnowBomb = false;
+	bool start_umb = false;
+	bool end_umb = false;
 	int random_bullet[MAX_BULLET_RANG] = {};
 
 
@@ -256,6 +258,7 @@ public:
 	void Send_ReadyPacket();
 	void Send_MatchPacket(); 
 	void Send_OpenBoxPacket(int open_box_id);
+	void Send_UmbPacket(bool umb_use);
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);
