@@ -8,6 +8,7 @@
 #include "Itembox.h"
 #include "Bonfire.h"
 #include "ClientSocket.h"
+#include "SnowballBomb.h"	
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -43,6 +44,9 @@ public:
 	void ReleaseSnowball();
 	void SendReleaseSnowball();
 
+	void SendSpawnSnowballBomb();
+
+
 	void SetIsFarming(bool value) { bIsFarming = value; };
 	bool GetIsFarming() { return bIsFarming; };
 	void SetCanFarmItem(AActor* item) { farmingItem = item; };
@@ -59,7 +63,8 @@ public:
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
-	void SnowAttack();
+	void SnowAttack();    // 일반 공격
+	void AttackShotgun(); //샷건 공격
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
@@ -81,6 +86,14 @@ public:
 	void ShowShotgun();
 	void HideShotgun();
 	void SpawnSnowballBomb();
+
+	void Cheat_Teleport1();
+	void Cheat_Teleport2();
+	void Cheat_Teleport3();
+	void Cheat_Teleport4();
+	void Cheat_IncreaseHP();
+	void Cheat_DecreaseHP();
+	void Cheat_IncreaseSnowball();
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -109,7 +122,6 @@ private:
 	void UpdateZByTornado();
 	void UpdateControllerRotateByTornado();
 
-	void AttackShotgun();
 	void ChangeWeapon();
 
 public:
@@ -183,12 +195,15 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UStaticMeshComponent* shotgunMeshComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FVector> snowballBombDirArray;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMySnowball> shotgunProjectileClass;
+	TSubclassOf<class ASnowballBomb> shotgunProjectileClass;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))

@@ -699,6 +699,21 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 
 	}
+
+	case CS_PACKET_GUNATTACK: {
+		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(p);
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state)
+				continue;
+			packet->type = SC_PACKET_GUNATTACK;
+			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+			other.do_send(sizeof(*packet), packet);
+			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+		}
+		printf("gunattack\n");
+		break;
+
+	}
 	case CS_PACKET_DAMAGE: {
 		if (cl.bIsSnowman) break;
 		//cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
@@ -900,6 +915,28 @@ void process_packet(int s_id, unsigned char* p)
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
+			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
+
+			//printf_s("[Send throw snow]\n");
+			other.do_send(sizeof(*packet), packet);
+			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+
+		}
+
+
+		break;
+
+	}
+
+	case CS_PACKET_GUNFIRE: {
+		if (cl.iCurrentSnowballCount < 4) break;
+		printf("gunfire\n");
+		cl.iCurrentSnowballCount-=5;
+		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state)
+				continue;
+			packet->type = SC_PACKET_GUNFIRE;
 			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
 
 			//printf_s("[Send throw snow]\n");
