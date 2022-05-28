@@ -190,6 +190,8 @@ AMyCharacter::AMyCharacter()
 		umb1CollisionComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 44.0f));
 
 		umb1CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		umb1CollisionComponent->BodyInstance.bNotifyRigidBodyCollision = true;
+		umb1CollisionComponent->SetUseCCD(true);
 	}
 
 	if (!umb2CollisionComponent)
@@ -201,6 +203,8 @@ AMyCharacter::AMyCharacter()
 		umb2CollisionComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 68.0f));
 
 		umb2CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		umb2CollisionComponent->BodyInstance.bNotifyRigidBodyCollision = true;
+		umb2CollisionComponent->SetUseCCD(true);
 	}
 
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
