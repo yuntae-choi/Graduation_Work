@@ -7,7 +7,7 @@
 #include "Snowdrift.h"
 #include "Debug.h"
 #include "Kismet/KismetMathLibrary.h"
-
+#include "UmbrellaAnimInstance.h"
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
@@ -139,6 +139,70 @@ AMyCharacter::AMyCharacter()
 		}
 	}
 
+	if (!umbrella1MeshComponent)
+	{
+		umbrella1MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("umbrella1MeshComponent"));
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_UMBRELLA1(TEXT("/Game/NonCharacters/umbrella1.umbrella1"));
+		if (SK_UMBRELLA1.Succeeded())
+		{
+			umbrella1MeshComponent->SetSkeletalMesh(SK_UMBRELLA1.Object);
+			umbrella1MeshComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			umbrella1MeshComponent->SetupAttachment(GetMesh(), TEXT("UmbrellaSocket"));
+			umbrella1MeshComponent->SetVisibility(false);
+		}
+	}
+
+	if (!umbrella2MeshComponent)
+	{
+		umbrella2MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("umbrella2MeshComponent"));
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_UMBRELLA2(TEXT("/Game/NonCharacters/umbrella2.umbrella2"));
+		if (SK_UMBRELLA2.Succeeded())
+		{
+			umbrella2MeshComponent->SetSkeletalMesh(SK_UMBRELLA2.Object);
+			umbrella2MeshComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			umbrella2MeshComponent->SetupAttachment(GetMesh(), TEXT("UmbrellaSocket"));
+			umbrella2MeshComponent->SetVisibility(false);
+		}
+	}
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> UMB1_ANIM(TEXT("/Game/Animations/Umbrella/Umb1AnimBP.Umb1AnimBP_C"));
+	if (UMB1_ANIM.Succeeded())
+	{
+		umbrella1Anim = UMB1_ANIM.Class;
+		umbrella1MeshComponent->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		umbrella1MeshComponent->SetAnimInstanceClass(UMB1_ANIM.Class);
+	}
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> UMB2_ANIM(TEXT("/Game/Animations/Umbrella/Umb2AnimBP.Umb2AnimBP_C"));
+	if (UMB2_ANIM.Succeeded())
+	{
+		umbrella2Anim = UMB2_ANIM.Class;
+		umbrella2MeshComponent->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		umbrella2MeshComponent->SetAnimInstanceClass(UMB2_ANIM.Class);
+	}
+
+	if (!umb1CollisionComponent)
+	{
+		umb1CollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("umb1CollisionComponent"));
+		umb1CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("BlockAll"));
+		umb1CollisionComponent->SetBoxExtent(FVector(4.0f, 4.0f, 39.0f));
+		umb1CollisionComponent->SetupAttachment(umbrella1MeshComponent);
+		umb1CollisionComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 44.0f));
+
+		umb1CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	if (!umb2CollisionComponent)
+	{
+		umb2CollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("umb2CollisionComponent"));
+		umb2CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("BlockAll"));
+		umb2CollisionComponent->SetBoxExtent(FVector(55.0f, 55.0f, 9.0f));
+		umb2CollisionComponent->SetupAttachment(umbrella2MeshComponent);
+		umb2CollisionComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 68.0f));
+
+		umb2CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
@@ -178,6 +242,9 @@ AMyCharacter::AMyCharacter()
 
 	iSelectedWeapon = Weapon::Hand;	// 실제 설정값
 	//iSelectedWeapon = Weapon::Shotgun;	// 디버깅용 - 샷건
+
+	iUmbrellaState = UmbrellaState::UmbClosed;
+	bReleaseUmbrella = true;
 }
 
 // Called when the game starts or when spawned
@@ -252,6 +319,9 @@ void AMyCharacter::PostInitializeComponents()
 	MYCHECK(nullptr != myAnim);
 
 	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
+
+	umb1AnimInst = Cast<UUmbrellaAnimInstance>(umbrella1MeshComponent->GetAnimInstance());
+	umb2AnimInst = Cast<UUmbrellaAnimInstance>(umbrella2MeshComponent->GetAnimInstance());
 }
 
 // Called to bind functionality to input
@@ -272,6 +342,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("SelectMatch"), EInputEvent::IE_Pressed, this, &AMyCharacter::SelectMatch);
 	PlayerInputComponent->BindAction(TEXT("SelectUmbrella"), EInputEvent::IE_Pressed, this, &AMyCharacter::SelectUmbrella);
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Pressed, this, &AMyCharacter::UseSelectedItem);
+	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Released, this, &AMyCharacter::ReleaseRightMouseButton);
 
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeWeapon);
 
@@ -948,6 +1019,9 @@ void AMyCharacter::UseSelectedItem()
 		break;
 	}
 	case ItemTypeList::Umbrella:	// 우산 아이템 사용 시
+		// 디버깅용 - 실제로는 주석 해제
+		//if (!bHasUmbrella) return;	// 우산 아이템이 없는 경우 리턴
+		StartUmbrella();
 		break;
 	default:
 		break;
@@ -1117,4 +1191,97 @@ void AMyCharacter::Cheat_DecreaseHP()
 void AMyCharacter::Cheat_IncreaseSnowball()
 {
 	localPlayerController->SendCheatInfo(CHEAT_SNOW_PLUS);
+
+}
+
+void AMyCharacter::ReleaseRightMouseButton()
+{
+	switch (iSelectedItem) {
+	case ItemTypeList::Umbrella:	// 우산 사용 해제
+		ReleaseUmbrella();
+		break;
+	default:
+		break;
+	}
+}
+
+void AMyCharacter::StartUmbrella()
+{
+	if (isAttacking) return;
+
+	IsAttacking = true;
+
+	myAnim->PlayUmbrellaMontage();
+
+	bReleaseUmbrella = false;
+}
+
+void AMyCharacter::ShowUmbrella()
+{
+	// 우산 메시 보이도록
+	umbrella1MeshComponent->SetVisibility(true);
+	umbrella2MeshComponent->SetVisibility(true);
+
+	// 우산 메시 콜리전 활성화
+	umb1CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	umb2CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	OpenUmbrellaAnim();		// 우산 펼치는 애니메이션
+}
+
+void AMyCharacter::HideUmbrella()
+{
+	// 우산 메시 안보이도록
+	umbrella1MeshComponent->SetVisibility(false);
+	umbrella2MeshComponent->SetVisibility(false);
+
+	// 우산 메시 콜리전 비활성화
+	umb1CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	umb2CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	umb1AnimInst->SetClose(false);
+	umb2AnimInst->SetClose(false);
+
+	iUmbrellaState = UmbrellaState::UmbClosed;
+}
+
+void AMyCharacter::OpenUmbrellaAnim()
+{
+	iUmbrellaState = UmbrellaState::UmbOpening;
+
+	// 우산 메시 애니메이션 재생 (펼치는)
+	umb1AnimInst->SetOpen(true);
+	umb2AnimInst->SetOpen(true);
+}
+
+void AMyCharacter::CloseUmbrellaAnim()
+{
+	iUmbrellaState = UmbrellaState::UmbClosing;
+
+	// 우산 메시 애니메이션 재생 (접히는)
+	umb1AnimInst->SetClose(true);
+	umb2AnimInst->SetClose(true);
+
+	umb1AnimInst->SetOpen(false);
+	umb2AnimInst->SetOpen(false);
+}
+
+void AMyCharacter::ReleaseUmbrella()
+{
+	bReleaseUmbrella = true;
+
+	switch (iUmbrellaState) {
+	case UmbrellaState::UmbClosed:
+		break;
+	case UmbrellaState::UmbOpening:
+		break;
+	case UmbrellaState::UmbOpened:
+		myAnim->ResumeUmbrellaMontage();
+		CloseUmbrellaAnim();
+		break;
+	case UmbrellaState::UmbClosing:
+		break;
+	default:
+		break;
+	}
 }

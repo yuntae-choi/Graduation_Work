@@ -24,6 +24,11 @@ enum Weapon {
 	Hand, Shotgun
 };
 
+// 후에 Umbrella 클래스 새로 제작해서 분리해야함 (임시)
+enum UmbrellaState {
+	UmbClosed, UmbOpening, UmbOpened, UmbClosing
+};
+
 UCLASS()
 class FINAL_PROJECT_API AMyCharacter : public ACharacter
 {
@@ -77,6 +82,7 @@ public:
 	void SelectMatch();
 	void SelectUmbrella();
 	void UseSelectedItem();
+	void ReleaseRightMouseButton();
 
 
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
@@ -87,6 +93,16 @@ public:
 	void ShowShotgun();
 	void HideShotgun();
 	void SpawnSnowballBomb();
+
+	void StartUmbrella();
+	void ShowUmbrella();
+	void HideUmbrella();
+	void OpenUmbrellaAnim();
+	void CloseUmbrellaAnim();
+
+	int GetUmbrellaState() { return iUmbrellaState; };
+	void SetUmbrellaState(int umbrellaState) { iUmbrellaState = umbrellaState; };
+	void ReleaseUmbrella();
 
 	void Cheat_Teleport1();
 	void Cheat_Teleport2();
@@ -199,6 +215,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FVector> snowballBombDirArray;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	USkeletalMeshComponent* umbrella1MeshComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	USkeletalMeshComponent* umbrella2MeshComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UBoxComponent* umb1CollisionComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UBoxComponent* umb2CollisionComponent;
+
+	bool bReleaseUmbrella;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
@@ -224,6 +254,18 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<class UAnimInstance> snowmanAnim;
+
+	UPROPERTY()
+	class UUmbrellaAnimInstance* umb1AnimInst;
+
+	UPROPERTY()
+	class UUmbrellaAnimInstance* umb2AnimInst;
+
+	UPROPERTY()
+	TSubclassOf<class UAnimInstance> umbrella1Anim;
+
+	UPROPERTY()
+	TSubclassOf<class UAnimInstance> umbrella2Anim;
 
 	// 캐릭터가 아이템의 트리거 안에 들어와서 현재 파밍할 수 있는 아이템
 	UPROPERTY(VisibleAnywhere, Category = Farm)
@@ -253,4 +295,6 @@ private:
 	FTimerHandle stunHandle;
 
 	bool bIsInTornado;
+
+	int32 iUmbrellaState;
 };
