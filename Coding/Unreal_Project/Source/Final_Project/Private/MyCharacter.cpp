@@ -1151,7 +1151,8 @@ void AMyCharacter::SpawnSnowballBomb()
 			}
 			
 			FVector smokeLocation = muzzleSocketTransform.GetLocation();
-			smokeLocation.Z += 100.0f;
+			smokeLocation.X += 18.0f;
+			smokeLocation.Z += 150.0f;
 
 			if (smokeNiagara) {
 				UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), smokeNiagara, smokeLocation, FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
