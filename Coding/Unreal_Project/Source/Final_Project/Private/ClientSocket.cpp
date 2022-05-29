@@ -82,7 +82,11 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_PUT_OBJECT:
 	{
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(ptr);
+		switch (packet->object_type)
+		{
 
+		case PLAYER:
+		{
 			auto info = make_shared<cCharacter>();
 			info->SessionId = packet->s_id;
 			info->X = packet->x;
@@ -91,10 +95,33 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			info->Yaw = packet->yaw;
 
 			MyPlayerController->SetNewCharacterInfo(info);
-		
-		
-		MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
+			break;
+		}
+		case ITEM_BOX:
+		{
+			break;
+		}
+		case TONARDO:
+		{
+			my_tonardo_id = packet->s_id;
+			MyPlayerController->itonardoId = packet->s_id;
+			auto info = make_shared<cCharacter>();
+			info->SessionId = packet->s_id;
+			info->X = packet->x;
+			info->Y = packet->y;
+			info->Z = packet->z;
+			info->Yaw = packet->yaw;
+
+			MyPlayerController->SetNewCharacterInfo(info);
+			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+
+			break;
+		}
+		default:
+			break;
+		}
 		break;
 	}
 

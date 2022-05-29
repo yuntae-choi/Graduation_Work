@@ -123,6 +123,8 @@ private:
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
+	int							itonardoId;			// 토네이도 아이디
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	bool bIsReady;

@@ -323,6 +323,8 @@ public:
 	bool     _stop = false;
 	bool     _login_ok =false;
 	int       my_s_id = -1;
+	int       my_tonardo_id = -1;
+
 private:
 	cCharactersInfo CharactersInfo;		// 캐릭터 정보
 

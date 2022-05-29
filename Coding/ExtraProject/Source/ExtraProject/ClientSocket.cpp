@@ -35,6 +35,9 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 	case SC_PACKET_LOGIN_OK:
 	{
+		sc_packet_login_ok* packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
+
+		my_s_id = packet->s_id;
 		_login_ok = true;
 		break;
 	}
@@ -97,7 +100,7 @@ void ClientSocket::Send_MovePacket(FVector MyLocation, FVector MyVelocity)
 		cs_packet_move packet;
 		packet.size = sizeof(packet);
 		packet.type = CS_PACKET_MOVE;
-		packet.sessionID = 100;
+		packet.sessionID = my_s_id;
 		packet.x = MyLocation.X;
 		packet.y = MyLocation.Y;
 		packet.z = MyLocation.Z;

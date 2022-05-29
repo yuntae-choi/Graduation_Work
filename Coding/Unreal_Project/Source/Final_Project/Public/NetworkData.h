@@ -119,6 +119,8 @@ enum ITEM_Type
 	ITEM_SNOW
 };
 
+enum OBJ_Type { PLAYER,ITEM_BOX, TONARDO };
+
 // ÆÐÅ¶
 
 #pragma pack (push, 1)

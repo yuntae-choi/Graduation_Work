@@ -324,9 +324,10 @@ void AMyPlayerController::InitPlayerSetting()
 
 	//컨트롤러의 회전
 	SetControlRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
-
-	localPlayerCharacter->SetCharacterMaterial(iSessionId);
-
+	if (itonardoId == 0)
+		localPlayerCharacter->SetCharacterMaterial(iSessionId - 1);
+	else
+		localPlayerCharacter->SetCharacterMaterial(iSessionId);
 	bInitPlayerSetting = false;
 }
 void AMyPlayerController::UpdateTornado()
@@ -334,12 +335,12 @@ void AMyPlayerController::UpdateTornado()
 	UWorld* World = GetWorld();
 	TArray<AActor*> SpawnedTornado;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATornado::StaticClass(), SpawnedTornado);
-
+	if (itonardoId == -1) return;
 	for (auto sd : SpawnedTornado)
 	{
 		ATornado* tornado = Cast<ATornado>(sd);
 
-		cCharacter* info = &charactersInfo->players[Tornado_id];
+		cCharacter* info = &charactersInfo->players[itonardoId];
 		FVector CharacterLocation;
 		CharacterLocation.X = info->X;
 		CharacterLocation.Y = info->Y;
@@ -358,7 +359,7 @@ void AMyPlayerController::UpdateTornado()
 		tornado->AddMovementInput(CharacterVelocity);
 		tornado->SetActorRotation(CharacterRotation);
 		tornado->SetActorLocation(CharacterLocation);
-		MYLOG(Warning, TEXT("tornado %f, %f, %f"), info->X, info->Y, info->Z);
+		//MYLOG(Warning, TEXT("tornado %f, %f, %f"), info->X, info->Y, info->Z);
 
 	}
 
@@ -542,16 +543,20 @@ void AMyPlayerController::UpdateNewPlayer()
 	SpawnParams.Instigator = GetInstigator();
 	SpawnParams.Name = FName(*FString(to_string(newplayer.get()->SessionId).c_str()));
 
-	if (newplayer.get()->SessionId != Tornado_id)
+	if (newplayer.get()->SessionId != itonardoId)
 	{
 		WhoToSpawn = AMyCharacter::StaticClass();
 		AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 		SpawnCharacter->SpawnDefaultController();
 		SpawnCharacter->iSessionId = newplayer.get()->SessionId;
-		SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
+		if(itonardoId == 0) 
+			SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId -1);
+		else
+			SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
 	}
-	else if(newplayer.get()->SessionId == Tornado_id)
+	else if(newplayer.get()->SessionId == itonardoId)
 	{
+		if (itonardoId == -1) return;
 		TornadoToSpawn = ATornado::StaticClass();
 		ATornado* SpawnTornado = World->SpawnActor<ATornado>(TornadoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 		SpawnTornado -> SpawnDefaultController();

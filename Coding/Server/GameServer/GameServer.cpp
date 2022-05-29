@@ -28,7 +28,7 @@ array <CLIENT, MAX_USER> clients;
 bool g_snow_drift[MAX_SNOWDRIFT] = {};
 bool g_item[MAX_ITEM] = {};
 bool g_start_game = false;
-
+int g_tonardo_id = -1;
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -106,10 +106,13 @@ void player_heal(int s_id)
 
 void player_damage(int s_id)
 {
-	if (false == clients[s_id].bIsSnowman) {
-		if (clients[s_id]._hp > clients[s_id]._min_hp) {
-			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);;
+	if (!clients[s_id].dot_dam) {
+		if (false == clients[s_id].bIsSnowman) {
+			if (clients[s_id]._hp > clients[s_id]._min_hp) {
+				Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);;
+			}
 		}
+		clients[s_id].dot_dam = true;
 	}
 }
 
@@ -484,6 +487,7 @@ void process_packet(int s_id, unsigned char* p)
 			// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
 			for (auto& other : clients) {
 				if (other._s_id == s_id) continue;
+				if (other._s_id == g_tonardo_id) continue;
 				other.state_lock.lock();
 				if (ST_INGAME != other._state) {
 					other.state_lock.unlock();
@@ -507,7 +511,7 @@ void process_packet(int s_id, unsigned char* p)
 				packet.y = cl.y;
 				packet.z = cl.z;
 				packet.yaw = cl.Yaw;
-
+				packet_type = PLAYER;
 				//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 				//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
 				other.do_send(sizeof(packet), &packet);
@@ -519,7 +523,7 @@ void process_packet(int s_id, unsigned char* p)
 				other.state_lock.lock();
 				
 				if (ST_INGAME != other._state) {
-					if (Tornado_id == other._s_id) {
+					if (g_tonardo_id == other._s_id) {
 						//토네이도 생성위치 보내기
 						sc_packet_put_object packet;
 						packet.s_id = other._s_id;
@@ -529,10 +533,9 @@ void process_packet(int s_id, unsigned char* p)
 						packet.y = other.y;
 						packet.z = other.z;
 						packet.yaw = 0.0f;
-
+						packet_type = TONARDO;
 						printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 						cl.do_send(sizeof(packet), &packet);
-						continue;
 					}
 					other.state_lock.unlock();
 					continue;
@@ -556,6 +559,7 @@ void process_packet(int s_id, unsigned char* p)
 				packet.y = other.y;
 				packet.z = other.z;
 				packet.yaw = other.Yaw;
+				packet_type = PLAYER;
 
 				//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 				cl.do_send(sizeof(packet), &packet);
@@ -563,7 +567,7 @@ void process_packet(int s_id, unsigned char* p)
 		}
 		else 
         {
-		    cl._s_id = 100;
+		   g_tonardo_id = cl._s_id;
 			send_login_ok_packet(s_id);
 			//cout << "토네이도" << endl;
 		}
@@ -572,7 +576,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_MOVE: {
 
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
-		if (packet->sessionID != Tornado_id) {
+		if (packet->sessionID != g_tonardo_id) {
 			CLIENT& cl = clients[packet->sessionID];
 			cl.x = packet->x;
 			cl.y = packet->y;
@@ -687,7 +691,7 @@ void process_packet(int s_id, unsigned char* p)
 					if (ST_INGAME != other._state)
 						continue;
 					cs_packet_move packet;
-					packet.sessionID = Tornado_id;
+					packet.sessionID = g_tonardo_id;
 					packet.size = sizeof(packet);
 					packet.type = SC_PACKET_MOVE;
 					packet.x = cl.x;
@@ -1113,7 +1117,7 @@ void process_packet(int s_id, unsigned char* p)
 				
 			}
 			cl._is_active = true;
-			player_damage(cl._s_id);
+			player_damage(cl._s_id);			
 			//cout << s_id << "플레이어 모닥불 밖" << endl;
 		}
 		else if (packet->state == ST_SNOWMAN)
@@ -1358,16 +1362,16 @@ void worker_thread()
 		}
 		case OP_PLAYER_DAMAGE: {
 			if (clients[_s_id].bIsSnowman) break;
-
 			if (clients[_s_id].is_bone == false) {
 				if (clients[_s_id]._hp - 1 > clients[_s_id]._min_hp) {
 					clients[_s_id]._hp -= 1;
-					player_damage(_s_id);
+					clients[_s_id].dot_dam = false;
+					player_damage(clients[_s_id]._s_id);
 					send_hp_packet(_s_id);
 					//cout << "hp -1" << endl;
 
 				}
-				else if (clients[_s_id]._hp - 1 == clients[_s_id]._min_hp) 
+				else if (clients[_s_id]._hp - 1 == clients[_s_id]._min_hp)
 				{
 					//cout << "모닥불 데미지 눈사람" << endl;
 					clients[_s_id].iCurrentSnowballCount = 0;
@@ -1382,13 +1386,13 @@ void worker_thread()
 					for (auto& other : clients) {
 						if (ST_INGAME != other._state) continue;
 						send_state_change(_s_id, other._s_id, ST_SNOWMAN);
-						
-						
+
+
 					}
 					int cnt = 0;
 					int target_s_id;
 					for (auto& other : clients) {
-						if (_s_id== other._s_id) continue;
+						if (_s_id == other._s_id) continue;
 						if (ST_INGAME != other._state) continue;
 						if (false == other.bIsSnowman)
 						{
@@ -1407,6 +1411,9 @@ void worker_thread()
 					}
 				}
 			}
+			else if (clients[_s_id].is_bone == true)
+				  clients[_s_id].dot_dam = false;
+				
 
 			delete exp_over;
 			break;

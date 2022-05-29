@@ -49,6 +49,7 @@ public:
     bool bHasBag = false;
     bool bIsSnowman = false;	// 현재 캐릭터가 눈사람인지
     bool b_ready = false;
+    atomic_bool dot_dam = false;
 
 
     unordered_set   <int>  viewlist; // 시야 안 오브젝트
