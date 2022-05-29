@@ -1051,6 +1051,8 @@ void AMyCharacter::UpdateControllerRotateByTornado()
 {
 	if (rotateCont)
 	{
+		if (!(iSessionId == localPlayerController->iSessionId)) return;
+
 		FRotator contRot = localPlayerController->GetControlRotation();
 		FRotator newContRot = FRotator(contRot.Pitch, contRot.Yaw + 5.0f, contRot.Roll);
 		localPlayerController->SetControlRotation(newContRot);
