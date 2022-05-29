@@ -677,14 +677,14 @@ void process_packet(int s_id, unsigned char* p)
 		}
 		else
 		{
+		cl.x = packet->x;
+		cl.y = packet->y;
+		cl.z = packet->z;
+		cl.VX = packet->vx;
+		cl.VY = packet->vy;
+		cl.VZ = packet->vz;
 			if (g_start_game) {
 				// cout << "토네이도 move" << endl;
-				cl.x = packet->x;
-				cl.y = packet->y;
-				cl.z = packet->z;
-				cl.VX = packet->vx;
-				cl.VY = packet->vy;
-				cl.VZ = packet->vz;
 				for (auto& other : clients) {
 					if (other._s_id == s_id)
 						continue;
