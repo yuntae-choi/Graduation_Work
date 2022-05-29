@@ -1141,6 +1141,7 @@ void AMyCharacter::SpawnSnowballBomb()
 			SpawnParams.Owner = this;
 			SpawnParams.Instigator = GetInstigator();
 			FTransform muzzleSocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle1Socket"));
+			FTransform smokeSocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("SmokeSocket"));
 			
 
 			for (int i = 0; i < 5; ++i)
@@ -1149,13 +1150,9 @@ void AMyCharacter::SpawnSnowballBomb()
 
 				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[PlayerController->GetCharactersInfo()->players[iSessionId].random_bullet[i]]);
 			}
-			
-			FVector smokeLocation = muzzleSocketTransform.GetLocation();
-			smokeLocation.X += 18.0f;
-			smokeLocation.Z += 150.0f;
 
 			if (smokeNiagara) {
-				UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), smokeNiagara, smokeLocation, FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+				UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), smokeNiagara, smokeSocketTransform.GetLocation(), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
 				//NiagaraComp->SetNiagaraVariableFloat(FString("StrengthCoef"), CoefStrength);
 			}
 
