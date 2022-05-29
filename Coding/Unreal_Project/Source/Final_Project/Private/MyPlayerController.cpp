@@ -557,6 +557,7 @@ void AMyPlayerController::UpdateNewPlayer()
 	else if(newplayer.get()->SessionId == itonardoId)
 	{
 		if (itonardoId == -1) return;
+
 		TornadoToSpawn = ATornado::StaticClass();
 		ATornado* SpawnTornado = World->SpawnActor<ATornado>(TornadoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 		SpawnTornado -> SpawnDefaultController();
