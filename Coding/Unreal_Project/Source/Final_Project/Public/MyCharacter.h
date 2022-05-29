@@ -238,6 +238,9 @@ public:
 	
 	ATornado* overlappedTornado;
 
+	UPROPERTY(VisibleAnywhere, Category = "Data")
+	class AMyPlayerController* localPlayerController;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
@@ -296,9 +299,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	APlayerController* playerController;
-
-	UPROPERTY(VisibleAnywhere, Category = "Data")
-	class AMyPlayerController* localPlayerController;
 
 	// 스턴 관리하는 타이머 핸들러
 	FTimerHandle stunHandle;

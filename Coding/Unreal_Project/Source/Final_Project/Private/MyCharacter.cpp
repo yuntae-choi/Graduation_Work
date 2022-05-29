@@ -1045,6 +1045,8 @@ void AMyCharacter::UpdateZByTornado()
 {	// 캐릭터가 토네이도 내부인 경우 z값 증가
 	if (bIsInTornado)
 	{
+		if (!(iSessionId == localPlayerController->iSessionId)) return;
+
 		LaunchCharacter(FVector(0.0f, 0.0f, 20.0f), true, false);
 
 		// 토네이도에 휩쓸린 캐릭터의 x, y값 토네이도의 x, y값으로 설정해서 같이 움직이도록

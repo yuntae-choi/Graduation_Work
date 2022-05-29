@@ -3,6 +3,7 @@
 
 #include "SpringPlatform.h"
 #include "MyCharacter.h"
+#include "MyPlayerController.h"
 
 const float fSpringScaleZInterval = 0.25f;
 const float fPlatformLocationZInterval = 12.25f;
@@ -81,10 +82,12 @@ void ASpringPlatform::OnComponentBeginOverlap(class UPrimitiveComponent* Overlap
 	{
 		iSpringPlatformState = SpringPlatformState::Increasing;	// 스프링이 늘어나도록
 
+		if (mycharacter->iSessionId != mycharacter->localPlayerController->iSessionId) return;
+		
 		float velX = mycharacter->GetVelocity().X;
 		float velY = mycharacter->GetVelocity().Y;
 		float multiple = 0.8;	// 이동하던 방향으로의 속도에 몇배의 힘으로 튀어오르게 할지
-		mycharacter->GetCharacterMovement()->AddImpulse(FVector(velX * multiple, velY * multiple, 1000.0f), true);	// 캐릭터가 튀어오르도록
+		mycharacter->GetCharacterMovement()->AddImpulse(FVector(velX * multiple, velY * multiple, 1900.0f), true);	// 캐릭터가 튀어오르도록
 
 		//FTimerHandle WaitHandle;
 		//float WaitTime = 0.2f;

@@ -3,6 +3,7 @@
 #include "Tornado.h"
 #include "MyCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "MyPlayerController.h"
 
 // Sets default values
 ATornado::ATornado()
@@ -60,6 +61,8 @@ void ATornado::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp
 	AMyCharacter* mycharacter = Cast<AMyCharacter>(OtherActor);
 	if (mycharacter)
 	{
+		if (mycharacter->iSessionId != mycharacter->localPlayerController->iSessionId) return;
+
 		mycharacter->SetIsInTornado(true);
 		mycharacter->StartStun(3.5f);
 		mycharacter->overlappedTornado = this;
@@ -71,20 +74,22 @@ void ATornado::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 	AMyCharacter* mycharacter = Cast<AMyCharacter>(OtherActor);
 	if (mycharacter)
 	{
+		if (mycharacter->iSessionId != mycharacter->localPlayerController->iSessionId) return;
+
 		mycharacter->SetIsInTornado(false);
 		mycharacter->overlappedTornado = nullptr;
 
 		float randomFloat;
 		bool randomBool;
 
-		randomFloat = UKismetMathLibrary::RandomFloatInRange(500.0f, 800.0f);
+		randomFloat = UKismetMathLibrary::RandomFloatInRange(600.0f, 1000.0f);
 		randomBool = UKismetMathLibrary::RandomBool();
 		float impulseX = UKismetMathLibrary::SelectFloat(randomFloat, -randomFloat, randomBool);
 
-		randomFloat = UKismetMathLibrary::RandomFloatInRange(500.0f, 800.0f);
+		randomFloat = UKismetMathLibrary::RandomFloatInRange(600.0f, 1000.0f);
 		randomBool = UKismetMathLibrary::RandomBool();
 		float impulseY = UKismetMathLibrary::SelectFloat(randomFloat, -randomFloat, randomBool);
 
-		mycharacter->GetCharacterMovement()->AddImpulse(FVector(impulseX, impulseY, 500.0f), true);
+		mycharacter->GetCharacterMovement()->AddImpulse(FVector(impulseX, impulseY, 1300.0f), true);
 	}
 }
