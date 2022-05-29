@@ -62,6 +62,7 @@ void ATornado::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp
 	{
 		mycharacter->SetIsInTornado(true);
 		mycharacter->StartStun(3.5f);
+		mycharacter->overlappedTornado = this;
 	}
 }
 
@@ -71,6 +72,7 @@ void ATornado::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 	if (mycharacter)
 	{
 		mycharacter->SetIsInTornado(false);
+		mycharacter->overlappedTornado = nullptr;
 
 		float randomFloat;
 		bool randomBool;

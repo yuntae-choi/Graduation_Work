@@ -85,6 +85,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 		Tornado_AI = Cast<ACharacter>(sd);
 		auto loc = Tornado_AI->GetActorLocation();
+		float fNewYaw = Tornado_AI->GetActorRotation().Yaw;		//yaw 값만 필요함
 		auto vel = Tornado_AI->GetVelocity();
 		mySocket->Send_MovePacket(loc, vel);
 

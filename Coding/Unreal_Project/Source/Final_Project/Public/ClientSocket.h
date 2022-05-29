@@ -123,10 +123,14 @@ public:
 	int current_snow_count = 0;
 	int max_snow_count = 10;
 
+	int current_match_count = 0;
+	int max_match_count = 2;
+
 	bool canShot = false;
 	bool canAttack = false;
 	bool canSnowBall = false;
 	bool canSnowBomb = false;
+	bool has_umb = false;
 	bool start_umb = false;
 	bool end_umb = false;
 	int random_bullet[MAX_BULLET_RANG] = {};
