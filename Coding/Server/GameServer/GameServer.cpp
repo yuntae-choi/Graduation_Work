@@ -106,14 +106,14 @@ void player_heal(int s_id)
 
 void player_damage(int s_id)
 {
-	if (!clients[s_id].dot_dam) {
+	//if (!clients[s_id].dot_dam) {
 		if (false == clients[s_id].bIsSnowman) {
 			if (clients[s_id]._hp > clients[s_id]._min_hp) {
 				Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);;
 			}
 		}
-		clients[s_id].dot_dam = true;
-	}
+		//clients[s_id].dot_dam = true;
+	//}
 }
 
 //플레이어 판별
@@ -1365,7 +1365,7 @@ void worker_thread()
 			if (clients[_s_id].is_bone == false) {
 				if (clients[_s_id]._hp - 1 > clients[_s_id]._min_hp) {
 					clients[_s_id]._hp -= 1;
-					clients[_s_id].dot_dam = false;
+					//clients[_s_id].dot_dam = false;
 					player_damage(clients[_s_id]._s_id);
 					send_hp_packet(_s_id);
 					//cout << "hp -1" << endl;
@@ -1412,7 +1412,7 @@ void worker_thread()
 				}
 			}
 			else if (clients[_s_id].is_bone == true)
-				  clients[_s_id].dot_dam = false;
+				  //clients[_s_id].dot_dam = false;
 				
 
 			delete exp_over;
