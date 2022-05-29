@@ -251,6 +251,8 @@ AMyCharacter::AMyCharacter()
 	bReleaseUmbrella = true;
 
 	smokeNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/NS_Smoke.NS_Smoke"), nullptr, LOAD_None, nullptr);
+
+	overlappedTornado = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -1044,6 +1046,12 @@ void AMyCharacter::UpdateZByTornado()
 	if (bIsInTornado)
 	{
 		LaunchCharacter(FVector(0.0f, 0.0f, 20.0f), true, false);
+
+		// 토네이도에 휩쓸린 캐릭터의 x, y값 토네이도의 x, y값으로 설정해서 같이 움직이도록
+		if (overlappedTornado != nullptr)
+		{
+			SetActorLocation(FVector(overlappedTornado->GetActorLocation().X, overlappedTornado->GetActorLocation().Y, GetActorLocation().Z));
+		}
 	}
 }
 

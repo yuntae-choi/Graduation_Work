@@ -11,6 +11,7 @@
 #include "SnowballBomb.h"	
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Tornado.h"
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -234,6 +235,8 @@ public:
 	UNiagaraSystem* smokeNiagara;
 
 	bool bReleaseUmbrella;
+	
+	ATornado* overlappedTornado;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
