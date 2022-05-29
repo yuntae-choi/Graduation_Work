@@ -87,7 +87,7 @@ void ASpringPlatform::OnComponentBeginOverlap(class UPrimitiveComponent* Overlap
 		float velX = mycharacter->GetVelocity().X;
 		float velY = mycharacter->GetVelocity().Y;
 		float multiple = 0.8;	// 이동하던 방향으로의 속도에 몇배의 힘으로 튀어오르게 할지
-		mycharacter->GetCharacterMovement()->AddImpulse(FVector(velX * multiple, velY * multiple, 1900.0f), true);	// 캐릭터가 튀어오르도록
+		mycharacter->GetCharacterMovement()->AddImpulse(FVector(velX * multiple, velY * multiple, 1500.0f), true);	// 캐릭터가 튀어오르도록
 
 		//FTimerHandle WaitHandle;
 		//float WaitTime = 0.2f;
