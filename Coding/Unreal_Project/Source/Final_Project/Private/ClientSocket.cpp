@@ -228,6 +228,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		{
 			if (MyPlayerController->iSessionId == packet->s_id)
 				MyPlayerController->get_item(ITEM_MAT);
+			//CharactersInfo.players[packet->s_id].current_match_count++;
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 
 			break;

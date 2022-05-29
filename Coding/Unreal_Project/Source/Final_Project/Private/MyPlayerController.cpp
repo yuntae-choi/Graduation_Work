@@ -311,7 +311,7 @@ void AMyPlayerController::get_item(int itemType)
 	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!player_)
 		return;
-	player_->GetItem(itemType);
+	//player_->GetItem(itemType);
 }
 
 
@@ -347,7 +347,7 @@ void AMyPlayerController::UpdateTornado()
 		CharacterLocation.Z = info->Z;
 
 		FRotator CharacterRotation;
-		CharacterRotation.Yaw = 0.0f;
+		CharacterRotation.Yaw = info->Yaw;
 		CharacterRotation.Pitch = 0.0f;
 		CharacterRotation.Roll = 0.0f;
 
@@ -356,8 +356,8 @@ void AMyPlayerController::UpdateTornado()
 		CharacterVelocity.Y = info->VY;
 		CharacterVelocity.Z = info->VZ;
 
-		tornado->AddMovementInput(CharacterVelocity);
-		tornado->SetActorRotation(CharacterRotation);
+		//tornado->AddMovementInput(CharacterVelocity);
+		//tornado->SetActorRotation(CharacterRotation);
 		tornado->SetActorLocation(CharacterLocation);
 		//MYLOG(Warning, TEXT("tornado %f, %f, %f"), info->X, info->Y, info->Z);
 

@@ -259,7 +259,7 @@ void AMyCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 수정 필요 - 캐릭터의 session id가 결정될 때 이 함수가 호출되도록
-	SetCharacterMaterial(iSessionId);	// 캐릭터 머티리얼 설정(색상)
+	SetCharacterMaterial(iSessionId-1);	// 캐릭터 머티리얼 설정(색상)
 
 	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
 	localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -636,8 +636,8 @@ void AMyCharacter::StartFarming()
 			break;
 		case ItemboxState::Opened:
 			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
-			//if (GetItem(itembox->GetItemType())) { 
-				//MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
+			if (GetItem(itembox->GetItemType())) { 
+				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
 
 				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
 				//아이템 파밍 시 서버 전송
@@ -647,7 +647,7 @@ void AMyCharacter::StartFarming()
 
 				//itembox->DeleteItem(); //서버에서 패킷받았을 때 처리
 				//박스가 열리는 시점에서 아이템 동기화
-			//}
+			}
 			break;
 		// 아이템박스가 열리는 중이거나 비어있는 경우
 		case ItemboxState::Opening:
@@ -665,8 +665,8 @@ bool AMyCharacter::GetItem(int itemType)
 	
 	switch (itemType) {
 	case ItemTypeList::Match:
-		//if (iCurrentMatchCount >= iMaxMatchCount) return false;	// 성냥 최대보유량을 넘어서 파밍하지 못하도록
-		//iCurrentMatchCount += 1;
+		if (iCurrentMatchCount >= iMaxMatchCount) return false;	// 성냥 최대보유량을 넘어서 파밍하지 못하도록
+		iCurrentMatchCount += 1;
 		UpdateUI(UICategory::CurMatch);
 		return true;
 		break;
@@ -914,7 +914,7 @@ void AMyCharacter::ChangeAnimal()
 	GetMesh()->SetSkeletalMesh(bear);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(bearAnim);
-	SetCharacterMaterial(iSessionId);
+	SetCharacterMaterial(iSessionId-1);
 
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);
