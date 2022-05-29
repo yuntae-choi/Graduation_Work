@@ -13,9 +13,9 @@ ATornado::ATornado()
 	if (!collisionComponent)
 	{
 		collisionComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleCollisionComponent"));
-		collisionComponent->SetCapsuleHalfHeight(250.0f);
-		collisionComponent->SetCapsuleRadius(100.0f);
-		collisionComponent->SetHiddenInGame(false);	// 디버깅용 (토네이도 범위 보이도록)
+		collisionComponent->SetCapsuleHalfHeight(600.0f);
+		collisionComponent->SetCapsuleRadius(130.0f);
+		//collisionComponent->SetHiddenInGame(false);	// 디버깅용 (토네이도 범위 보이도록)
 
 		RootComponent = collisionComponent;
 	}
@@ -29,7 +29,7 @@ ATornado::ATornado()
 	if (NS_TORNADO.Succeeded())
 	{
 		tornadoNiagara->SetAsset(NS_TORNADO.Object);
-		tornadoNiagara->SetRelativeLocation(FVector(0.0f, 0.0f, -300.0f));
+		tornadoNiagara->SetRelativeLocation(FVector(0.0f, 0.0f, -720.0f));
 		tornadoNiagara->SetupAttachment(collisionComponent);
 	}
 }
@@ -85,6 +85,6 @@ void ATornado::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 		randomBool = UKismetMathLibrary::RandomBool();
 		float impulseY = UKismetMathLibrary::SelectFloat(randomFloat, -randomFloat, randomBool);
 
-		mycharacter->GetCharacterMovement()->AddImpulse(FVector(impulseX, impulseY, 1500.0f), true);
+		mycharacter->GetCharacterMovement()->AddImpulse(FVector(impulseX, impulseY, 1000.0f), true);
 	}
 }
