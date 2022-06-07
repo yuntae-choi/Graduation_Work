@@ -801,6 +801,9 @@ void AMyCharacter::ChangeSnowman()
 	ResetHasItems();
 
 	isAttacking = false;	// 공격 도중에 상태 변할 시 발생하는 오류 방지
+
+	CloseUmbrellaAnim();
+	HideUmbrella();
 }
 
 void AMyCharacter::WaitForStartGame()
