@@ -157,7 +157,12 @@ void UMyAnimInstance::AnimNotify_FullyOpenedUmbrella()
 
 	if (MyCharacter->bReleaseUmbrella)
 	{
-		MyCharacter->CloseUmbrellaAnim();
+		if (MyCharacter->iSessionId == MyCharacter->localPlayerController->iSessionId)
+		{
+			MYLOG(Warning, TEXT("ReleaseUmbrella"));
+			MyCharacter->localPlayerController->SendPlayerInfo(COMMAND_UMB_END);
+		}
+		//MyCharacter->CloseUmbrellaAnim();
 		return;
 	}
 	
