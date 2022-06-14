@@ -16,6 +16,12 @@ UMyAnimInstance::UMyAnimInstance()
 		attackMontage = ATTACK_MONTAGE.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ATTACK2_MONTAGE(TEXT("/Game/Animations/Bear/BearThrow2Montage.BearThrow2Montage"));
+	if (ATTACK2_MONTAGE.Succeeded())
+	{
+		attack2Montage = ATTACK2_MONTAGE.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> ATTACK_SHOTGUN_MONTAGE(TEXT("/Game/Animations/Bear/BearShotgunMontage.BearShotgunMontage"));
 	if (ATTACK_SHOTGUN_MONTAGE.Succeeded())
 	{
@@ -64,6 +70,23 @@ void UMyAnimInstance::PlayAttackMontage()
 }
 
 void UMyAnimInstance::AnimNotify_SnowballRelease()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
+
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	MyCharacter->SendReleaseSnowball();
+}
+
+void UMyAnimInstance::PlayAttack2Montage()
+{
+	if (!bIsDead)
+		Montage_Play(attack2Montage, 1.0f);
+}
+
+void UMyAnimInstance::AnimNotify_SnowballRelease2()
 {
 	auto Pawn = TryGetPawnOwner();
 	if (!::IsValid(Pawn)) return;

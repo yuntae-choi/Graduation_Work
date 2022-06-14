@@ -22,6 +22,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	void PlayAttackMontage();
+	void PlayAttack2Montage();
 	void PlayAttackShotgunMontage();
 	void PlayUmbrellaMontage();
 	void ResumeUmbrellaMontage();
@@ -33,6 +34,8 @@ public:
 private:
 	UFUNCTION()
 	void AnimNotify_SnowballRelease();
+	UFUNCTION()
+	void AnimNotify_SnowballRelease2();
 
 	UFUNCTION()
 	void AnimNotify_SpawnShotgun();
@@ -60,6 +63,9 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* attackMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* attack2Montage;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* attackShotgunMontage;
