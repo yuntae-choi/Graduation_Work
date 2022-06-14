@@ -108,6 +108,8 @@ public:
 	void SetUmbrellaState(int umbrellaState) { iUmbrellaState = umbrellaState; };
 	void ReleaseUmbrella();
 
+	void GetBag();
+
 	void Cheat_Teleport1();
 	void Cheat_Teleport2();
 	void Cheat_Teleport3();
@@ -233,6 +235,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UNiagaraSystem* smokeNiagara;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* bagMeshComponent;
 
 	bool bReleaseUmbrella;
 	

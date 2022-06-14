@@ -207,6 +207,21 @@ AMyCharacter::AMyCharacter()
 		umb2CollisionComponent->SetUseCCD(true);
 	}
 
+	if (!bagMeshComponent)
+	{
+		bagMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("bagMeshComponent"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BAG(TEXT("/Game/NonCharacters/bag.bag"));
+		if (SM_BAG.Succeeded())
+		{
+			bagMeshComponent->SetStaticMesh(SM_BAG.Object);
+			bagMeshComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+
+			bagMeshComponent->SetupAttachment(GetMesh(), TEXT("BagSocket"));
+
+			bagMeshComponent->SetVisibility(false);
+		}
+	}
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
@@ -681,11 +696,7 @@ bool AMyCharacter::GetItem(int itemType)
 		break;
 	case ItemTypeList::Bag:
 		if (bHasBag) return false;	// 가방을 소유 중이면 가방 파밍 못하도록
-		bHasBag = true;
-		iMaxSnowballCount += 5;	// 눈덩이 10 -> 15 까지 보유 가능
-		iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
-		UpdateUI(UICategory::HasBag);
-		UpdateUI(UICategory::MaxSnowballAndMatch);
+		GetBag();
 		return true;
 		break;
 	default:
@@ -799,8 +810,6 @@ void AMyCharacter::ChangeSnowman()
 	
 	StartStun(fChangeSnowmanStunTime);
 
-	ResetHasItems();
-
 	isAttacking = false;	// 공격 도중에 상태 변할 시 발생하는 오류 방지
 
 	CloseUmbrellaAnim();
@@ -907,6 +916,7 @@ void AMyCharacter::ResetHasItems()
 	iMaxMatchCount = iOriginMaxMatchCount;
 	bHasUmbrella = false;
 	bHasBag = false;
+	bagMeshComponent->SetVisibility(false);
 
 
 	UpdateUI(UICategory::AllOfUI);
@@ -1331,4 +1341,15 @@ void AMyCharacter::ReleaseUmbrella()
 	default:
 		break;
 	}
+}
+
+void AMyCharacter::GetBag()
+{
+	bHasBag = true;
+	iMaxSnowballCount += 5;	// 눈덩이 10 -> 15 까지 보유 가능
+	iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
+	UpdateUI(UICategory::HasBag);
+	UpdateUI(UICategory::MaxSnowballAndMatch);
+
+	bagMeshComponent->SetVisibility(true);
 }
