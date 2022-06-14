@@ -12,7 +12,11 @@
 #include <thread>
 #include <cmath>
 #include<random>
+#include <sqlext.h>  
 
+#define UNICODE  // 우리나라는 Default니깐 굳이 안써도 됨
+#define NAME_LEN 20  
+#define PHONE_LEN 60
 
 HANDLE g_h_iocp;
 HANDLE g_timer;
@@ -56,6 +60,218 @@ void worker_thread();
 void ev_timer();
 void send_state_change(int s_id, int target, STATE_Type stat);
 bool is_snowdrift(int obj_id);
+//DB 에러 출력
+void HandleDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode)
+{
+	setlocale(LC_ALL, "korean");
+	std::wcout.imbue(std::locale("korean"));
+	SQLSMALLINT iRec = 0;
+	SQLINTEGER iError;
+	WCHAR wszMessage[1000];
+	WCHAR wszState[SQL_SQLSTATE_SIZE + 1];
+	if (RetCode == SQL_INVALID_HANDLE) {
+		fwprintf(stderr, L"Invalid handle! n");
+		return;
+	}
+
+	while (SQLGetDiagRec(hType, hHandle, ++iRec, wszState, &iError, wszMessage, (SQLSMALLINT)(sizeof(wszMessage) / sizeof(WCHAR)), (SQLSMALLINT*)NULL) == SQL_SUCCESS) {
+		// Hide data truncated..
+		if (wcsncmp(wszState, L"01004", 5)) {
+			wprintf(L"[%s] : ", wszState);
+			wprintf(L"%s", wszMessage);
+			wprintf(L" - %d\n", iError);
+		}
+	}
+}
+
+//플레이어 데이터 받아오기
+bool DB_odbc(int id, char* name, char* pw)
+{
+	SQLHENV henv;
+	SQLHDBC hdbc;
+	SQLHSTMT hstmt = 0;
+	SQLRETURN retcode;
+	cout << name << endl;
+	cout << pw << endl;
+
+	char temp[BUFSIZE];
+	sprintf_s(temp, sizeof(temp), "EXEC login_player %s, %s", name, pw);
+	wchar_t* exec;
+	int str_size = MultiByteToWideChar(CP_ACP, 0, temp, -1, NULL, NULL);
+	exec = new WCHAR[str_size];
+	MultiByteToWideChar(CP_ACP, 0, temp, sizeof(temp) + 1, exec, str_size);
+
+	SQLINTEGER p_x;
+	SQLINTEGER p_y;
+	SQLINTEGER p_m_hp;
+	SQLINTEGER p_hp;
+
+	SQLWCHAR p_id[NAME_LEN];
+	SQLLEN cbP_ID = 0, cbP_X = 0, cbP_Y = 0, cbP_MAX_HP = 0, cbP_HP = 0,
+		cbP_MAX_EXP = 0, cbP_EXP = 0, cbP_LEVEL = 0, cbP_ATK = 0, cbP_DEF = 0, cbP_JOB_NUM = 0, cbP_GOLD = 0;
+
+	retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
+
+	// Set the ODBC version environment attribute  
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0);
+
+	
+		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+			retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
+
+			
+			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+				SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
+
+				
+				retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2021_Class_ODBC", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
+
+			
+				if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+					cout << "ODBC Connection Success" << endl;
+					retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+					retcode = SQLExecDirect(hstmt, (SQLWCHAR*)exec, SQL_NTS);
+					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+					
+						retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, p_id, NAME_LEN, &cbP_ID);
+						retcode = SQLBindCol(hstmt, 2, SQL_C_LONG, &p_x, 100, &cbP_X);
+						retcode = SQLBindCol(hstmt, 3, SQL_C_LONG, &p_y, 100, &cbP_Y);
+						retcode = SQLBindCol(hstmt, 4, SQL_C_LONG, &p_m_hp, 100, &cbP_MAX_HP);
+						retcode = SQLBindCol(hstmt, 5, SQL_C_LONG, &p_hp, 100, &cbP_HP);
+					  
+						for (int i = 0; ; i++) {
+							retcode = SQLFetch(hstmt);
+							if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+								show_err();
+							if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+							{
+								if (p_id != 0) {
+									strcpy_s(clients[id].name, name);
+									clients[id].x = p_x;
+									clients[id].y = p_y;
+									printf("%d: %ls %d %d\n", i + 1, p_id, p_x, p_y);
+									return true;
+								}
+								else
+								{
+									return false;
+								}
+							}
+							else
+								break;
+						}
+					}
+
+					// Process data  
+					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+						SQLCancel(hstmt);
+						SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+					}
+
+					SQLDisconnect(hdbc);
+				}
+				else cout << "ODBC Connected Failed" << endl;
+				SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+			}
+		}
+		SQLFreeHandle(SQL_HANDLE_ENV, henv);
+	}
+
+	return false;
+}
+
+//플레이어 데이터 저장
+bool DB_save(int id)
+{
+	SQLHENV henv;
+	SQLHDBC hdbc;
+	SQLHSTMT hstmt = 0;
+	SQLRETURN retcode;
+
+	char temp[BUFSIZE];
+	sprintf_s(temp, sizeof(temp), "EXEC select_save %d,%d,%s", clients[id]._max_hp, clients[id]._hp,  clients[id].name);
+	wchar_t* exec;
+	int str_size = MultiByteToWideChar(CP_ACP, 0, temp, -1, NULL, NULL);
+	exec = new WCHAR[str_size];
+	MultiByteToWideChar(CP_ACP, 0, temp, sizeof(temp) + 1, exec, str_size);
+	cout << temp << endl;
+
+	SQLINTEGER p_x;
+	SQLINTEGER p_y;
+	SQLWCHAR p_id[NAME_LEN];
+	SQLLEN cbP_ID = 0, cbP_X = 0, cbP_Y = 0;
+	// Allocate environment handle  
+	retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
+
+	// Set the ODBC version environment attribute  
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0);
+
+		// Allocate connection handle  
+		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+			retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
+
+			// Set login timeout to 5 seconds  
+			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+				SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
+
+				// Connect to data source  
+				retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2021_Class_ODBC", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
+
+				// Allocate statement handle  
+				if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+					cout << "ODBC Connection Success" << endl;
+					retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+					retcode = SQLExecDirect(hstmt, (SQLWCHAR*)exec, SQL_NTS);
+					HandleDiagnosticRecord(hstmt, SQL_HANDLE_STMT, retcode);
+					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+						//// Bind columns 1, 2, and 3  
+						//retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, p_id, NAME_LEN, &cbP_ID);
+						//retcode = SQLBindCol(hstmt, 2, SQL_C_LONG, &p_x, 100, &cbP_X);
+						//retcode = SQLBindCol(hstmt, 3, SQL_C_LONG, &p_y, 100, &cbP_Y);
+
+
+						// Fetch and print each row of data. On an error, display a message and exit.  
+						for (int i = 0; ; i++) {
+							retcode = SQLFetch(hstmt);
+							if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+								show_err();
+							if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+							{
+								//replace wprintf with printf
+								//%S with %ls
+								//warning C4477: 'wprintf' : format string '%S' requires an argument of type 'char *'
+								//but variadic argument 2 has type 'SQLWCHAR *'
+								//wprintf(L"%d: %S %S %S\n", i + 1, sCustID, szName, szPhone);
+								//strcpy_s(clients[id].name, (char*)p_id);
+
+								return true;
+							}
+							else
+								break;
+						}
+					}
+
+					// Process data  
+					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+						SQLCancel(hstmt);
+						SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+					}
+
+					SQLDisconnect(hdbc);
+				}
+				else cout << "ODBC Connected Failed" << endl;
+				SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+			}
+		}
+		SQLFreeHandle(SQL_HANDLE_ENV, henv);
+	}
+
+	return false;
+}
 
 void rand_arr(int* r_arr) {
 	int cnt = 0;
