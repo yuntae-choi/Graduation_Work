@@ -72,6 +72,7 @@ public:
 	void EndStun(float waitTime);
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
+	void ReleaseAttack();
 	void SnowAttack();    // 일반 공격
 	void AttackShotgun(); //샷건 공격
 	void ChangeSnowman();

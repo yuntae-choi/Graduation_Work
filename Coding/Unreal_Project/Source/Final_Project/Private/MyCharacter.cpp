@@ -359,6 +359,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AMyCharacter::Attack);
+	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Released, this, &AMyCharacter::ReleaseAttack);
 	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Pressed, this, &AMyCharacter::StartFarming);
 	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Released, this, &AMyCharacter::EndFarming);
 
@@ -428,6 +429,19 @@ void AMyCharacter::Attack()
 #ifdef SINGLEPLAY_DEBUG
 	SnowAttack();
 #endif
+}
+
+void AMyCharacter::ReleaseAttack()
+{
+	if (myAnim->bThrowing)
+	{
+		myAnim->PlayAttack2MontageSectionEnd();
+	}
+	else
+	{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
+		StopAnimMontage();
+		snowball->Destroy();
+	}
 }
 
 void AMyCharacter::SnowAttack()
