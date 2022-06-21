@@ -12,6 +12,8 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Tornado.h"
+#include "Components/SplineComponent.h"
+#include "Components/SplineMeshComponent.h"
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -66,15 +68,20 @@ public:
 	void UpdateSpeed();
 	int GetCharacterState() { return iCharacterState; };
 	bool IsSnowman() { return bIsSnowman; };
+
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void StartStun(float waitTime);
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void EndStun(float waitTime);
+
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
 	void ReleaseAttack();
 	void SnowAttack();    // 일반 공격
 	void AttackShotgun(); //샷건 공격
+	void ShowProjectilePath();
+	void HideProjectilePath();
+
 	void ChangeSnowman();
 	void ChangeAnimal();	// 캐릭터를 동물화 (부활)
 	void SetCharacterMaterial(int Id = 0);	// 캐릭터 색상 설정, 동물->눈사람 머티리얼 변경
@@ -312,4 +319,7 @@ private:
 	bool bIsInTornado;
 
 	int32 iUmbrellaState;
+
+	USplineComponent* projectilePath;
+	TArray<USplineMeshComponent*> splineMeshComponents;
 };

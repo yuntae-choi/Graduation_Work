@@ -31,6 +31,13 @@ FString TextureStringArray[] = {
 	TEXT("/Game/Characters/Bear/bear_texture_light_gray.bear_texture_light_gray"),
 	TEXT("/Game/Characters/Bear/bear_texture_black.bear_texture_black") };
 
+const int iNumOfPathSpline = 15;
+FString SplineStringArray[] = {
+	TEXT("spline1"), TEXT("spline2"),TEXT("spline3"),TEXT("spline4"),TEXT("spline5"),TEXT("spline6"), TEXT("spline7"),
+	TEXT("spline8"),TEXT("spline9"),TEXT("spline10"),TEXT("spline11"),TEXT("spline12"), TEXT("spline13"),TEXT("spline14"),
+	TEXT("spline15"), TEXT("spline16"),TEXT("spline17"),TEXT("spline18"),TEXT("spline19"), TEXT("spline20"),TEXT("spline21")
+};
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -220,6 +227,22 @@ AMyCharacter::AMyCharacter()
 
 			bagMeshComponent->SetVisibility(false);
 		}
+	}
+
+	if (!projectilePath)
+	{
+		projectilePath = CreateDefaultSubobject<USplineComponent>(TEXT("ProjectilePath"));
+		projectilePath->SetupAttachment(GetMesh());
+	}
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_Spline(TEXT("/Game/NonCharacters/Spline_SM.Spline_SM"));
+
+	for (int i = 0; i < iNumOfPathSpline; ++i)
+	{
+		USplineMeshComponent* splineMesh = CreateDefaultSubobject<USplineMeshComponent>(*(SplineStringArray[i]));
+		splineMesh->SetStaticMesh(SM_Spline.Object);
+		splineMesh->SetVisibility(false);
+		splineMeshComponents.Add(splineMesh);
 	}
 
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
@@ -1366,4 +1389,69 @@ void AMyCharacter::GetBag()
 	UpdateUI(UICategory::MaxSnowballAndMatch);
 
 	bagMeshComponent->SetVisibility(true);
+}
+
+void AMyCharacter::ShowProjectilePath()
+{
+	projectilePath->ClearSplinePoints();
+	HideProjectilePath();
+
+	if (myAnim->bThrowing)
+	{
+		FHitResult OutHitResult;	// 사용 x
+		TArray<FVector> OutPathPositions;
+		FVector OutLastTraceDestination;	// 사용 x
+
+		FVector StartPos = GetMesh()->GetSocketLocation(TEXT("SnowballSocket"));
+		FVector cameraLocation;
+		FRotator cameraRotation;
+		GetActorEyesViewPoint(cameraLocation, cameraRotation);
+		FVector LaunchVelocity = (cameraRotation.Vector() + FVector(0.0f, 0.0f, 0.15f)) * 2500.0f;
+		// bool bTracePath, float ProjectileRadius, TEnumAsByte<ECollisionChannel> TraceChannel, bool bTraceComplex,
+		TArray<AActor*> actorsToIgnore;
+		actorsToIgnore.Add(this);
+		//EDrawDebugTrace::Type DrawDebugType
+
+		// float DrawDebugTime, float SimFrequency, float MaxSimTime, float OverrideGravityZ;
+
+		UGameplayStatics::Blueprint_PredictProjectilePath_ByTraceChannel(GetWorld(), OutHitResult, OutPathPositions, OutLastTraceDestination,
+			StartPos, LaunchVelocity, true, 0.0f, ECollisionChannel::ECC_Camera, false, actorsToIgnore, EDrawDebugTrace::None,
+			0.0f, 15.0f, 2.0f, 0.0f);
+
+		for (int i = 0; i < OutPathPositions.Num(); ++i)
+		{
+			projectilePath->AddSplinePointAtIndex(OutPathPositions[i], i, ESplineCoordinateSpace::Local);
+		}
+
+		int lastIndex = projectilePath->GetNumberOfSplinePoints() - 1;
+		if (lastIndex > iNumOfPathSpline - 1) lastIndex = iNumOfPathSpline - 1;
+
+		for (int i = 0; i < lastIndex; ++i)
+		{
+			FVector startPos, startTangent, endPos, endTangent;
+			startPos = projectilePath->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
+			startTangent = projectilePath->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::Local);
+			endPos = projectilePath->GetLocationAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
+			endTangent = projectilePath->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
+
+			splineMeshComponents[i]->SetStartAndEnd(startPos, startTangent, endPos, endTangent);
+			splineMeshComponents[i]->SetVisibility(true);
+		}
+
+		//Delay 함수
+		FTimerHandle WaitHandle;
+		float WaitTime = GetWorld()->GetDeltaSeconds();
+		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+			{
+				ShowProjectilePath();
+			}), WaitTime, false);
+	}
+}
+
+void AMyCharacter::HideProjectilePath()
+{
+	for (int i = 0; i < iNumOfPathSpline; ++i)
+	{
+		splineMeshComponents[i]->SetVisibility(false);
+	}
 }
