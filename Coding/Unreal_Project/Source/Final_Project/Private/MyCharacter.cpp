@@ -236,13 +236,24 @@ AMyCharacter::AMyCharacter()
 	}
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_Spline(TEXT("/Game/NonCharacters/Spline_SM.Spline_SM"));
-
-	for (int i = 0; i < iNumOfPathSpline; ++i)
+	if (SM_Spline.Succeeded())
 	{
-		USplineMeshComponent* splineMesh = CreateDefaultSubobject<USplineMeshComponent>(*(SplineStringArray[i]));
-		splineMesh->SetStaticMesh(SM_Spline.Object);
-		splineMesh->SetVisibility(false);
-		splineMeshComponents.Add(splineMesh);
+		for (int i = 0; i < iNumOfPathSpline; ++i)
+		{
+			USplineMeshComponent* splineMesh = CreateDefaultSubobject<USplineMeshComponent>(*(SplineStringArray[i]));
+			splineMesh->SetStaticMesh(SM_Spline.Object);
+			splineMesh->SetVisibility(false);
+			splineMesh->bOnlyOwnerSee = true;	// 해당 플레이어만 궤적이 보이도록
+			splineMesh->SetCastShadow(false);	// 궤적의 그림자 안보이도록
+			splineMeshComponents.Add(splineMesh);
+		}
+	}
+
+	if (!projectilePathStartPos)
+	{
+		projectilePathStartPos = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectilePathStartPos"));
+		projectilePathStartPos->SetupAttachment(GetMesh());
+		projectilePathStartPos->SetRelativeLocation(FVector(-32.0f, 38.012852f, 116.264641f));
 	}
 
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
@@ -1402,7 +1413,8 @@ void AMyCharacter::ShowProjectilePath()
 		TArray<FVector> OutPathPositions;
 		FVector OutLastTraceDestination;	// 사용 x
 
-		FVector StartPos = GetMesh()->GetSocketLocation(TEXT("SnowballSocket"));
+		//FVector StartPos = GetMesh()->GetSocketLocation(TEXT("SnowballSocket"));
+		FVector StartPos = projectilePathStartPos->GetComponentLocation();
 		FVector cameraLocation;
 		FRotator cameraRotation;
 		GetActorEyesViewPoint(cameraLocation, cameraRotation);

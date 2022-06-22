@@ -322,4 +322,5 @@ private:
 
 	USplineComponent* projectilePath;
 	TArray<USplineMeshComponent*> splineMeshComponents;
+	USceneComponent* projectilePathStartPos;
 };
