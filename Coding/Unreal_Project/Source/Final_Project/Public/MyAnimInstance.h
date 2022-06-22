@@ -23,6 +23,7 @@ public:
 
 	void PlayAttackMontage();
 	void PlayAttack2Montage();
+	void PlayAttack2MontageSectionEnd();
 	void PlayAttackShotgunMontage();
 	void PlayUmbrellaMontage();
 	void ResumeUmbrellaMontage();
@@ -36,6 +37,8 @@ private:
 	void AnimNotify_SnowballRelease();
 	UFUNCTION()
 	void AnimNotify_SnowballRelease2();
+	UFUNCTION()
+	void AnimNotify_StopThrow();
 
 	UFUNCTION()
 	void AnimNotify_SpawnShotgun();
@@ -50,6 +53,10 @@ private:
 	void AnimNotify_DestroyUmbrella();
 	UFUNCTION()
 	void AnimNotify_FullyOpenedUmbrella();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Throw, Meta = (AllowPrivateAccess = true))
+	bool bThrowing;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))

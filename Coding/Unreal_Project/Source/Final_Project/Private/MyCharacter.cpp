@@ -31,6 +31,13 @@ FString TextureStringArray[] = {
 	TEXT("/Game/Characters/Bear/bear_texture_light_gray.bear_texture_light_gray"),
 	TEXT("/Game/Characters/Bear/bear_texture_black.bear_texture_black") };
 
+const int iNumOfPathSpline = 15;
+FString SplineStringArray[] = {
+	TEXT("spline1"), TEXT("spline2"),TEXT("spline3"),TEXT("spline4"),TEXT("spline5"),TEXT("spline6"), TEXT("spline7"),
+	TEXT("spline8"),TEXT("spline9"),TEXT("spline10"),TEXT("spline11"),TEXT("spline12"), TEXT("spline13"),TEXT("spline14"),
+	TEXT("spline15"), TEXT("spline16"),TEXT("spline17"),TEXT("spline18"),TEXT("spline19"), TEXT("spline20"),TEXT("spline21")
+};
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -222,6 +229,33 @@ AMyCharacter::AMyCharacter()
 		}
 	}
 
+	if (!projectilePath)
+	{
+		projectilePath = CreateDefaultSubobject<USplineComponent>(TEXT("ProjectilePath"));
+		projectilePath->SetupAttachment(GetMesh());
+	}
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_Spline(TEXT("/Game/NonCharacters/Spline_SM.Spline_SM"));
+	if (SM_Spline.Succeeded())
+	{
+		for (int i = 0; i < iNumOfPathSpline; ++i)
+		{
+			USplineMeshComponent* splineMesh = CreateDefaultSubobject<USplineMeshComponent>(*(SplineStringArray[i]));
+			splineMesh->SetStaticMesh(SM_Spline.Object);
+			splineMesh->SetVisibility(false);
+			splineMesh->bOnlyOwnerSee = true;	// 해당 플레이어만 궤적이 보이도록
+			splineMesh->SetCastShadow(false);	// 궤적의 그림자 안보이도록
+			splineMeshComponents.Add(splineMesh);
+		}
+	}
+
+	if (!projectilePathStartPos)
+	{
+		projectilePathStartPos = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectilePathStartPos"));
+		projectilePathStartPos->SetupAttachment(GetMesh());
+		projectilePathStartPos->SetRelativeLocation(FVector(-32.0f, 38.012852f, 116.264641f));
+	}
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
@@ -359,6 +393,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AMyCharacter::Attack);
+	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Released, this, &AMyCharacter::ReleaseAttack);
 	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Pressed, this, &AMyCharacter::StartFarming);
 	PlayerInputComponent->BindAction(TEXT("Farming"), EInputEvent::IE_Released, this, &AMyCharacter::EndFarming);
 
@@ -428,6 +463,19 @@ void AMyCharacter::Attack()
 #ifdef SINGLEPLAY_DEBUG
 	SnowAttack();
 #endif
+}
+
+void AMyCharacter::ReleaseAttack()
+{
+	if (myAnim->bThrowing)
+	{
+		myAnim->PlayAttack2MontageSectionEnd();
+	}
+	else
+	{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
+		StopAnimMontage();
+		snowball->Destroy();
+	}
 }
 
 void AMyCharacter::SnowAttack()
@@ -1352,4 +1400,70 @@ void AMyCharacter::GetBag()
 	UpdateUI(UICategory::MaxSnowballAndMatch);
 
 	bagMeshComponent->SetVisibility(true);
+}
+
+void AMyCharacter::ShowProjectilePath()
+{
+	projectilePath->ClearSplinePoints();
+	HideProjectilePath();
+
+	if (myAnim->bThrowing)
+	{
+		FHitResult OutHitResult;	// 사용 x
+		TArray<FVector> OutPathPositions;
+		FVector OutLastTraceDestination;	// 사용 x
+
+		//FVector StartPos = GetMesh()->GetSocketLocation(TEXT("SnowballSocket"));
+		FVector StartPos = projectilePathStartPos->GetComponentLocation();
+		FVector cameraLocation;
+		FRotator cameraRotation;
+		GetActorEyesViewPoint(cameraLocation, cameraRotation);
+		FVector LaunchVelocity = (cameraRotation.Vector() + FVector(0.0f, 0.0f, 0.15f)) * 2500.0f;
+		// bool bTracePath, float ProjectileRadius, TEnumAsByte<ECollisionChannel> TraceChannel, bool bTraceComplex,
+		TArray<AActor*> actorsToIgnore;
+		actorsToIgnore.Add(this);
+		//EDrawDebugTrace::Type DrawDebugType
+
+		// float DrawDebugTime, float SimFrequency, float MaxSimTime, float OverrideGravityZ;
+
+		UGameplayStatics::Blueprint_PredictProjectilePath_ByTraceChannel(GetWorld(), OutHitResult, OutPathPositions, OutLastTraceDestination,
+			StartPos, LaunchVelocity, true, 0.0f, ECollisionChannel::ECC_Camera, false, actorsToIgnore, EDrawDebugTrace::None,
+			0.0f, 15.0f, 2.0f, 0.0f);
+
+		for (int i = 0; i < OutPathPositions.Num(); ++i)
+		{
+			projectilePath->AddSplinePointAtIndex(OutPathPositions[i], i, ESplineCoordinateSpace::Local);
+		}
+
+		int lastIndex = projectilePath->GetNumberOfSplinePoints() - 1;
+		if (lastIndex > iNumOfPathSpline - 1) lastIndex = iNumOfPathSpline - 1;
+
+		for (int i = 0; i < lastIndex; ++i)
+		{
+			FVector startPos, startTangent, endPos, endTangent;
+			startPos = projectilePath->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
+			startTangent = projectilePath->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::Local);
+			endPos = projectilePath->GetLocationAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
+			endTangent = projectilePath->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
+
+			splineMeshComponents[i]->SetStartAndEnd(startPos, startTangent, endPos, endTangent);
+			splineMeshComponents[i]->SetVisibility(true);
+		}
+
+		//Delay 함수
+		FTimerHandle WaitHandle;
+		float WaitTime = GetWorld()->GetDeltaSeconds();
+		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+			{
+				ShowProjectilePath();
+			}), WaitTime, false);
+	}
+}
+
+void AMyCharacter::HideProjectilePath()
+{
+	for (int i = 0; i < iNumOfPathSpline; ++i)
+	{
+		splineMeshComponents[i]->SetVisibility(false);
+	}
 }

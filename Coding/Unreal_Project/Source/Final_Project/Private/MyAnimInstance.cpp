@@ -86,6 +86,22 @@ void UMyAnimInstance::PlayAttack2Montage()
 		Montage_Play(attack2Montage, 1.0f);
 }
 
+void UMyAnimInstance::PlayAttack2MontageSectionEnd()
+{
+	if (!bIsDead)
+	{
+		Montage_Play(attack2Montage, 1.0f);
+		Montage_JumpToSection(FName("End"));
+		bThrowing = false;
+
+		auto Pawn = TryGetPawnOwner();
+		if (!::IsValid(Pawn)) return;
+		auto MyCharacter = Cast<AMyCharacter>(Pawn);
+		if (nullptr == MyCharacter) return;
+		MyCharacter->HideProjectilePath();
+	}
+}
+
 void UMyAnimInstance::AnimNotify_SnowballRelease2()
 {
 	auto Pawn = TryGetPawnOwner();
@@ -95,6 +111,18 @@ void UMyAnimInstance::AnimNotify_SnowballRelease2()
 	if (nullptr == MyCharacter) return;
 
 	MyCharacter->SendReleaseSnowball();
+}
+
+void UMyAnimInstance::AnimNotify_StopThrow()
+{
+	auto Pawn = TryGetPawnOwner();
+	if (!::IsValid(Pawn)) return;
+
+	auto MyCharacter = Cast<AMyCharacter>(Pawn);
+	if (nullptr == MyCharacter) return;
+
+	bThrowing = true;
+	MyCharacter->ShowProjectilePath();
 }
 
 void UMyAnimInstance::PlayAttackShotgunMontage()
