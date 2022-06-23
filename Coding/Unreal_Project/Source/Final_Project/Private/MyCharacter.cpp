@@ -31,11 +31,13 @@ FString TextureStringArray[] = {
 	TEXT("/Game/Characters/Bear/bear_texture_light_gray.bear_texture_light_gray"),
 	TEXT("/Game/Characters/Bear/bear_texture_black.bear_texture_black") };
 
-const int iNumOfPathSpline = 15;
+const int iNumOfPathSpline = 35;
 FString SplineStringArray[] = {
 	TEXT("spline1"), TEXT("spline2"),TEXT("spline3"),TEXT("spline4"),TEXT("spline5"),TEXT("spline6"), TEXT("spline7"),
 	TEXT("spline8"),TEXT("spline9"),TEXT("spline10"),TEXT("spline11"),TEXT("spline12"), TEXT("spline13"),TEXT("spline14"),
-	TEXT("spline15"), TEXT("spline16"),TEXT("spline17"),TEXT("spline18"),TEXT("spline19"), TEXT("spline20"),TEXT("spline21")
+	TEXT("spline15"), TEXT("spline16"),TEXT("spline17"),TEXT("spline18"),TEXT("spline19"), TEXT("spline20"),TEXT("spline21"),
+	TEXT("spline22"), TEXT("spline23"),TEXT("spline24"),TEXT("spline25"),TEXT("spline26"), TEXT("spline27"),TEXT("spline28"),
+	TEXT("spline29"), TEXT("spline30"),TEXT("spline31"),TEXT("spline32"),TEXT("spline33"), TEXT("spline34"),TEXT("spline35")
 };
 
 // Sets default values
@@ -475,6 +477,7 @@ void AMyCharacter::ReleaseAttack()
 	{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
 		StopAnimMontage();
 		snowball->Destroy();
+		snowball = nullptr;
 	}
 }
 
