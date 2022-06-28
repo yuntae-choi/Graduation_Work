@@ -8,6 +8,7 @@
 #include "Debug.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UmbrellaAnimInstance.h"
+#include "EmptyActor.h"
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
@@ -19,6 +20,7 @@ const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 const int iNumOfWeapons = 2;	// 무기 종류 수
+const float fAimingTime = 0.2f;
 
 // 색상별 곰 텍스쳐
 FString TextureStringArray[] = {
@@ -71,6 +73,18 @@ AMyCharacter::AMyCharacter()
 	springArm->SocketOffset.Y = 30.0f;
 	springArm->SocketOffset.Z = 35.0f;
 	bUseControllerRotationYaw = true;
+
+	springArm2 = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM2"));
+	springArm2->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
+	springArm2->TargetArmLength = 200.0f;
+	springArm2->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(0.0f, -30.0f, 0.0f));
+	springArm2->bUsePawnControlRotation = true;
+	springArm2->bInheritPitch = true;
+	springArm2->bInheritRoll = true;
+	springArm2->bInheritYaw = true;
+	springArm2->bDoCollisionTest = true;
+	springArm2->SocketOffset.Y = 90.0f;
+	springArm2->SocketOffset.Z = 35.0f;
 
 	bear = CreateDefaultSubobject<USkeletalMesh>(TEXT("BEAR"));
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_BEAR(TEXT("/Game/Characters/Bear/bear.bear"));
@@ -245,7 +259,7 @@ AMyCharacter::AMyCharacter()
 			USplineMeshComponent* splineMesh = CreateDefaultSubobject<USplineMeshComponent>(*(SplineStringArray[i]));
 			splineMesh->SetStaticMesh(SM_Spline.Object);
 			splineMesh->SetVisibility(false);
-			splineMesh->bOnlyOwnerSee = true;	// 해당 플레이어만 궤적이 보이도록
+			//splineMesh->bOnlyOwnerSee = true;	// 해당 플레이어만 궤적이 보이도록
 			splineMesh->SetCastShadow(false);	// 궤적의 그림자 안보이도록
 			splineMeshComponents.Add(splineMesh);
 		}
@@ -317,6 +331,17 @@ void AMyCharacter::BeginPlay()
 	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
 	localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+
+	//aimingCameraPos = GetWorld()->SpawnActor<AMySnowball>(projectileClass, GetActorTransform(), SpawnParams);
+	//aimingCameraPos = GetWorld()->SpawnActor<ABonfire>(ABonfire::StaticClass(), GetActorTransform(), SpawnParams);
+	aimingCameraPos = GetWorld()->SpawnActor<AEmptyActor>(AEmptyActor::StaticClass(), GetActorTransform(), SpawnParams);
+	FAttachmentTransformRules atr = FAttachmentTransformRules(
+		EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
+	aimingCameraPos->AttachToComponent(springArm2, atr);
+
 	WaitForStartGame();	// 대기시간
 }
 
@@ -476,8 +501,18 @@ void AMyCharacter::ReleaseAttack()
 	else
 	{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
 		StopAnimMontage();
-		snowball->Destroy();
-		snowball = nullptr;
+		if (snowball)
+		{
+			snowball->Destroy();
+			snowball = nullptr;
+		}
+	}
+
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+		
+		PlayerController->SetViewTargetWithBlend(this, fAimingTime);
 	}
 }
 
@@ -510,6 +545,11 @@ void AMyCharacter::SnowAttack()
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 			snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
 		}
+	}
+
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		GetWorld()->GetFirstPlayerController()->SetViewTargetWithBlend(aimingCameraPos, fAimingTime);
 	}
 }
 
@@ -1407,6 +1447,8 @@ void AMyCharacter::GetBag()
 
 void AMyCharacter::ShowProjectilePath()
 {
+	if (iSessionId != localPlayerController->iSessionId) return;	// 본인의 궤적만 그리도록
+
 	projectilePath->ClearSplinePoints();
 	HideProjectilePath();
 
@@ -1425,6 +1467,7 @@ void AMyCharacter::ShowProjectilePath()
 		// bool bTracePath, float ProjectileRadius, TEnumAsByte<ECollisionChannel> TraceChannel, bool bTraceComplex,
 		TArray<AActor*> actorsToIgnore;
 		actorsToIgnore.Add(this);
+		actorsToIgnore.Add(aimingCameraPos);
 		//EDrawDebugTrace::Type DrawDebugType
 
 		// float DrawDebugTime, float SimFrequency, float MaxSimTime, float OverrideGravityZ;
@@ -1453,6 +1496,8 @@ void AMyCharacter::ShowProjectilePath()
 			splineMeshComponents[i]->SetVisibility(true);
 		}
 
+		//UE_LOG(LogTemp, Warning, TEXT("path"));
+
 		//Delay 함수
 		FTimerHandle WaitHandle;
 		float WaitTime = GetWorld()->GetDeltaSeconds();
@@ -1465,6 +1510,7 @@ void AMyCharacter::ShowProjectilePath()
 
 void AMyCharacter::HideProjectilePath()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("hide path"));
 	for (int i = 0; i < iNumOfPathSpline; ++i)
 	{
 		splineMeshComponents[i]->SetVisibility(false);

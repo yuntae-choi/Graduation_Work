@@ -160,7 +160,13 @@ public:
 	USpringArmComponent* springArm;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
+	USpringArmComponent* springArm2;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* camera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	AActor* aimingCameraPos;
 
 	// 현재 손에 들고있는 눈덩이
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
