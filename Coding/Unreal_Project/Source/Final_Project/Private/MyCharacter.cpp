@@ -1488,8 +1488,6 @@ void AMyCharacter::ShowProjectilePath()
 			splineMeshComponents[i]->SetVisibility(true);
 		}
 
-		//UE_LOG(LogTemp, Warning, TEXT("path"));
-
 		//Delay ÇÔ¼ö
 		FTimerHandle WaitHandle;
 		float WaitTime = GetWorld()->GetDeltaSeconds();
@@ -1502,7 +1500,6 @@ void AMyCharacter::ShowProjectilePath()
 
 void AMyCharacter::HideProjectilePath()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("hide path"));
 	for (int i = 0; i < iNumOfPathSpline; ++i)
 	{
 		splineMeshComponents[i]->SetVisibility(false);
