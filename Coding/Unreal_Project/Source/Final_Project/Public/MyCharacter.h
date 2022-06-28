@@ -155,6 +155,8 @@ private:
 
 	void ChangeWeapon();
 
+	void SetAimingCameraPos();
+
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* springArm;

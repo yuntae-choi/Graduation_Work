@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "UmbrellaAnimInstance.h"
 #include "EmptyActor.h"
+#include "GameFramework/HUD.h"
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
@@ -331,16 +332,7 @@ void AMyCharacter::BeginPlay()
 	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
 	localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
-
-	//aimingCameraPos = GetWorld()->SpawnActor<AMySnowball>(projectileClass, GetActorTransform(), SpawnParams);
-	//aimingCameraPos = GetWorld()->SpawnActor<ABonfire>(ABonfire::StaticClass(), GetActorTransform(), SpawnParams);
-	aimingCameraPos = GetWorld()->SpawnActor<AEmptyActor>(AEmptyActor::StaticClass(), GetActorTransform(), SpawnParams);
-	FAttachmentTransformRules atr = FAttachmentTransformRules(
-		EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
-	aimingCameraPos->AttachToComponent(springArm2, atr);
+	SetAimingCameraPos();
 
 	WaitForStartGame();	// 대기시간
 }
@@ -510,9 +502,8 @@ void AMyCharacter::ReleaseAttack()
 
 	if (iSessionId == localPlayerController->iSessionId)
 	{
-		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		
-		PlayerController->SetViewTargetWithBlend(this, fAimingTime);
+		localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
+		localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
 	}
 }
 
@@ -549,7 +540,8 @@ void AMyCharacter::SnowAttack()
 
 	if (iSessionId == localPlayerController->iSessionId)
 	{
-		GetWorld()->GetFirstPlayerController()->SetViewTargetWithBlend(aimingCameraPos, fAimingTime);
+		localPlayerController->SetViewTargetWithBlend(aimingCameraPos, fAimingTime);	// 조준 시 카메라 위치로 전환
+		localPlayerController->GetHUD()->bShowHUD = false;	// 크로스헤어 안보이도록
 	}
 }
 
@@ -1515,4 +1507,16 @@ void AMyCharacter::HideProjectilePath()
 	{
 		splineMeshComponents[i]->SetVisibility(false);
 	}
+}
+
+void AMyCharacter::SetAimingCameraPos()
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+
+	aimingCameraPos = GetWorld()->SpawnActor<AEmptyActor>(AEmptyActor::StaticClass(), GetActorTransform(), SpawnParams);
+	FAttachmentTransformRules atr = FAttachmentTransformRules(
+		EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
+	aimingCameraPos->AttachToComponent(springArm2, atr);
 }
