@@ -44,6 +44,7 @@ public:
 	void SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_);
 	void SetInitInfo(const cCharacter& me);
 	void SetNewBall(const int s_id);
+	void SetRelAttack(const int s_id);
 	void SetGunFire(const int s_id);
 
 	void SetDestroySnowdritt(const int s_id);
@@ -123,7 +124,8 @@ private:
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
-	int							itonardoId;			// 토네이도 아이디
+	int							itonardoId = -1;			// 토네이도 아이디
+	//int							itonardoId;			// 토네이도 아이디
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")

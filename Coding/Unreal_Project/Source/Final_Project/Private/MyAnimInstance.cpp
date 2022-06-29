@@ -99,6 +99,11 @@ void UMyAnimInstance::PlayAttack2MontageSectionEnd()
 		auto MyCharacter = Cast<AMyCharacter>(Pawn);
 		if (nullptr == MyCharacter) return;
 		MyCharacter->HideProjectilePath();
+		if (MyCharacter->iSessionId == MyCharacter->localPlayerController->iSessionId)
+		{
+			MyCharacter->SendReleaseSnowball();
+		}
+
 	}
 }
 

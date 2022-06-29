@@ -33,6 +33,8 @@ bool g_snow_drift[MAX_SNOWDRIFT] = {};
 bool g_item[MAX_ITEM] = {};
 bool g_start_game = false;
 int g_tonardo_id = -1;
+bool g_tonardo = false;
+
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -736,53 +738,43 @@ void process_packet(int s_id, unsigned char* p)
 			// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
 			for (auto& other : clients) {
 				if (other._s_id == s_id) continue;
-				other.state_lock.lock();
-				
 				if (ST_INGAME != other._state) {
-					if (g_tonardo_id == other._s_id) {
-						//토네이도 생성위치 보내기
-						sc_packet_put_object packet;
-						packet.s_id = other._s_id;
-						packet.size = sizeof(packet);
-						packet.type = SC_PACKET_PUT_OBJECT;
-						packet.x = other.x;
-						packet.y = other.y;
-						packet.z = other.z;
-						packet.yaw = 0.0f;
-						packet_type = TONARDO;
-						printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-						cl.do_send(sizeof(packet), &packet);
+					if (g_tonardo) {
+						if (g_tonardo_id == other._s_id) {
+							//토네이도 생성위치 보내기
+							sc_packet_put_object packet;
+							packet.s_id = other._s_id;
+							packet.size = sizeof(packet);
+							packet.type = SC_PACKET_PUT_OBJECT;
+							packet.x = other.x;
+							packet.y = other.y;
+							packet.z = other.z;
+							packet.yaw = 0.0f;
+							packet_type = TONARDO;
+							printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+							cl.do_send(sizeof(packet), &packet);
+						}
 					}
-					other.state_lock.unlock();
-					continue;
 				}
-				else other.state_lock.unlock();
-
-				//if (false == is_near(other._s_id, s_id))
-					//continue;
-
-				//clients[s_id].vl.lock();
-				//clients[s_id].viewlist.insert(other._id);
-				//clients[s_id].vl.unlock();
-
-				sc_packet_put_object packet;
-				packet.s_id = other._s_id;
-				strcpy_s(packet.name, other.name);
-				packet.object_type = 0;
-				packet.size = sizeof(packet);
-				packet.type = SC_PACKET_PUT_OBJECT;
-				packet.x = other.x;
-				packet.y = other.y;
-				packet.z = other.z;
-				packet.yaw = other.Yaw;
-				packet_type = PLAYER;
-
-				//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-				cl.do_send(sizeof(packet), &packet);
+				else {
+					sc_packet_put_object packet;
+					packet.s_id = other._s_id;
+					strcpy_s(packet.name, other.name);
+					packet.object_type = 0;
+					packet.size = sizeof(packet);
+					packet.type = SC_PACKET_PUT_OBJECT;
+					packet.x = other.x;
+					packet.y = other.y;
+					packet.z = other.z;
+					packet.yaw = other.Yaw;
+					packet_type = PLAYER;
+       				cl.do_send(sizeof(packet), &packet);
+				}
 			}
 		}
 		else 
         {
+		   g_tonardo_id = true;
 		   g_tonardo_id = cl._s_id;
 			send_login_ok_packet(s_id);
 			//cout << "토네이도" << endl;
@@ -954,7 +946,7 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case CS_PACKET_DAMAGE: {
 		if (cl.bIsSnowman) break;
-		//cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
+		cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
 		int current_hp = cl._hp;
 		cl._hp -= 30;
 		if (cl._hp < 270) cl._hp = 270;
@@ -1266,9 +1258,17 @@ void process_packet(int s_id, unsigned char* p)
 	}
 	case CS_PACKET_THROW_SNOW: {
 		if (cl.iCurrentSnowballCount <= 0) break;
-		printf("attack\n");
-		cl.iCurrentSnowballCount--;
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
+		if (!packet->mode){
+			printf("throw\n");
+			cl.iCurrentSnowballCount--;
+		}
+		else
+		{
+			printf("rel_attack\n");
+		}
+			
+
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
 				continue;

@@ -122,6 +122,7 @@ struct cs_packet_throw_snow {
 	unsigned char size;
 	char	type;
 	int32 s_id;
+	bool    mode;
 	float x, y, z;
 	float dx, dy, dz;
 };

@@ -53,6 +53,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void ReleaseSnowball();
 	void SendReleaseSnowball();
+	void SendReleaseAttack();
+
 
 	void SendSpawnSnowballBomb();
 

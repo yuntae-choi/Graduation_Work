@@ -90,6 +90,7 @@ enum COMMAND_Type
 	COMMAND_DAMAGE,
 	COMMAND_MATCH,
 	COMMAND_THROW,
+	COMMAND_R_ATTACK,
 	COMMAND_GUNATTACK,
 	COMMAND_GUNFIRE,
 	COMMAND_UMB_START,
@@ -176,6 +177,7 @@ struct cs_packet_throw_snow {
 	unsigned char size;
 	char	type;
 	int32 s_id;
+	bool    mode;
 	float x, y, z;
 	float dx, dy, dz;
 };

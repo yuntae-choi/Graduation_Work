@@ -153,7 +153,10 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
 
 		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
-		MyPlayerController->SetNewBall(packet->s_id);
+		if (!packet->mode)
+		    MyPlayerController->SetNewBall(packet->s_id);
+		else
+			MyPlayerController->SetRelAttack(packet->s_id);
 
 		break;
 	}
@@ -433,13 +436,14 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVec
 };
 
 
-void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection)
+void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode)
 {
 
 	cs_packet_throw_snow packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_THROW_SNOW;
 	packet.s_id = s_id;
+	packet.mode = mode;
 	packet.x = MyLocation.X;
 	packet.y = MyLocation.Y;
 	packet.z = MyLocation.Z;

@@ -493,6 +493,11 @@ void AMyCharacter::Attack()
 
 void AMyCharacter::ReleaseAttack()
 {
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		SendReleaseAttack();
+	}
+
 	if (myAnim->bThrowing)
 	{
 		myAnim->PlayAttack2MontageSectionEnd();
@@ -509,6 +514,7 @@ void AMyCharacter::ReleaseAttack()
 
 	if (iSessionId == localPlayerController->iSessionId)
 	{
+		
 		localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
 		localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
 	}
@@ -606,6 +612,17 @@ void AMyCharacter::SendReleaseSnowball()
 
 	}
 }
+
+void AMyCharacter::SendReleaseAttack()
+{
+	if (iSessionId != localPlayerController->iSessionId) return;
+	if (IsValid(snowball))
+	{
+		localPlayerController->SendPlayerInfo(COMMAND_R_ATTACK);
+
+	}
+}
+
 
 void AMyCharacter::SendSpawnSnowballBomb()
 {

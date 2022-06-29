@@ -179,6 +179,14 @@ void AMyPlayerController::SetNewBall(const int s_id)
 	
 }
 
+void AMyPlayerController::SetRelAttack(const int s_id)
+{
+	UWorld* World = GetWorld();
+	if (s_id != iSessionId)
+	   charactersInfo->players[s_id].relATTACK = true;
+
+}
+
 void AMyPlayerController::SetUmb(const int s_id, bool end)
 {
 	UWorld* World = GetWorld();
@@ -404,6 +412,10 @@ bool AMyPlayerController::UpdateWorldInfo()
 			info->canShot = false;
 		}
 
+		if (info->relATTACK) {
+			player_->ReleaseAttack();
+			info->relATTACK = false;
+		}
 
 		if (info->canSnowBall) {
 			player_->ReleaseSnowball();
@@ -624,7 +636,9 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	else if (input == COMMAND_GUNATTACK)
 		mySocket->Send_GunAttackPacket(iSessionId);
 	else if (input == COMMAND_THROW)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector());
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),false);
+	else if (input == COMMAND_R_ATTACK)
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),true);
 	else if (input == COMMAND_GUNFIRE)
 		mySocket->Send_GunFire_Packet(iSessionId, MyCameraLocation, MyCameraRotation);
 	else if (input == COMMAND_DAMAGE)
