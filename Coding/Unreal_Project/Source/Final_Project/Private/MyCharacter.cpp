@@ -21,7 +21,10 @@ const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 const int iNumOfWeapons = 2;	// 무기 종류 수
-const float fAimingTime = 0.2f;
+const float fAimingTime = 0.2f;		// 조준하는 데 걸리는 시간 (카메라 전환만, 애니메이션은 따로)
+const float fThrowPower = 700.0f;
+const float fMaxChargingTime = 5.0f;	// 최대 차징 시간
+const float fSnowballInitialSpeed = 2000.0f;	// 눈덩이 초기 속도
 
 // 색상별 곰 텍스쳐
 FString TextureStringArray[] = {
@@ -319,6 +322,9 @@ AMyCharacter::AMyCharacter()
 	smokeNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/NS_Smoke.NS_Smoke"), nullptr, LOAD_None, nullptr);
 
 	overlappedTornado = nullptr;
+
+	bIsAiming = false;
+	fAimingElapsedTime = 0.0f;
 }
 
 // Called when the game starts or when spawned
@@ -364,6 +370,7 @@ void AMyCharacter::Tick(float DeltaTime)
 		UpdateFarming(DeltaTime);
 		UpdateHP();
 		UpdateSpeed();
+		UpdateAiming();
 	}
 
 	UpdateZByTornado();		// 캐릭터가 토네이도 내부인 경우 z값 증가
@@ -542,6 +549,7 @@ void AMyCharacter::SnowAttack()
 	{
 		localPlayerController->SetViewTargetWithBlend(aimingCameraPos, fAimingTime);	// 조준 시 카메라 위치로 전환
 		localPlayerController->GetHUD()->bShowHUD = false;	// 크로스헤어 안보이도록
+		bIsAiming = true;
 	}
 }
 
@@ -629,7 +637,10 @@ void AMyCharacter::ReleaseSnowball()
 			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
 			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
 
-			II_Throwable::Execute_Throw(snowball, direction_);
+			float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
+
+			II_Throwable::Execute_Throw(snowball, direction_, speed);
+			// 속도 인자 추가
 #endif
 #ifdef SINGLEPLAY_DEBUG
 			FVector cameraLocation;
@@ -640,6 +651,9 @@ void AMyCharacter::ReleaseSnowball()
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
 #endif
 			snowball = nullptr;
+
+			bIsAiming = false;
+			fAimingElapsedTime = 0.0f;
 		}
 
 	}
@@ -1234,7 +1248,6 @@ void AMyCharacter::SpawnSnowballBomb()
 			//	}
 			//}
 
-
 			// 랜덤한 5개의 위치에 snowball bomb 생성 및 던지기
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = this;
@@ -1242,12 +1255,11 @@ void AMyCharacter::SpawnSnowballBomb()
 			FTransform muzzleSocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("Muzzle1Socket"));
 			FTransform smokeSocketTransform = shotgunMeshComponent->GetSocketTransform(TEXT("SmokeSocket"));
 			
-
 			for (int i = 0; i < 5; ++i)
 			{
 				ASnowballBomb* snowballBomb = GetWorld()->SpawnActor<ASnowballBomb>(shotgunProjectileClass, muzzleSocketTransform, SpawnParams);
 
-				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[PlayerController->GetCharactersInfo()->players[iSessionId].random_bullet[i]]);
+				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[PlayerController->GetCharactersInfo()->players[iSessionId].random_bullet[i]], 0.0f);
 			}
 
 			if (smokeNiagara) {
@@ -1455,7 +1467,8 @@ void AMyCharacter::ShowProjectilePath()
 		FVector cameraLocation;
 		FRotator cameraRotation;
 		GetActorEyesViewPoint(cameraLocation, cameraRotation);
-		FVector LaunchVelocity = (cameraRotation.Vector() + FVector(0.0f, 0.0f, 0.15f)) * 2500.0f;
+		FVector LaunchVelocity = (cameraRotation.Vector() + FVector(0.0f, 0.0f, 0.15f)) * (2000.0f + fAimingElapsedTime * fThrowPower);
+		//FVector LaunchVelocity = (cameraRotation.Vector() + FVector(0.0f, 0.0f, 0.15f)) * 2500.0f;
 		// bool bTracePath, float ProjectileRadius, TEnumAsByte<ECollisionChannel> TraceChannel, bool bTraceComplex,
 		TArray<AActor*> actorsToIgnore;
 		actorsToIgnore.Add(this);
@@ -1516,4 +1529,11 @@ void AMyCharacter::SetAimingCameraPos()
 	FAttachmentTransformRules atr = FAttachmentTransformRules(
 		EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 	aimingCameraPos->AttachToComponent(springArm2, atr);
+}
+
+void AMyCharacter::UpdateAiming()
+{
+	if (!bIsAiming) return;
+	if (fAimingElapsedTime >= fMaxChargingTime) return;
+	fAimingElapsedTime += GetWorld()->GetDeltaSeconds();
 }

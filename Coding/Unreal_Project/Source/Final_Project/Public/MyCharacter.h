@@ -156,6 +156,7 @@ private:
 	void ChangeWeapon();
 
 	void SetAimingCameraPos();
+	void UpdateAiming();
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -331,4 +332,7 @@ private:
 	USplineComponent* projectilePath;
 	TArray<USplineMeshComponent*> splineMeshComponents;
 	USceneComponent* projectilePathStartPos;
+
+	bool bIsAiming;
+	float fAimingElapsedTime;
 };
