@@ -74,10 +74,12 @@ void AMySnowball::Tick(float DeltaTime)
 #endif
 }
 
-void AMySnowball::Throw_Implementation(FVector Direction)
+void AMySnowball::Throw_Implementation(FVector Direction, float Speed)
 {
 	collisionComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	projectileMovementComponent->bSimulationEnabled = true;	// 눈덩이가 움직일 수 있도록 활성화
+	projectileMovementComponent->InitialSpeed = Speed;
+	projectileMovementComponent->MaxSpeed = Speed;
 	projectileMovementComponent->Velocity = (Direction + FVector(0.0f, 0.0f, 0.15f)) * (projectileMovementComponent->InitialSpeed);
 
 	//Delay 함수

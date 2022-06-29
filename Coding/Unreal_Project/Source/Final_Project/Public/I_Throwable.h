@@ -23,5 +23,5 @@ class FINAL_PROJECT_API II_Throwable
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Itf")
-	void Throw(FVector Direction);
+	void Throw(FVector Direction, float Speed);
 };

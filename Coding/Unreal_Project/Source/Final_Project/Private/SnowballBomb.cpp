@@ -61,7 +61,7 @@ void ASnowballBomb::Tick(float DeltaTime)
 
 }
 
-void ASnowballBomb::Throw_Implementation(FVector Direction)
+void ASnowballBomb::Throw_Implementation(FVector Direction, float Speed)
 {
 	projectileMovementComponent->Velocity = (Direction + FVector(0.0f, 0.0f, 0.15f)) * (projectileMovementComponent->InitialSpeed);
 }

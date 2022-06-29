@@ -21,8 +21,8 @@ public:
 
 	// Throwable 인터페이스에서 Throw 이벤트 발생 시 호출
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Itf")
-	void Throw(FVector Direction);
-	virtual void Throw_Implementation(FVector Direction) override;
+	void Throw(FVector Direction, float Speed);
+	virtual void Throw_Implementation(FVector Direction, float Speed) override;
 
 	// Function that is called when the projectile hits something.
 	UFUNCTION()
