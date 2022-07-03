@@ -3,6 +3,7 @@ Binaries/*
 DerivedDataCache/*
 Intermediate/*
 Saved/*
+Plugins/*
 
 # 상위에서 ignore할 것을 제외시킨 것
 *.lib
