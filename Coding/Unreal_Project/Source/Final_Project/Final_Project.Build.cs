@@ -7,8 +7,12 @@ public class Final_Project : ModuleRules
 	public Final_Project(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "GameplayTasks", "Niagara" });
+
+		PrivateIncludePaths.AddRange(new string[] {
+				"../Plugins/HoudiniNiagara/Source/HoudiniNiagara/Private", "../Plugins/HoudiniNiagara/Source/HoudiniNiagaraEditor/Private"
+		});
+
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "GameplayTasks", "Niagara", "HoudiniNiagara" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

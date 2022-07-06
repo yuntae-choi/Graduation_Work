@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "I_Throwable.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "MySnowball.generated.h"
 
 UCLASS()
@@ -43,6 +45,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UProjectileMovementComponent* projectileMovementComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraSystem* crumbleNiagara;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)
