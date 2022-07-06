@@ -78,7 +78,9 @@ public:
 
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
-	void ReleaseAttack();
+	void ReleaseAttack();      //호출시 서버로 메세지 전송
+	void Recv_ReleaseAttack(); //서버에서 전송이 왔을때
+
 	void SnowAttack();    // 일반 공격
 	void AttackShotgun(); //샷건 공격
 	void ShowProjectilePath();

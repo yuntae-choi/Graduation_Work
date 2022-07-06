@@ -497,7 +497,33 @@ void AMyCharacter::ReleaseAttack()
 	{
 		SendReleaseAttack();
 	}
+	//Recv_ReleaseAttack()로 옮김
+	//자기 자신을 포함하여 서버에서 명령이 오면 작업을 수행하게함
+	//if (myAnim->bThrowing)
+	//{
+	//	myAnim->PlayAttack2MontageSectionEnd();
+	//}
+	//else
+	//{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
+	//	StopAnimMontage();
+	//	if (snowball)
+	//	{
+	//		snowball->Destroy();
+	//		snowball = nullptr;
+	//	}
+	//}
 
+	//if (iSessionId == localPlayerController->iSessionId)
+	//{
+	//	
+	//	localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
+	//	localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
+	//}
+}
+
+//자기 자신을 포함하여 서버에서 명령이 오면 작업을 수행하게함
+void AMyCharacter::Recv_ReleaseAttack()
+{
 	if (myAnim->bThrowing)
 	{
 		myAnim->PlayAttack2MontageSectionEnd();
@@ -514,7 +540,7 @@ void AMyCharacter::ReleaseAttack()
 
 	if (iSessionId == localPlayerController->iSessionId)
 	{
-		
+
 		localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
 		localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
 	}

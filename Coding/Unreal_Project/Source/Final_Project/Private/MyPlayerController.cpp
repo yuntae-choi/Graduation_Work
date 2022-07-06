@@ -136,7 +136,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 void AMyPlayerController::SetSocket()
 {
-	mySocket = new ClientSocket();         // 에디터용
+    mySocket = new ClientSocket();         // 에디터용
 	//mySocket = ClientSocket::GetSingleton(); // 패키징 용
 
 	mySocket->SetPlayerController(this);
@@ -182,8 +182,7 @@ void AMyPlayerController::SetNewBall(const int s_id)
 void AMyPlayerController::SetRelAttack(const int s_id)
 {
 	UWorld* World = GetWorld();
-	if (s_id != iSessionId)
-	   charactersInfo->players[s_id].relATTACK = true;
+    charactersInfo->players[s_id].relATTACK = true;
 
 }
 
@@ -413,7 +412,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 		}
 
 		if (info->relATTACK) {
-			player_->ReleaseAttack();
+			player_->Recv_ReleaseAttack();
 			info->relATTACK = false;
 		}
 
