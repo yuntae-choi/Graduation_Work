@@ -122,6 +122,10 @@ public:
 
 	void GetBag();
 
+	void GetOnOffJetski();
+	void GetOnJetski();
+	void GetOffJetski();
+
 	void Cheat_Teleport1();
 	void Cheat_Teleport2();
 	void Cheat_Teleport3();
@@ -174,6 +178,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	AActor* aimingCameraPos;
+
+	// jetski 탑승 시 사용될 spring arm, camera
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	USpringArmComponent* springArm3;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UCameraComponent* camera3;
 
 	// 현재 손에 들고있는 눈덩이
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
@@ -260,6 +271,12 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UStaticMeshComponent* bagMeshComponent;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* jetskiMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bIsRiding;		// jetski 탑승 중인지
+
 	bool bReleaseUmbrella;
 	
 	ATornado* overlappedTornado;
@@ -339,4 +356,9 @@ private:
 
 	bool bIsAiming;
 	float fAimingElapsedTime;
+
+	UPROPERTY(VisibleAnywhere, Category = Jetski)
+	TSubclassOf<class AJetski> jetskiClass;
+
+	UAnimationAsset* driveAnimAsset;
 };

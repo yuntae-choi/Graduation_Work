@@ -10,6 +10,7 @@
 #include "UmbrellaAnimInstance.h"
 #include "EmptyActor.h"
 #include "GameFramework/HUD.h"
+#include "Jetski.h"
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
@@ -89,6 +90,20 @@ AMyCharacter::AMyCharacter()
 	springArm2->bDoCollisionTest = true;
 	springArm2->SocketOffset.Y = 90.0f;
 	springArm2->SocketOffset.Z = 35.0f;
+
+	springArm3 = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM3"));
+	springArm3->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
+	springArm3->TargetArmLength = 220.0f;
+	springArm3->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 10.0f), FRotator::ZeroRotator);
+	springArm3->bUsePawnControlRotation = true;
+	springArm3->bInheritPitch = true;
+	springArm3->bInheritRoll = true;
+	springArm3->bInheritYaw = true;
+	springArm3->bDoCollisionTest = true;
+
+	camera3 = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA3"));
+	check(camera3 != nullptr);
+	camera3->SetupAttachment(springArm3);
 
 	bear = CreateDefaultSubobject<USkeletalMesh>(TEXT("BEAR"));
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_BEAR(TEXT("/Game/Characters/Bear/bear.bear"));
@@ -276,11 +291,34 @@ AMyCharacter::AMyCharacter()
 		projectilePathStartPos->SetRelativeLocation(FVector(-32.0f, 38.012852f, 116.264641f));
 	}
 
+	if (!jetskiMeshComponent)
+	{
+		jetskiMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("jetskiMeshComponent"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_Jetski(TEXT("/Game/NonCharacters/SM_Jetski.SM_Jetski"));
+		if (SM_Jetski.Succeeded())
+		{
+			jetskiMeshComponent->SetStaticMesh(SM_Jetski.Object);
+			jetskiMeshComponent->BodyInstance.SetCollisionProfileName(TEXT("Jetski"));
+			jetskiMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -55.0f));
+			jetskiMeshComponent->SetVisibility(false);
+		}
+	}
+
+	if (!driveAnimAsset)
+	{
+		static ConstructorHelpers::FObjectFinder<UAnimationAsset> ANIM_Drive(TEXT("/Game/Animations/Bear/bear_driving_Anim.bear_driving_Anim"));
+		if (ANIM_Drive.Succeeded())
+		{
+			driveAnimAsset = ANIM_Drive.Object;
+		}
+	}
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
 	projectileClass = AMySnowball::StaticClass();
 	shotgunProjectileClass = ASnowballBomb::StaticClass();
+	jetskiClass = AJetski::StaticClass();
 
 	iSessionId = -1;
 	iCurrentHP = iMaxHP;	// 실제 설정값
@@ -325,6 +363,8 @@ AMyCharacter::AMyCharacter()
 
 	bIsAiming = false;
 	fAimingElapsedTime = 0.0f;
+
+	bIsRiding = false;
 }
 
 // Called when the game starts or when spawned
@@ -341,6 +381,8 @@ void AMyCharacter::BeginPlay()
 	SetAimingCameraPos();
 
 	WaitForStartGame();	// 대기시간
+
+	camera3->Deactivate();
 }
 
 void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -429,6 +471,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Released, this, &AMyCharacter::ReleaseRightMouseButton);
 
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeWeapon);
+
+	PlayerInputComponent->BindAction(TEXT("GetOnOffJetski"), EInputEvent::IE_Pressed, this, &AMyCharacter::GetOnOffJetski);
 
 	// Cheat Key
 	PlayerInputComponent->BindAction(TEXT("Cheat_Teleport1"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_Teleport1);
@@ -1579,4 +1623,43 @@ void AMyCharacter::UpdateAiming()
 	if (!bIsAiming) return;
 	if (fAimingElapsedTime >= fMaxChargingTime) return;
 	fAimingElapsedTime += GetWorld()->GetDeltaSeconds();
+}
+
+void AMyCharacter::GetOnOffJetski()
+{
+	if (bIsSnowman) return;		// 눈사람은 jetski 탑승 x
+
+	if (!bIsRiding) GetOnJetski();
+	else GetOffJetski();
+}
+
+
+void AMyCharacter::GetOnJetski()
+{	// jetski 탑승
+
+	TArray<AActor*> overlapActorsArray;	// overlap 중인 jetski를 담을 배열
+	GetOverlappingActors(overlapActorsArray, jetskiClass);
+
+	if (overlapActorsArray.Num() == 1)
+	{	
+		bIsRiding = true;
+
+		// 애니메이션 BP 대신 drive 애니메이션 재생
+		GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+		GetMesh()->PlayAnimation(driveAnimAsset, true);
+		
+		
+		//overlapActorsArray[0]->Destroy();
+	}
+}
+
+void AMyCharacter::GetOffJetski()
+{	// jetski 하차
+
+	// 기존 애니메이션 BP로 변경
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	GetMesh()->SetAnimInstanceClass(bearAnim);
+	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
+	MYCHECK(nullptr != myAnim);
+	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
 }
