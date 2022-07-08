@@ -17,6 +17,7 @@ const int AMyCharacter::iMinHP = 270;
 const int AMyCharacter::iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 const int iNormalSpeed = 600;	// 캐릭터 기본 이동속도
 const int iSlowSpeed = 400;		// 캐릭터 슬로우 상태 이동속도
+const int iJetskiSpeed = 1200;		// Jetski 탑승 시 이동속도
 const float fChangeSnowmanStunTime = 3.0f;	// 실제값 - 10.0f, 눈사람화 할 때 스턴 시간
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
@@ -94,7 +95,7 @@ AMyCharacter::AMyCharacter()
 	springArm3 = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM3"));
 	springArm3->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	springArm3->TargetArmLength = 220.0f;
-	springArm3->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 10.0f), FRotator::ZeroRotator);
+	springArm3->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 80.0f), FRotator::ZeroRotator);
 	springArm3->bUsePawnControlRotation = true;
 	springArm3->bInheritPitch = true;
 	springArm3->bInheritRoll = true;
@@ -299,7 +300,8 @@ AMyCharacter::AMyCharacter()
 		{
 			jetskiMeshComponent->SetStaticMesh(SM_Jetski.Object);
 			jetskiMeshComponent->BodyInstance.SetCollisionProfileName(TEXT("Jetski"));
-			jetskiMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -55.0f));
+			jetskiMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			jetskiMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -56.0f));
 			jetskiMeshComponent->SetVisibility(false);
 		}
 	}
@@ -413,6 +415,7 @@ void AMyCharacter::Tick(float DeltaTime)
 		UpdateHP();
 		UpdateSpeed();
 		UpdateAiming();
+		UpdateJetski();
 	}
 
 	UpdateZByTornado();		// 캐릭터가 토네이도 내부인 경우 z값 증가
@@ -948,6 +951,8 @@ void AMyCharacter::UpdateHP()
 
 void AMyCharacter::UpdateSpeed()
 {
+	if (bIsRiding) return;	// jetski 탑승 중에는 체온에따른 speed x
+
 	switch (iCharacterState) {
 	case CharacterState::AnimalNormal:
 		if (iCurrentHP <= iBeginSlowHP)
@@ -1648,13 +1653,64 @@ void AMyCharacter::GetOnJetski()
 		GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 		GetMesh()->PlayAnimation(driveAnimAsset, true);
 		
-		
-		//overlapActorsArray[0]->Destroy();
+		// jetski 물리, 충돌, 시야 활성화
+		jetskiMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		jetskiMeshComponent->SetSimulatePhysics(true);
+		jetskiMeshComponent->SetVisibility(true);
+
+		// 배치된 jetski의 위치로 캐릭터 이동 및 회전
+		SetActorLocation(overlapActorsArray[0]->GetActorLocation());
+		FRotator newRotation = FRotator(
+			GetControlRotation().Pitch, overlapActorsArray[0]->GetActorRotation().Yaw, GetControlRotation().Roll);
+		localPlayerController->SetControlRotation(newRotation);
+
+		// 배치된 jetski 제거
+		overlapActorsArray[0]->Destroy();
+
+		// jetski 메시에 캐릭터 메시 attach
+		FAttachmentTransformRules atr = FAttachmentTransformRules(
+			EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
+		GetMesh()->AttachToComponent(jetskiMeshComponent, atr);
+		GetMesh()->SetRelativeLocation(FVector(-8.68f, -4.0f, 15.35f));
+
+		// 운전용 카메라로 전환, 크로스헤어 제거
+		camera->Deactivate();
+		camera3->Activate();
+		localPlayerController->GetHUD()->bShowHUD = false;
+
+		// 이동속도 설정
+		GetCharacterMovement()->MaxWalkSpeed = iJetskiSpeed;
 	}
 }
 
 void AMyCharacter::GetOffJetski()
 {	// jetski 하차
+
+	bIsRiding = false;
+
+	// jetski 왼쪽으로 캐릭터 이동 및 회전
+	SetActorLocation(FVector(GetActorLocation() - jetskiMeshComponent->GetRightVector() * 80));
+	localPlayerController->SetControlRotation(FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.0f));
+
+	// jetski 물리, 충돌, 시야 비활성화
+	jetskiMeshComponent->SetSimulatePhysics(false);
+	jetskiMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	jetskiMeshComponent->SetVisibility(false);
+
+	// 캐릭터 메시 jetski 메시에서 detach
+	GetMesh()->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	FAttachmentTransformRules atr = FAttachmentTransformRules(
+		EAttachmentRule::KeepWorld, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
+	GetMesh()->AttachToComponent(GetCapsuleComponent(), atr);
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -77.0f), FRotator(0.0f, -90.0f, 0.0f));
+
+	// 해당 위치에 jetski 스폰
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+	FVector location = FVector(jetskiMeshComponent->GetComponentLocation() + FVector(0.0f, 0.0f, 27.5f));
+	FTransform transform = FTransform(jetskiMeshComponent->GetComponentRotation(), location, jetskiMeshComponent->GetRelativeScale3D());
+	GetWorld()->SpawnActor<AJetski>(jetskiClass, transform, SpawnParams);
 
 	// 기존 애니메이션 BP로 변경
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -1662,4 +1718,25 @@ void AMyCharacter::GetOffJetski()
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);
 	myAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
+
+	// 기존 카메라로 전환, 크로스헤어 생성
+	camera->Activate();
+	camera3->Deactivate();
+	localPlayerController->GetHUD()->bShowHUD = true;
+
+	// 이동속도 설정
+	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;
+}
+
+void AMyCharacter::UpdateJetski()
+{
+	if (bIsRiding)
+	{	// jetski 메시 위치 및 회전 갱신, 뒤집어짐 방지
+		jetskiMeshComponent->SetWorldLocation(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - 56.0f));
+		float pitch = UKismetMathLibrary::ClampAngle(jetskiMeshComponent->GetComponentRotation().Pitch, -40.0f, 40.0f);
+		float roll = UKismetMathLibrary::ClampAngle(jetskiMeshComponent->GetComponentRotation().Roll, -20.0f, 20.0f);
+		//FRotator newRotation = FRotator(jetskiMeshComponent->GetComponentRotation().Pitch, GetActorRotation().Yaw, roll);
+		FRotator newRotation = FRotator(pitch, GetActorRotation().Yaw, roll);
+		jetskiMeshComponent->SetWorldRotation(newRotation);
+	}
 }

@@ -166,6 +166,8 @@ private:
 	void SetAimingCameraPos();
 	void UpdateAiming();
 
+	void UpdateJetski();
+
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* springArm;
