@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Final_Project.h"
+#include "EditorManager.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "I_Throwable.h"
@@ -46,8 +47,10 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UProjectileMovementComponent* projectileMovementComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Component)
 	UNiagaraSystem* crumbleNiagara;
+
+	AEditorManager* editorManager;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)

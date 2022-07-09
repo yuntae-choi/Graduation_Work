@@ -4,16 +4,6 @@
 #include "MySnowball.h"
 #include "MyCharacter.h"
 #include "MyPlayerController.h"
-#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagara/Public/HoudiniNiagara.h"
-//#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagara/Public/HoudiniPointCache.h"
-//#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagara/Public/HoudiniPointCacheLoader.h"
-//#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagara/Public/HoudiniPointCacheLoaderBJSON.h"
-//#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagara/Public/HoudiniPointCacheLoaderCSV.h"
-//#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagara/Public/HoudiniPointCacheLoaderJSON.h"
-//#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagara/Public/HoudiniPointCacheLoaderJSONBase.h"
-#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagaraEditor/Public/HoudiniNiagaraEditor.h"
-//#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagaraEditor/Public/HoudiniPointCacheAssetActions.h"
-//#include "../../../Plugins/HoudiniNiagara/Source/HoudiniNiagaraEditor/Public/HoudiniPointCacheFactory.h"
 
 //#define CHECKTRAJECTORY	// 눈덩이가 던져지는 시점에서부터 충돌할 때까지의 궤적 로그 출력
 
@@ -131,10 +121,11 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 		//MYLOG(Warning, TEXT("no damage"));
 	}
 
-	if (crumbleNiagara) {
-		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), crumbleNiagara, GetActorLocation(), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
-		//NiagaraComp->SetNiagaraVariableFloat(FString("StrengthCoef"), CoefStrength);
-	}
+	TArray<AActor*> ems;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEditorManager::StaticClass(), ems);
+
+	AEditorManager* em = Cast<AEditorManager>(ems[0]);
+	em->PlaySnowballCrumbleEffect(GetActorLocation());
 
 	Destroy();
 	
