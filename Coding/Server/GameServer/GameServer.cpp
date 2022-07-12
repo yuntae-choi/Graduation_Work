@@ -1204,6 +1204,19 @@ void process_packet(int s_id, unsigned char* p)
 			
 			break;
 		}
+		case ITEM_JET:
+		{
+			packet->type = SC_PACKET_GET_ITEM;
+			for (auto& other : clients) {
+				if (ST_INGAME != other._state) continue;
+				if (s_id == other._s_id) continue;
+				packet->type = SC_PACKET_GET_ITEM;
+				other.do_send(sizeof(*packet), packet);
+			}
+			cout << "플레이어: [" << cl._s_id << "] 제트스키 on/off" << endl;
+
+			break;
+		}
 		case ITEM_MAT:
 		{
 			int item_num = packet->destroy_obj_id;

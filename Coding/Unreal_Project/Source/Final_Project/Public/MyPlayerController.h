@@ -46,6 +46,7 @@ public:
 	void SetNewBall(const int s_id);
 	void SetRelAttack(const int s_id);
 	void SetGunFire(const int s_id);
+	void SetJetSki(const int s_id);
 
 	void SetDestroySnowdritt(const int s_id);
 	void SetDestroyitembox(const int obj_id);

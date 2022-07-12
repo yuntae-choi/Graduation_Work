@@ -1634,6 +1634,12 @@ void AMyCharacter::GetOnOffJetski()
 {
 	if (bIsSnowman) return;		// 눈사람은 jetski 탑승 x
 
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		//제트스키 탑승시 서버 전송
+		localPlayerController->GetSocket()->Send_ItemPacket(ITEM_JET, 0);
+	}
+
 	if (!bIsRiding) GetOnJetski();
 	else GetOffJetski();
 }

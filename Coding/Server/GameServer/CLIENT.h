@@ -46,6 +46,7 @@ public:
     int32 iCurrentSnowballCount = 0;
     int32 iCurrentMatchCount = 0;
     bool bHasUmbrella = false;
+    bool bIsRiding = false;
     bool bHasBag = false;
     bool bIsSnowman = false;	// 현재 캐릭터가 눈사람인지
     bool b_ready = false;

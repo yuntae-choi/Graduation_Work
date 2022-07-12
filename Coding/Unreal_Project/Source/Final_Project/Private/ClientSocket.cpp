@@ -241,6 +241,12 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			CharactersInfo.players[packet->s_id].current_snow_count = packet->current_snowball;
 			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
 			break;
+		}	
+		case ITEM_JET:
+		{
+			if (MyPlayerController->iSessionId != packet->s_id)
+				MyPlayerController->SetJetSki(packet->s_id);
+			break;
 		}
 		default:
 			break;
@@ -406,6 +412,7 @@ void ClientSocket::Send_UmbPacket(bool umb_use) {
 	//MYLOG(Warning, TEXT("[Send damage]"));
 	SendPacket(&packet);
 };
+
 
 void ClientSocket::Send_TelePortPacket(int point_num) {
 	cs_packet_teleport packet;

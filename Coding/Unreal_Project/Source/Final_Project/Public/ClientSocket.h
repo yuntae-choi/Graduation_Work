@@ -128,6 +128,8 @@ public:
 
 	bool canShot = false;
 	bool canAttack = false;
+	bool operate_jet = false;
+
 	bool canSnowBall = false;
 	bool relATTACK = false;
 	bool canSnowBomb = false;

@@ -231,6 +231,15 @@ void AMyPlayerController::SetGunFire(const int s_id)
 
 }
 
+void AMyPlayerController::SetJetSki(const int s_id)
+{
+	UWorld* World = GetWorld();
+
+	charactersInfo->players[s_id].operate_jet = true;
+
+}
+
+
 void AMyPlayerController::SetDestroyPlayer(const int del_sid)
 {
 	UWorld* World = GetWorld();
@@ -452,7 +461,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->CloseUmbrellaAnim();
 			info->end_umb = false;
 		}
-
+		if (info->operate_jet) {
+			MYLOG(Warning, TEXT("jetski"));
+			player_->GetOnOffJetski();
+			info->operate_jet = false;
+		}
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
 		{
@@ -657,6 +670,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 		mySocket->Send_UmbPacket(false);
 	else if (input == COMMAND_UMB_END)
 		mySocket->Send_UmbPacket(true);
+	
 }
 
 void AMyPlayerController::SendTeleportInfo(int input)
