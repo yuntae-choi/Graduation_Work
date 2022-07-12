@@ -247,7 +247,7 @@ public:
 
 	bool Connect();
 	void ProcessPacket(unsigned char* ptr);
-	void Send_LoginPacket();
+	void Send_LoginPacket(char* _id, char* _pw);
 	void Send_StatusPacket(STATE_Type _state, int s_id);
 
 	void Send_TelePortPacket(int point_num);

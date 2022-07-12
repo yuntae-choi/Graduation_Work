@@ -157,7 +157,7 @@ void AMyPlayerController::SetSocket()
 	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
 	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
 	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
-	g_socket->Send_LoginPacket();
+	//g_socket->Send_LoginPacket();
 	SleepEx(0, true); 
 	
 }
@@ -1029,6 +1029,7 @@ void AMyPlayerController::BtnLogin(FString id, FString pw)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("LOGIN id : %s, pw : %s"), *id, *pw);
 
+	
 	// 디버깅용 - id, pw에 입력 x인 경우 게임 플레이 되도록
 	if (id.Len() == 0 && pw.Len() == 0)
 	{
@@ -1047,6 +1048,9 @@ void AMyPlayerController::BtnLogin(FString id, FString pw)
 			return;
 		}
 
+		g_socket->Send_LoginPacket(TCHAR_TO_UTF8(*id), TCHAR_TO_UTF8(*pw));
+
+
 		// id, pw가 DB에 등록된 것과 일치하는지 체크
 
 		// id가 유효하지 않은 경우 return
@@ -1063,7 +1067,7 @@ void AMyPlayerController::BtnLogin(FString id, FString pw)
 		//}
 
 		// id, pw가 유효한 경우
-		DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
+		//DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
 	}
 }
 

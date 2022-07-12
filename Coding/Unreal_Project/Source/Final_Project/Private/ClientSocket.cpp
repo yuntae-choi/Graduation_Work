@@ -55,14 +55,35 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		MyPlayerController->SetCharactersInfo(&CharactersInfo);
 		MyPlayerController->SetInitInfo(info);
 
+
+		// id, pw가 유효한 경우
+		MyPlayerController->DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
+
 		//MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
 
 		break;
 	}
 
 	case SC_PACKET_LOGIN_FAIL:
-		break;
+	{
+		// id, pw가 DB에 등록된 것과 일치하는지 체크
+		MyPlayerController->loginInfoText = TEXT("Invalid ID");
+		
+		// id가 유효하지 않은 경우 return
+		//if ()
+		//{
+		//	loginInfoText = TEXT("Invalid ID");
+		//	return;
+		//}
+		// pw 입력이 잘못된 경우 return
+		//if ()
+		//{
+		//	loginInfoText = TEXT("Wrong PW");
+		//	return;
+		//}
 
+		break;
+	}
 	case SC_PACKET_READY:
 	{
 		sc_packet_ready* packet = reinterpret_cast<sc_packet_ready*>(ptr);
@@ -322,7 +343,7 @@ void ClientSocket::SetPlayerController(AMyPlayerController* pPlayerController)
 	}
 }
 
-void ClientSocket::Send_LoginPacket()
+void ClientSocket::Send_LoginPacket(char* send_id, char* send_pw)
 {
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
@@ -586,7 +607,7 @@ uint32 ClientSocket::Run()
 	
 	RecvPacket();
 
-	Send_LoginPacket();
+	//Send_LoginPacket();
 
 	SleepEx(0, true);
 

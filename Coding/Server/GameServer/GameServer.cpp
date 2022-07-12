@@ -660,46 +660,50 @@ void process_packet(int s_id, unsigned char* p)
 	switch (packet_type) {
 	case CS_PACKET_LOGIN: {
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
+		bool _OverLap = false;
 		if (strcmp("Tornado", packet->id) != 0) {
 			CLIENT& cl = clients[s_id];
 			printf_s("[Recv login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
 
-			/*	for (int i = 0; i < MAX_USER; ++i) {
-					clients[i].state_lock.lock();
-					if (ST_INGAME == clients[i]._state) {
-						if (strcmp(packet->id, clients[i]._id) == 0) {
-							send_login_fail_packet(s_id);
-							cout << packet->id << "접속중인 플레이어" << endl;
-							clients[i].state_lock.unlock();
-							return;
-						}
+			for (int i = 0; i < MAX_USER; ++i) {
+				clients[i].state_lock.lock();
+				if (ST_INGAME == clients[i]._state) {
+					if (strcmp(packet->id, clients[i]._id) == 0) {
+						send_login_fail_packet(s_id);
+						cout << packet->id << "접속중인 플레이어" << endl;
+						_OverLap = true;
+						clients[i].state_lock.unlock();
+						return;
 					}
-					clients[i].state_lock.unlock();
-				}*/
-			cl.state_lock.lock();
-			cl._state = ST_INGAME;
-			cl.state_lock.unlock();
-			cl.x = 600.0f * cos(s_id + 45.0f);
-			cl.y = 600.0f * sin(s_id + 45.0f);
-			cl.z = packet->z;
-			cl.Yaw = s_id * 55.0f - 115.0f;
-			if (cl.Yaw > 180) cl.Yaw -= 360;
+				}
+				clients[i].state_lock.unlock();
+			}
 
-			cl._hp = cl._max_hp;
+			if (_OverLap == true) break;
+			if (DB_odbc(s_id, packet->id, packet->pw) == true)
+			{
+				send_login_ok_packet(s_id);
+				cout << packet->id << " 로그인 성공" << endl;
+			}
+			//else 
+			//{
+			//	//계정 생성
+				strcpy_s(cl.name, packet->id);
+				cl.state_lock.lock();
+				cl._state = ST_INGAME;
+				cl.state_lock.unlock();
+				cl.x = 600.0f * cos(s_id + 45.0f);
+				cl.y = 600.0f * sin(s_id + 45.0f);
+				cl.z = packet->z;
+				cl.Yaw = s_id * 55.0f - 115.0f;
+				if (cl.Yaw > 180) cl.Yaw -= 360;
 
-			//sc_packet_login_ok _packet;
-			//_packet.size = sizeof(_packet);
-			//_packet.type = SC_PACKET_LOGIN_OK;
-			//_packet.s_id = s_id;
-			/*packet.x = clients[_s_id].x;
-			packet.y = clients[_s_id].y;
-			packet.z = clients[_s_id].z;
-			packet.Yaw = clients[_s_id].Yaw;
-			packet.Pitch = clients[_s_id].Pitch;
-			packet.Roll = clients[_s_id].Roll;*/
-			//cout << "로그인 허용 전송" << s_id << endl;
-			//cl.do_send(sizeof(_packet), &_packet);
-			send_login_ok_packet(s_id);
+				cl._hp = cl._max_hp;
+				DB_save(s_id);
+				send_login_ok_packet(s_id);
+			//	cout << packet->id << " 로그인 성공" << endl;
+			//}
+
 			cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
 
 			// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
@@ -768,14 +772,14 @@ void process_packet(int s_id, unsigned char* p)
 					packet.z = other.z;
 					packet.yaw = other.Yaw;
 					packet_type = PLAYER;
-       				cl.do_send(sizeof(packet), &packet);
+					cl.do_send(sizeof(packet), &packet);
 				}
 			}
 		}
-		else 
-        {
-		   g_tonardo_id = true;
-		   g_tonardo_id = cl._s_id;
+		else
+		{
+			g_tonardo_id = true;
+			g_tonardo_id = cl._s_id;
 			send_login_ok_packet(s_id);
 			//cout << "토네이도" << endl;
 		}
