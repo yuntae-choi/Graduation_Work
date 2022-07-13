@@ -137,7 +137,13 @@ AMyCharacter::AMyCharacter()
 		snowmanAnim = SNOWMAN_ANIM.Class;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear.M_Bear"));
+	//static ConstructorHelpers::FObjectFinder<UMaterial>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear.M_Bear"));
+	//if (BearMaterial.Succeeded())
+	//{
+	//	bearMaterial = BearMaterial.Object;
+	//}
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInstance>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear_Inst.M_Bear_Inst"));
 	if (BearMaterial.Succeeded())
 	{
 		bearMaterial = BearMaterial.Object;
