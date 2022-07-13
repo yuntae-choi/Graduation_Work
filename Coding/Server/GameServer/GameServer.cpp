@@ -685,9 +685,9 @@ void process_packet(int s_id, unsigned char* p)
 				send_login_ok_packet(s_id);
 				cout << packet->id << " 로그인 성공" << endl;
 			}
-			//else 
-			//{
-			//	//계정 생성
+			else 
+			{
+				//계정 생성
 				strcpy_s(cl.name, packet->id);
 				cl.state_lock.lock();
 				cl._state = ST_INGAME;
@@ -699,10 +699,11 @@ void process_packet(int s_id, unsigned char* p)
 				if (cl.Yaw > 180) cl.Yaw -= 360;
 
 				cl._hp = cl._max_hp;
-				DB_save(s_id);
+				//DB에 계정등록 
+				//DB_save(s_id);
 				send_login_ok_packet(s_id);
-			//	cout << packet->id << " 로그인 성공" << endl;
-			//}
+				cout << packet->id << " 로그인 성공" << endl;
+			}
 
 			cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
 
