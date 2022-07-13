@@ -61,7 +61,14 @@ AMyPlayerController::AMyPlayerController()
 	{
 		gameResultUIClass = GAMERESULT_UI.Class;
 	}
+	static ConstructorHelpers::FClassFinder<UUserWidget> LOGIN_UI(TEXT("/Game/Blueprints/LoginUI.LoginUI_C"));
+	if (LOGIN_UI.Succeeded() && (LOGIN_UI.Class != nullptr))
+	{
+		loginUIClass = LOGIN_UI.Class;
+	}
+
 	bIsReady = false;
+	loginInfoText = TEXT("LOGIN");
 }
 
 void AMyPlayerController::OnPossess(APawn* pawn_)
@@ -71,7 +78,9 @@ void AMyPlayerController::OnPossess(APawn* pawn_)
 	//mySocket->StartListen();
 	
 	localPlayerCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
+	
+	LoadLoginUI();	// loginUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
+	//LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
 	
 	FPlatformProcess::Sleep(0);
 }
@@ -956,4 +965,96 @@ void AMyPlayerController::FixRotation()
 	pitch = UKismetMathLibrary::ClampAngle(pitch, -15.0f, 30.0f);
 	FRotator newRotator = UKismetMathLibrary::MakeRotator(roll, pitch, yaw);
 	SetControlRotation(newRotator);
+}
+
+void AMyPlayerController::LoadLoginUI()
+{
+	if (loginUIClass)
+	{
+		loginUI = CreateWidget<UUserWidget>(GetWorld(), loginUIClass);
+		if (loginUI)
+		{
+			loginUI->AddToViewport();
+
+			FInputModeUIOnly InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputMode);
+			bShowMouseCursor = true;
+		}
+	}
+}
+
+void AMyPlayerController::BtnCreateAccount(FString id, FString pw)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("CREATE id : %s, pw : %s"), *id, *pw);
+
+	// id, pw를 모두 입력하지 않은 경우 return
+	if (id.Len() == 0 && pw.Len() == 0)
+	{
+		loginInfoText = TEXT("Input ID and PW");
+		return;
+	}
+	else if (id.Len() == 0)
+	{
+		loginInfoText = TEXT("Input ID");
+		return;
+	}
+	else if (pw.Len() == 0)
+	{
+		loginInfoText = TEXT("Input PW");
+		return;
+	}
+
+	// id, pw를 제대로 모두 입력한 경우
+	// id, pw로 계정 생성 후 Ready UI로 넘어가도록 해야함
+
+	//DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
+}
+
+void AMyPlayerController::BtnLogin(FString id, FString pw)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("LOGIN id : %s, pw : %s"), *id, *pw);
+
+	// 디버깅용 - id, pw에 입력 x인 경우 게임 플레이 되도록
+	if (id.Len() == 0 && pw.Len() == 0)
+	{
+		DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
+	}
+	else
+	{
+		if (id.Len() == 0)
+		{
+			loginInfoText = TEXT("Input ID");
+			return;
+		}
+		if (pw.Len() == 0)
+		{
+			loginInfoText = TEXT("Input PW");
+			return;
+		}
+
+		// id, pw가 DB에 등록된 것과 일치하는지 체크
+
+		// id가 유효하지 않은 경우 return
+		//if ()
+		//{
+		//	loginInfoText = TEXT("Invalid ID");
+		//	return;
+		//}
+		// pw 입력이 잘못된 경우 return
+		//if ()
+		//{
+		//	loginInfoText = TEXT("Wrong PW");
+		//	return;
+		//}
+
+		// id, pw가 유효한 경우
+		DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
+	}
+}
+
+void AMyPlayerController::DeleteLoginUICreateReadyUI()
+{
+	loginUI->RemoveFromParent();	// LoginUI 제거
+	LoadReadyUI(); // ReadyUI 띄우기
 }

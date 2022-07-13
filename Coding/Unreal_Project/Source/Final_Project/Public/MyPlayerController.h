@@ -72,6 +72,13 @@ public:
 	void StartGame();	// 모든 플레이어가 ready하면 호출 (ReadyUI 제거, 게임에 대한 입력 허용)
 	void LoadGameResultUI(int winnerSessionId);	// 게임 종료 시 결과창 ui 띄우기 (CharacterUI 제거, 승자 id 인자로 받아서 결과 출력)
 	
+	UFUNCTION(BlueprintCallable)
+	void BtnCreateAccount(FString id, FString pw);
+	UFUNCTION(BlueprintCallable)
+	void BtnLogin(FString id, FString pw);
+
+	void DeleteLoginUICreateReadyUI();
+
 	// UpdateUI 델리게이트 이벤트 호출
 	void CallDelegateUpdateAllOfUI();
 	void CallDelegateUpdateHP();
@@ -119,6 +126,7 @@ private:
 	void UpdatePlayerInfo(cCharacter& info);
 	void LoadReadyUI();	// ReadyUI 띄우기, UI에 대한 입력만 허용
 	void LoadCharacterUI();	// CharacterUI 띄우기, 게임에 대한 입력 허용
+	void LoadLoginUI();	// LoginUI 띄우기, UI에 대한 입력만 허용
 	void Reset_Items(int s_id);
 	void FixRotation();
 
@@ -148,6 +156,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	class UUserWidget* gameResultUI;	// 게임 결과 UI (게임종료 후 승패 ui)
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> loginUIClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	class UUserWidget* loginUI;	// 로그인 UI (계정 생성 버튼, 로그인 버튼, id pw 입력)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	FString loginInfoText;	// 로그인 UI info text에 보여질 text
 
 	// 델리게이트 이벤트 UpdateUI
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
