@@ -23,6 +23,7 @@ const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 const int iNumOfWeapons = 2;	// 무기 종류 수
+const int iNumOfProjectiles = 2;	// 발사체 종류 수
 const float fAimingTime = 0.2f;		// 조준하는 데 걸리는 시간 (카메라 전환만, 애니메이션은 따로)
 const float fThrowPower = 700.0f;
 const float fMaxChargingTime = 5.0f;	// 최대 차징 시간
@@ -326,6 +327,7 @@ AMyCharacter::AMyCharacter()
 
 	projectileClass = AMySnowball::StaticClass();
 	shotgunProjectileClass = ASnowballBomb::StaticClass();
+	iceballClass = AIceball::StaticClass();
 	jetskiClass = AJetski::StaticClass();
 
 	iSessionId = -1;
@@ -333,6 +335,7 @@ AMyCharacter::AMyCharacter()
 	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
+	iceball = nullptr;
 	
 	iMaxSnowballCount = iOriginMaxSnowballCount;
 	iCurrentSnowballCount = 0;	// 실제 설정값
@@ -359,8 +362,8 @@ AMyCharacter::AMyCharacter()
 	bIsInTornado = false;
 	rotateCont = false;
 
-	iSelectedWeapon = Weapon::Hand;	// 실제 설정값
-	//iSelectedWeapon = Weapon::Shotgun;	// 디버깅용 - 샷건
+	iSelectedWeapon = Weapon::Hand;
+	iSelectedProjectile = Projectile::Snowball;
 
 	iUmbrellaState = UmbrellaState::UmbClosed;
 	bReleaseUmbrella = true;
@@ -480,6 +483,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Released, this, &AMyCharacter::ReleaseRightMouseButton);
 
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeWeapon);
+	PlayerInputComponent->BindAction(TEXT("ChangeProjectile"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeProjectile);
 
 	PlayerInputComponent->BindAction(TEXT("GetOnOffJetski"), EInputEvent::IE_Pressed, this, &AMyCharacter::GetOnOffJetski);
 
@@ -523,16 +527,26 @@ void AMyCharacter::Attack()
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId == PlayerController->iSessionId)
 	{
-		switch (iSelectedWeapon) {
-		case Weapon::Hand:
-			PlayerController->SendPlayerInfo(COMMAND_ATTACK);
-			isAttacking = true;
+		switch (iSelectedProjectile) {
+		case Projectile::Snowball:
+			switch (iSelectedWeapon) {
+			case Weapon::Hand:
+				PlayerController->SendPlayerInfo(COMMAND_ATTACK);
+				isAttacking = true;
+				break;
+			case Weapon::Shotgun:
+				if (iCurrentSnowballCount < 5) return;	// 눈덩이가 5개 이상 없으면 공격 x
+				PlayerController->SendPlayerInfo(COMMAND_GUNATTACK);
+				MYLOG(Warning, TEXT("gunattack"));
+				//AttackShotgun();
+				isAttacking = true;
+				break;
+			default:
+				break;
+			}
 			break;
-		case Weapon::Shotgun:
-			if (iCurrentSnowballCount < 5) return;	// 눈덩이가 5개 이상 없으면 공격 x
-			PlayerController->SendPlayerInfo(COMMAND_GUNATTACK);
-			MYLOG(Warning, TEXT("gunattack"));
-			//AttackShotgun();
+		case Projectile::Iceball:
+			IceballAttack();
 			isAttacking = true;
 			break;
 		default:
@@ -545,7 +559,34 @@ void AMyCharacter::Attack()
 }
 
 void AMyCharacter::ReleaseAttack()
-{
+{	// 임시 - 아이스볼로 공격 중 release
+	if (iSelectedProjectile == Projectile::Iceball)
+	{
+		if (myAnim->bThrowing)
+		{
+			myAnim->PlayAttack2MontageSectionEnd();
+		}
+		else
+		{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
+			StopAnimMontage();
+			if (iceball)
+			{
+				iceball->Destroy();
+				iceball = nullptr;
+			}
+		}
+
+		if (iSessionId == localPlayerController->iSessionId)
+		{
+
+			localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
+			localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
+		}
+
+		return;
+	}
+
+
 	if (iSessionId == localPlayerController->iSessionId)
 	{
 		SendReleaseAttack();
@@ -650,6 +691,45 @@ void AMyCharacter::AttackShotgun()
 
 }
 
+void AMyCharacter::IceballAttack()
+{
+	//if (bIsSnowman) return;
+	//if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
+
+	//myAnim->PlayAttackMontage();
+	myAnim->PlayAttack2Montage();
+
+	// 디버깅용 - 실제는 주석 해제
+	//iCurrentSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
+	//UpdateUI(UICategory::CurSnowball);
+
+	// Attempt to fire a projectile.
+	if (iceballClass)
+	{
+		UWorld* World = GetWorld();
+
+		if (World)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+
+			FTransform SnowballSocketTransform = GetMesh()->GetSocketTransform(TEXT("SnowballSocket"));
+			iceball = World->SpawnActor<AIceball>(iceballClass, SnowballSocketTransform, SpawnParams);
+			FAttachmentTransformRules atr = FAttachmentTransformRules(
+				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
+			iceball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
+		}
+	}
+
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		localPlayerController->SetViewTargetWithBlend(aimingCameraPos, fAimingTime);	// 조준 시 카메라 위치로 전환
+		localPlayerController->GetHUD()->bShowHUD = false;	// 크로스헤어 안보이도록
+		bIsAiming = true;
+	}
+}
+
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	isAttacking = false;
@@ -752,6 +832,32 @@ void AMyCharacter::ReleaseSnowball()
 			fAimingElapsedTime = 0.0f;
 		}
 
+	}
+}
+
+void AMyCharacter::ReleaseIceball()
+{
+	if (IsValid(iceball))
+	{
+		FDetachmentTransformRules dtr = FDetachmentTransformRules(EDetachmentRule::KeepWorld, false);
+		iceball->DetachFromActor(dtr);
+
+		if (iceball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
+		{
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+
+			float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
+
+			II_Throwable::Execute_IceballThrow(iceball, cameraRotation, speed);
+
+			iceball = nullptr;
+
+			bIsAiming = false;
+			fAimingElapsedTime = 0.0f;
+		}
 	}
 }
 
@@ -1283,6 +1389,11 @@ void AMyCharacter::UpdateControllerRotateByTornado()
 void AMyCharacter::ChangeWeapon()
 {
 	iSelectedWeapon = (iSelectedWeapon + 1) % iNumOfWeapons;
+}
+
+void AMyCharacter::ChangeProjectile()
+{
+	iSelectedProjectile = (iSelectedProjectile + 1) % iNumOfProjectiles;
 }
 
 void AMyCharacter::ShowShotgun()

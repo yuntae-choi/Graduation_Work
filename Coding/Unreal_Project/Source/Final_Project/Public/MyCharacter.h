@@ -5,6 +5,7 @@
 #include "Final_Project.h"
 #include "GameFramework/Character.h"
 #include "MySnowball.h"
+#include "Iceball.h"
 #include "Itembox.h"
 #include "Bonfire.h"
 #include "ClientSocket.h"
@@ -27,6 +28,10 @@ enum UICategory {
 
 enum Weapon {
 	Hand, Shotgun
+};
+
+enum Projectile {
+	Snowball, Iceball
 };
 
 // 후에 Umbrella 클래스 새로 제작해서 분리해야함 (임시)
@@ -55,6 +60,7 @@ public:
 	void SendReleaseSnowball();
 	void SendReleaseAttack();
 
+	void ReleaseIceball();
 
 	void SendSpawnSnowballBomb();
 
@@ -83,6 +89,7 @@ public:
 
 	void SnowAttack();    // 일반 공격
 	void AttackShotgun(); //샷건 공격
+	void IceballAttack();    // 아이스볼 공격
 	void ShowProjectilePath();
 	void HideProjectilePath();
 
@@ -162,6 +169,7 @@ private:
 	void UpdateControllerRotateByTornado();
 
 	void ChangeWeapon();
+	void ChangeProjectile();
 
 	void SetAimingCameraPos();
 	void UpdateAiming();
@@ -191,6 +199,10 @@ public:
 	// 현재 손에 들고있는 눈덩이
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	AMySnowball* snowball;
+
+	// 현재 손에 들고있는 아이스볼
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	AIceball* iceball;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Data", Meta = (AllowPrivateAccess = true))
 	int32 iSessionId;
@@ -249,6 +261,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iSelectedWeapon;	// 현재 선택된 무기
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 iSelectedProjectile;	// 현재 선택된 발사체
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UStaticMeshComponent* shotgunMeshComponent;
 
@@ -292,6 +307,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class ASnowballBomb> shotgunProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AIceball> iceballClass;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
