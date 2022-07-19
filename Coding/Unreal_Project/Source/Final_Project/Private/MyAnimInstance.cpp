@@ -111,6 +111,13 @@ void UMyAnimInstance::AnimNotify_SnowballRelease2()
 	auto MyCharacter = Cast<AMyCharacter>(Pawn);
 	if (nullptr == MyCharacter) return;
 
+	// 임시 - 아이스볼
+	if (MyCharacter->iSelectedProjectile == Projectile::Iceball)
+	{
+		MyCharacter->ReleaseIceball();
+		return;
+	}
+
 	MyCharacter->SendReleaseSnowball();
 }
 

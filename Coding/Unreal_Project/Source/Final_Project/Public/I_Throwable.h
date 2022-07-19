@@ -24,4 +24,7 @@ class FINAL_PROJECT_API II_Throwable
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Itf")
 	void Throw(FVector Direction, float Speed);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Itf")
+	void IceballThrow(FRotator Rotation, float Speed);
 };
