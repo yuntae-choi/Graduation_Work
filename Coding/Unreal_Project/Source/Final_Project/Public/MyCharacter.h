@@ -286,6 +286,8 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	class AMyPlayerController* localPlayerController;
 
+	bool bFreeze;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;

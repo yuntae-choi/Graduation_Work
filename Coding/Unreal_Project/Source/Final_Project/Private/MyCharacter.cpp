@@ -137,17 +137,17 @@ AMyCharacter::AMyCharacter()
 		snowmanAnim = SNOWMAN_ANIM.Class;
 	}
 
-	//static ConstructorHelpers::FObjectFinder<UMaterial>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear.M_Bear"));
-	//if (BearMaterial.Succeeded())
-	//{
-	//	bearMaterial = BearMaterial.Object;
-	//}
-
-	static ConstructorHelpers::FObjectFinder<UMaterialInstance>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear_Inst.M_Bear_Inst"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear.M_Bear"));
 	if (BearMaterial.Succeeded())
 	{
 		bearMaterial = BearMaterial.Object;
 	}
+
+	//static ConstructorHelpers::FObjectFinder<UMaterialInstance>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear_Inst.M_Bear_Inst"));
+	//if (BearMaterial.Succeeded())
+	//{
+	//	bearMaterial = BearMaterial.Object;
+	//}
 
 	// 모든 색상의 곰 텍스쳐 로드해서 저장
 	for (int i = 0; i < 8; ++i)
@@ -766,14 +766,10 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 
 	if (nullptr != MySnowball)
 	{
-		//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		//if (iSessionId == PlayerController->iSessionId)
-		//{
-		//	MYLOG(Warning, TEXT("id: %d snowball hit."), iSessionId);
-
-		//	PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
-		//}
-
+		auto BoneName = GetMesh()->FindClosestBone(GetActorLocation());
+		MYLOG(Warning, TEXT("%s"), *BoneName.ToString());
+		if (BoneName.ToString() == TEXT("Base-HumanHead") || GetMesh()->GetParentBone(BoneName) == TEXT("Base-HumanHead"))
+			bFreeze = true;
 	}
 	AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
 	if (!otherCharacter) return;
