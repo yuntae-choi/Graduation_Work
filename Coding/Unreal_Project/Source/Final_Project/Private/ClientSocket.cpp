@@ -348,8 +348,8 @@ void ClientSocket::Send_LoginPacket(char* send_id, char* send_pw)
 	cs_packet_login packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
-	strcpy_s(packet.id, _id);
-	strcpy_s(packet.pw, _pw);
+	strcpy_s(packet.id, send_id);
+	strcpy_s(packet.pw, send_pw);
 
 	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(MyPlayerController, 0));
 	if (!player_) return;

@@ -1,15 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Snowdrift.h"
+#include "Icedrift.h"
 #include "MyCharacter.h"
 
-const float ASnowdrift::fFarmDurationMax = 3.0f;
-const int ASnowdrift::iNumOfSnowball = 5;
-int ASnowdrift::iIdCountHelper = -1;
+const float AIcedrift::fFarmDurationMax = 3.0f;
+const int AIcedrift::iNumOfIceball = 5;
 
 // Sets default values
-ASnowdrift::ASnowdrift()
+AIcedrift::AIcedrift()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -25,8 +24,8 @@ ASnowdrift::ASnowdrift()
 
 	if (!meshComponent)
 	{
-		meshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SnowdriftMeshComponent"));
-		static ConstructorHelpers::FObjectFinder<UStaticMesh>Mesh(TEXT("/Game/NonCharacters/snowdrift1.snowdrift1"));
+		meshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("IcedriftMeshComponent"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh>Mesh(TEXT("/Game/NonCharacters/icedrift2.icedrift2"));
 		if (Mesh.Succeeded())
 		{
 			meshComponent->SetStaticMesh(Mesh.Object);
@@ -34,28 +33,27 @@ ASnowdrift::ASnowdrift()
 		meshComponent->SetupAttachment(RootComponent);
 	}
 
-	boxComponent->OnComponentBeginOverlap.AddDynamic(this, &ASnowdrift::OnComponentBeginOverlap);
-	boxComponent->OnComponentEndOverlap.AddDynamic(this, &ASnowdrift::OnComponentEndOverlap);
+	boxComponent->OnComponentBeginOverlap.AddDynamic(this, &AIcedrift::OnComponentBeginOverlap);
+	boxComponent->OnComponentEndOverlap.AddDynamic(this, &AIcedrift::OnComponentEndOverlap);
 
 	fFarmDuration = fFarmDurationMax;
 }
 
 // Called when the game starts or when spawned
-void ASnowdrift::BeginPlay()
+void AIcedrift::BeginPlay()
 {
 	Super::BeginPlay();
-
-	iId = ++iIdCountHelper;
+	
 }
 
 // Called every frame
-void ASnowdrift::Tick(float DeltaTime)
+void AIcedrift::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void ASnowdrift::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AIcedrift::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AMyCharacter* mycharacter = Cast<AMyCharacter>(OtherActor);
 	if (mycharacter)
@@ -64,7 +62,7 @@ void ASnowdrift::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedCo
 	}
 }
 
-void ASnowdrift::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AIcedrift::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	AMyCharacter* mycharacter = Cast<AMyCharacter>(OtherActor);
 	if (mycharacter)
