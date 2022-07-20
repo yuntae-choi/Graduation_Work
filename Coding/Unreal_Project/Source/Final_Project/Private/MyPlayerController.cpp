@@ -1033,7 +1033,8 @@ void AMyPlayerController::BtnLogin(FString id, FString pw)
 	// 디버깅용 - id, pw에 입력 x인 경우 게임 플레이 되도록
 	if (id.Len() == 0 && pw.Len() == 0)
 	{
-		DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
+		g_socket->Send_LoginPacket(TCHAR_TO_UTF8(*id), TCHAR_TO_UTF8(*pw));
+		//DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
 	}
 	else
 	{

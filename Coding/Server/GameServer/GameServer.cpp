@@ -93,8 +93,8 @@ bool DB_odbc(int id, char* name, char* pw)
 	SQLHDBC hdbc;
 	SQLHSTMT hstmt = 0;
 	SQLRETURN retcode;
-	cout << name << endl;
-	cout << pw << endl;
+	cout <<"ID" << name << endl;
+	cout << "PW" << pw << endl;
 
 	char temp[BUFSIZE];
 	sprintf_s(temp, sizeof(temp), "EXEC login_player %s, %s", name, pw);
@@ -108,7 +108,7 @@ bool DB_odbc(int id, char* name, char* pw)
 	SQLINTEGER p_m_hp;
 	SQLINTEGER p_hp;
 
-	SQLWCHAR p_id[NAME_LEN];
+	SQLWCHAR p_nick[NAME_LEN];
 	SQLLEN cbP_ID = 0, cbP_X = 0, cbP_Y = 0, cbP_MAX_HP = 0, cbP_HP = 0,
 		cbP_MAX_EXP = 0, cbP_EXP = 0, cbP_LEVEL = 0, cbP_ATK = 0, cbP_DEF = 0, cbP_JOB_NUM = 0, cbP_GOLD = 0;
 
@@ -135,13 +135,11 @@ bool DB_odbc(int id, char* name, char* pw)
 					retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 					retcode = SQLExecDirect(hstmt, (SQLWCHAR*)exec, SQL_NTS);
 					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-
-					
-						retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, p_id, NAME_LEN, &cbP_ID);
-						retcode = SQLBindCol(hstmt, 2, SQL_C_LONG, &p_x, 100, &cbP_X);
-						retcode = SQLBindCol(hstmt, 3, SQL_C_LONG, &p_y, 100, &cbP_Y);
-						retcode = SQLBindCol(hstmt, 4, SQL_C_LONG, &p_m_hp, 100, &cbP_MAX_HP);
-						retcode = SQLBindCol(hstmt, 5, SQL_C_LONG, &p_hp, 100, &cbP_HP);
+						retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, p_nick, NAME_LEN, &cbP_ID);
+						//retcode = SQLBindCol(hstmt, 2, SQL_C_LONG, &p_x, 100, &cbP_X);
+						//retcode = SQLBindCol(hstmt, 3, SQL_C_LONG, &p_y, 100, &cbP_Y);
+						//retcode = SQLBindCol(hstmt, 4, SQL_C_LONG, &p_m_hp, 100, &cbP_MAX_HP);
+						//retcode = SQLBindCol(hstmt, 5, SQL_C_LONG, &p_hp, 100, &cbP_HP);
 					  
 						for (int i = 0; ; i++) {
 							retcode = SQLFetch(hstmt);
@@ -149,11 +147,12 @@ bool DB_odbc(int id, char* name, char* pw)
 								show_err();
 							if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
 							{
-								if (p_id != 0) {
-									strcpy_s(clients[id].name, name);
-									clients[id].x = p_x;
-									clients[id].y = p_y;
-									printf("%d: %ls %d %d\n", i + 1, p_id, p_x, p_y);
+								if (p_nick != 0) {
+									strcpy_s(clients[id].name, (char*)p_nick);
+									cout << "닉네임: " << name << endl;
+									//clients[id].x = p_x;
+									//clients[id].y = p_y;
+									//printf("%d: %ls %d %d\n", i + 1, p_id, p_x, p_y);
 									return true;
 								}
 								else
@@ -193,7 +192,7 @@ bool DB_save(int id)
 	SQLRETURN retcode;
 
 	char temp[BUFSIZE];
-	sprintf_s(temp, sizeof(temp), "EXEC select_save %d,%d,%s", clients[id]._max_hp, clients[id]._hp,  clients[id].name);
+	sprintf_s(temp, sizeof(temp), "EXEC select_save %s,%s,%s", clients[id]._id, clients[id]._pw,  clients[id].name);
 	wchar_t* exec;
 	int str_size = MultiByteToWideChar(CP_ACP, 0, temp, -1, NULL, NULL);
 	exec = new WCHAR[str_size];
@@ -700,9 +699,9 @@ void process_packet(int s_id, unsigned char* p)
 
 				cl._hp = cl._max_hp;
 				//DB에 계정등록 
-				//DB_save(s_id);
+				DB_save(s_id);
 				send_login_ok_packet(s_id);
-				cout << packet->id << " 로그인 성공" << endl;
+				cout << packet->id << "DB에 계정등록" << endl;
 			}
 
 			cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
