@@ -5,6 +5,7 @@
 #include "MyAnimInstance.h"
 #include "MyPlayerController.h"
 #include "Snowdrift.h"
+#include "Icedrift.h"
 #include "Debug.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UmbrellaAnimInstance.h"
@@ -21,8 +22,10 @@ const int iJetskiSpeed = 1200;		// Jetski 탑승 시 이동속도
 const float fChangeSnowmanStunTime = 3.0f;	// 실제값 - 10.0f, 눈사람화 할 때 스턴 시간
 const float fStunTime = 3.0f;	// 눈사람이 눈덩이 맞았을 때 스턴 시간
 const int iOriginMaxSnowballCount = 10;	// 눈덩이 최대보유량 (초기, 가방x)
+const int iOriginMaxIceballCount = 10;	// 아이스볼 최대보유량 (초기, 가방x)
 const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 const int iNumOfWeapons = 2;	// 무기 종류 수
+const int iNumOfProjectiles = 2;	// 발사체 종류 수
 const float fAimingTime = 0.2f;		// 조준하는 데 걸리는 시간 (카메라 전환만, 애니메이션은 따로)
 const float fThrowPower = 700.0f;
 const float fMaxChargingTime = 5.0f;	// 최대 차징 시간
@@ -137,17 +140,17 @@ AMyCharacter::AMyCharacter()
 		snowmanAnim = SNOWMAN_ANIM.Class;
 	}
 
-	//static ConstructorHelpers::FObjectFinder<UMaterial>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear.M_Bear"));
-	//if (BearMaterial.Succeeded())
-	//{
-	//	bearMaterial = BearMaterial.Object;
-	//}
-
-	static ConstructorHelpers::FObjectFinder<UMaterialInstance>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear_Inst.M_Bear_Inst"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear.M_Bear"));
 	if (BearMaterial.Succeeded())
 	{
 		bearMaterial = BearMaterial.Object;
 	}
+
+	//static ConstructorHelpers::FObjectFinder<UMaterialInstance>BearMaterial(TEXT("/Game/Characters/Bear/M_Bear_Inst.M_Bear_Inst"));
+	//if (BearMaterial.Succeeded())
+	//{
+	//	bearMaterial = BearMaterial.Object;
+	//}
 
 	// 모든 색상의 곰 텍스쳐 로드해서 저장
 	for (int i = 0; i < 8; ++i)
@@ -326,6 +329,7 @@ AMyCharacter::AMyCharacter()
 
 	projectileClass = AMySnowball::StaticClass();
 	shotgunProjectileClass = ASnowballBomb::StaticClass();
+	iceballClass = AIceball::StaticClass();
 	jetskiClass = AJetski::StaticClass();
 
 	iSessionId = -1;
@@ -333,10 +337,14 @@ AMyCharacter::AMyCharacter()
 	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
 	snowball = nullptr;
+	iceball = nullptr;
 	
 	iMaxSnowballCount = iOriginMaxSnowballCount;
 	iCurrentSnowballCount = 0;	// 실제 설정값
 	//iCurrentSnowballCount = 10;	// 디버깅용
+	iMaxIceballCount = iOriginMaxIceballCount;
+	iCurrentIceballCount = 0;	// 실제 설정값
+	//iCurrentIceballCount = 10;	// 디버깅용
 	iMaxMatchCount = iOriginMaxMatchCount;
 	iCurrentMatchCount = 0;
 	bHasUmbrella = false;
@@ -359,8 +367,8 @@ AMyCharacter::AMyCharacter()
 	bIsInTornado = false;
 	rotateCont = false;
 
-	iSelectedWeapon = Weapon::Hand;	// 실제 설정값
-	//iSelectedWeapon = Weapon::Shotgun;	// 디버깅용 - 샷건
+	iSelectedWeapon = Weapon::Hand;
+	iSelectedProjectile = Projectile::Snowball;
 
 	iUmbrellaState = UmbrellaState::UmbClosed;
 	bReleaseUmbrella = true;
@@ -480,6 +488,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("UseSelectedItem"), EInputEvent::IE_Released, this, &AMyCharacter::ReleaseRightMouseButton);
 
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeWeapon);
+	PlayerInputComponent->BindAction(TEXT("ChangeProjectile"), EInputEvent::IE_Pressed, this, &AMyCharacter::ChangeProjectile);
 
 	PlayerInputComponent->BindAction(TEXT("GetOnOffJetski"), EInputEvent::IE_Pressed, this, &AMyCharacter::GetOnOffJetski);
 
@@ -519,20 +528,32 @@ void AMyCharacter::Attack()
 {
 	if (isAttacking) return;
 	if (bIsSnowman) return;
-	if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
+
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId == PlayerController->iSessionId)
 	{
-		switch (iSelectedWeapon) {
-		case Weapon::Hand:
-			PlayerController->SendPlayerInfo(COMMAND_ATTACK);
-			isAttacking = true;
+		switch (iSelectedProjectile) {
+		case Projectile::Snowball:
+			switch (iSelectedWeapon) {
+			case Weapon::Hand:
+				if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
+				PlayerController->SendPlayerInfo(COMMAND_ATTACK);
+				isAttacking = true;
+				break;
+			case Weapon::Shotgun:
+				if (iCurrentSnowballCount < 5) return;	// 눈덩이가 5개 이상 없으면 공격 x
+				PlayerController->SendPlayerInfo(COMMAND_GUNATTACK);
+				MYLOG(Warning, TEXT("gunattack"));
+				//AttackShotgun();
+				isAttacking = true;
+				break;
+			default:
+				break;
+			}
 			break;
-		case Weapon::Shotgun:
-			if (iCurrentSnowballCount < 5) return;	// 눈덩이가 5개 이상 없으면 공격 x
-			PlayerController->SendPlayerInfo(COMMAND_GUNATTACK);
-			MYLOG(Warning, TEXT("gunattack"));
-			//AttackShotgun();
+		case Projectile::Iceball:
+			if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
+			IceballAttack();
 			isAttacking = true;
 			break;
 		default:
@@ -545,7 +566,34 @@ void AMyCharacter::Attack()
 }
 
 void AMyCharacter::ReleaseAttack()
-{
+{	// 임시 - 아이스볼로 공격 중 release
+	if (iSelectedProjectile == Projectile::Iceball)
+	{
+		if (myAnim->bThrowing)
+		{
+			myAnim->PlayAttack2MontageSectionEnd();
+		}
+		else
+		{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
+			StopAnimMontage();
+			if (iceball)
+			{
+				iceball->Destroy();
+				iceball = nullptr;
+			}
+		}
+
+		if (iSessionId == localPlayerController->iSessionId)
+		{
+
+			localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
+			localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
+		}
+
+		return;
+	}
+
+
 	if (iSessionId == localPlayerController->iSessionId)
 	{
 		SendReleaseAttack();
@@ -607,10 +655,6 @@ void AMyCharacter::SnowAttack()
 	//myAnim->PlayAttackMontage();
 	myAnim->PlayAttack2Montage();
 
-	// 디버깅용 - 실제는 주석 해제
-	//iCurrentSnowballCount -= 1;	// 공격 시 눈덩이 소유량 1 감소
-	UpdateUI(UICategory::CurSnowball);
-
 	// Attempt to fire a projectile.
 	if (projectileClass)
 	{
@@ -648,6 +692,41 @@ void AMyCharacter::AttackShotgun()
 	//iCurrentSnowballCount -= 4;	// 공격 시 눈덩이 소유량 4 감소
 	UpdateUI(UICategory::CurSnowball);
 
+}
+
+void AMyCharacter::IceballAttack()
+{
+	//if (bIsSnowman) return;
+	if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
+
+	//myAnim->PlayAttackMontage();
+	myAnim->PlayAttack2Montage();
+
+	// Attempt to fire a projectile.
+	if (iceballClass)
+	{
+		UWorld* World = GetWorld();
+
+		if (World)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+
+			FTransform SnowballSocketTransform = GetMesh()->GetSocketTransform(TEXT("SnowballSocket"));
+			iceball = World->SpawnActor<AIceball>(iceballClass, SnowballSocketTransform, SpawnParams);
+			FAttachmentTransformRules atr = FAttachmentTransformRules(
+				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
+			iceball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
+		}
+	}
+
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		localPlayerController->SetViewTargetWithBlend(aimingCameraPos, fAimingTime);	// 조준 시 카메라 위치로 전환
+		localPlayerController->GetHUD()->bShowHUD = false;	// 크로스헤어 안보이도록
+		bIsAiming = true;
+	}
 }
 
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -755,6 +834,35 @@ void AMyCharacter::ReleaseSnowball()
 	}
 }
 
+void AMyCharacter::ReleaseIceball()
+{
+	if (IsValid(iceball))
+	{
+		iCurrentIceballCount -= 1;	// 공격 시 아이스볼 소유량 1 감소
+		UpdateUI(UICategory::CurIceball);
+
+		FDetachmentTransformRules dtr = FDetachmentTransformRules(EDetachmentRule::KeepWorld, false);
+		iceball->DetachFromActor(dtr);
+
+		if (iceball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
+		{
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+
+			float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
+
+			II_Throwable::Execute_IceballThrow(iceball, cameraRotation, speed);
+
+			iceball = nullptr;
+
+			bIsAiming = false;
+			fAimingElapsedTime = 0.0f;
+		}
+	}
+}
+
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -766,14 +874,10 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 
 	if (nullptr != MySnowball)
 	{
-		//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-		//if (iSessionId == PlayerController->iSessionId)
-		//{
-		//	MYLOG(Warning, TEXT("id: %d snowball hit."), iSessionId);
-
-		//	PlayerController->UpdatePlayerInfo(COMMAND_DAMAGE);
-		//}
-
+		auto BoneName = GetMesh()->FindClosestBone(GetActorLocation());
+		MYLOG(Warning, TEXT("%s"), *BoneName.ToString());
+		if (BoneName.ToString() == TEXT("Base-HumanHead") || GetMesh()->GetParentBone(BoneName) == TEXT("Base-HumanHead"))
+			bFreeze = true;
 	}
 	AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
 	if (!otherCharacter) return;
@@ -833,6 +937,12 @@ void AMyCharacter::StartFarming()
 	if (Cast<ASnowdrift>(farmingItem))
 	{
 		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
+		bIsFarming = true;
+		UpdateUI(UICategory::IsFarmingSnowdrift);
+	}
+	else if (Cast<AIcedrift>(farmingItem))
+	{
+		if (iCurrentIceballCount >= iMaxIceballCount) return;	// 아이스볼 최대보유량 이상은 눈 무더기 파밍 못하도록
 		bIsFarming = true;
 		UpdateUI(UICategory::IsFarmingSnowdrift);
 	}
@@ -905,13 +1015,24 @@ void AMyCharacter::EndFarming()
 	if (IsValid(farmingItem))
 	{
 		if (Cast<ASnowdrift>(farmingItem))
-		{	
+		{
 
 			if (iCurrentSnowballCount >= iMaxSnowballCount) return;
-			
+
 			// F키로 눈 무더기 파밍 중 F키 release 시 눈 무더기 duration 초기화
 			ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
 			snowdrift->SetFarmDuration(ASnowdrift::fFarmDurationMax);
+			bIsFarming = false;
+			UpdateUI(UICategory::IsFarmingSnowdrift);
+		}
+		else if (Cast<AIcedrift>(farmingItem))
+		{
+
+			if (iCurrentIceballCount >= iMaxIceballCount) return;
+
+			// F키로 얼음 무더기 파밍 중 F키 release 시 얼음 무더기 duration 초기화
+			AIcedrift* icedrift = Cast<AIcedrift>(farmingItem);
+			icedrift->SetFarmDuration(AIcedrift::fFarmDurationMax);
 			bIsFarming = false;
 			UpdateUI(UICategory::IsFarmingSnowdrift);
 		}
@@ -924,6 +1045,8 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 	if (!IsValid(farmingItem)) return;
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId != PlayerController->iSessionId || !PlayerController->is_start()) return;
+
+	// 눈 무더기 파밍
 	ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
 	if (snowdrift)
 	{	// 눈 무더기 duration 만큼 F키를 누르고 있으면 캐릭터의 눈덩이 추가 
@@ -943,6 +1066,26 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 			UpdateUI(UICategory::IsFarmingSnowdrift);
 			//snowdrift->Destroy(); //서버에서 아이디 반환시 처리
 			//snowdrift = nullptr;
+		}
+	}
+
+	// 얼음 무더기 파밍
+	AIcedrift* icedrift = Cast<AIcedrift>(farmingItem);
+	if (icedrift)
+	{	// 얼음 무더기 duration 만큼 F키를 누르고 있으면 캐릭터의 아이스볼 추가 
+		float lastFarmDuration = icedrift->GetFarmDuration();
+		float newFarmDuration = lastFarmDuration - deltaTime;
+		icedrift->SetFarmDuration(newFarmDuration);
+		UpdateUI(UICategory::SnowdriftFarmDuration, newFarmDuration);
+
+		if (newFarmDuration <= 0)
+		{
+			iCurrentIceballCount = FMath::Clamp<int>(iCurrentIceballCount + icedrift->iNumOfIceball, 0, iMaxIceballCount);
+			UpdateUI(UICategory::CurIceball);
+			bIsFarming = false;	// 얼음무더기 파밍 끝나면 false로 변경 후 UI 갱신 (눈무더기 파밍 바 ui 안보이도록)
+			UpdateUI(UICategory::IsFarmingSnowdrift);
+			icedrift->Destroy();
+			icedrift = nullptr;
 		}
 	}
 }
@@ -1107,6 +1250,8 @@ void AMyCharacter::ResetHasItems()
 {
 	iCurrentSnowballCount = 0;
 	iMaxSnowballCount = iOriginMaxSnowballCount;
+	iCurrentIceballCount = 0;
+	iMaxIceballCount = iOriginMaxIceballCount;
 	iCurrentMatchCount = 0;
 	iMaxMatchCount = iOriginMaxMatchCount;
 	bHasUmbrella = false;
@@ -1177,11 +1322,14 @@ void AMyCharacter::UpdateUI(int uiCategory, float farmDuration)
 	case UICategory::CurSnowball:
 		localPlayerController->CallDelegateUpdateCurrentSnowballCount();	// CurSnowball ui 갱신
 		break;
+	case UICategory::CurIceball:
+		localPlayerController->CallDelegateUpdateCurrentIceballCount();		// CurIceball ui 갱신
+		break;
 	case UICategory::CurMatch:
 		localPlayerController->CallDelegateUpdateCurrentMatchCount();	// CurMatch ui 갱신
 		break;
-	case UICategory::MaxSnowballAndMatch:
-		localPlayerController->CallDelegateUpdateMaxSnowballAndMatchCount();	// MaxSnowballAndMatch ui 갱신
+	case UICategory::MaxSnowIceballAndMatch:
+		localPlayerController->CallDelegateUpdateMaxSnowIceballAndMatchCount();	// MaxSnowIceballAndMatch ui 갱신
 		break;
 	case UICategory::HasUmbrella:
 		localPlayerController->CallDelegateUpdateHasUmbrella();	// HasUmbrella ui 갱신
@@ -1197,6 +1345,9 @@ void AMyCharacter::UpdateUI(int uiCategory, float farmDuration)
 		break;
 	case UICategory::SelectedItem:
 		localPlayerController->CallDelegateUpdateSelectedItem();
+		break;
+	case UICategory::SelectedProjectile:
+		localPlayerController->CallDelegateUpdateSelectedProjectile();
 		break;
 	case UICategory::AllOfUI:
 		localPlayerController->CallDelegateUpdateAllOfUI();	// 모든 캐릭터 ui 갱신
@@ -1283,6 +1434,12 @@ void AMyCharacter::UpdateControllerRotateByTornado()
 void AMyCharacter::ChangeWeapon()
 {
 	iSelectedWeapon = (iSelectedWeapon + 1) % iNumOfWeapons;
+}
+
+void AMyCharacter::ChangeProjectile()
+{
+	iSelectedProjectile = (iSelectedProjectile + 1) % iNumOfProjectiles;
+	UpdateUI(UICategory::SelectedProjectile);
 }
 
 void AMyCharacter::ShowShotgun()
@@ -1540,9 +1697,10 @@ void AMyCharacter::GetBag()
 {
 	bHasBag = true;
 	iMaxSnowballCount += 5;	// 눈덩이 10 -> 15 까지 보유 가능
+	iMaxIceballCount += 5;	// 아이스볼 10 -> 15 까지 보유 가능
 	iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
 	UpdateUI(UICategory::HasBag);
-	UpdateUI(UICategory::MaxSnowballAndMatch);
+	UpdateUI(UICategory::MaxSnowIceballAndMatch);
 
 	bagMeshComponent->SetVisibility(true);
 }

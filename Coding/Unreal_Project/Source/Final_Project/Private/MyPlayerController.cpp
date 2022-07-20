@@ -104,16 +104,19 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	////SleepEx(0, true);
 	//mySocket->CloseSocket();
 	//g_socket = nullptr;
+
 	// 델리게이트 해제
 	FuncUpdateHP.Clear();
 	FuncUpdateCurrentSnowballCount.Clear();
+	FuncUpdateCurrentIceballCount.Clear();
 	FuncUpdateCurrentMatchCount.Clear();
-	FuncUpdateMaxSnowballAndMatchCount.Clear();
+	FuncUpdateMaxSnowIceballAndMatchCount.Clear();
 	FuncUpdateHasUmbrella.Clear();
 	FuncUpdateHasBag.Clear();
 	FuncUpdateIsFarmingSnowdrift.Clear();
 	FuncUpdateSnowdriftFarmDuration.Clear();
 	FuncUpdateSelectedItem.Clear();
+	FuncUpdateSelectedProjectile.Clear();
 	FuncUpdateGameResult.Clear();
 }
 
@@ -876,12 +879,14 @@ void AMyPlayerController::CallDelegateUpdateAllOfUI()
 {
 	CallDelegateUpdateHP();
 	CallDelegateUpdateCurrentSnowballCount();
+	CallDelegateUpdateCurrentIceballCount();
 	CallDelegateUpdateCurrentMatchCount();
-	CallDelegateUpdateMaxSnowballAndMatchCount();
+	CallDelegateUpdateMaxSnowIceballAndMatchCount();
 	CallDelegateUpdateHasUmbrella();
 	CallDelegateUpdateHasBag();
 
 	CallDelegateUpdateSelectedItem();
+	CallDelegateUpdateSelectedProjectile();
 }
 
 void AMyPlayerController::CallDelegateUpdateHP()
@@ -901,6 +906,16 @@ void AMyPlayerController::CallDelegateUpdateCurrentSnowballCount()
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update current snowball count %d"), localPlayerCharacter->iCurrentSnowballCount);
 }
+
+void AMyPlayerController::CallDelegateUpdateCurrentIceballCount()
+{
+	if (!characterUI) return;
+
+	if (FuncUpdateCurrentIceballCount.IsBound() == true) FuncUpdateCurrentIceballCount.Broadcast(localPlayerCharacter->iCurrentIceballCount);
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update current iceball count %d"), localPlayerCharacter->iCurrentIceballCount);
+}
+
 void AMyPlayerController::CallDelegateUpdateCurrentMatchCount()
 {
 	if (!characterUI) return;
@@ -909,16 +924,19 @@ void AMyPlayerController::CallDelegateUpdateCurrentMatchCount()
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update current match count %d"), localPlayerCharacter->iCurrentMatchCount);
 }
-void AMyPlayerController::CallDelegateUpdateMaxSnowballAndMatchCount()
+
+void AMyPlayerController::CallDelegateUpdateMaxSnowIceballAndMatchCount()
 {
 	if (!characterUI) return;
 
-	if (FuncUpdateMaxSnowballAndMatchCount.IsBound() == true)
-		FuncUpdateMaxSnowballAndMatchCount.Broadcast(localPlayerCharacter->iMaxSnowballCount, localPlayerCharacter->iMaxMatchCount);
+	if (FuncUpdateMaxSnowIceballAndMatchCount.IsBound() == true)
+		FuncUpdateMaxSnowIceballAndMatchCount.Broadcast(
+			localPlayerCharacter->iMaxSnowballCount, localPlayerCharacter->iMaxIceballCount, localPlayerCharacter->iMaxMatchCount);
 
-	//UE_LOG(LogTemp, Warning, TEXT("call delegate update max snowball count %d, max match count %d"), 
-	//	localPlayerCharacter->iMaxSnowballCount, localPlayerCharacter->iMaxMatchCount);
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update max snowball count %d, max iceball count %d, max match count %d"), 
+	//	localPlayerCharacter->iMaxSnowballCount, localPlayerCharacter->iMaxIceballCount, localPlayerCharacter->iMaxMatchCount);
 }
+
 void AMyPlayerController::CallDelegateUpdateHasUmbrella()
 {
 	if (!characterUI) return;
@@ -927,6 +945,7 @@ void AMyPlayerController::CallDelegateUpdateHasUmbrella()
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update has umbrella %d"), localPlayerCharacter->bHasUmbrella);
 }
+
 void AMyPlayerController::CallDelegateUpdateHasBag()
 {
 	if (!characterUI) return;
@@ -963,13 +982,20 @@ void AMyPlayerController::CallDelegateUpdateSelectedItem()
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected item %d"), localPlayerCharacter->iSelectedItem);
 }
 
+void AMyPlayerController::CallDelegateUpdateSelectedProjectile()
+{
+	if (!characterUI) return;
+
+	if (FuncUpdateSelectedProjectile.IsBound() == true) FuncUpdateSelectedProjectile.Broadcast(localPlayerCharacter->iSelectedProjectile);
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected projectile %d"), localPlayerCharacter->iSelectedProjectile);
+}
+
 void AMyPlayerController::CallDelegateUpdateGameResult(bool isWinner)
 {
 	if (!gameResultUI) return;
 	
 	if (FuncUpdateGameResult.IsBound() == true) FuncUpdateGameResult.Broadcast(isWinner);
-
-	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected item %d"), localPlayerCharacter->iSelectedItem);
 }
 
 void AMyPlayerController::FixRotation()
