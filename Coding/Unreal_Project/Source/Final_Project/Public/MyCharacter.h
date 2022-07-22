@@ -146,6 +146,9 @@ public:
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
 
 	void init_Socket();
+
+	void FreezeHead();
+	void FreezeAnimation();
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -176,6 +179,8 @@ private:
 	void UpdateAiming();
 
 	void UpdateJetski();
+
+	void SettingHead();
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -309,6 +314,78 @@ public:
 	class AMyPlayerController* localPlayerController;
 
 	bool bFreeze;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UStaticMeshComponent* head9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* head23;
+
+	TArray<UStaticMeshComponent*> heads;
+	int32 iHeadFrame;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)

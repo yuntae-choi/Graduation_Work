@@ -324,6 +324,8 @@ AMyCharacter::AMyCharacter()
 		}
 	}
 
+	SettingHead();
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
@@ -874,10 +876,6 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 
 	if (nullptr != MySnowball)
 	{
-		auto BoneName = GetMesh()->FindClosestBone(GetActorLocation());
-		MYLOG(Warning, TEXT("%s"), *BoneName.ToString());
-		if (BoneName.ToString() == TEXT("Base-HumanHead") || GetMesh()->GetParentBone(BoneName) == TEXT("Base-HumanHead"))
-			bFreeze = true;
 	}
 	AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
 	if (!otherCharacter) return;
@@ -1909,4 +1907,116 @@ void AMyCharacter::UpdateJetski()
 		FRotator newRotation = FRotator(pitch, GetActorRotation().Yaw, roll);
 		jetskiMeshComponent->SetWorldRotation(newRotation);
 	}
+}
+
+void AMyCharacter::SettingHead() 
+{
+	heads.Add(head1);
+	heads.Add(head2);
+	heads.Add(head3);
+	heads.Add(head4);
+	heads.Add(head5);
+	heads.Add(head6);
+	heads.Add(head7);
+	heads.Add(head8);
+	heads.Add(head9);
+	heads.Add(head10);
+	heads.Add(head11);
+	heads.Add(head12);
+	heads.Add(head13);
+	heads.Add(head14);
+	heads.Add(head15);
+	heads.Add(head16);
+	heads.Add(head17);
+	heads.Add(head18);
+	heads.Add(head19);
+	heads.Add(head20);
+	heads.Add(head21);
+	heads.Add(head22);
+	heads.Add(head23);
+
+	TArray<const wchar_t*> names;
+	names.Add(TEXT("head1"));
+	names.Add(TEXT("head2"));
+	names.Add(TEXT("head3"));
+	names.Add(TEXT("head4"));
+	names.Add(TEXT("head5"));
+	names.Add(TEXT("head6"));
+	names.Add(TEXT("head7"));
+	names.Add(TEXT("head8"));
+	names.Add(TEXT("head9"));
+	names.Add(TEXT("head10"));
+	names.Add(TEXT("head11"));
+	names.Add(TEXT("head12"));
+	names.Add(TEXT("head13"));
+	names.Add(TEXT("head14"));
+	names.Add(TEXT("head15"));
+	names.Add(TEXT("head16"));
+	names.Add(TEXT("head17"));
+	names.Add(TEXT("head18"));
+	names.Add(TEXT("head19"));
+	names.Add(TEXT("head20"));
+	names.Add(TEXT("head21"));
+	names.Add(TEXT("head22"));
+	names.Add(TEXT("head23"));
+
+	TArray<const wchar_t*> refs;
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_2.head_2"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_3.head_3"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_4.head_4"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_5.head_5"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_6.head_6"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_7.head_7"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_8.head_8"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_9.head_9"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_10.head_10"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_11.head_11"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_12.head_12"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_13.head_13"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_14.head_14"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_15.head_15"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_16.head_16"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_17.head_17"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_18.head_18"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_19.head_19"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_20.head_20"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_21.head_21"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_22.head_22"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_23.head_23"));
+	refs.Add(TEXT("/Game/FX/Frozen/Meshes/head_24.head_24"));
+
+	for (int i = 0; i < 23; ++i)
+	{
+		if (!heads[i])
+		{
+			heads[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+			static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD(refs[i]);
+			if (SM_HEAD.Succeeded())
+			{
+				heads[i]->SetStaticMesh(SM_HEAD.Object);
+				heads[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+				heads[i]->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
+				heads[i]->SetVisibility(false);
+			}
+		}
+	}
+}
+
+void AMyCharacter::FreezeHead()
+{
+	FTimerHandle WaitHandle;
+	float WaitTime = 0.1f;
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			switch (iHeadFrame)
+			{
+			case 0:
+				break;
+			default:
+				break;
+			}
+
+			if(iHeadFrame == 0)
+			heads[0]->SetVisibility(true);
+		}), WaitTime, true);
 }
