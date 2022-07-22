@@ -34,6 +34,7 @@ const char CS_PACKET_OPEN_BOX = 14;
 const char CS_PACKET_GUNATTACK = 15;
 const char CS_PACKET_GUNFIRE = 16;
 const char CS_PACKET_UMB = 17;
+const char CS_PACKET_ACC = 18;
 
 
 const char SC_PACKET_LOGIN_OK = 1;

@@ -687,6 +687,144 @@ void process_packet(int s_id, unsigned char* p)
 			}
 			else 
 			{
+				/*sc_packet_login_ok packet;
+				packet.size = sizeof(packet);
+				packet.type = SC_PACKET_LOGIN_FAIL;
+				printf("[Send login fail] id : %d\n", s_id);
+				*///clients[s_id].do_send(sizeof(packet), &packet);
+
+				//디버깅용
+				strcpy_s(cl._id, packet->id);
+				strcpy_s(cl._pw, packet->pw);
+				cl.state_lock.lock();
+				cl._state = ST_INGAME;
+				cl.state_lock.unlock();
+				cl.x = 600.0f * cos(s_id + 45.0f);
+				cl.y = 600.0f * sin(s_id + 45.0f);
+				cl.z = packet->z;
+				cl.Yaw = s_id * 55.0f - 115.0f;
+				cout << "플레이어 1" << cl.x << "" << cl.y << "" << cl.z << "" << cl.Yaw << endl;
+				if (cl.Yaw > 180) cl.Yaw -= 360;
+
+				cl._hp = cl._max_hp;
+				send_login_ok_packet(s_id);
+				cout << packet->id << " 로그인 성공" << endl;
+			}
+
+			cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
+
+			// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
+			for (auto& other : clients) {
+				if (other._s_id == s_id) continue;
+				if (other._s_id == g_tonardo_id) continue;
+				other.state_lock.lock();
+				if (ST_INGAME != other._state) {
+					other.state_lock.unlock();
+					continue;
+				}
+				else other.state_lock.unlock();
+
+				//if (false == is_near(other._id, client_id))
+					//continue;
+
+				//other.vl.lock();
+				//other.viewlist.insert(s_id);
+				//other.vl.unlock();
+				sc_packet_put_object packet;
+				packet.s_id = cl._s_id;
+				strcpy_s(packet.name, cl.name);
+				packet.object_type = 0;
+				packet.size = sizeof(packet);
+				packet.type = SC_PACKET_PUT_OBJECT;
+				packet.x = cl.x;
+				packet.y = cl.y;
+				packet.z = cl.z;
+				packet.yaw = cl.Yaw;
+				packet_type = PLAYER;
+				//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+				//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
+				other.do_send(sizeof(packet), &packet);
+			}
+
+			// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
+			for (auto& other : clients) {
+				if (other._s_id == s_id) continue;
+				if (ST_INGAME != other._state) {
+					if (g_tonardo) {
+						if (g_tonardo_id == other._s_id) {
+							//토네이도 생성위치 보내기
+							sc_packet_put_object packet;
+							packet.s_id = other._s_id;
+							packet.size = sizeof(packet);
+							packet.type = SC_PACKET_PUT_OBJECT;
+							packet.x = other.x;
+							packet.y = other.y;
+							packet.z = other.z;
+							packet.yaw = 0.0f;
+							packet_type = TONARDO;
+							printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+							cl.do_send(sizeof(packet), &packet);
+						}
+					}
+				}
+				else {
+					sc_packet_put_object packet;
+					packet.s_id = other._s_id;
+					strcpy_s(packet.name, other.name);
+					packet.object_type = 0;
+					packet.size = sizeof(packet);
+					packet.type = SC_PACKET_PUT_OBJECT;
+					packet.x = other.x;
+					packet.y = other.y;
+					packet.z = other.z;
+					packet.yaw = other.Yaw;
+					packet_type = PLAYER;
+					cl.do_send(sizeof(packet), &packet);
+				}
+			}
+		}
+		else
+		{
+			g_tonardo_id = true;
+			g_tonardo_id = cl._s_id;
+			send_login_ok_packet(s_id);
+			//cout << "토네이도" << endl;
+		}
+		break;
+	}
+	case CS_PACKET_ACC: {
+		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
+		bool _OverLap = false;
+		if (strcmp("Tornado", packet->id) != 0) {
+			CLIENT& cl = clients[s_id];
+			printf_s("[init login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
+
+			for (int i = 0; i < MAX_USER; ++i) {
+				clients[i].state_lock.lock();
+				if (ST_INGAME == clients[i]._state) {
+					if (strcmp(packet->id, clients[i]._id) == 0) {
+						send_login_fail_packet(s_id);
+						cout << packet->id << "접속중인 플레이어" << endl;
+						_OverLap = true;
+						clients[i].state_lock.unlock();
+						return;
+					}
+				}
+				clients[i].state_lock.unlock();
+			}
+
+			if (_OverLap == true) break;
+			if (DB_odbc(s_id, packet->id, packet->pw) == true)
+			{
+				sc_packet_login_ok packet;
+				packet.size = sizeof(packet);
+				packet.type = SC_PACKET_LOGIN_FAIL;
+				printf("[Send login fail] id : %d\n", s_id);
+				clients[s_id].do_send(sizeof(packet), &packet);
+				
+			}
+			else
+			{
 				//계정 생성
 				strcpy_s(cl._id, packet->id);
 				strcpy_s(cl._pw, packet->pw);
@@ -698,12 +836,12 @@ void process_packet(int s_id, unsigned char* p)
 				cl.y = 600.0f * sin(s_id + 45.0f);
 				cl.z = packet->z;
 				cl.Yaw = s_id * 55.0f - 115.0f;
-				cout << "플레이어 1" << cl.x  << "" << cl.y << "" << cl.z << "" << cl.Yaw << endl;
+				cout << "플레이어 1" << cl.x << "" << cl.y << "" << cl.z << "" << cl.Yaw << endl;
 				if (cl.Yaw > 180) cl.Yaw -= 360;
 
 				cl._hp = cl._max_hp;
 				//DB에 계정등록 
-				DB_save(s_id);
+				//DB_save(s_id);
 				send_login_ok_packet(s_id);
 				cout << packet->id << "DB에 계정등록" << endl;
 			}
