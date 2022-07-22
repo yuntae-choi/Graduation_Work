@@ -34,6 +34,7 @@ const char CS_PACKET_OPEN_BOX = 14;
 const char CS_PACKET_GUNATTACK = 15;
 const char CS_PACKET_GUNFIRE = 16;
 const char CS_PACKET_UMB = 17;
+const char CS_PACKET_ACCOUNT = 18;
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -59,6 +60,7 @@ const char SC_PACKET_GUNATTACK = 20;
 const char SC_PACKET_GUNFIRE = 21;
 const char SC_PACKET_TELEPORT = 22;
 const char SC_PACKET_UMB = 23;
+const char SC_PACKET_ACCOUNT = 24;
 
 
 #pragma pack (push, 1)
@@ -77,6 +79,8 @@ struct sc_packet_login_ok {
 	int32		s_id;
 	float x, y, z;
 	float yaw;
+	char	id[MAX_NAME_SIZE];
+	char	pw[MAX_NAME_SIZE];
 };
 
 struct cs_packet_logout {
@@ -243,13 +247,13 @@ struct sc_packet_chat {
 struct sc_packet_login_fail {
 	unsigned char size;
 	char type;
-	int32	 reason;		// 0: 중복 ID,  1:사용자 Full
+	int32	 reason;		
 };
 
 struct sc_packet_status_change {
 	unsigned char size;
 	char type;
 	int32 s_id;
-	short   state;
+	int32   state;
 };
 #pragma pack(pop)

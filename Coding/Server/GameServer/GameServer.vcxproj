@@ -162,6 +162,7 @@
     <ClCompile Include="CLIENT.cpp" />
     <ClCompile Include="ConcurrentQueue.cpp" />
     <ClCompile Include="ConcurrentStack.cpp" />
+    <ClCompile Include="GameDataBase.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="Overlap.cpp" />
     <ClCompile Include="pch.cpp">
@@ -176,6 +177,7 @@
     <ClInclude Include="ConcurrentQueue.h" />
     <ClInclude Include="ConcurrentStack.h" />
     <ClInclude Include="Enum.h" />
+    <ClInclude Include="GameDataBase.h" />
     <ClInclude Include="Overlap.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

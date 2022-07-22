@@ -49,6 +49,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		info.Y = packet->y;
 		info.Z = packet->z;
 		info.Yaw = packet->yaw;
+		strcpy_s(info.user_id, packet->id);
 		my_s_id = packet->s_id;
 		CharactersInfo.players[info.SessionId] = info;
 		MyPlayerController->SetSessionId(info.SessionId);
@@ -66,23 +67,39 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 	case SC_PACKET_LOGIN_FAIL:
 	{
-		// id, pw가 DB에 등록된 것과 일치하는지 체크
-		MyPlayerController->loginInfoText = TEXT("Invalid ID");
-		
-		// id가 유효하지 않은 경우 return
-		//if ()
-		//{
-		//	loginInfoText = TEXT("Invalid ID");
-		//	return;
-		//}
-		// pw 입력이 잘못된 경우 return
-		//if ()
-		//{
-		//	loginInfoText = TEXT("Wrong PW");
-		//	return;
-		//}
+		sc_packet_login_fail* packet = reinterpret_cast<sc_packet_login_fail*>(ptr);
 
+		//id, pw가 DB에 등록된 것과 일치하는지 체크
+		//id가 유효하지 않은 경우 return
+		switch (packet->reason)
+		{
+		case OVERLAP_AC:
+		{
+			MyPlayerController->loginInfoText = TEXT("account already connected");
+			break;
+		}
+		case WORNG_ID:
+		{
+			MyPlayerController->loginInfoText = TEXT("Invalid ID");
+			break;
+		}
+		case WORNG_PW:
+		{
+			MyPlayerController->loginInfoText = TEXT("Invalid PW");
+			break;
+		}
+		case OVERLAP_ID:
+		{
+			MyPlayerController->loginInfoText = TEXT("Overlap_ID");
+			break;
+		}
+		case CREATE_AC:
+		{
+			MyPlayerController->loginInfoText = TEXT("Account creation successful");
+			break;
+		}
 		break;
+		}
 	}
 	case SC_PACKET_READY:
 	{
@@ -114,7 +131,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			info->Y = packet->y;
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
-
+			strcpy_s(info->user_id, packet->name);
 			MyPlayerController->SetNewCharacterInfo(info);
 			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
@@ -175,7 +192,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
 		if (!packet->mode)
-		    MyPlayerController->SetNewBall(packet->s_id);
+			MyPlayerController->SetNewBall(packet->s_id);
 		else
 			MyPlayerController->SetRelAttack(packet->s_id);
 
@@ -185,7 +202,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_fire* packet = reinterpret_cast<cs_packet_fire*>(ptr);
 		for (int i = 0; i < MAX_BULLET_RANG; ++i)
-			CharactersInfo.players[packet->s_id].random_bullet[i]= packet->rand_int[i];
+			CharactersInfo.players[packet->s_id].random_bullet[i] = packet->rand_int[i];
 		CharactersInfo.players[packet->s_id].Pitch = packet->pitch;		// 카메라 pitch
 		MyPlayerController->SetGunFire(packet->s_id);
 		break;
@@ -216,7 +233,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
 		//MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
 		if (ST_SNOWMAN == packet->state) {
-		
+
 			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
 			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
 		}
@@ -235,7 +252,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		case ITEM_BAG:
 		{
-			if (MyPlayerController->iSessionId == packet->s_id) 
+			if (MyPlayerController->iSessionId == packet->s_id)
 				MyPlayerController->get_item(ITEM_BAG);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 			break;
@@ -262,7 +279,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			CharactersInfo.players[packet->s_id].current_snow_count = packet->current_snowball;
 			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
 			break;
-		}	
+		}
 		case ITEM_JET:
 		{
 			if (MyPlayerController->iSessionId != packet->s_id)
@@ -361,7 +378,20 @@ void ClientSocket::Send_LoginPacket(char* send_id, char* send_pw)
 
 	//MYLOG(Warning, TEXT("[Send login] z : %f"), packet.z);
 	SendPacket(&packet);
-	
+
+};
+
+void ClientSocket::Send_Create_ID_Packet(char* send_id, char* send_pw)
+{
+	cs_packet_login packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_ACCOUNT;
+	strcpy_s(packet.id, send_id);
+	strcpy_s(packet.pw, send_pw);
+	size_t sent = 0;
+	//MYLOG(Warning, TEXT("[Send login] z : %f"), packet.z);
+	SendPacket(&packet);
+
 };
 
 void ClientSocket::Send_ReadyPacket()
@@ -522,7 +552,7 @@ void ClientSocket::Send_OpenBoxPacket(int open_box_id)
 
 void ClientSocket::Send_ChatPacket(int cheat_num)
 {
-    cs_packet_chat packet;
+	cs_packet_chat packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_CHAT;
 	packet.s_id = MyPlayerController->iSessionId;
@@ -548,15 +578,15 @@ void ClientSocket::CloseSocket()
 										 //강제 종료 시킨다. 데이터 손실이 있을 수 있음
 
 	stLinger.l_onoff = true;
-	 //_socket 소켓의 데이터 송수신을 모두 중단
+	//_socket 소켓의 데이터 송수신을 모두 중단
 	shutdown(_socket, SD_BOTH);
-	 //소켓 옵션을 설정
+	//소켓 옵션을 설정
 	setsockopt(_socket, SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
-	 //소켓 연결을 종료
+	//소켓 연결을 종료
 	closesocket(_socket);
 
 	_socket = INVALID_SOCKET;
-	
+
 	WSACleanup();
 	MYLOG(Warning, TEXT("CloseSocket"));
 
@@ -575,7 +605,7 @@ void ClientSocket::process_data(unsigned char* net_buf, size_t io_byte)
 	static size_t in_packet_size = 0;
 	static size_t saved_packet_size = 0;
 	static unsigned char packet_buffer[BUF_SIZE];
-	
+
 	while (0 != io_byte) {
 		if (0 == in_packet_size) in_packet_size = ptr[0];
 		if (io_byte + saved_packet_size >= in_packet_size) {
@@ -604,7 +634,7 @@ uint32 ClientSocket::Run()
 	//Connect();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_socket), h_iocp, 0, 0);
-	
+
 	RecvPacket();
 
 	//Send_LoginPacket();
@@ -622,7 +652,7 @@ uint32 ClientSocket::Run()
 		BOOL ret = GetQueuedCompletionStatus(h_iocp, &num_byte, (PULONG_PTR)&iocp_key, &p_over, INFINITE);
 
 		Overlap* exp_over = reinterpret_cast<Overlap*>(p_over);
-		
+
 		if (FALSE == ret) {
 			int err_no = WSAGetLastError();
 			if (exp_over->_op == OP_SEND)
