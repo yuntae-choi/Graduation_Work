@@ -69,6 +69,7 @@ void send_login_ok_packet(int _s_id)
 	packet.y = clients[_s_id].y;
 	packet.z = clients[_s_id].z;
 	packet.yaw = clients[_s_id].Yaw;
+	strcpy_s(packet.id, clients[_s_id]._id);
 	//packet.Yaw = clients[_s_id].Yaw;
 	//packet.Pitch = clients[_s_id].Pitch;
 	//packet.Roll = clients[_s_id].Roll;*/

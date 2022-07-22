@@ -79,6 +79,8 @@ struct sc_packet_login_ok {
 	int32		s_id;
 	float x, y, z;
 	float yaw;
+	char	id[MAX_NAME_SIZE];
+	char	pw[MAX_NAME_SIZE];
 };
 
 struct cs_packet_logout {

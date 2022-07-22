@@ -97,6 +97,9 @@ public:
 
 	// 세션 아이디
 	int SessionId = -1;
+	// 아이디 비번
+	char	user_id[MAX_NAME_SIZE] = {};
+	char	user_pw[MAX_NAME_SIZE] = {};
 	// 위치
 	float X = 0;
 	float Y = 0;

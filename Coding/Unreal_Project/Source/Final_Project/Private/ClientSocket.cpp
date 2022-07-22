@@ -49,6 +49,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		info.Y = packet->y;
 		info.Z = packet->z;
 		info.Yaw = packet->yaw;
+		strcpy_s(info.user_id, packet->id);
 		my_s_id = packet->s_id;
 		CharactersInfo.players[info.SessionId] = info;
 		MyPlayerController->SetSessionId(info.SessionId);
@@ -130,7 +131,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			info->Y = packet->y;
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
-
+			strcpy_s(info->user_id, packet->name);
 			MyPlayerController->SetNewCharacterInfo(info);
 			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
