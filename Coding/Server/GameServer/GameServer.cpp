@@ -442,12 +442,12 @@ void process_packet(int s_id, unsigned char* p)
 			if (DB_id(packet->id) == true) {
 				cout << "플레이어[" << s_id << "] 계정 생성 실패 - " << "중복된 아이디" << endl;
 				send_login_fail_packet(s_id, OVERLAP_ID);
-				return;
 			}
 			else
 			{
-				Init_Pos(s_id, packet->id, packet->pw, packet->z);
 				//DB에 계정등록 
+				strcpy_s(cl._id, packet->id);
+				strcpy_s(cl._pw, packet->pw);
 				DB_save(s_id);
 				send_login_fail_packet(s_id, CREATE_AC);
 				cout << packet->id << "DB에 계정등록" << endl;

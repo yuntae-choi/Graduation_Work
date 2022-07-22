@@ -1044,6 +1044,8 @@ void AMyPlayerController::BtnCreateAccount(FString id, FString pw)
 		loginInfoText = TEXT("Input PW");
 		return;
 	}
+
+	g_socket->Send_Create_ID_Packet(TCHAR_TO_UTF8(*id), TCHAR_TO_UTF8(*pw));
 }
 
 void AMyPlayerController::BtnLogin(FString id, FString pw)

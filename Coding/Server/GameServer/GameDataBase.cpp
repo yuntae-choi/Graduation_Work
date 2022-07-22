@@ -41,7 +41,7 @@ bool DB_odbc(int id, char* name, char* pw)
 	//cout << "PW" << pw << endl;
 
 	char temp[BUFSIZE] = {};
-	sprintf_s(temp, sizeof(temp), "EXEC login_player %s, %s", name, pw);
+	sprintf_s(temp, sizeof(temp), "EXEC login_player %s,%s", name, pw);
 	wchar_t* exec;
 	int str_size = MultiByteToWideChar(CP_ACP, 0, temp, -1, NULL, NULL);
 	exec = new WCHAR[str_size];
@@ -114,16 +114,17 @@ bool DB_odbc(int id, char* name, char* pw)
 }
 
 //플레이어 아이디 확인
-bool DB_id(char* _id)
+bool DB_id(char* login_id)
 {
 	SQLHENV henv;
 	SQLHDBC hdbc;
 	SQLHSTMT hstmt = 0;
 	SQLRETURN retcode;
-	cout << "[DB_id] ID : " << _id << endl;
+	//cout <<"ID" << name << endl;
+	//cout << "PW" << pw << endl;
 
 	char temp[BUFSIZE] = {};
-	sprintf_s(temp, sizeof(temp), "EXEC select_id %s", _id);
+	sprintf_s(temp, sizeof(temp), "EXEC select_id %s", login_id);
 	wchar_t* exec;
 	int str_size = MultiByteToWideChar(CP_ACP, 0, temp, -1, NULL, NULL);
 	exec = new WCHAR[str_size];
@@ -156,24 +157,25 @@ bool DB_id(char* _id)
 					retcode = SQLExecDirect(hstmt, (SQLWCHAR*)exec, SQL_NTS);
 					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 						retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, p_id, NAME_LEN, &cbP_ID);
+
 						for (int i = 0; ; i++) {
 							retcode = SQLFetch(hstmt);
 							if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
-								//show_err();
-								if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-								{
-									if (p_id != 0) {
-										printf("등록된 아이디 \n");
-										return true;
-									}
-									else
-									{
-										printf("[DB_ID] 실패 \n");
-										return false;
-									}
+								show_err();
+							if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+							{
+								if (p_id != 0) {
+									printf(" [DB_ID] 아이디 존재\n");
+									return true;
 								}
 								else
-									break;
+								{
+									printf(" [DB_ID] 실패 \n");
+									return false;
+								}
+							}
+							else
+								break;
 						}
 					}
 
@@ -192,6 +194,7 @@ bool DB_id(char* _id)
 		SQLFreeHandle(SQL_HANDLE_ENV, henv);
 	}
 
+	printf(" [DB_ID] 없음 \n");
 	return false;
 }
 
