@@ -8,381 +8,44 @@
 #include "Overlap.h"
 #include "ConcurrentQueue.h"
 #include "ConcurrentStack.h"
+#include "GameDataBase.h"
+#include <string>
 
-#include <thread>
-#include <cmath>
-#include<random>
-#include <sqlext.h>  
-
-#define UNICODE  // 우리나라는 Default니깐 굳이 안써도 됨
-#define NAME_LEN 20  
-#define PHONE_LEN 60
 
 HANDLE g_h_iocp;
 HANDLE g_timer;
-mutex  g_snow_mutex;
-mutex  g_item_mutex;
+SOCKET sever_socket;
 
 condition_variable cv;
-SOCKET sever_socket;
-LockQueue<timer_ev> timer_q;
-
-//concurrency::concurrent_priority_queue <timer_ev> timer_q;
-array <CLIENT, MAX_USER> clients;
-bool g_snow_drift[MAX_SNOWDRIFT] = {};
-bool g_item[MAX_ITEM] = {};
-bool g_start_game = false;
-int g_tonardo_id = -1;
-bool g_tonardo = false;
-
-
-using std::chrono::duration_cast;
-using std::chrono::milliseconds;
-using std::chrono::seconds;
-using std::chrono::system_clock;
-using namespace std;
-
 default_random_engine dre;
 uniform_int_distribution<> uid{ 0,7 };// 범위 지정
 
-void show_err();
-int get_id();
-void send_login_ok_packet(int _s_id);
-void send_login_fail_packet(int _s_id);
-void send_move_packet(int _id, int target);
-void send_remove_object(int _s_id, int victim);
-void send_put_object(int _s_id, int target);
-void send_chat_packet(int user_id, int my_id, char* mess);
-void send_status_packet(int _s_id);
-void Disconnect(int _s_id);
+LockQueue<timer_ev> timer_q;
+
+using namespace std;
+
+
+void Wsa_err_display(int err_no);
+void Init_Pos(int s_id, char* _id, char* _pw, float _z);
+void Init_Arr();
+void rand_arr(int* r_arr);
 void Player_Event(int target, int player_id, COMMAND type);
-void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseconds ms);
+void player_heal(int s_id);
+void player_damage(int s_id);
+int get_id();
+void Accept_Player(int _s_id);
+void Disconnect(int _s_id);
+void Timer_Event(int np_s_id, int user_id, int ev, std::chrono::milliseconds ms);
 void process_packet(int _s_id, unsigned char* p);
 void worker_thread();
 void ev_timer();
-void send_state_change(int s_id, int target, STATE_Type stat);
-bool is_snowdrift(int obj_id);
-//DB 에러 출력
-void HandleDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode)
-{
-	setlocale(LC_ALL, "korean");
-	std::wcout.imbue(std::locale("korean"));
-	SQLSMALLINT iRec = 0;
-	SQLINTEGER iError;
-	WCHAR wszMessage[1000];
-	WCHAR wszState[SQL_SQLSTATE_SIZE + 1];
-	if (RetCode == SQL_INVALID_HANDLE) {
-		fwprintf(stderr, L"Invalid handle! n");
-		return;
-	}
-
-	while (SQLGetDiagRec(hType, hHandle, ++iRec, wszState, &iError, wszMessage, (SQLSMALLINT)(sizeof(wszMessage) / sizeof(WCHAR)), (SQLSMALLINT*)NULL) == SQL_SUCCESS) {
-		// Hide data truncated..
-		if (wcsncmp(wszState, L"01004", 5)) {
-			wprintf(L"[%s] : ", wszState);
-			wprintf(L"%s", wszMessage);
-			wprintf(L" - %d\n", iError);
-		}
-	}
-}
-
-//플레이어 데이터 받아오기
-bool DB_odbc(int id, char* name, char* pw)
-{
-	SQLHENV henv;
-	SQLHDBC hdbc;
-	SQLHSTMT hstmt = 0;
-	SQLRETURN retcode;
-	//cout <<"ID" << name << endl;
-	//cout << "PW" << pw << endl;
-
-	char temp[BUFSIZE];
-	sprintf_s(temp, sizeof(temp), "EXEC login_player %s, %s", name, pw);
-	wchar_t* exec;
-	int str_size = MultiByteToWideChar(CP_ACP, 0, temp, -1, NULL, NULL);
-	exec = new WCHAR[str_size];
-	MultiByteToWideChar(CP_ACP, 0, temp, sizeof(temp) + 1, exec, str_size);
-
-	SQLFLOAT p_x;
-	SQLFLOAT p_y;
-	SQLFLOAT p_z;
-	SQLFLOAT p_yaw;
-
-	SQLWCHAR p_id[NAME_LEN];
-	SQLLEN cbP_ID = 0, cbP_X = 0, cbP_Y = 0, cbP_Z = 0, cbP_YAW = 0;
-
-	retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
-
-	// Set the ODBC version environment attribute  
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-		retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0);
-
-	
-		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-			retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-
-			
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
-
-				
-				retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2021_Class_ODBC", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
-
-			
-				if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-					cout << "ODBC Connection Success" << endl;
-					retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-					retcode = SQLExecDirect(hstmt, (SQLWCHAR*)exec, SQL_NTS);
-					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-						retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, p_id, NAME_LEN, &cbP_ID);
-						retcode = SQLBindCol(hstmt, 2, SQL_C_DOUBLE, &p_x, 100, &cbP_X);
-						retcode = SQLBindCol(hstmt, 3, SQL_C_DOUBLE, &p_y, 100, &cbP_Y);
-						retcode = SQLBindCol(hstmt, 4, SQL_C_DOUBLE, &p_z, 100, &cbP_Z);
-						retcode = SQLBindCol(hstmt, 5, SQL_C_DOUBLE, &p_yaw, 100, &cbP_YAW);
-
-						for (int i = 0; ; i++) {
-							retcode = SQLFetch(hstmt);
-							if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
-								show_err();
-							if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-							{
-								if (p_id != 0) {
-									strcpy_s(clients[id]._id, (char*)p_id);
-									clients[id].x = p_x;
-									clients[id].y = p_y;
-									clients[id].z = p_z;
-									clients[id].Yaw = p_yaw;
-
-									printf("%d: %ls %lf %lf %lf %lf \n", i + 1, p_id, p_x, p_y, p_z, p_yaw);
-									return true;
-								}
-								else
-								{
-									return false;
-								}
-							}
-							else
-								break;
-						}
-					}
-
-					// Process data  
-					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-						SQLCancel(hstmt);
-						SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-					}
-
-					SQLDisconnect(hdbc);
-				}
-				else cout << "ODBC Connected Failed" << endl;
-				SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
-			}
-		}
-		SQLFreeHandle(SQL_HANDLE_ENV, henv);
-	}
-
-	return false;
-}
-
-//플레이어 데이터 저장
-bool DB_save(int id)
-{
-	SQLHENV henv;
-	SQLHDBC hdbc;
-	SQLHSTMT hstmt = 0;
-	SQLRETURN retcode;
-
-	char temp[BUFSIZE];
-	sprintf_s(temp, sizeof(temp), "EXEC account_creation %s,%s", clients[id]._id, clients[id]._pw);
-	wchar_t* exec;
-	int str_size = MultiByteToWideChar(CP_ACP, 0, temp, -1, NULL, NULL);
-	exec = new WCHAR[str_size];
-	MultiByteToWideChar(CP_ACP, 0, temp, sizeof(temp) + 1, exec, str_size);
-	cout << temp << endl;
-
-	SQLINTEGER p_x;
-	SQLINTEGER p_y;
-	SQLWCHAR p_id[NAME_LEN];
-	SQLLEN cbP_ID = 0, cbP_X = 0, cbP_Y = 0;
-	// Allocate environment handle  
-	retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
-
-	// Set the ODBC version environment attribute  
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-		retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0);
-
-		// Allocate connection handle  
-		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-			retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-
-			// Set login timeout to 5 seconds  
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
-
-				// Connect to data source  
-				retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2021_Class_ODBC", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
-
-				// Allocate statement handle  
-				if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-					cout << "ODBC Connection Success" << endl;
-					retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-					retcode = SQLExecDirect(hstmt, (SQLWCHAR*)exec, SQL_NTS);
-					HandleDiagnosticRecord(hstmt, SQL_HANDLE_STMT, retcode);
-					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-
-						//// Bind columns 1, 2, and 3  
-						//retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, p_id, NAME_LEN, &cbP_ID);
-						//retcode = SQLBindCol(hstmt, 2, SQL_C_LONG, &p_x, 100, &cbP_X);
-						//retcode = SQLBindCol(hstmt, 3, SQL_C_LONG, &p_y, 100, &cbP_Y);
-
-
-						// Fetch and print each row of data. On an error, display a message and exit.  
-						for (int i = 0; ; i++) {
-							retcode = SQLFetch(hstmt);
-							if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
-								show_err();
-							if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-							{
-								//replace wprintf with printf
-								//%S with %ls
-								//warning C4477: 'wprintf' : format string '%S' requires an argument of type 'char *'
-								//but variadic argument 2 has type 'SQLWCHAR *'
-								//wprintf(L"%d: %S %S %S\n", i + 1, sCustID, szName, szPhone);
-								//strcpy_s(clients[id].name, (char*)p_id);
-
-								return true;
-							}
-							else
-								break;
-						}
-					}
-
-					// Process data  
-					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-						SQLCancel(hstmt);
-						SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-					}
-
-					SQLDisconnect(hdbc);
-				}
-				else cout << "ODBC Connected Failed" << endl;
-				SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
-			}
-		}
-		SQLFreeHandle(SQL_HANDLE_ENV, henv);
-	}
-
-	return false;
-}
-
-void rand_arr(int* r_arr) {
-	int cnt = 0;
-	int test[MAX_BULLET_RANG];
-	memset(test, 0, MAX_BULLET_RANG * 4);
-	while (cnt < MAX_BULLET_RANG) {
-		int32 num = uid(dre);
-		if (test[num] == 0) {
-			test[num] = 1;
-			r_arr[cnt] = num;
-			cnt++;
-		}
-	}
-}
-
-//이동
-void send_hp_packet(int _id)
-{
-	sc_packet_hp_change packet;
-	packet.s_id = _id;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_HP;
-	packet.hp = clients[_id]._hp;
-
-	// printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
-	clients[_id].do_send(sizeof(packet), &packet);
-}
-
-//모닥불 확인
-void send_is_bone_packet(int _id)
-{
-	cout << "모닥불 확인" << endl;
-	sc_packet_is_bone packet;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_IS_BONE;
-	// printf_s("[Send hp change] id : %d, hp : %d\n", packet.s_id, packet.hp);
-	clients[_id].do_send(sizeof(packet), &packet);
-}
-
-void player_heal(int s_id)
-{
-	if (false == clients[s_id].bIsSnowman) {
-		if (clients[s_id]._hp < clients[s_id]._max_hp) {
-			Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
-		}
-	}
-}
-
-void player_damage(int s_id)
-{
-	//if (!clients[s_id].dot_dam) {
-		if (false == clients[s_id].bIsSnowman) {
-			if (clients[s_id]._hp > clients[s_id]._min_hp) {
-				Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);;
-			}
-		}
-		//clients[s_id].dot_dam = true;
-	//}
-}
-
-//플레이어 판별
-bool is_player(int id)
-{
-	return (id >= 0) && (id < MAX_USER);
-}
-
-//모닥불 범위 판정
-bool is_bonfire(int a)
-{
-	if (BONFIRE_RANGE < abs(clients[a].x)) return false;
-	if (BONFIRE_RANGE < abs(clients[a].y)) return false;
-	return true;
-}
-
-//근처 객체 판별
-bool is_near(int a, int b)
-{
-	if (RANGE < abs(clients[a].x - clients[b].x)) return false;
-	if (RANGE < abs(clients[a].y - clients[b].y)) return false;
-	return true;
-}
-
-bool is_snowdrift(int obj_id)
-{
-	unique_lock<mutex> _lock(g_snow_mutex);
-	if (g_snow_drift[obj_id]) {
-		g_snow_drift[obj_id] = false;
-		return true;
-	}
-	return false;
-}
-
-bool is_item(int obj_id)
-{
-	unique_lock<mutex> _lock(g_item_mutex);
-	if (g_item[obj_id]) {
-		g_item[obj_id] = false;
-		return true;
-	}
-	return false;
-}
-
-
 
 int main()
 {
 	wcout.imbue(locale("korean"));
 	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 2), &WSAData);
+	int ret = WSAStartup(MAKEWORD(2, 2), &WSAData);
+	Wsa_err_display(ret);
 	sever_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server_addr;
 	ZeroMemory(&server_addr, sizeof(server_addr));
@@ -401,32 +64,13 @@ int main()
 	*(reinterpret_cast<SOCKET*>(&accept_ex._net_buf)) = c_socket;
 	ZeroMemory(&accept_ex._wsa_over, sizeof(accept_ex._wsa_over));
 	accept_ex._op = OP_ACCEPT;
-
-
-
 	AcceptEx(sever_socket, c_socket, accept_buf, 0, sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16, NULL, &accept_ex._wsa_over);
 
-	
 	g_timer = CreateEvent(NULL, FALSE, FALSE, NULL);
-	
-	for (int i = 0; i < MAX_SNOWDRIFT; ++i)
-		g_snow_drift[i] = true;
-
-	for (int i = 0; i < MAX_ITEM; ++i)
-		g_item[i] = true;
-
-	for (int i = 0; i < MAX_USER; ++i)
-		clients[i]._s_id = i;
-
+	Init_Arr();
 	vector <thread> worker_threads;
-
-
-
 	thread timer_thread{ ev_timer };
-
-
-
 	// 시스템 정보 가져옴
 	//SYSTEM_INFO sysInfo;
 	//GetSystemInfo(&sysInfo);
@@ -434,14 +78,11 @@ int main()
 	// 적절한 작업 스레드의 갯수는 (CPU * 2) + 1
 	//int nThreadCnt = sysInfo.dwNumberOfProcessors;
 	int nThreadCnt = 5;
-
 	for (int i = 0; i < 10; ++i)
 		worker_threads.emplace_back(worker_thread);
-
 	for (auto& th : worker_threads)
 		th.join();
 	timer_thread.join();
-	//timer_thread.join();
 	for (auto& cl : clients) {
 		if (ST_INGAME == cl._state)
 			Disconnect(cl._s_id);
@@ -450,10 +91,104 @@ int main()
 	WSACleanup();
 }
 
-void show_err() {
-	cout << "error" << endl;
+void Wsa_err_display(int err_no)
+{
+	if (err_no != 0)
+	{
+		switch (err_no)
+
+		{
+
+		case WSASYSNOTREADY:
+
+			printf("네트워크 접속을 준비 못함");
+
+			break;
+
+		case WSAVERNOTSUPPORTED:
+
+			printf("요구한 윈속 버전이 서포트 안됨");
+
+			break;
+
+		case WSAEINPROGRESS:
+
+			printf("블로킹 조작이 실행중");
+
+			break;
+
+		case WSAEPROCLIM:
+
+			printf("최대 윈속 프로세스 처리수 초과");
+
+			break;
+
+		case WSAEFAULT:
+
+			printf("두번째 인수의 포인터가 무효");
+
+			break;
+
+		}
+
+	}
 }
 
+void Init_Arr()
+{
+	for (int i = 0; i < MAX_SNOWDRIFT; ++i) GA.g_snow_drift[i] = true;
+	for (int i = 0; i < MAX_ITEM; ++i) GA.g_item[i] = true;
+	for (int i = 0; i < MAX_USER; ++i) clients[i]._s_id = i;
+}
+
+void Init_Pos(int s_id, char* _id, char* _pw, float _z)
+{
+	CLIENT& cl = clients[s_id];
+	strcpy_s(cl._id, _id);
+	strcpy_s(cl._pw, _pw);
+	cl._state = ST_INGAME;
+	cl.x = 600.0f * cos(s_id + 45.0f);
+	cl.y = 600.0f * sin(s_id + 45.0f);
+	cl.z = _z;
+	cl.Yaw = s_id * 55.0f - 115.0f;
+	if (cl.Yaw > 180) cl.Yaw -= 360;
+	cl._hp = cl._max_hp;
+}
+
+void rand_arr(int* r_arr) {
+	int cnt = 0;
+	int test[MAX_BULLET_RANG];
+	memset(test, 0, MAX_BULLET_RANG * 4);
+	while (cnt < MAX_BULLET_RANG) {
+		int32 num = uid(dre);
+		if (test[num] == 0) {
+			test[num] = 1;
+			r_arr[cnt] = num;
+			cnt++;
+		}
+	}
+}
+
+void player_heal(int s_id)
+{
+	if (false == clients[s_id].bIsSnowman) {
+		if (clients[s_id]._hp < clients[s_id]._max_hp) {
+			Timer_Event(s_id, s_id, CL_BONEFIRE, 1000ms);
+		}
+	}
+}
+
+void player_damage(int s_id)
+{
+	//if (!clients[s_id].dot_dam) {
+	if (false == clients[s_id].bIsSnowman) {
+		if (clients[s_id]._hp > clients[s_id]._min_hp) {
+			Timer_Event(s_id, s_id, CL_BONEOUT, 1000ms);;
+		}
+	}
+	//clients[s_id].dot_dam = true;
+//}
+}
 
 
 //새로운 id(인덱스) 할당
@@ -474,79 +209,6 @@ int get_id()
 	return -1;
 }
 
-//로그인 허용
-void send_login_ok_packet(int _s_id)
-{
-	sc_packet_login_ok packet;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_LOGIN_OK;
-	packet.s_id = _s_id;
-	packet.x = clients[_s_id].x;
-	packet.y = clients[_s_id].y;
-	packet.z = clients[_s_id].z;
-	packet.yaw = clients[_s_id].Yaw;
-	//packet.Yaw = clients[_s_id].Yaw;
-	//packet.Pitch = clients[_s_id].Pitch;
-	//packet.Roll = clients[_s_id].Roll;*/
-	printf("[Send login ok] id : %d, location : (%f,%f,%f) yaw : %f\n", _s_id, packet.x, packet.y, packet.z, packet.yaw);
-	clients[_s_id].do_send(sizeof(packet), &packet);
-}
-
-//로그인 실패
-void send_login_fail_packet(int _s_id)
-{
-	sc_packet_login_fail packet;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_LOGIN_FAIL;
-	clients[_s_id].do_send(sizeof(packet), &packet);
-}
-
-//오브젝트 제거
-void send_remove_object(int _s_id, int victim)
-{
-	sc_packet_remove_object packet;
-	packet.s_id = victim;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_REMOVE_OBJECT;
-	clients[_s_id].do_send(sizeof(packet), &packet);
-}
-
-//오브젝트 생성
-void send_put_object(int _s_id, int target)
-{
-	sc_packet_put_object packet;
-	packet.s_id = target;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_PUT_OBJECT;
-	packet.x = clients[target].x;
-	packet.y = clients[target].y;
-	packet.z = clients[target].z;
-
-	strcpy_s(packet.name, clients[target].name);
-	packet.object_type = 0;
-	clients[_s_id].do_send(sizeof(packet), &packet);
-}
-
-//메세지 전송
-void send_chat_packet(int user_id, int my_id, char* mess)
-{
-	sc_packet_chat packet;
-	packet.id = my_id;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_CHAT;
-	strcpy_s(packet.message, mess);
-	clients[user_id].do_send(sizeof(packet), &packet);
-}
-
-//플레이어 데이터 변경
-void send_status_packet(int _s_id)
-{
-	sc_packet_status_change packet;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_STATUS_CHANGE;
-	clients[_s_id].do_send(sizeof(packet), &packet);
-}
-
 //해제
 void Disconnect(int _s_id)
 {
@@ -556,7 +218,7 @@ void Disconnect(int _s_id)
 	//cl.vl.unlock();
 
 	strcpy_s(clients[_s_id]._id, " ");
-	
+
 	/*for (auto& other : my_vl) {
 		CLIENT& target = clients[other];
 
@@ -607,7 +269,7 @@ void Disconnect(int _s_id)
 	closesocket(clients[_s_id]._socket);
 	clients[_s_id]._socket = INVALID_SOCKET;
 	//clients[_s_id].state_lock.unlock();
-	
+
 	cout << "------------플레이어 " << _s_id << " 연결 종료------------" << endl;
 }
 
@@ -621,7 +283,7 @@ void Player_Event(int target, int player_id, COMMAND type)
 }
 
 //타이머 큐 등록
-void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseconds ms)
+void Timer_Event(int np_s_id, int user_id, int ev, std::chrono::milliseconds ms)
 {
 	timer_ev order;
 	order.this_id = np_s_id;
@@ -631,24 +293,71 @@ void Timer_Event(int np_s_id, int user_id, EVENT_TYPE ev, std::chrono::milliseco
 	timer_q.Push(order);
 }
 
-
-void send_state_change(int s_id, int target, STATE_Type stat)
+//플레이어 접속 정보 전송
+void Accept_Player(int _s_id)
 {
-	sc_packet_status_change _packet;
-	_packet.size = sizeof(_packet);
-	_packet.type = SC_PACKET_STATUS_CHANGE;
-	_packet.state = stat;
-	_packet.s_id = s_id;
-	clients[target].do_send(sizeof(_packet), &_packet);
-}
+	CLIENT& cl = clients[_s_id];
+	// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
+	for (auto& other : clients) {
+		if (other._s_id == _s_id) continue;
+		if (other._s_id == GA.g_tonardo_id) continue;
+		other.state_lock.lock();
+		if (ST_INGAME != other._state) {
+			other.state_lock.unlock();
+			continue;
+		}
+		else other.state_lock.unlock();
 
-void send_game_end(int s_id, int target)
-{
-	sc_packet_game_end _packet;
-	_packet.size = sizeof(_packet);
-	_packet.type = SC_PACKET_END;
-	_packet.s_id = s_id;
-	clients[target].do_send(sizeof(_packet), &_packet);
+		sc_packet_put_object packet;
+		packet.s_id = cl._s_id;
+		strcpy_s(packet.name, cl.name);
+		packet.size = sizeof(packet);
+		packet.type = SC_PACKET_PUT_OBJECT;
+		packet.x = cl.x;
+		packet.y = cl.y;
+		packet.z = cl.z;
+		packet.yaw = cl.Yaw;
+		packet.object_type = PLAYER;
+		strcpy_s(packet.name, cl._id);
+		other.do_send(sizeof(packet), &packet);
+	}
+
+	// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
+	for (auto& other : clients) {
+		if (other._s_id == _s_id) continue;
+		if (ST_INGAME != other._state) {
+			if (GA.g_tonardo) {
+				if (GA.g_tonardo_id == other._s_id) {
+					//토네이도 생성위치 보내기
+					sc_packet_put_object packet;
+					packet.s_id = other._s_id;
+					packet.size = sizeof(packet);
+					packet.type = SC_PACKET_PUT_OBJECT;
+					packet.x = other.x;
+					packet.y = other.y;
+					packet.z = other.z;
+					packet.yaw = 0.0f;
+					packet.object_type = TONARDO;
+					printf_s("[토네이도 생성] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
+					cl.do_send(sizeof(packet), &packet);
+				}
+			}
+		}
+		else {
+			sc_packet_put_object packet;
+			packet.s_id = other._s_id;
+			strcpy_s(packet.name, other.name);
+			packet.size = sizeof(packet);
+			packet.type = SC_PACKET_PUT_OBJECT;
+			packet.x = other.x;
+			packet.y = other.y;
+			packet.z = other.z;
+			packet.yaw = other.Yaw;
+			packet.object_type = PLAYER;
+			strcpy_s(packet.name, other._id);
+			cl.do_send(sizeof(packet), &packet);
+		}
+	}
 }
 
 //패킷 판별
@@ -656,281 +365,100 @@ void process_packet(int s_id, unsigned char* p)
 {
 	unsigned char packet_type = p[1];
 	CLIENT& cl = clients[s_id];
-	
+
 	switch (packet_type) {
 	case CS_PACKET_LOGIN: {
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
 		bool _OverLap = false;
 		if (strcmp("Tornado", packet->id) != 0) {
-			CLIENT& cl = clients[s_id];
-			printf_s("[Recv login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
-
-			for (int i = 0; i < MAX_USER; ++i) {
-				clients[i].state_lock.lock();
-				if (ST_INGAME == clients[i]._state) {
-					if (strcmp(packet->id, clients[i]._id) == 0) {
-						send_login_fail_packet(s_id);
-						cout << packet->id << "접속중인 플레이어" << endl;
-						_OverLap = true;
-						clients[i].state_lock.unlock();
-						return;
-					}
-				}
-				clients[i].state_lock.unlock();
-			}
-
-			if (_OverLap == true) break;
-			if (DB_odbc(s_id, packet->id, packet->pw) == true)
+			if (strcmp("testuser", packet->id) != 0)
 			{
-				send_login_ok_packet(s_id);
-				cout << packet->id << " 로그인 성공" << endl;
-			}
-			else 
-			{
-				/*sc_packet_login_ok packet;
-				packet.size = sizeof(packet);
-				packet.type = SC_PACKET_LOGIN_FAIL;
-				printf("[Send login fail] id : %d\n", s_id);
-				*///clients[s_id].do_send(sizeof(packet), &packet);
+				CLIENT& cl = clients[s_id];
+				printf_s("[Recv login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
 
-				//디버깅용
-				strcpy_s(cl._id, packet->id);
-				strcpy_s(cl._pw, packet->pw);
-				cl.state_lock.lock();
-				cl._state = ST_INGAME;
-				cl.state_lock.unlock();
-				cl.x = 600.0f * cos(s_id + 45.0f);
-				cl.y = 600.0f * sin(s_id + 45.0f);
-				cl.z = packet->z;
-				cl.Yaw = s_id * 55.0f - 115.0f;
-				cout << "플레이어 1" << cl.x << "" << cl.y << "" << cl.z << "" << cl.Yaw << endl;
-				if (cl.Yaw > 180) cl.Yaw -= 360;
-
-				cl._hp = cl._max_hp;
-				send_login_ok_packet(s_id);
-				cout << packet->id << " 로그인 성공" << endl;
-			}
-
-			cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
-
-			// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
-			for (auto& other : clients) {
-				if (other._s_id == s_id) continue;
-				if (other._s_id == g_tonardo_id) continue;
-				other.state_lock.lock();
-				if (ST_INGAME != other._state) {
-					other.state_lock.unlock();
-					continue;
-				}
-				else other.state_lock.unlock();
-
-				//if (false == is_near(other._id, client_id))
-					//continue;
-
-				//other.vl.lock();
-				//other.viewlist.insert(s_id);
-				//other.vl.unlock();
-				sc_packet_put_object packet;
-				packet.s_id = cl._s_id;
-				strcpy_s(packet.name, cl.name);
-				packet.object_type = 0;
-				packet.size = sizeof(packet);
-				packet.type = SC_PACKET_PUT_OBJECT;
-				packet.x = cl.x;
-				packet.y = cl.y;
-				packet.z = cl.z;
-				packet.yaw = cl.Yaw;
-				packet_type = PLAYER;
-				//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-				//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
-				other.do_send(sizeof(packet), &packet);
-			}
-
-			// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
-			for (auto& other : clients) {
-				if (other._s_id == s_id) continue;
-				if (ST_INGAME != other._state) {
-					if (g_tonardo) {
-						if (g_tonardo_id == other._s_id) {
-							//토네이도 생성위치 보내기
-							sc_packet_put_object packet;
-							packet.s_id = other._s_id;
-							packet.size = sizeof(packet);
-							packet.type = SC_PACKET_PUT_OBJECT;
-							packet.x = other.x;
-							packet.y = other.y;
-							packet.z = other.z;
-							packet.yaw = 0.0f;
-							packet_type = TONARDO;
-							printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-							cl.do_send(sizeof(packet), &packet);
+				for (int i = 0; i < MAX_USER; ++i) {
+					clients[i].state_lock.lock();
+					if (ST_INGAME == clients[i]._state) {
+						if (strcmp(packet->id, clients[i]._id) == 0) {
+							cout << packet->id << "접속중인 플레이어" << endl;
+							send_login_fail_packet(s_id, OVERLAP_AC);
+							_OverLap = true;
+							clients[i].state_lock.unlock();
+							break;
 						}
 					}
+					clients[i].state_lock.unlock();
 				}
-				else {
-					sc_packet_put_object packet;
-					packet.s_id = other._s_id;
-					strcpy_s(packet.name, other.name);
-					packet.object_type = 0;
-					packet.size = sizeof(packet);
-					packet.type = SC_PACKET_PUT_OBJECT;
-					packet.x = other.x;
-					packet.y = other.y;
-					packet.z = other.z;
-					packet.yaw = other.Yaw;
-					packet_type = PLAYER;
-					cl.do_send(sizeof(packet), &packet);
+
+				if (_OverLap == true) break;
+				if (DB_odbc(s_id, packet->id, packet->pw) == true)
+				{
+					Init_Pos(s_id, packet->id, packet->pw, packet->z);
+					printf(" [DB_odbc] 플레이어[id] - ID : %s 로그인 성공 \n", cl._id);
+					send_login_ok_packet(s_id);
+					Accept_Player(s_id);
 				}
+				else
+				{
+					if (DB_id(packet->id) == true) {
+						cout << "플레이어[" << s_id << "]" << " 잘못된 비번" << endl;
+						send_login_fail_packet(s_id, WORNG_PW);
+						break;
+					}
+					else {
+						cout << "플레이어[" << s_id << "]" << " 잘못된 아이디" << endl;
+						send_login_fail_packet(s_id, WORNG_ID);
+						break;
+					}
+				}
+			}
+			else
+			{ 
+				
+				string gm_id(packet->id);
+				gm_id += to_string(s_id);
+				Init_Pos(s_id, (char*)gm_id.c_str(), packet->pw, packet->z);
+				printf(" [GM] 플레이어[id] - ID : %s 로그인 성공 \n", cl._id);
+				send_login_ok_packet(s_id);
+				Accept_Player(s_id);
 			}
 		}
 		else
 		{
-			g_tonardo_id = true;
-			g_tonardo_id = cl._s_id;
+			GA.g_tonardo_id = true;
+			GA.g_tonardo_id = cl._s_id;
 			send_login_ok_packet(s_id);
 			//cout << "토네이도" << endl;
 		}
 		break;
 	}
-	case CS_PACKET_ACC: {
+	case CS_PACKET_ACCOUNT: {
 		cs_packet_login* packet = reinterpret_cast<cs_packet_login*>(p);
 		bool _OverLap = false;
 		if (strcmp("Tornado", packet->id) != 0) {
 			CLIENT& cl = clients[s_id];
-			printf_s("[init login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
-
-			for (int i = 0; i < MAX_USER; ++i) {
-				clients[i].state_lock.lock();
-				if (ST_INGAME == clients[i]._state) {
-					if (strcmp(packet->id, clients[i]._id) == 0) {
-						send_login_fail_packet(s_id);
-						cout << packet->id << "접속중인 플레이어" << endl;
-						_OverLap = true;
-						clients[i].state_lock.unlock();
-						return;
-					}
-				}
-				clients[i].state_lock.unlock();
-			}
-
+			printf_s("[Recv login] ID : %s, PASSWORD : %s\n", packet->id, packet->pw);
 			if (_OverLap == true) break;
-			if (DB_odbc(s_id, packet->id, packet->pw) == true)
-			{
-				sc_packet_login_ok packet;
-				packet.size = sizeof(packet);
-				packet.type = SC_PACKET_LOGIN_FAIL;
-				printf("[Send login fail] id : %d\n", s_id);
-				clients[s_id].do_send(sizeof(packet), &packet);
-				
+			if (DB_id(packet->id) == true) {
+				cout << "플레이어[" << s_id << "] 계정 생성 실패 - " << "중복된 아이디" << endl;
+				send_login_fail_packet(s_id, OVERLAP_ID);
+				return;
 			}
 			else
 			{
-				//계정 생성
-				strcpy_s(cl._id, packet->id);
-				strcpy_s(cl._pw, packet->pw);
-
-				cl.state_lock.lock();
-				cl._state = ST_INGAME;
-				cl.state_lock.unlock();
-				cl.x = 600.0f * cos(s_id + 45.0f);
-				cl.y = 600.0f * sin(s_id + 45.0f);
-				cl.z = packet->z;
-				cl.Yaw = s_id * 55.0f - 115.0f;
-				cout << "플레이어 1" << cl.x << "" << cl.y << "" << cl.z << "" << cl.Yaw << endl;
-				if (cl.Yaw > 180) cl.Yaw -= 360;
-
-				cl._hp = cl._max_hp;
+				Init_Pos(s_id, packet->id, packet->pw, packet->z);
 				//DB에 계정등록 
-				//DB_save(s_id);
-				send_login_ok_packet(s_id);
+				DB_save(s_id);
+				send_login_fail_packet(s_id, CREATE_AC);
 				cout << packet->id << "DB에 계정등록" << endl;
 			}
-
-			cout << "플레이어[" << s_id << "]" << " 로그인 성공" << endl;
-
-			// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
-			for (auto& other : clients) {
-				if (other._s_id == s_id) continue;
-				if (other._s_id == g_tonardo_id) continue;
-				other.state_lock.lock();
-				if (ST_INGAME != other._state) {
-					other.state_lock.unlock();
-					continue;
-				}
-				else other.state_lock.unlock();
-
-				//if (false == is_near(other._id, client_id))
-					//continue;
-
-				//other.vl.lock();
-				//other.viewlist.insert(s_id);
-				//other.vl.unlock();
-				sc_packet_put_object packet;
-				packet.s_id = cl._s_id;
-				strcpy_s(packet.name, cl.name);
-				packet.object_type = 0;
-				packet.size = sizeof(packet);
-				packet.type = SC_PACKET_PUT_OBJECT;
-				packet.x = cl.x;
-				packet.y = cl.y;
-				packet.z = cl.z;
-				packet.yaw = cl.Yaw;
-				packet_type = PLAYER;
-				//printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-				//cout << other._s_id << "에게 " << cl._s_id << "을 " << endl;
-				other.do_send(sizeof(packet), &packet);
-			}
-
-			// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
-			for (auto& other : clients) {
-				if (other._s_id == s_id) continue;
-				if (ST_INGAME != other._state) {
-					if (g_tonardo) {
-						if (g_tonardo_id == other._s_id) {
-							//토네이도 생성위치 보내기
-							sc_packet_put_object packet;
-							packet.s_id = other._s_id;
-							packet.size = sizeof(packet);
-							packet.type = SC_PACKET_PUT_OBJECT;
-							packet.x = other.x;
-							packet.y = other.y;
-							packet.z = other.z;
-							packet.yaw = 0.0f;
-							packet_type = TONARDO;
-							printf_s("[Send put object] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-							cl.do_send(sizeof(packet), &packet);
-						}
-					}
-				}
-				else {
-					sc_packet_put_object packet;
-					packet.s_id = other._s_id;
-					strcpy_s(packet.name, other.name);
-					packet.object_type = 0;
-					packet.size = sizeof(packet);
-					packet.type = SC_PACKET_PUT_OBJECT;
-					packet.x = other.x;
-					packet.y = other.y;
-					packet.z = other.z;
-					packet.yaw = other.Yaw;
-					packet_type = PLAYER;
-					cl.do_send(sizeof(packet), &packet);
-				}
-			}
-		}
-		else
-		{
-			g_tonardo_id = true;
-			g_tonardo_id = cl._s_id;
-			send_login_ok_packet(s_id);
-			//cout << "토네이도" << endl;
 		}
 		break;
 	}
 	case CS_PACKET_MOVE: {
 
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
-		if (packet->sessionID != g_tonardo_id) {
+		if (packet->sessionID != GA.g_tonardo_id) {
 			CLIENT& cl = clients[packet->sessionID];
 			cl.x = packet->x;
 			cl.y = packet->y;
@@ -940,12 +468,6 @@ void process_packet(int s_id, unsigned char* p)
 			cl.VY = packet->vy;
 			cl.VZ = packet->vz;
 			cl.direction = packet->direction;
-			//printf_s("[Recv move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f), dir : %f\n", packet->sessionID, cl.x, cl.y, cl.z, cl.Yaw, cl.VX, cl.VY, cl.VZ, cl.direction);
-
-			//auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-			//cout << millisec_since_epoch - packet->move_time << "ms" << endl;
-
-			//send_status_packet(s_id);
 
 			unordered_set <int> near_list;
 			for (auto& other : clients) {
@@ -971,73 +493,17 @@ void process_packet(int s_id, unsigned char* p)
 				if (ST_INGAME != other._state)
 					continue;
 				send_move_packet(other._s_id, cl._s_id);
-				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
-
 			}
-
-			//새로 시야에 들어온 플레이어
-			//for (auto other_id : near_list) {
-			//	if (0 == my_vl.count(other_id)) {
-			//		cl.vl.lock();
-			//		cl.viewlist.insert(other_id);
-			//		cl.vl.unlock();
-			//		send_put_object(cl._s_id, other_id);
-
-
-			//		clients[other_id].vl.lock();
-			//		if (0 == clients[other_id].viewlist.count(cl._s_id)) {
-			//			clients[other_id].viewlist.insert(cl._s_id);
-			//			clients[other_id].vl.unlock();
-			//			send_put_object(other_id, cl._s_id);
-			//		}
-			//		else {
-			//			clients[other_id].vl.unlock();
-			//			send_move_packet(other_id, cl._s_id);
-			//		}
-			//	}
-			//	//시야에 존재하는 플레이어
-			//	else {
-			//		clients[other_id].vl.lock();
-			//		if (0 != clients[other_id].viewlist.count(cl._s_id)) {
-			//			clients[other_id].vl.unlock();
-			//			send_move_packet(other_id, cl._s_id);
-			//		}
-			//		else {
-			//			clients[other_id].viewlist.insert(cl._s_id);
-			//			clients[other_id].vl.unlock();
-			//			send_put_object(other_id, cl._s_id);
-			//		}
-			//	}
-			//}
-			//// 시야에서 벗어난 플레이어 
-			//for (auto other_id : my_vl) {
-			//	if (0 == near_list.count(other_id)) {
-			//		cl.vl.lock();
-			//		cl.viewlist.erase(other_id);
-			//		cl.vl.unlock();
-			//		send_remove_object(cl._s_id, other_id);
-			//		clients[other_id].vl.lock();
-			//		if (0 != clients[other_id].viewlist.count(cl._s_id)) {
-			//			clients[other_id].viewlist.erase(cl._s_id);
-			//			clients[other_id].vl.unlock();
-			//			send_remove_object(other_id, cl._s_id);
-			//		}
-			//		else clients[other_id].vl.unlock();
-			//	}
-			//}
-
-
-			//printf("Move\n");
 		}
 		else
 		{
-		cl.x = packet->x;
-		cl.y = packet->y;
-		cl.z = packet->z;
-		cl.VX = packet->vx;
-		cl.VY = packet->vy;
-		cl.VZ = packet->vz;
-			if (g_start_game) {
+			cl.x = packet->x;
+			cl.y = packet->y;
+			cl.z = packet->z;
+			cl.VX = packet->vx;
+			cl.VY = packet->vy;
+			cl.VZ = packet->vz;
+			if (GA.g_start_game) {
 				// cout << "토네이도 move" << endl;
 				for (auto& other : clients) {
 					if (other._s_id == s_id)
@@ -1045,7 +511,7 @@ void process_packet(int s_id, unsigned char* p)
 					if (ST_INGAME != other._state)
 						continue;
 					cs_packet_move packet;
-					packet.sessionID = g_tonardo_id;
+					packet.sessionID = GA.g_tonardo_id;
 					packet.size = sizeof(packet);
 					packet.type = SC_PACKET_MOVE;
 					packet.x = cl.x;
@@ -1160,7 +626,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (cl._hp + 30 > cl._max_hp)
 				cl._hp = cl._max_hp;
 			else
-				cl._hp +=30;
+				cl._hp += 30;
 			send_hp_packet(cl._s_id);
 			//cl.is_bone = true;
 			//Timer_Event(s_id, s_id, CL_MATCH, 1000ms);
@@ -1173,13 +639,13 @@ void process_packet(int s_id, unsigned char* p)
 
 	}
 	case CS_PACKET_UMB: {
-		
+
 		if (cl.bIsSnowman) break;
 		if (cl.bHasUmbrella)
 		{
 			cs_packet_umb* packet = reinterpret_cast<cs_packet_umb*>(p);
-			if(!packet->end)
-			    cout << "플레이어 " << cl._s_id << ": 우산 사용 " << endl;
+			if (!packet->end)
+				cout << "플레이어 " << cl._s_id << ": 우산 사용 " << endl;
 			else
 				cout << "플레이어 " << cl._s_id << ": 우산 접기" << endl;
 			for (auto& other : clients) {
@@ -1293,14 +759,14 @@ void process_packet(int s_id, unsigned char* p)
 		default:
 			break;
 		}
-		
+
 		break;
 
 	}
 	case CS_PACKET_GET_ITEM: {
 		cs_packet_get_item* packet = reinterpret_cast<cs_packet_get_item*>(p);
 		int p_s_id = packet->s_id;
-		
+
 		switch (packet->item_type)
 		{
 
@@ -1326,8 +792,8 @@ void process_packet(int s_id, unsigned char* p)
 			}
 			else
 				//cout << "플레이어: [" << cl._s_id << "] 가방 파밍 실패" << endl;
-			
-			break;
+
+				break;
 		}
 		case ITEM_UMB:
 		{
@@ -1347,8 +813,8 @@ void process_packet(int s_id, unsigned char* p)
 			else
 				//cout << "플레이어: [" << cl._s_id << "] 우산 파밍 실패" << endl;
 
-			
-			break;
+
+				break;
 		}
 		case ITEM_JET:
 		{
@@ -1381,8 +847,8 @@ void process_packet(int s_id, unsigned char* p)
 			else
 				//cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 실패" << endl;
 
-			
-			break;
+
+				break;
 		}
 		case ITEM_SNOW:
 		{
@@ -1402,23 +868,23 @@ void process_packet(int s_id, unsigned char* p)
 					packet->type = SC_PACKET_GET_ITEM;
 					other.do_send(sizeof(*packet), packet);
 				}
-				cout <<"플레이어: ["<< cl._s_id << "] 눈무더기 파밍 성공" << endl;
+				cout << "플레이어: [" << cl._s_id << "] 눈무더기 파밍 성공" << endl;
 			}
 			else
 				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
-			break;
+				break;
 		}
 		default:
 			break;
 		}
 		//cout << "플레이어[" << s_id << "]가 " << "아이템 [" << _item_no << "]얻음" << endl;
-		
+
 		break;
 	}
 	case CS_PACKET_THROW_SNOW: {
 		if (cl.iCurrentSnowballCount <= 0) break;
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
-		if (!packet->mode){
+		if (!packet->mode) {
 			printf("throw\n");
 			cl.iCurrentSnowballCount--;
 		}
@@ -1426,7 +892,7 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			printf("rel_attack\n");
 		}
-			
+
 
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
@@ -1448,7 +914,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_GUNFIRE: {
 		if (cl.iCurrentSnowballCount < 4) break;
 		printf("gunfire\n");
-		cl.iCurrentSnowballCount-=5;
+		cl.iCurrentSnowballCount -= 5;
 		cs_packet_fire* packet = reinterpret_cast<cs_packet_fire*>(p);
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
@@ -1463,7 +929,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_LOGOUT: {
 		cs_packet_logout* packet = reinterpret_cast<cs_packet_logout*>(p);
 		cout << "[Recv logout]";
-	
+
 		Disconnect(s_id);
 		break;
 	}
@@ -1489,10 +955,10 @@ void process_packet(int s_id, unsigned char* p)
 			if (cl.bIsSnowman) break;
 			if (true == cl.is_bone) {
 				cl.is_bone = false;
-				
+
 			}
 			cl._is_active = true;
-			player_damage(cl._s_id);			
+			player_damage(cl._s_id);
 			//cout << s_id << "플레이어 모닥불 밖" << endl;
 		}
 		else if (packet->state == ST_SNOWMAN)
@@ -1596,7 +1062,7 @@ void process_packet(int s_id, unsigned char* p)
 		}
 
 		SetEvent(g_timer);
-		g_start_game = true;
+		GA.g_start_game = true;
 
 		cout << "게임 스타트" << endl;
 		break;
@@ -1615,7 +1081,7 @@ void process_packet(int s_id, unsigned char* p)
 	}
 
 	default:
-		cout <<" 오류패킷타입" << packet_type << endl;
+		cout << " 오류패킷타입" << packet_type << endl;
 		printf("Unknown PACKET type\n");
 		break;
 	}
@@ -1629,7 +1095,7 @@ void worker_thread()
 		LONG64 iocp_key;
 		WSAOVERLAPPED* p_over;
 		BOOL ret = GetQueuedCompletionStatus(g_h_iocp, &num_byte, (PULONG_PTR)&iocp_key, &p_over, INFINITE);
-	
+
 		int _s_id = static_cast<int>(iocp_key);
 		Overlap* exp_over = reinterpret_cast<Overlap*>(p_over);
 		if (FALSE == ret) {
@@ -1641,7 +1107,7 @@ void worker_thread()
 			if (exp_over->_op == OP_SEND)
 				delete exp_over;
 			continue;
-		} 
+		}
 
 		switch (exp_over->_op) {
 		case OP_RECV: {
@@ -1683,22 +1149,14 @@ void worker_thread()
 		case OP_ACCEPT: {
 			cout << "Accept Completed.\n";
 			SOCKET c_socket = *(reinterpret_cast<SOCKET*>(exp_over->_net_buf));
-			
-			
+
+
 			int n__s_id = get_id();
 			if (-1 == n__s_id) {
 				cout << "user over.\n";
 			}
 			else {
 				CLIENT& cl = clients[n__s_id];
-				cl.x = rand() % ReZone_WIDTH;
-				cl.y = rand() % ReZone_HEIGHT;
-				cl.z = 0;
-				cl.Yaw = 0;
-				cl.Pitch = 0;
-				cl.Roll = 0;
-				//cl.x = 200;
-				//cl.y = 200;
 				cl.state_lock.lock();
 				cl._s_id = n__s_id;
 				cl._state = ST_ACCEPT;
@@ -1709,10 +1167,9 @@ void worker_thread()
 				cl._recv_over._wsa_buf.len = sizeof(cl._recv_over._net_buf);
 				ZeroMemory(&cl._recv_over._wsa_over, sizeof(cl._recv_over._wsa_over));
 				cl._socket = c_socket;
-
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), g_h_iocp, n__s_id, 0);
 				cl.do_recv();
-	
+
 
 			}
 
@@ -1740,11 +1197,8 @@ void worker_thread()
 			if (clients[_s_id].is_bone == false) {
 				if (clients[_s_id]._hp - 1 > clients[_s_id]._min_hp) {
 					clients[_s_id]._hp -= 1;
-					//clients[_s_id].dot_dam = false;
 					player_damage(clients[_s_id]._s_id);
 					send_hp_packet(_s_id);
-					//cout << "hp -1" << endl;
-
 				}
 				else if (clients[_s_id]._hp - 1 == clients[_s_id]._min_hp)
 				{
@@ -1761,8 +1215,6 @@ void worker_thread()
 					for (auto& other : clients) {
 						if (ST_INGAME != other._state) continue;
 						send_state_change(_s_id, other._s_id, ST_SNOWMAN);
-
-
 					}
 					int cnt = 0;
 					int target_s_id;
@@ -1772,7 +1224,6 @@ void worker_thread()
 						if (false == other.bIsSnowman)
 						{
 							cnt++;
-							//cout << "모닥불 cnt" << endl;
 							target_s_id = other._s_id;
 						}
 					}
@@ -1786,10 +1237,6 @@ void worker_thread()
 					}
 				}
 			}
-			else if (clients[_s_id].is_bone == true)
-				  //clients[_s_id].dot_dam = false;
-				
-
 			delete exp_over;
 			break;
 		}
@@ -1800,26 +1247,6 @@ void worker_thread()
 
 }
 
-//이동
-void send_move_packet(int _id, int target)
-{
-	cs_packet_move packet;
-	packet.sessionID = target;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_MOVE;
-	packet.x = clients[target].x;
-	packet.y = clients[target].y;
-	packet.z = clients[target].z;
-	packet.yaw = clients[target].Yaw;
-	packet.vx = clients[target].VX;
-	packet.vy = clients[target].VY;
-	packet.vz = clients[target].VZ;
-	packet.direction = clients[target].direction;
-	//packet.move_time = clients[target].last_move_time;
-
-	//printf_s("[Send move] id : %d, location : (%f,%f,%f), yaw : %f,  v : (%f,%f,%f)\n", packet.sessionID, packet.x, packet.y, packet.z, packet.yaw, packet.vx, packet.vy, packet.vz);
-	clients[_id].do_send(sizeof(packet), &packet);
-}
 //타이머
 void ev_timer()
 {

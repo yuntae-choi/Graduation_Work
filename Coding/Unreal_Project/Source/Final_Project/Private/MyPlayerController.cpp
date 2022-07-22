@@ -1044,11 +1044,6 @@ void AMyPlayerController::BtnCreateAccount(FString id, FString pw)
 		loginInfoText = TEXT("Input PW");
 		return;
 	}
-
-	// id, pw를 제대로 모두 입력한 경우
-	// id, pw로 계정 생성 후 Ready UI로 넘어가도록 해야함
-
-	//DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
 }
 
 void AMyPlayerController::BtnLogin(FString id, FString pw)
@@ -1059,8 +1054,9 @@ void AMyPlayerController::BtnLogin(FString id, FString pw)
 	// 디버깅용 - id, pw에 입력 x인 경우 게임 플레이 되도록
 	if (id.Len() == 0 && pw.Len() == 0)
 	{
+		id = FString(TEXT("testuser"));
+		pw = FString(TEXT("testuser"));
 		g_socket->Send_LoginPacket(TCHAR_TO_UTF8(*id), TCHAR_TO_UTF8(*pw));
-		//DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
 	}
 	else
 	{
@@ -1074,27 +1070,7 @@ void AMyPlayerController::BtnLogin(FString id, FString pw)
 			loginInfoText = TEXT("Input PW");
 			return;
 		}
-
 		g_socket->Send_LoginPacket(TCHAR_TO_UTF8(*id), TCHAR_TO_UTF8(*pw));
-
-
-		// id, pw가 DB에 등록된 것과 일치하는지 체크
-
-		// id가 유효하지 않은 경우 return
-		//if ()
-		//{
-		//	loginInfoText = TEXT("Invalid ID");
-		//	return;
-		//}
-		// pw 입력이 잘못된 경우 return
-		//if ()
-		//{
-		//	loginInfoText = TEXT("Wrong PW");
-		//	return;
-		//}
-
-		// id, pw가 유효한 경우
-		//DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
 	}
 }
 
