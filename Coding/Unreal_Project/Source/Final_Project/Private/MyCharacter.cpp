@@ -598,7 +598,7 @@ void AMyCharacter::ReleaseAttack()
 	{
 		SendReleaseAttack();
 	}
-	//Recv_ReleaseAttack()로 옮김
+	//Cancel_SnowBallAttack()로 옮김
 	//자기 자신을 포함하여 서버에서 명령이 오면 작업을 수행하게함
 	//if (myAnim->bThrowing)
 	//{
@@ -623,7 +623,7 @@ void AMyCharacter::ReleaseAttack()
 }
 
 //자기 자신을 포함하여 서버에서 명령이 오면 작업을 수행하게함
-void AMyCharacter::Recv_ReleaseAttack()
+void AMyCharacter::Cancel_SnowBallAttack()
 {
 	if (myAnim->bThrowing)
 	{

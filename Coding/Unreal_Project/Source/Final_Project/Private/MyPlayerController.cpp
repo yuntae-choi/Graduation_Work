@@ -187,14 +187,14 @@ void AMyPlayerController::SetNewBall(const int s_id)
 {
 	UWorld* World = GetWorld();
 	
-	charactersInfo->players[s_id].canSnowBall = true;
+	charactersInfo->players[s_id].End_SnowBall = true;
 	
 }
 
 void AMyPlayerController::SetRelAttack(const int s_id)
 {
 	UWorld* World = GetWorld();
-    charactersInfo->players[s_id].relATTACK = true;
+    charactersInfo->players[s_id].Cancel_SnowBall = true;
 
 }
 
@@ -215,14 +215,14 @@ void AMyPlayerController::SetAttack(const int s_id)
 {
 	UWorld* World = GetWorld();
 
-	charactersInfo->players[s_id].canAttack = true;
+	charactersInfo->players[s_id].Start_SnowBall = true;
 
 }
 
 void AMyPlayerController::SetShotGun(const int s_id)
 {
 	UWorld* World = GetWorld();
-	charactersInfo->players[s_id].canShot = true;
+	charactersInfo->players[s_id].Start_ShotGun = true;
 	//MYLOG(Warning, TEXT("SetShotGun %d"), s_id);
 }
 
@@ -230,7 +230,7 @@ void AMyPlayerController::SetGunFire(const int s_id)
 {
 	UWorld* World = GetWorld();
 
-	charactersInfo->players[s_id].canSnowBomb = true;
+	charactersInfo->players[s_id].End_ShotGun = true;
 
 }
 
@@ -238,7 +238,7 @@ void AMyPlayerController::SetJetSki(const int s_id)
 {
 	UWorld* World = GetWorld();
 
-	charactersInfo->players[s_id].operate_jet = true;
+	charactersInfo->players[s_id].OP_JET_SKI = true;
 
 }
 
@@ -422,32 +422,31 @@ bool AMyPlayerController::UpdateWorldInfo()
 		cCharacter* info = &charactersInfo->players[player_->iSessionId];
 		if (!info->IsAlive) continue;
 
-		if (info->canAttack) { 
+		if (info->Start_SnowBall) { 
 			player_->SnowAttack();
-			info->canAttack = false;
+			info->Start_SnowBall = false;
 		}
 		
-		if (info->canShot) {
+		if (info->Start_ShotGun) {
 			player_->AttackShotgun();
-			info->canShot = false;
+			info->Start_ShotGun = false;
 		}
 
-		if (info->relATTACK) {
-			player_->Recv_ReleaseAttack();
-			info->relATTACK = false;
+		if (info->Cancel_SnowBall) {
+			player_->Cancel_SnowBallAttack();
+			info->Cancel_SnowBall = false;
 		}
 
-		if (info->canSnowBall) {
+		if (info->End_SnowBall) {
 			player_->ReleaseSnowball();
-			info->canSnowBall = false;
+			info->End_SnowBall = false;
 			info->current_snow_count--;
 		}
 
-		if (info->canSnowBomb) {
-			MYLOG(Warning, TEXT("canSnowBomb"));
-
+		if (info->End_ShotGun) {
+			MYLOG(Warning, TEXT("End_ShotGun"));
 			player_->SpawnSnowballBomb();
-			info->canSnowBomb = false;
+			info->End_ShotGun = false;
 			info->current_snow_count-=5;
 		}
 
@@ -464,10 +463,10 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->CloseUmbrellaAnim();
 			info->end_umb = false;
 		}
-		if (info->operate_jet) {
+		if (info->OP_JET_SKI) {
 			MYLOG(Warning, TEXT("jetski"));
 			player_->GetOnOffJetski();
-			info->operate_jet = false;
+			info->OP_JET_SKI = false;
 		}
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)

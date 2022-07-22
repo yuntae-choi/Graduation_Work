@@ -129,13 +129,13 @@ public:
 	int current_match_count = 0;
 	int max_match_count = 2;
 
-	bool canShot = false;
-	bool canAttack = false;
-	bool operate_jet = false;
+	bool Start_ShotGun = false;
+	bool Start_SnowBall = false;
+	bool OP_JET_SKI = false;
 
-	bool canSnowBall = false;
-	bool relATTACK = false;
-	bool canSnowBomb = false;
+	bool End_SnowBall = false;
+	bool Cancel_SnowBall = false;
+	bool End_ShotGun = false;
 	bool has_umb = false;
 	bool start_umb = false;
 	bool end_umb = false;
