@@ -148,7 +148,7 @@ public:
 	void init_Socket();
 
 	void FreezeHead();
-	void FreezeAnimation();
+	void FreezeAnimation(TArray<UStaticMeshComponent*> bones, int& frame, bool& end);
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -386,6 +386,8 @@ public:
 
 	TArray<UStaticMeshComponent*> heads;
 	int32 iHeadFrame;
+	bool bHeadAnimEnd = false;
+	FTimerHandle HeadHandle;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
