@@ -114,14 +114,12 @@ void UMyAnimInstance::AnimNotify_SnowballRelease2()
 	// 임시 - 아이스볼
 	if (MyCharacter->iSelectedProjectile == Projectile::Iceball)
 	{
-		//MyCharacter->SendReleaseBullet(BULLET_ICEBALL);
-		MyCharacter->ReleaseIceball();
+		MyCharacter->SendReleaseBullet(BULLET_ICEBALL);
+		//MyCharacter->ReleaseIceball();
 		return;
 	}
-	else 
-	{
-		MyCharacter->SendReleaseBullet(BULLET_SNOWBALL);
-	}
+
+	MyCharacter->SendReleaseBullet(BULLET_SNOWBALL);
 }
 
 void UMyAnimInstance::AnimNotify_StopThrow()

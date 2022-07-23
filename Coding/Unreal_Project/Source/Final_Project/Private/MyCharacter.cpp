@@ -561,8 +561,8 @@ void AMyCharacter::Attack()
 			break;
 		case Projectile::Iceball:
 			if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
-			//PlayerController->SendPlayerInfo(COMMAND_ICEBALL);
-			IceballAttack();
+			PlayerController->SendPlayerInfo(COMMAND_ICEBALL);
+			//IceballAttack();
 			isAttacking = true;
 			break;
 		default:
@@ -695,7 +695,7 @@ void AMyCharacter::ShotgunAttack()
 void AMyCharacter::IceballAttack()
 {
 	//if (bIsSnowman) return;
-	if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
+	//if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
 
 	//myAnim->PlayAttackMontage();
 	myAnim->PlayAttack2Montage();
@@ -774,7 +774,7 @@ void AMyCharacter::SendReleaseBullet(int bullet)
 		break;
 	}
 	case BULLET_ICEBALL: {
-		if (IsValid(snowball))
+		if (IsValid(iceball))
 		{
 			localPlayerController->SendPlayerInfo(COMMAND_THROW_IB);
 		}
@@ -800,7 +800,7 @@ void AMyCharacter::SendCancelAttack(int bullet)
 		break;
 	}
 	case BULLET_ICEBALL: {
-		if (IsValid(snowball))
+		if (IsValid(iceball))
 		{
 			localPlayerController->SendPlayerInfo(COMMAND_CANCEL_IB);
 
@@ -870,8 +870,8 @@ void AMyCharacter::ReleaseIceball()
 {
 	if (IsValid(iceball))
 	{
-		iCurrentIceballCount -= 1;	// 공격 시 아이스볼 소유량 1 감소
-		UpdateUI(UICategory::CurIceball);
+		//iCurrentIceballCount -= 1;	// 공격 시 아이스볼 소유량 1 감소
+		//UpdateUI(UICategory::CurIceball);
 
 		FDetachmentTransformRules dtr = FDetachmentTransformRules(EDetachmentRule::KeepWorld, false);
 		iceball->DetachFromActor(dtr);
@@ -886,7 +886,10 @@ void AMyCharacter::ReleaseIceball()
 			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
 			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
 			
+			FVector cameraLocation;
 			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+
 			cameraRotation.Vector() = direction_;
 
 			float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
