@@ -620,8 +620,8 @@ void AMyCharacter::Cancel_SnowBallAttack()
 //자기 자신을 포함하여 서버에서 명령이 오면 작업을 수행하게함
 void AMyCharacter::Cancel_IceBallAttack()
 {
-	if (iSelectedProjectile == Projectile::Iceball)
-	{
+	//if (iSelectedProjectile == Projectile::Iceball)
+	//{
 		if (myAnim->bThrowing)
 		{
 			myAnim->PlayAttack2MontageSectionEnd();
@@ -642,7 +642,7 @@ void AMyCharacter::Cancel_IceBallAttack()
 			localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
 			localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
 		}
-	}
+	//}
 }
 
 void AMyCharacter::SnowBallAttack()
@@ -769,6 +769,7 @@ void AMyCharacter::SendReleaseBullet(int bullet)
 	case BULLET_SNOWBALL: {
 		if (IsValid(snowball))
 		{
+			
 			localPlayerController->SendPlayerInfo(COMMAND_THROW_SB);
 		}
 		break;
@@ -844,7 +845,7 @@ void AMyCharacter::ReleaseSnowball()
 			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
 			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
 
-			float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
+			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 
 			II_Throwable::Execute_Throw(snowball, direction_, speed);
 			// 속도 인자 추가
@@ -892,7 +893,7 @@ void AMyCharacter::ReleaseIceball()
 
 			cameraRotation.Vector() = direction_;
 
-			float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
+			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 
 			II_Throwable::Execute_IceballThrow(iceball, cameraRotation, speed);
 
@@ -2133,3 +2134,9 @@ void AMyCharacter::FreezeAnimation(TArray<UStaticMeshComponent*> bones, int& fra
 	else
 		frame += 1;
 }
+
+float AMyCharacter::Getfspeed()
+{
+	float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
+	return speed;
+};

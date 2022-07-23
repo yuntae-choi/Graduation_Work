@@ -212,6 +212,7 @@ struct cs_packet_throw_snow {
 	bool    mode;
 	float x, y, z;
 	float dx, dy, dz;
+	float speed;
 };
 
 struct cs_packet_fire {

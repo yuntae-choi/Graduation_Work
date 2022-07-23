@@ -134,6 +134,7 @@ public:
 	void GetOnOffJetski();
 	void GetOnJetski();
 	void GetOffJetski();
+	float Getfspeed();
 
 	void Cheat_Teleport1();
 	void Cheat_Teleport2();

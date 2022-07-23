@@ -189,6 +189,8 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[packet->s_id].fCDx = packet->dx;		// 카메라 방향
 		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
 		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
+		CharactersInfo.players[packet->s_id].fSpeed = packet->speed;		// 발사 속도
+
 
 		switch (packet->bullet)
 		{
@@ -531,7 +533,7 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVec
 };
 
 
-void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode, int bullet)
+void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode, int bullet, float speed)
 {
 
 	cs_packet_throw_snow packet;
@@ -546,6 +548,7 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	packet.dx = MyDirection.X;
 	packet.dy = MyDirection.Y;
 	packet.dz = MyDirection.Z;
+	packet.speed = speed;
 	size_t sent = 0;
 	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
 	SendPacket(&packet);

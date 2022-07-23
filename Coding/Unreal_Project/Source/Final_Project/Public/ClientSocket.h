@@ -122,6 +122,9 @@ public:
 	float fCx, fCy, fCz;
 	//카메라 방향
 	float fCDx, fCDy, fCDz;
+	//발사 속도
+	float fSpeed;
+
 	STATE_Type My_State = ST_ANIMAL;
 	int current_snow_count = 0;
 	int current_ice_count = 0;
@@ -145,6 +148,8 @@ public:
 	bool start_umb = false;
 	bool end_umb = false;
 	bool SET_JET_SKI = false;
+
+
 
 	int random_bullet[MAX_BULLET_RANG] = {};
 
@@ -267,7 +272,7 @@ public:
 	void Send_GunAttackPacket(int s_id);
 
 	void Send_ChatPacket(int cheat_num);
-	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode, int bullet);
+	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode, int bullet, float speed);
 	void Send_GunFire_Packet(int s_id, FVector MyLocation, FRotator MyRotation);
 
 	void Send_DamagePacket();

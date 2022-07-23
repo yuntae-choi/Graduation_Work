@@ -627,7 +627,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	FRotator MyCameraRotation;
 	localPlayerCharacter->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
 	float dir = localPlayerCharacter->GetAnim()->GetDirection();
-
+	float fspeed = localPlayerCharacter->Getfspeed();
 	if (input == COMMAND_MOVE) 
 	mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
 	else if (input == COMMAND_SNOWBALL)
@@ -637,13 +637,13 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	else if (input == COMMAND_SHOTGUN)
 		mySocket->Send_GunAttackPacket(iSessionId);
 	else if (input == COMMAND_THROW_SB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),false, BULLET_SNOWBALL);
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),false, BULLET_SNOWBALL, fspeed);
 	else if (input == COMMAND_THROW_IB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(), false, BULLET_ICEBALL);
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(), false, BULLET_ICEBALL, fspeed);
 	else if (input == COMMAND_CANCEL_SB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),true, BULLET_SNOWBALL);
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),true, BULLET_SNOWBALL, fspeed);
 	else if (input == COMMAND_CANCEL_IB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(), true, BULLET_ICEBALL);
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(), true, BULLET_ICEBALL, fspeed);
 	else if (input == COMMAND_GUNFIRE)
 		mySocket->Send_GunFire_Packet(iSessionId, MyCameraLocation, MyCameraRotation);
 	else if (input == COMMAND_DAMAGE)

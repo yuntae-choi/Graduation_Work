@@ -914,7 +914,7 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			if (cl.iCurrentSnowballCount <= 0) break;
 			if (!packet->mode) {
-				printf("throw BULLET_SNOWBALL\n");
+				cout << "throw BULLET_SNOWBALL " << packet->speed << endl;
 				cl.iCurrentSnowballCount--;
 			}
 			else
@@ -927,7 +927,7 @@ void process_packet(int s_id, unsigned char* p)
 		case BULLET_ICEBALL:
 		{
 			if (!packet->mode) {
-				printf("throw BULLET_ICEBALL\n");
+				cout << "throw BULLET_ICEBALL "<< packet->speed << endl;
 				cl.iCurrentIceballCount--;
 			}
 			else
