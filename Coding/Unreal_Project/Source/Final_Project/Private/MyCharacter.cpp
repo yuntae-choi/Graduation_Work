@@ -324,6 +324,8 @@ AMyCharacter::AMyCharacter()
 		}
 	}
 
+	SettingHead();
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
@@ -435,6 +437,11 @@ void AMyCharacter::Tick(float DeltaTime)
 
 	UpdateZByTornado();		// 캐릭터가 토네이도 내부인 경우 z값 증가
 	UpdateControllerRotateByTornado();	// 토네이도로 인한 스턴상태인 경우 회전하도록
+
+	if (bHeadAnimEnd) 
+	{
+		GetWorld()->GetTimerManager().ClearTimer(HeadHandle);
+	}
 }
 
 void AMyCharacter::init_Socket()
@@ -875,10 +882,6 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 
 	if (nullptr != MySnowball)
 	{
-		auto BoneName = GetMesh()->FindClosestBone(GetActorLocation());
-		MYLOG(Warning, TEXT("%s"), *BoneName.ToString());
-		if (BoneName.ToString() == TEXT("Base-HumanHead") || GetMesh()->GetParentBone(BoneName) == TEXT("Base-HumanHead"))
-			bFreeze = true;
 	}
 	AMyCharacter* otherCharacter = Cast<AMyCharacter>(OtherActor);
 	if (!otherCharacter) return;
@@ -1921,4 +1924,155 @@ void AMyCharacter::UpdateJetski()
 		FRotator newRotation = FRotator(pitch, GetActorRotation().Yaw, roll);
 		jetskiMeshComponent->SetWorldRotation(newRotation);
 	}
+}
+
+void AMyCharacter::SettingHead() 
+{
+	heads.Add(head1);
+	heads.Add(head2);
+	heads.Add(head3);
+	heads.Add(head4);
+	heads.Add(head5);
+	heads.Add(head6);
+	heads.Add(head7);
+	heads.Add(head8);
+	heads.Add(head9);
+	heads.Add(head10);
+	heads.Add(head11);
+	heads.Add(head12);
+	heads.Add(head13);
+	heads.Add(head14);
+	heads.Add(head15);
+	heads.Add(head16);
+	heads.Add(head17);
+	heads.Add(head18);
+	heads.Add(head19);
+	heads.Add(head20);
+	heads.Add(head21);
+	heads.Add(head22);
+	heads.Add(head23);
+
+	TArray<const wchar_t*> names;
+	names.Add(TEXT("head1"));
+	names.Add(TEXT("head2"));
+	names.Add(TEXT("head3"));
+	names.Add(TEXT("head4"));
+	names.Add(TEXT("head5"));
+	names.Add(TEXT("head6"));
+	names.Add(TEXT("head7"));
+	names.Add(TEXT("head8"));
+	names.Add(TEXT("head9"));
+	names.Add(TEXT("head10"));
+	names.Add(TEXT("head11"));
+	names.Add(TEXT("head12"));
+	names.Add(TEXT("head13"));
+	names.Add(TEXT("head14"));
+	names.Add(TEXT("head15"));
+	names.Add(TEXT("head16"));
+	names.Add(TEXT("head17"));
+	names.Add(TEXT("head18"));
+	names.Add(TEXT("head19"));
+	names.Add(TEXT("head20"));
+	names.Add(TEXT("head21"));
+	names.Add(TEXT("head22"));
+	names.Add(TEXT("head23"));
+
+	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_HEADS;
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD1(TEXT("/Game/FX/Frozen/Meshes/head_2.head_2"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD2(TEXT("/Game/FX/Frozen/Meshes/head_3.head_3"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD3(TEXT("/Game/FX/Frozen/Meshes/head_4.head_4"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD4(TEXT("/Game/FX/Frozen/Meshes/head_5.head_5"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD5(TEXT("/Game/FX/Frozen/Meshes/head_6.head_6"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD6(TEXT("/Game/FX/Frozen/Meshes/head_7.head_7"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD7(TEXT("/Game/FX/Frozen/Meshes/head_8.head_8"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD8(TEXT("/Game/FX/Frozen/Meshes/head_9.head_9"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD9(TEXT("/Game/FX/Frozen/Meshes/head_10.head_10"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD10(TEXT("/Game/FX/Frozen/Meshes/head_11.head_11"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD11(TEXT("/Game/FX/Frozen/Meshes/head_12.head_12"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD12(TEXT("/Game/FX/Frozen/Meshes/head_13.head_13"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD13(TEXT("/Game/FX/Frozen/Meshes/head_14.head_14"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD14(TEXT("/Game/FX/Frozen/Meshes/head_15.head_15"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD15(TEXT("/Game/FX/Frozen/Meshes/head_16.head_16"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD16(TEXT("/Game/FX/Frozen/Meshes/head_17.head_17"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD17(TEXT("/Game/FX/Frozen/Meshes/head_18.head_18"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD18(TEXT("/Game/FX/Frozen/Meshes/head_19.head_19"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD19(TEXT("/Game/FX/Frozen/Meshes/head_20.head_20"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD20(TEXT("/Game/FX/Frozen/Meshes/head_21.head_21"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD21(TEXT("/Game/FX/Frozen/Meshes/head_22.head_22"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD22(TEXT("/Game/FX/Frozen/Meshes/head_23.head_23"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD23(TEXT("/Game/FX/Frozen/Meshes/head_24.head_24"));
+	SM_HEADS.Add(&SM_HEAD1);
+	SM_HEADS.Add(&SM_HEAD2);
+	SM_HEADS.Add(&SM_HEAD3);
+	SM_HEADS.Add(&SM_HEAD4);
+	SM_HEADS.Add(&SM_HEAD5);
+	SM_HEADS.Add(&SM_HEAD6);
+	SM_HEADS.Add(&SM_HEAD7);
+	SM_HEADS.Add(&SM_HEAD8);
+	SM_HEADS.Add(&SM_HEAD9);
+	SM_HEADS.Add(&SM_HEAD10);
+	SM_HEADS.Add(&SM_HEAD11);
+	SM_HEADS.Add(&SM_HEAD12);
+	SM_HEADS.Add(&SM_HEAD13);
+	SM_HEADS.Add(&SM_HEAD14);
+	SM_HEADS.Add(&SM_HEAD15);
+	SM_HEADS.Add(&SM_HEAD16);
+	SM_HEADS.Add(&SM_HEAD17);
+	SM_HEADS.Add(&SM_HEAD18);
+	SM_HEADS.Add(&SM_HEAD19);
+	SM_HEADS.Add(&SM_HEAD20);
+	SM_HEADS.Add(&SM_HEAD21);
+	SM_HEADS.Add(&SM_HEAD22);
+	SM_HEADS.Add(&SM_HEAD23);
+
+	for (int i = 0; i < 23; ++i)
+	{
+		if (!heads[i])
+		{
+			heads[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+			if (SM_HEADS[i]->Succeeded())
+			{
+				heads[i]->SetStaticMesh(SM_HEADS[i]->Object);
+				heads[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+				heads[i]->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
+				heads[i]->SetVisibility(false);
+			}
+		}
+	}
+}
+
+void AMyCharacter::FreezeHead()
+{
+	float WaitTime = 0.1f;
+	GetWorld()->GetTimerManager().SetTimer(HeadHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			MYLOG(Warning, TEXT("%d"), iHeadFrame);
+
+			for (int i = 0; i < 23; ++i)
+			{
+				if (iHeadFrame == i) {
+					FreezeAnimation(heads, iHeadFrame, bHeadAnimEnd);
+					break;
+				}
+			}
+		}), WaitTime, true);
+}
+
+void AMyCharacter::FreezeAnimation(TArray<UStaticMeshComponent*> bones, int& frame, bool& end)
+{
+	//투명모드 조정
+	if (iHeadFrame != 0)
+		bones[frame - 1]->SetVisibility(false);
+	bones[frame]->SetVisibility(true);
+
+	//머리만 머티리얼로 점점 얼리기
+	if (bones == heads)
+		bones[frame]->CreateDynamicMaterialInstance(1)->SetScalarParameterValue(TEXT("Emissive"), frame * 0.125);
+
+	//배열 끝 판정
+	if (bones.Num() - 1 == frame)
+		end = true;
+		//GetWorld()->GetTimerManager().ClearTimer(FreezeHandle);
+	else
+		frame += 1;
 }

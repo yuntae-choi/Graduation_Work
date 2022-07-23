@@ -100,7 +100,7 @@ void AMySnowball::Throw_Implementation(FVector Direction, float Speed)
 // Function that is called when the projectile hits something.
 void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	auto MyCharacter = Cast<ACharacter>(OtherActor);
+	auto MyCharacter = Cast<AMyCharacter>(OtherActor);
 
 	if (nullptr != MyCharacter)
 	{
@@ -114,6 +114,11 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 		{	// 캐릭터와 충돌 시 데미지
 			FDamageEvent DamageEvent;
 			MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
+
+			auto BoneName = MyCharacter->GetMesh()->FindClosestBone(GetActorLocation());
+			MYLOG(Warning, TEXT("%s"), *BoneName.ToString());
+			if (BoneName.ToString() == TEXT("Base-HumanHead") || MyCharacter->GetMesh()->GetParentBone(BoneName) == TEXT("Base-HumanHead"))
+				MyCharacter->FreezeHead();
 		}
 	}
 	else

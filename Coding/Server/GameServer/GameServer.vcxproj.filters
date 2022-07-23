@@ -19,6 +19,9 @@
     <Filter Include="Concurent">
       <UniqueIdentifier>{6e0c3814-c947-484c-a452-88e9ceb0f2ce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DB">
+      <UniqueIdentifier>{77447068-13e1-4388-b0dc-4d566d79366c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameServer.cpp">
@@ -39,6 +42,9 @@
     <ClCompile Include="ConcurrentStack.cpp">
       <Filter>Concurent</Filter>
     </ClCompile>
+    <ClCompile Include="GameDataBase.cpp">
+      <Filter>DB</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -58,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="ConcurrentStack.h">
       <Filter>Concurent</Filter>
+    </ClInclude>
+    <ClInclude Include="GameDataBase.h">
+      <Filter>DB</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
