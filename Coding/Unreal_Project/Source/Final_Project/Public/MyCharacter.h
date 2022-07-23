@@ -23,8 +23,8 @@ enum CharacterState {
 };
 
 enum UICategory {
-	HP, CurSnowball, CurIceball, CurMatch, MaxSnowIceballAndMatch, HasUmbrella, HasBag, IsFarmingSnowdrift, SnowdriftFarmDuration, 
-	SelectedItem, SelectedProjectile, AllOfUI
+	HP, CurSnowball, CurIceball, CurMatch, MaxSnowIceballAndMatch, HasUmbrella, HasBag, HasShotgun, IsFarmingSnowdrift, SnowdriftFarmDuration, 
+	SelectedItem, SelectedProjectile, SelectedWeapon, AllOfUI
 };
 
 enum Weapon {
@@ -58,8 +58,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void ReleaseSnowball();
-	void SendReleaseSnowball();
-	void SendReleaseAttack();
+	void SendReleaseBullet(int bullet);
+	void SendCancelAttack(int bullet);
 
 	void ReleaseIceball();
 
@@ -86,10 +86,11 @@ public:
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
 	void ReleaseAttack();      //호출시 서버로 메세지 전송
-	void Recv_ReleaseAttack(); //서버에서 전송이 왔을때
+	void Cancel_SnowBallAttack(); //서버에서 전송이 왔을때
+	void Cancel_IceBallAttack(); //서버에서 전송이 왔을때
 
-	void SnowAttack();    // 일반 공격
-	void AttackShotgun(); //샷건 공격
+	void SnowBallAttack();    // 일반 공격
+	void ShotgunAttack(); //샷건 공격
 	void IceballAttack();    // 아이스볼 공격
 	void ShowProjectilePath();
 	void HideProjectilePath();
@@ -133,6 +134,7 @@ public:
 	void GetOnOffJetski();
 	void GetOnJetski();
 	void GetOffJetski();
+	float Getfspeed();
 
 	void Cheat_Teleport1();
 	void Cheat_Teleport2();
@@ -268,6 +270,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bHasBag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bHasShotgun;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = State)
 	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지

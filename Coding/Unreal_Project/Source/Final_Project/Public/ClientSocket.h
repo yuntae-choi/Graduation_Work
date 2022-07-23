@@ -122,23 +122,35 @@ public:
 	float fCx, fCy, fCz;
 	//카메라 방향
 	float fCDx, fCDy, fCDz;
+	//발사 속도
+	float fSpeed;
+
 	STATE_Type My_State = ST_ANIMAL;
 	int current_snow_count = 0;
-	int max_snow_count = 10;
-
+	int current_ice_count = 0;
 	int current_match_count = 0;
+
+	int max_snow_count = 10;
 	int max_match_count = 2;
 
-	bool canShot = false;
-	bool canAttack = false;
-	bool operate_jet = false;
+	bool Start_ShotGun = false;
+	bool Start_SnowBall = false;
+	bool Start_IceBall = false;
+	
+	bool End_SnowBall = false;
+	bool End_IceBall = false;
+	bool End_ShotGun = false;
 
-	bool canSnowBall = false;
-	bool relATTACK = false;
-	bool canSnowBomb = false;
+	bool Cancel_SnowBall = false;
+	bool Cancel_IceBall = false;
+
 	bool has_umb = false;
 	bool start_umb = false;
 	bool end_umb = false;
+	bool SET_JET_SKI = false;
+
+
+
 	int random_bullet[MAX_BULLET_RANG] = {};
 
 
@@ -256,11 +268,11 @@ public:
 
 	void Send_TelePortPacket(int point_num);
 	void Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVector MyVelocity, float dir);
-	void Send_AttackPacket(int s_id);
+	void Send_AttackPacket(int s_id, int bullet);
 	void Send_GunAttackPacket(int s_id);
 
 	void Send_ChatPacket(int cheat_num);
-	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode);
+	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode, int bullet, float speed);
 	void Send_GunFire_Packet(int s_id, FVector MyLocation, FRotator MyRotation);
 
 	void Send_DamagePacket();

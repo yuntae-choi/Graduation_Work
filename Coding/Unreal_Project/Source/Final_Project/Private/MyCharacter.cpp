@@ -361,6 +361,7 @@ AMyCharacter::AMyCharacter()
 	iCurrentMatchCount = 0;
 	bHasUmbrella = false;
 	bHasBag = false;
+	bHasShotgun = false;
 
 	farmingItem = nullptr;
 	bIsFarming = false;
@@ -560,14 +561,14 @@ void AMyCharacter::Attack()
 			switch (iSelectedWeapon) {
 			case Weapon::Hand:
 				if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
-				PlayerController->SendPlayerInfo(COMMAND_ATTACK);
+				PlayerController->SendPlayerInfo(COMMAND_SNOWBALL);
 				isAttacking = true;
 				break;
 			case Weapon::Shotgun:
 				if (iCurrentSnowballCount < 5) return;	// 눈덩이가 5개 이상 없으면 공격 x
-				PlayerController->SendPlayerInfo(COMMAND_GUNATTACK);
+				PlayerController->SendPlayerInfo(COMMAND_SHOTGUN);
 				MYLOG(Warning, TEXT("gunattack"));
-				//AttackShotgun();
+				//ShotgunAttack();
 				isAttacking = true;
 				break;
 			default:
@@ -576,7 +577,8 @@ void AMyCharacter::Attack()
 			break;
 		case Projectile::Iceball:
 			if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
-			IceballAttack();
+			PlayerController->SendPlayerInfo(COMMAND_ICEBALL);
+			//IceballAttack();
 			isAttacking = true;
 			break;
 		default:
@@ -584,7 +586,7 @@ void AMyCharacter::Attack()
 		}
 	}
 #ifdef SINGLEPLAY_DEBUG
-	SnowAttack();
+	SnowBallAttack();
 #endif
 }
 
@@ -592,61 +594,22 @@ void AMyCharacter::ReleaseAttack()
 {	// 임시 - 아이스볼로 공격 중 release
 	if (iSelectedProjectile == Projectile::Iceball)
 	{
-		if (myAnim->bThrowing)
-		{
-			myAnim->PlayAttack2MontageSectionEnd();
-		}
-		else
-		{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
-			StopAnimMontage();
-			if (iceball)
-			{
-				iceball->Destroy();
-				iceball = nullptr;
-			}
-		}
-
 		if (iSessionId == localPlayerController->iSessionId)
 		{
-
-			localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
-			localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
+			SendCancelAttack(BULLET_ICEBALL);
 		}
-
-		return;
 	}
-
-
-	if (iSessionId == localPlayerController->iSessionId)
+	else
 	{
-		SendReleaseAttack();
+		if (iSessionId == localPlayerController->iSessionId)
+		{
+			SendCancelAttack(BULLET_SNOWBALL);
+		}
 	}
-	//Recv_ReleaseAttack()로 옮김
-	//자기 자신을 포함하여 서버에서 명령이 오면 작업을 수행하게함
-	//if (myAnim->bThrowing)
-	//{
-	//	myAnim->PlayAttack2MontageSectionEnd();
-	//}
-	//else
-	//{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
-	//	StopAnimMontage();
-	//	if (snowball)
-	//	{
-	//		snowball->Destroy();
-	//		snowball = nullptr;
-	//	}
-	//}
-
-	//if (iSessionId == localPlayerController->iSessionId)
-	//{
-	//	
-	//	localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
-	//	localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
-	//}
 }
 
 //자기 자신을 포함하여 서버에서 명령이 오면 작업을 수행하게함
-void AMyCharacter::Recv_ReleaseAttack()
+void AMyCharacter::Cancel_SnowBallAttack()
 {
 	if (myAnim->bThrowing)
 	{
@@ -670,7 +633,35 @@ void AMyCharacter::Recv_ReleaseAttack()
 	}
 }
 
-void AMyCharacter::SnowAttack()
+//자기 자신을 포함하여 서버에서 명령이 오면 작업을 수행하게함
+void AMyCharacter::Cancel_IceBallAttack()
+{
+	//if (iSelectedProjectile == Projectile::Iceball)
+	//{
+		if (myAnim->bThrowing)
+		{
+			myAnim->PlayAttack2MontageSectionEnd();
+		}
+		else
+		{	// 눈덩이를 던지려다가 마우스 버튼을 릴리즈해서 취소된 경우
+			StopAnimMontage();
+			if (iceball)
+			{
+				iceball->Destroy();
+				iceball = nullptr;
+			}
+		}
+
+		if (iSessionId == localPlayerController->iSessionId)
+		{
+
+			localPlayerController->SetViewTargetWithBlend(this, fAimingTime);	// 기존 카메라로 전환
+			localPlayerController->GetHUD()->bShowHUD = true;	// 크로스헤어 보이도록
+		}
+	//}
+}
+
+void AMyCharacter::SnowBallAttack()
 {
 	//if (bIsSnowman) return;
 	//if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
@@ -705,7 +696,7 @@ void AMyCharacter::SnowAttack()
 	}
 }
 
-void AMyCharacter::AttackShotgun()
+void AMyCharacter::ShotgunAttack()
 {
 	MYLOG(Warning, TEXT("AttackShotGun"));
 
@@ -720,7 +711,7 @@ void AMyCharacter::AttackShotgun()
 void AMyCharacter::IceballAttack()
 {
 	//if (bIsSnowman) return;
-	if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
+	//if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
 
 	//myAnim->PlayAttackMontage();
 	myAnim->PlayAttack2Montage();
@@ -784,24 +775,59 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	return FinalDamage;
 }
 
-void AMyCharacter::SendReleaseSnowball()
+//발사
+void AMyCharacter::SendReleaseBullet(int bullet)
 {
 	if (iSessionId != localPlayerController->iSessionId) return;
-	if (IsValid(snowball))
-	{
-		localPlayerController->SendPlayerInfo(COMMAND_THROW);
 
+	switch (bullet)
+	{
+	case BULLET_SNOWBALL: {
+		if (IsValid(snowball))
+		{
+			
+			localPlayerController->SendPlayerInfo(COMMAND_THROW_SB);
+		}
+		break;
+	}
+	case BULLET_ICEBALL: {
+		if (IsValid(iceball))
+		{
+			localPlayerController->SendPlayerInfo(COMMAND_THROW_IB);
+		}
+		break;
+	}
+	default:
+		break;
 	}
 }
 
-void AMyCharacter::SendReleaseAttack()
+//공격 취소
+void AMyCharacter::SendCancelAttack(int bullet)
 {
 	if (iSessionId != localPlayerController->iSessionId) return;
-	if (IsValid(snowball))
+	switch (bullet)
 	{
-		localPlayerController->SendPlayerInfo(COMMAND_R_ATTACK);
+	case BULLET_SNOWBALL: {
+		if (IsValid(snowball))
+		{
+			localPlayerController->SendPlayerInfo(COMMAND_CANCEL_SB);
 
+		}
+		break;
 	}
+	case BULLET_ICEBALL: {
+		if (IsValid(iceball))
+		{
+			localPlayerController->SendPlayerInfo(COMMAND_CANCEL_IB);
+
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
 }
 
 
@@ -835,7 +861,7 @@ void AMyCharacter::ReleaseSnowball()
 			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
 			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
 
-			float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
+			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 
 			II_Throwable::Execute_Throw(snowball, direction_, speed);
 			// 속도 인자 추가
@@ -861,14 +887,39 @@ void AMyCharacter::ReleaseIceball()
 {
 	if (IsValid(iceball))
 	{
-		iCurrentIceballCount -= 1;	// 공격 시 아이스볼 소유량 1 감소
-		UpdateUI(UICategory::CurIceball);
+		//iCurrentIceballCount -= 1;	// 공격 시 아이스볼 소유량 1 감소
+		//UpdateUI(UICategory::CurIceball);
 
 		FDetachmentTransformRules dtr = FDetachmentTransformRules(EDetachmentRule::KeepWorld, false);
 		iceball->DetachFromActor(dtr);
 
 		if (iceball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
+
+#ifdef MULTIPLAY_DEBUG
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			FVector direction_;
+			direction_.X = PlayerController->GetCharactersInfo()->players[iSessionId].fCDx;
+			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
+			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
+			
+			FVector cameraLocation;
+			FRotator cameraRotation;
+			GetActorEyesViewPoint(cameraLocation, cameraRotation);
+
+			cameraRotation.Vector() = direction_;
+
+			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
+
+			II_Throwable::Execute_IceballThrow(iceball, cameraRotation, speed);
+
+			iceball = nullptr;
+
+			bIsAiming = false;
+			fAimingElapsedTime = 0.0f;
+
+#endif
+#ifdef SINGLEPLAY_DEBUG
 			FVector cameraLocation;
 			FRotator cameraRotation;
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
@@ -882,6 +933,7 @@ void AMyCharacter::ReleaseIceball()
 
 			bIsAiming = false;
 			fAimingElapsedTime = 0.0f;
+#endif
 		}
 	}
 }
@@ -1275,6 +1327,7 @@ void AMyCharacter::ResetHasItems()
 	iMaxMatchCount = iOriginMaxMatchCount;
 	bHasUmbrella = false;
 	bHasBag = false;
+	bHasShotgun = false;
 	bagMeshComponent->SetVisibility(false);
 
 
@@ -1357,6 +1410,9 @@ void AMyCharacter::UpdateUI(int uiCategory, float farmDuration)
 	case UICategory::HasBag:
 		localPlayerController->CallDelegateUpdateHasBag();	// HasBag ui 갱신
 		break;
+	case UICategory::HasShotgun:
+		localPlayerController->CallDelegateUpdateHasShotgun();	// HasShotgun ui 갱신
+		break;
 	case UICategory::IsFarmingSnowdrift:
 		localPlayerController->CallDelegateUpdateIsFarmingSnowdrift();	// snowdrift farming ui visible 갱신
 		break;
@@ -1368,6 +1424,9 @@ void AMyCharacter::UpdateUI(int uiCategory, float farmDuration)
 		break;
 	case UICategory::SelectedProjectile:
 		localPlayerController->CallDelegateUpdateSelectedProjectile();
+		break;
+	case UICategory::SelectedWeapon:
+		localPlayerController->CallDelegateUpdateSelectedWeapon();
 		break;
 	case UICategory::AllOfUI:
 		localPlayerController->CallDelegateUpdateAllOfUI();	// 모든 캐릭터 ui 갱신
@@ -1454,6 +1513,7 @@ void AMyCharacter::UpdateControllerRotateByTornado()
 void AMyCharacter::ChangeWeapon()
 {
 	iSelectedWeapon = (iSelectedWeapon + 1) % iNumOfWeapons;
+	UpdateUI(UICategory::SelectedWeapon);
 }
 
 void AMyCharacter::ChangeProjectile()
@@ -1608,11 +1668,21 @@ void AMyCharacter::Cheat_IncreaseHP()
 void AMyCharacter::Cheat_DecreaseHP()
 {
 	localPlayerController->SendCheatInfo(CHEAT_HP_DOWN);
+
+	// 임시 - 샷건 획득 치트키
+	bHasShotgun = true;
+	UpdateUI(UICategory::HasShotgun);
 }
 void AMyCharacter::Cheat_IncreaseSnowball()
 {
-	localPlayerController->SendCheatInfo(CHEAT_SNOW_PLUS);
-
+	if (iSelectedProjectile == Projectile::Iceball)
+	{
+		localPlayerController->SendCheatInfo(CHEAT_ICE_PLUS);
+	}
+	else 
+	{
+		localPlayerController->SendCheatInfo(CHEAT_SNOW_PLUS);
+	}
 }
 
 void AMyCharacter::ReleaseRightMouseButton()
@@ -3284,3 +3354,9 @@ void AMyCharacter::FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end)
 		end = false;
 	}
 }
+
+float AMyCharacter::Getfspeed()
+{
+	float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
+	return speed;
+};

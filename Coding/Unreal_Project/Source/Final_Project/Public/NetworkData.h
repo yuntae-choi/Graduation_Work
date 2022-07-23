@@ -86,13 +86,16 @@ const char SC_PACKET_ACCOUNT = 24;
 
 enum COMMAND_Type
 {
-	COMMAND_ATTACK = 1,
+	COMMAND_SNOWBALL = 1,
+	COMMAND_ICEBALL,
 	COMMAND_MOVE,
 	COMMAND_DAMAGE,
 	COMMAND_MATCH,
-	COMMAND_THROW,
-	COMMAND_R_ATTACK,
-	COMMAND_GUNATTACK,
+	COMMAND_THROW_SB,
+	COMMAND_THROW_IB,
+	COMMAND_CANCEL_SB,
+	COMMAND_CANCEL_IB,
+	COMMAND_SHOTGUN,
 	COMMAND_GUNFIRE,
 	COMMAND_UMB_START,
 	COMMAND_UMB_END
@@ -110,7 +113,8 @@ enum CHEAT_Type
 {
 	CHEAT_HP_UP = 1,
 	CHEAT_HP_DOWN,
-	CHEAT_SNOW_PLUS
+	CHEAT_SNOW_PLUS,
+	CHEAT_ICE_PLUS
 };
 
 enum ITEM_Type
@@ -119,7 +123,27 @@ enum ITEM_Type
 	ITEM_UMB,
 	ITEM_BAG,
 	ITEM_SNOW,
-	ITEM_JET
+	ITEM_JET,
+	ITEM_ICE
+};
+
+enum ATTACK_Type
+{
+	ATTACK_SNOWBALL = 0,
+	ATTACK_ICEBALL,
+	ATTACK_SHOTGUN,
+	END_SNOWBALL,
+	END_ICEBALL,
+	END_SHOTGUN,
+	CANCEL_SNOWBALL,
+	CANCEL_ICEBALL
+};
+
+enum BULLET_Type
+{
+	BULLET_SNOWBALL = 0,
+	BULLET_ICEBALL,
+	BULLET_SNOWBOMB
 };
 
 enum OBJ_Type { PLAYER,ITEM_BOX, TONARDO };
@@ -184,9 +208,11 @@ struct cs_packet_throw_snow {
 	unsigned char size;
 	char	type;
 	int32 s_id;
+	int32 bullet;
 	bool    mode;
 	float x, y, z;
 	float dx, dy, dz;
+	float speed;
 };
 
 struct cs_packet_fire {
@@ -225,6 +251,8 @@ struct cs_packet_attack {
 	unsigned char size;
 	char	type;
 	int32 s_id;
+	int32 bullet;
+
 };
 
 struct cs_packet_shotattack {
@@ -254,7 +282,7 @@ struct cs_packet_get_item {
 	char	type;
 	int32 s_id;
 	int32 item_type;
-	int32 current_snowball;
+	int32 current_bullet;
 	int32 destroy_obj_id;
 };
 

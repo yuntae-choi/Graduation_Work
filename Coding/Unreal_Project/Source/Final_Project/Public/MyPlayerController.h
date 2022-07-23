@@ -22,10 +22,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_CurrentMatchCount, int
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FDele_Dynamic_MaxSnowIceballAndMatchCount, int32, NewMaxSnowballCount, int32, NewMaxIceballCount, int32, NewMaxMatchCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasUmbrella, bool, NewHasUmbrella);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasBag, bool, NewHasBag);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasShotgun, bool, NewHasShotgun);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_IsFarmingSnowdrift, bool, NewIsFarmingSnowdrift);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SnowdriftFarmDuration, float, NewSnowdriftFarmDuration);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedItem, int32, NewSelectedItem);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedProjectile, int32, NewSelectedProjectile);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedWeapon, int32, NewSelectedWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_GameResult, bool, GameResult);
 
 /**
@@ -45,19 +47,14 @@ public:
 	void SetCharactersInfo(cCharactersInfo* ci_) { if (ci_ != nullptr)	charactersInfo = ci_; }
 	void SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_);
 	void SetInitInfo(const cCharacter& me);
-	void SetNewBall(const int s_id);
-	void SetRelAttack(const int s_id);
-	void SetGunFire(const int s_id);
-	void SetJetSki(const int s_id);
 
 	void SetDestroySnowdritt(const int s_id);
 	void SetDestroyitembox(const int obj_id);
 	void SetDestroyPlayer(const int del_sid);
 	void SetGameEnd(const int target_id);
 	void SetOpenItembox(const int obj_id);
-	void SetAttack(const int s_id);
-	void SetShotGun(const int s_id);
-	void SetUmb(const int s_id, bool end);
+	void SetAttack(const int s_id, int at_type);
+	void SetItem(const int s_id, int item_type, bool end);
 	void SetSocket();
 	void get_item(int itemType);
 
@@ -91,10 +88,12 @@ public:
 	void CallDelegateUpdateMaxSnowIceballAndMatchCount();
 	void CallDelegateUpdateHasUmbrella();
 	void CallDelegateUpdateHasBag();
+	void CallDelegateUpdateHasShotgun();
 	void CallDelegateUpdateIsFarmingSnowdrift();
 	void CallDelegateUpdateSnowdriftFarmDuration(float farmDuration);
 	void CallDelegateUpdateSelectedItem();
 	void CallDelegateUpdateSelectedProjectile();
+	void CallDelegateUpdateSelectedWeapon();
 	void CallDelegateUpdateGameResult(bool isWinner);
 
 	void SetCharacterState(const int s_id, STATE_Type _state)
@@ -138,7 +137,6 @@ private:
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
 	int							itonardoId = -1;			// 토네이도 아이디
-	//int							itonardoId;			// 토네이도 아이디
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
@@ -194,6 +192,9 @@ public:
 	FDele_Dynamic_HasBag FuncUpdateHasBag;
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_HasShotgun FuncUpdateHasShotgun;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_IsFarmingSnowdrift FuncUpdateIsFarmingSnowdrift;
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
@@ -204,6 +205,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_SelectedProjectile FuncUpdateSelectedProjectile;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_SelectedWeapon FuncUpdateSelectedWeapon;
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_GameResult FuncUpdateGameResult;
