@@ -113,10 +113,12 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	FuncUpdateMaxSnowIceballAndMatchCount.Clear();
 	FuncUpdateHasUmbrella.Clear();
 	FuncUpdateHasBag.Clear();
+	FuncUpdateHasShotgun.Clear();
 	FuncUpdateIsFarmingSnowdrift.Clear();
 	FuncUpdateSnowdriftFarmDuration.Clear();
 	FuncUpdateSelectedItem.Clear();
 	FuncUpdateSelectedProjectile.Clear();
+	FuncUpdateSelectedWeapon.Clear();
 	FuncUpdateGameResult.Clear();
 }
 
@@ -887,6 +889,7 @@ void AMyPlayerController::CallDelegateUpdateAllOfUI()
 
 	CallDelegateUpdateSelectedItem();
 	CallDelegateUpdateSelectedProjectile();
+	CallDelegateUpdateSelectedWeapon();
 }
 
 void AMyPlayerController::CallDelegateUpdateHP()
@@ -955,6 +958,15 @@ void AMyPlayerController::CallDelegateUpdateHasBag()
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update has bag %d"), localPlayerCharacter->bHasBag);
 }
 
+void AMyPlayerController::CallDelegateUpdateHasShotgun()
+{
+	if (!characterUI) return;
+
+	if (FuncUpdateHasShotgun.IsBound() == true) FuncUpdateHasShotgun.Broadcast(localPlayerCharacter->bHasShotgun);
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update has shotgun %d"), localPlayerCharacter->bHasShotgun);
+}
+
 void AMyPlayerController::CallDelegateUpdateIsFarmingSnowdrift()
 {
 	if (!characterUI) return;
@@ -989,6 +1001,15 @@ void AMyPlayerController::CallDelegateUpdateSelectedProjectile()
 	if (FuncUpdateSelectedProjectile.IsBound() == true) FuncUpdateSelectedProjectile.Broadcast(localPlayerCharacter->iSelectedProjectile);
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected projectile %d"), localPlayerCharacter->iSelectedProjectile);
+}
+
+void AMyPlayerController::CallDelegateUpdateSelectedWeapon()
+{
+	if (!characterUI) return;
+
+	if (FuncUpdateSelectedWeapon.IsBound() == true) FuncUpdateSelectedWeapon.Broadcast(localPlayerCharacter->iSelectedWeapon);
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected weapon %d"), localPlayerCharacter->iSelectedWeapon);
 }
 
 void AMyPlayerController::CallDelegateUpdateGameResult(bool isWinner)

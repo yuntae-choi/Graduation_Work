@@ -349,6 +349,7 @@ AMyCharacter::AMyCharacter()
 	iCurrentMatchCount = 0;
 	bHasUmbrella = false;
 	bHasBag = false;
+	bHasShotgun = false;
 
 	farmingItem = nullptr;
 	bIsFarming = false;
@@ -1256,6 +1257,7 @@ void AMyCharacter::ResetHasItems()
 	iMaxMatchCount = iOriginMaxMatchCount;
 	bHasUmbrella = false;
 	bHasBag = false;
+	bHasShotgun = false;
 	bagMeshComponent->SetVisibility(false);
 
 
@@ -1337,6 +1339,9 @@ void AMyCharacter::UpdateUI(int uiCategory, float farmDuration)
 	case UICategory::HasBag:
 		localPlayerController->CallDelegateUpdateHasBag();	// HasBag ui 갱신
 		break;
+	case UICategory::HasShotgun:
+		localPlayerController->CallDelegateUpdateHasShotgun();	// HasShotgun ui 갱신
+		break;
 	case UICategory::IsFarmingSnowdrift:
 		localPlayerController->CallDelegateUpdateIsFarmingSnowdrift();	// snowdrift farming ui visible 갱신
 		break;
@@ -1348,6 +1353,9 @@ void AMyCharacter::UpdateUI(int uiCategory, float farmDuration)
 		break;
 	case UICategory::SelectedProjectile:
 		localPlayerController->CallDelegateUpdateSelectedProjectile();
+		break;
+	case UICategory::SelectedWeapon:
+		localPlayerController->CallDelegateUpdateSelectedWeapon();
 		break;
 	case UICategory::AllOfUI:
 		localPlayerController->CallDelegateUpdateAllOfUI();	// 모든 캐릭터 ui 갱신
@@ -1434,6 +1442,7 @@ void AMyCharacter::UpdateControllerRotateByTornado()
 void AMyCharacter::ChangeWeapon()
 {
 	iSelectedWeapon = (iSelectedWeapon + 1) % iNumOfWeapons;
+	UpdateUI(UICategory::SelectedWeapon);
 }
 
 void AMyCharacter::ChangeProjectile()
@@ -1588,11 +1597,14 @@ void AMyCharacter::Cheat_IncreaseHP()
 void AMyCharacter::Cheat_DecreaseHP()
 {
 	localPlayerController->SendCheatInfo(CHEAT_HP_DOWN);
+
+	// 임시 - 샷건 획득 치트키
+	bHasShotgun = true;
+	UpdateUI(UICategory::HasShotgun);
 }
 void AMyCharacter::Cheat_IncreaseSnowball()
 {
 	localPlayerController->SendCheatInfo(CHEAT_SNOW_PLUS);
-
 }
 
 void AMyCharacter::ReleaseRightMouseButton()

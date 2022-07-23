@@ -23,8 +23,8 @@ enum CharacterState {
 };
 
 enum UICategory {
-	HP, CurSnowball, CurIceball, CurMatch, MaxSnowIceballAndMatch, HasUmbrella, HasBag, IsFarmingSnowdrift, SnowdriftFarmDuration, 
-	SelectedItem, SelectedProjectile, AllOfUI
+	HP, CurSnowball, CurIceball, CurMatch, MaxSnowIceballAndMatch, HasUmbrella, HasBag, HasShotgun, IsFarmingSnowdrift, SnowdriftFarmDuration, 
+	SelectedItem, SelectedProjectile, SelectedWeapon, AllOfUI
 };
 
 enum Weapon {
@@ -243,6 +243,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bHasBag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bHasShotgun;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = State)
 	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
