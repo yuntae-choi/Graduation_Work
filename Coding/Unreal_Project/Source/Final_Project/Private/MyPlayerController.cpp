@@ -162,7 +162,6 @@ void AMyPlayerController::SetSocket()
 	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
 	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
 	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
-	//g_socket->Send_LoginPacket();
 	SleepEx(0, true); 
 	
 }
@@ -179,71 +178,75 @@ void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
 {
 	if (NewPlayer_ != nullptr)
 	{
-		//bNewPlayerEntered = true;
 		newplayer = NewPlayer_;
 		UpdateNewPlayer();
 	}
 }
 
-void AMyPlayerController::SetNewBall(const int s_id)
+void AMyPlayerController::SetAttack(const int s_id, int at_type)
 {
 	UWorld* World = GetWorld();
-	
-	charactersInfo->players[s_id].End_SnowBall = true;
-	
-}
-
-void AMyPlayerController::SetRelAttack(const int s_id)
-{
-	UWorld* World = GetWorld();
-    charactersInfo->players[s_id].Cancel_SnowBall = true;
-
-}
-
-void AMyPlayerController::SetUmb(const int s_id, bool end)
-{
-	UWorld* World = GetWorld();
-	if (!end) {
-		//charactersInfo->players[s_id].end_umb = true;
-		charactersInfo->players[s_id].start_umb = true;
+	switch (at_type)
+	{
+	case ATTACK_SNOWBALL: {
+		charactersInfo->players[s_id].Start_SnowBall = true;
+		break;
 	}
-	else {
-		//charactersInfo->players[s_id].start_umb = true;
-		charactersInfo->players[s_id].end_umb = true;
+	case ATTACK_ICEBALL: {
+		charactersInfo->players[s_id].Start_IceBall = true;
+		break;
+	}
+	case ATTACK_SHOTGUN: {
+		charactersInfo->players[s_id].Start_ShotGun = true;
+		break;
+	}
+	case END_SNOWBALL: {
+		charactersInfo->players[s_id].End_SnowBall = true;
+		break;
+	}
+	case END_ICEBALL: {
+		charactersInfo->players[s_id].End_IceBall = true;
+		break;
+	}
+	case END_SHOTGUN: {
+		charactersInfo->players[s_id].End_ShotGun = true;
+		break;
+	}
+	case CANCEL_SNOWBALL: {
+		charactersInfo->players[s_id].Cancel_SnowBall = true;
+		break;
+	}
+	case CANCEL_ICEBALL: {
+		charactersInfo->players[s_id].Cancel_IceBall = true;
+		break;
+	}
+	default:
+		break;
 	}
 }
 
-void AMyPlayerController::SetAttack(const int s_id)
+void AMyPlayerController::SetItem(const int s_id, int item_type, bool end)
 {
 	UWorld* World = GetWorld();
-
-	charactersInfo->players[s_id].Start_SnowBall = true;
-
+	switch (item_type)
+	{
+	case ITEM_UMB: {
+		if (!end) {
+			charactersInfo->players[s_id].start_umb = true;
+		}
+		else {
+			charactersInfo->players[s_id].end_umb = true;
+		}
+		break;
+	}
+	case ITEM_JET: {
+		charactersInfo->players[s_id].SET_JET_SKI = true;
+		break;
+	}
+	default:
+		break;
+	}
 }
-
-void AMyPlayerController::SetShotGun(const int s_id)
-{
-	UWorld* World = GetWorld();
-	charactersInfo->players[s_id].Start_ShotGun = true;
-	//MYLOG(Warning, TEXT("SetShotGun %d"), s_id);
-}
-
-void AMyPlayerController::SetGunFire(const int s_id)
-{
-	UWorld* World = GetWorld();
-
-	charactersInfo->players[s_id].End_ShotGun = true;
-
-}
-
-void AMyPlayerController::SetJetSki(const int s_id)
-{
-	UWorld* World = GetWorld();
-
-	charactersInfo->players[s_id].OP_JET_SKI = true;
-
-}
-
 
 void AMyPlayerController::SetDestroyPlayer(const int del_sid)
 {
@@ -327,13 +330,10 @@ void AMyPlayerController::SetDestroyitembox(const int obj_id)
 			if (itembox->GetId() == obj_id)
 			{
 				itembox->DeleteItem();
-
 			}
 		}
 	
 }
-
-
 
 void AMyPlayerController::get_item(int itemType)
 {
@@ -343,9 +343,6 @@ void AMyPlayerController::get_item(int itemType)
 		return;
 	//player_->GetItem(itemType);
 }
-
-
-
 void AMyPlayerController::InitPlayerSetting()
 {
 	if (!localPlayerCharacter) return;
@@ -404,13 +401,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 	// 플레이어자신 체력, 사망업데이트
 	UpdatePlayerInfo(charactersInfo->players[iSessionId]);
 	UpdateTornado();
-	//if (charactersInfo->players.size() == 1)
-	//{
-	//	//MYLOG(Warning, TEXT("Only one player"));
-	//	return false;
-	//}
-	
-	
+
 	// 스폰캐릭터들배열 하나 생성하고 월드에 있는 캐릭터들을 배열에 넣어주기
 	TArray<AActor*> SpawnedCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
@@ -425,12 +416,17 @@ bool AMyPlayerController::UpdateWorldInfo()
 		if (!info->IsAlive) continue;
 
 		if (info->Start_SnowBall) { 
-			player_->SnowAttack();
+			player_->SnowBallAttack();
 			info->Start_SnowBall = false;
 		}
 		
+		if (info->Start_IceBall) {
+			player_->IceballAttack();
+			info->Start_IceBall = false;
+		}
+		
 		if (info->Start_ShotGun) {
-			player_->AttackShotgun();
+			player_->ShotgunAttack();
 			info->Start_ShotGun = false;
 		}
 
@@ -439,10 +435,21 @@ bool AMyPlayerController::UpdateWorldInfo()
 			info->Cancel_SnowBall = false;
 		}
 
+		if (info->Cancel_IceBall) {
+			player_->Cancel_IceBallAttack();
+			info->Cancel_IceBall = false;
+		}
+
 		if (info->End_SnowBall) {
 			player_->ReleaseSnowball();
 			info->End_SnowBall = false;
 			info->current_snow_count--;
+		}
+
+		if (info->End_IceBall) {
+			player_->ReleaseIceball();
+			info->End_IceBall = false;
+			info->current_ice_count--;
 		}
 
 		if (info->End_ShotGun) {
@@ -465,37 +472,16 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->CloseUmbrellaAnim();
 			info->end_umb = false;
 		}
-		if (info->OP_JET_SKI) {
+		if (info->SET_JET_SKI) {
 			MYLOG(Warning, TEXT("jetski"));
 			player_->GetOnOffJetski();
-			info->OP_JET_SKI = false;
+			info->SET_JET_SKI = false;
 		}
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
 		{
 			continue;
 		}
-
-
-		//if (player_->iCurrentHP != info->HealthValue)
-		//{
-		//	MYLOG(Warning, TEXT("other player damaged."));
-		//	//// 피격 파티클 소환
-		//	//FTransform transform(OtherPlayer->GetActorLocation());
-		//	//UGameplayStatics::SpawnEmitterAtLocation(
-		//	//	world, HitEmiiter, transform, true
-		//	//);
-		//	//// 피격 애니메이션 플레이
-		//	//player_->PlayDamagedAnimation();
-		//	//player_->iCurrentHP = info->HealthValue;
-		//}
-
-		//// 공격중일때 타격 애니메이션 플레이
-		//if (info->IsAttacking)
-		//{
-		//	UE_LOG(LogClass, Log, TEXT("other player hit."));
-		//	OtherPlayer->PlayHitAnimation();
-		//}
 
 		FVector CharacterLocation;
 		CharacterLocation.X = info->X;
@@ -516,6 +502,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 		player_->SetActorRotation(CharacterRotation);
 		player_->SetActorLocation(CharacterLocation);
 		player_->GetAnim()->SetDirection(info->direction);
+		
 		//눈사람 변화
 		if (!player_->IsSnowman())
 		{
@@ -537,22 +524,9 @@ bool AMyPlayerController::UpdateWorldInfo()
 		// 캐릭터 속성 업데이트
 		if (player_->iCurrentSnowballCount != info->current_snow_count)
 		{
-			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
 			player_->iCurrentSnowballCount = info->current_snow_count;
 		}
-		//if (info->start_farming_item == ITEM_MAT);
-		//if (info->start_farming_item == ITEM_UMB);
-		//if (info->start_farming_item == ITEM_BAG);
-		//if (info->start_farming_item == ITEM_SNOW)
-		//{
-		//	player_->StartFarming();
-		//	info->start_farming_item = -1;
-		//}
-		//if (info->end_farming == true)
-		//{
-		//	player_->EndFarming();
-		//	info->end_farming = false;
-		//}
+
 	}
 	return true;
 }
@@ -656,14 +630,20 @@ void AMyPlayerController::SendPlayerInfo(int input)
 
 	if (input == COMMAND_MOVE) 
 	mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
-	else if (input == COMMAND_ATTACK)
-		mySocket->Send_AttackPacket(iSessionId);
-	else if (input == COMMAND_GUNATTACK)
+	else if (input == COMMAND_SNOWBALL)
+		mySocket->Send_AttackPacket(iSessionId, BULLET_SNOWBALL);
+	else if (input == COMMAND_ICEBALL)
+		mySocket->Send_AttackPacket(iSessionId, BULLET_ICEBALL);
+	else if (input == COMMAND_SHOTGUN)
 		mySocket->Send_GunAttackPacket(iSessionId);
-	else if (input == COMMAND_THROW)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),false);
-	else if (input == COMMAND_R_ATTACK)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),true);
+	else if (input == COMMAND_THROW_SB)
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),false, BULLET_SNOWBALL);
+	else if (input == COMMAND_THROW_IB)
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(), false, BULLET_ICEBALL);
+	else if (input == COMMAND_CANCEL_SB)
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),true, BULLET_SNOWBALL);
+	else if (input == COMMAND_CANCEL_IB)
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(), true, BULLET_ICEBALL);
 	else if (input == COMMAND_GUNFIRE)
 		mySocket->Send_GunFire_Packet(iSessionId, MyCameraLocation, MyCameraRotation);
 	else if (input == COMMAND_DAMAGE)
@@ -710,6 +690,8 @@ void AMyPlayerController::SendCheatInfo(int input)
 		mySocket->Send_ChatPacket(CHEAT_HP_DOWN);
 	else if (input == CHEAT_SNOW_PLUS)
 		mySocket->Send_ChatPacket(CHEAT_SNOW_PLUS);
+	else if (input == CHEAT_ICE_PLUS)
+		mySocket->Send_ChatPacket(CHEAT_ICE_PLUS);
 
 }
 
@@ -779,6 +761,13 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
 			player_->iCurrentSnowballCount = info.current_snow_count;
 			CallDelegateUpdateCurrentSnowballCount();
+		}
+		// 캐릭터 속성 업데이트
+		if (player_->iCurrentIceballCount != info.current_ice_count)
+		{
+			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
+			player_->iCurrentIceballCount = info.current_ice_count;
+			CallDelegateUpdateCurrentIceballCount();
 		}
 
 	}

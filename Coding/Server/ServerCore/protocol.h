@@ -126,6 +126,7 @@ struct cs_packet_throw_snow {
 	unsigned char size;
 	char	type;
 	int32 s_id;
+	int32 bullet;
 	bool    mode;
 	float x, y, z;
 	float dx, dy, dz;
@@ -171,6 +172,7 @@ struct cs_packet_attack {
 	unsigned char size;
 	char	type;
 	int32 s_id;
+	int32 bullet;
 };
 
 struct cs_packet_get_item {
@@ -178,7 +180,7 @@ struct cs_packet_get_item {
 	char	type;
 	int32 s_id;
 	int32 item_type;
-	int32 current_snowball;
+	int32 current_bullet;
 	int32 destroy_obj_id;
 };
 

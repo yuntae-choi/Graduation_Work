@@ -190,12 +190,31 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[packet->s_id].fCDy = packet->dy;		// 카메라 방향
 		CharactersInfo.players[packet->s_id].fCDz = packet->dz;		// 카메라 방향
 
-		//MYLOG(Warning, TEXT("[Recv throw snow] id : %d, cam_loc : (%f, %f, %f), cam_dir : (%f, %f, %f)"), packet->s_id, packet->x, packet->y, packet->z, packet->dx, packet->dy, packet->dz);
-		if (!packet->mode)
-			MyPlayerController->SetNewBall(packet->s_id);
-		else
-			MyPlayerController->SetRelAttack(packet->s_id);
+		switch (packet->bullet)
+		{
+		case BULLET_SNOWBALL:
+		{
+			if (!packet->mode)
+				MyPlayerController->SetAttack(packet->s_id, END_SNOWBALL);
+			else
+				MyPlayerController->SetAttack(packet->s_id, CANCEL_SNOWBALL);
 
+			break;
+		}
+		case BULLET_ICEBALL:
+		{
+			if (!packet->mode)
+				MyPlayerController->SetAttack(packet->s_id, END_ICEBALL);
+			else
+				MyPlayerController->SetAttack(packet->s_id, CANCEL_ICEBALL);
+
+			break;
+		}
+		default:
+			break;
+		}
+
+		
 		break;
 	}
 	case SC_PACKET_GUNFIRE:
@@ -204,7 +223,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		for (int i = 0; i < MAX_BULLET_RANG; ++i)
 			CharactersInfo.players[packet->s_id].random_bullet[i] = packet->rand_int[i];
 		CharactersInfo.players[packet->s_id].Pitch = packet->pitch;		// 카메라 pitch
-		MyPlayerController->SetGunFire(packet->s_id);
+		MyPlayerController->SetAttack(packet->s_id, END_SHOTGUN);
 		break;
 	}
 	case SC_PACKET_HP:
@@ -276,14 +295,20 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		}
 		case ITEM_SNOW:
 		{
-			CharactersInfo.players[packet->s_id].current_snow_count = packet->current_snowball;
+			CharactersInfo.players[packet->s_id].current_snow_count = packet->current_bullet;
+			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
+			break;
+		}
+		case ITEM_ICE:
+		{
+			CharactersInfo.players[packet->s_id].current_ice_count = packet->current_bullet;
 			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
 			break;
 		}
 		case ITEM_JET:
 		{
 			if (MyPlayerController->iSessionId != packet->s_id)
-				MyPlayerController->SetJetSki(packet->s_id);
+				MyPlayerController->SetItem(packet->s_id, ITEM_JET, true);
 			break;
 		}
 		default:
@@ -330,22 +355,34 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_ATTACK:
 	{
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
-		int attack_s_id = packet->s_id;
-		MyPlayerController->SetAttack(attack_s_id);
+		switch (packet->bullet)
+		{
+		case BULLET_SNOWBALL:
+		{
+			MyPlayerController->SetAttack(packet->s_id, ATTACK_SNOWBALL);
+			break;
+		}
+		case BULLET_ICEBALL:
+		{
+			MyPlayerController->SetAttack(packet->s_id, ATTACK_ICEBALL);
+			break;
+		}
+		default:
+			break;
+		}
+		
 		break;
 	}
 	case SC_PACKET_GUNATTACK:
 	{
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(ptr);
-		int attack_s_id = packet->s_id;
-		MyPlayerController->SetShotGun(attack_s_id);
-
+		MyPlayerController->SetAttack(packet->s_id, ATTACK_SHOTGUN);
 		break;
 	}
 	case SC_PACKET_UMB:
 	{
 		cs_packet_umb* packet = reinterpret_cast<cs_packet_umb*>(ptr);
-		MyPlayerController->SetUmb(packet->s_id, packet->end);
+		MyPlayerController->SetItem(packet->s_id, ITEM_UMB, packet->end);
 		break;
 	}
 	}
@@ -425,12 +462,12 @@ void ClientSocket::Send_DamagePacket() {
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_AttackPacket(int s_id) {
+void ClientSocket::Send_AttackPacket(int s_id, int bullet) {
 	cs_packet_attack packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_ATTACK;
 	packet.s_id = s_id;
-
+	packet.bullet = bullet;
 	//MYLOG(Warning, TEXT("[Send damage]"));
 	SendPacket(&packet);
 };
@@ -494,7 +531,7 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVec
 };
 
 
-void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode)
+void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode, int bullet)
 {
 
 	cs_packet_throw_snow packet;
@@ -502,6 +539,7 @@ void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDir
 	packet.type = CS_PACKET_THROW_SNOW;
 	packet.s_id = s_id;
 	packet.mode = mode;
+	packet.bullet = bullet;
 	packet.x = MyLocation.X;
 	packet.y = MyLocation.Y;
 	packet.z = MyLocation.Z;

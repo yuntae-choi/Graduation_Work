@@ -58,8 +58,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void ReleaseSnowball();
-	void SendReleaseSnowball();
-	void SendReleaseAttack();
+	void SendReleaseBullet(int bullet);
+	void SendCancelAttack(int bullet);
 
 	void ReleaseIceball();
 
@@ -87,9 +87,10 @@ public:
 	void Attack();
 	void ReleaseAttack();      //호출시 서버로 메세지 전송
 	void Cancel_SnowBallAttack(); //서버에서 전송이 왔을때
+	void Cancel_IceBallAttack(); //서버에서 전송이 왔을때
 
-	void SnowAttack();    // 일반 공격
-	void AttackShotgun(); //샷건 공격
+	void SnowBallAttack();    // 일반 공격
+	void ShotgunAttack(); //샷건 공격
 	void IceballAttack();    // 아이스볼 공격
 	void ShowProjectilePath();
 	void HideProjectilePath();

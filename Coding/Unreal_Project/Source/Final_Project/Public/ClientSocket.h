@@ -124,21 +124,28 @@ public:
 	float fCDx, fCDy, fCDz;
 	STATE_Type My_State = ST_ANIMAL;
 	int current_snow_count = 0;
-	int max_snow_count = 10;
-
+	int current_ice_count = 0;
 	int current_match_count = 0;
+
+	int max_snow_count = 10;
 	int max_match_count = 2;
 
 	bool Start_ShotGun = false;
 	bool Start_SnowBall = false;
-	bool OP_JET_SKI = false;
-
+	bool Start_IceBall = false;
+	
 	bool End_SnowBall = false;
-	bool Cancel_SnowBall = false;
+	bool End_IceBall = false;
 	bool End_ShotGun = false;
+
+	bool Cancel_SnowBall = false;
+	bool Cancel_IceBall = false;
+
 	bool has_umb = false;
 	bool start_umb = false;
 	bool end_umb = false;
+	bool SET_JET_SKI = false;
+
 	int random_bullet[MAX_BULLET_RANG] = {};
 
 
@@ -256,11 +263,11 @@ public:
 
 	void Send_TelePortPacket(int point_num);
 	void Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVector MyVelocity, float dir);
-	void Send_AttackPacket(int s_id);
+	void Send_AttackPacket(int s_id, int bullet);
 	void Send_GunAttackPacket(int s_id);
 
 	void Send_ChatPacket(int cheat_num);
-	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode);
+	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode, int bullet);
 	void Send_GunFire_Packet(int s_id, FVector MyLocation, FRotator MyRotation);
 
 	void Send_DamagePacket();

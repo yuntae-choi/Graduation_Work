@@ -25,10 +25,6 @@ public:
 
 	float direction;
 
-	int _max_hp; // 최대 체력
-	int _min_hp;
-	int _BeginSlowHP;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
-
 	int _hp; // 체력
 	int _at_range; // 기본 공격 범위
 	int _sk_range; // 스킬 범위
@@ -36,10 +32,17 @@ public:
 	atomic_bool is_match;
 
 	int32 iMaxSnowballCount;
+	int32 iMaxIceballCount;
 	int32 iMaxMatchCount;
-	int32 iOriginMaxMatchCount;	// 성냥 최대보유량 (초기, 가방x)
-	int32 iOriginMaxSnowballCount;
+	const int32 _max_hp = 390;	// 성냥 최대보유량 (초기)
+	const int32 _min_hp = 270;// 눈 최대보유량 (초기)
+	const int32 _BeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
+
+	const int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기)
+	const int32 iOriginMaxSnowballCount = 10;// 눈 최대보유량 (초기)
+	const int32 iOriginMaxIceballCount = 10;     // 얼음 최대보유량 (초기)
 	int32 iCurrentSnowballCount;
+	int32 iCurrentIceballCount;
 	int32 iCurrentMatchCount;
 	bool bHasUmbrella;
 	bool bIsRiding;

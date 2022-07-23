@@ -537,7 +537,7 @@ void process_packet(int s_id, unsigned char* p)
 			other.do_send(sizeof(*packet), packet);
 			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 		}
-		printf("attack\n");
+		cout << "attack " << packet->bullet << endl;
 		break;
 
 	}
@@ -573,6 +573,7 @@ void process_packet(int s_id, unsigned char* p)
 		if (cl._hp <= cl._min_hp)
 		{
 			cl.iCurrentSnowballCount = 0;
+			cl.iCurrentIceballCount = 0;
 			cl.iCurrentMatchCount = 0;
 			cl.iMaxSnowballCount = cl.iOriginMaxSnowballCount;
 			cl.iMaxMatchCount = cl.iOriginMaxMatchCount;
@@ -692,6 +693,7 @@ void process_packet(int s_id, unsigned char* p)
 			if (cl._hp <= cl._min_hp)
 			{
 				cl.iCurrentSnowballCount = 0;
+				cl.iCurrentIceballCount = 0;
 				cl.iCurrentMatchCount = 0;
 				cl.iMaxSnowballCount = cl.iOriginMaxSnowballCount;
 				cl.iMaxMatchCount = cl.iOriginMaxMatchCount;
@@ -749,7 +751,28 @@ void process_packet(int s_id, unsigned char* p)
 			packet.s_id = cl._s_id;
 			packet.item_type = ITEM_SNOW;
 			packet.destroy_obj_id = -1;
-			packet.current_snowball = cl.iCurrentSnowballCount;
+			packet.current_bullet = cl.iCurrentSnowballCount;
+			for (auto& other : clients) {
+				if (ST_INGAME != other._state) continue;
+				other.do_send(sizeof(packet), &packet);
+			}
+			break;
+		}
+		case CHEAT_ICE_PLUS:
+		{
+			cout << "플레이어 " << cl._s_id << "치트 4 사용 " << endl;
+
+			if (cl.iMaxIceballCount >= cl.iCurrentIceballCount + 5)
+				cl.iCurrentIceballCount += 5;
+			else
+				cl.iCurrentIceballCount = cl.iMaxIceballCount;
+			cs_packet_get_item packet;
+			packet.size = sizeof(packet);
+			packet.type = SC_PACKET_GET_ITEM;
+			packet.s_id = cl._s_id;
+			packet.item_type = ITEM_ICE;
+			packet.destroy_obj_id = -1;
+			packet.current_bullet = cl.iCurrentIceballCount;
 			for (auto& other : clients) {
 				if (ST_INGAME != other._state) continue;
 				other.do_send(sizeof(packet), &packet);
@@ -776,6 +799,7 @@ void process_packet(int s_id, unsigned char* p)
 			bool get_item = is_item(item_num);
 			if (!cl.bHasBag) {
 				cl.iMaxSnowballCount += 5;	// 눈덩이 10 -> 15 까지 보유 가능
+				cl.iMaxIceballCount += 5;	// 얼음 10 -> 15 까지 보유 가능
 				cl.iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
 				cl.bHasBag = true;
 			}
@@ -861,7 +885,7 @@ void process_packet(int s_id, unsigned char* p)
 					cl.iCurrentSnowballCount = cl.iMaxSnowballCount;
 
 				packet->type = SC_PACKET_GET_ITEM;
-				packet->current_snowball = cl.iCurrentSnowballCount;
+				packet->current_bullet = cl.iCurrentSnowballCount;
 				for (auto& other : clients) {
 					if (ST_INGAME != other._state)
 						continue;
@@ -882,31 +906,46 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 	}
 	case CS_PACKET_THROW_SNOW: {
-		if (cl.iCurrentSnowballCount <= 0) break;
+	
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
-		if (!packet->mode) {
-			printf("throw\n");
-			cl.iCurrentSnowballCount--;
-		}
-		else
+		switch (packet->bullet)
 		{
-			printf("rel_attack\n");
+		case BULLET_SNOWBALL:
+		{
+			if (cl.iCurrentSnowballCount <= 0) break;
+			if (!packet->mode) {
+				printf("throw BULLET_SNOWBALL\n");
+				cl.iCurrentSnowballCount--;
+			}
+			else
+			{
+				printf("rel_BULLET_SNOWBALL\n");
+			}
+
+			break;
 		}
+		case BULLET_ICEBALL:
+		{
+			if (!packet->mode) {
+				printf("throw BULLET_ICEBALL\n");
+				cl.iCurrentIceballCount--;
+			}
+			else
+			{
+				printf("rel_ BULLET_ICEBALL\n");
+			}
 
-
+			break;
+		}
+		default:
+			break;
+		}
 		for (auto& other : clients) {
 			if (ST_INGAME != other._state)
 				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
-			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
-
-			//printf_s("[Send throw snow]\n");
 			other.do_send(sizeof(*packet), packet);
-			//cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
-
 		}
-
-
 		break;
 
 	}
@@ -1204,8 +1243,10 @@ void worker_thread()
 				{
 					//cout << "모닥불 데미지 눈사람" << endl;
 					clients[_s_id].iCurrentSnowballCount = 0;
+					clients[_s_id].iCurrentIceballCount = 0;
 					clients[_s_id].iCurrentMatchCount = 0;
 					clients[_s_id].iMaxSnowballCount = clients[_s_id].iOriginMaxSnowballCount;
+					clients[_s_id].iMaxIceballCount = clients[_s_id].iOriginMaxIceballCount;
 					clients[_s_id].iMaxMatchCount = clients[_s_id].iOriginMaxMatchCount;
 					clients[_s_id].bHasBag = false;
 					clients[_s_id].bHasUmbrella = false;

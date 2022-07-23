@@ -77,7 +77,7 @@ void UMyAnimInstance::AnimNotify_SnowballRelease()
 	auto MyCharacter = Cast<AMyCharacter>(Pawn);
 	if (nullptr == MyCharacter) return;
 
-	MyCharacter->SendReleaseSnowball();
+	MyCharacter->SendReleaseBullet(BULLET_SNOWBALL);
 }
 
 void UMyAnimInstance::PlayAttack2Montage()
@@ -114,11 +114,14 @@ void UMyAnimInstance::AnimNotify_SnowballRelease2()
 	// 임시 - 아이스볼
 	if (MyCharacter->iSelectedProjectile == Projectile::Iceball)
 	{
+		//MyCharacter->SendReleaseBullet(BULLET_ICEBALL);
 		MyCharacter->ReleaseIceball();
 		return;
 	}
-
-	MyCharacter->SendReleaseSnowball();
+	else 
+	{
+		MyCharacter->SendReleaseBullet(BULLET_SNOWBALL);
+	}
 }
 
 void UMyAnimInstance::AnimNotify_StopThrow()
