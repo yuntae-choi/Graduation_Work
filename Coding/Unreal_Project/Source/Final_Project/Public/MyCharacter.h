@@ -148,7 +148,17 @@ public:
 	void init_Socket();
 
 	void FreezeHead();
+	void FreezeLeftForearm();
+	void FreezeLeftUpperarm();
+	void FreezeRightForearm();
+	void FreezeRightUpperarm();
+	void FreezeCenter();
+	void FreezeLeftThigh();
+	void FreezeLeftCalf();
+	void FreezeRightThigh();
+	void FreezeRightCalf();
 	void FreezeAnimation(TArray<UStaticMeshComponent*> bones, int& frame, bool& end);
+	void FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end);
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -181,6 +191,16 @@ private:
 	void UpdateJetski();
 
 	void SettingHead();
+	void SettingLeftForearm();
+	void SettingLeftUpperArm();
+	void SettingRightForearm();
+	void SettingRightUpperArm();
+	void SettingCenter();
+	void SettingLeftThigh();
+	void SettingLeftCalf();
+	void SettingRightThigh();
+	void SettingRightCalf();
+
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -313,8 +333,6 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	class AMyPlayerController* localPlayerController;
 
-	bool bFreeze;
-
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UStaticMeshComponent* head1;
 
@@ -343,51 +361,719 @@ public:
 	UStaticMeshComponent* head9;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head10;
+	UStaticMeshComponent* head10;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head11;
+	UStaticMeshComponent* head11;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head12;
+	UStaticMeshComponent* head12;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head13;
+	UStaticMeshComponent* head13;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head14;
+	UStaticMeshComponent* head14;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head15;
+	UStaticMeshComponent* head15;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head16;
+	UStaticMeshComponent* head16;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head17;
+	UStaticMeshComponent* head17;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head18;
+	UStaticMeshComponent* head18;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head19;
+	UStaticMeshComponent* head19;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head20;
+	UStaticMeshComponent* head20;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head21;
+	UStaticMeshComponent* head21;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head22;
+	UStaticMeshComponent* head22;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
-		UStaticMeshComponent* head23;
+	UStaticMeshComponent* head23;
 
 	TArray<UStaticMeshComponent*> heads;
 	int32 iHeadFrame;
 	bool bHeadAnimEnd = false;
-	FTimerHandle HeadHandle;
+	FTimerHandle headHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftForearm23;
+
+	TArray<UStaticMeshComponent*> leftForearms;
+	int32 iLeftForearmFrame;
+	bool bLeftForearmAnimEnd = false;
+	FTimerHandle leftForearmHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftUpperarm23;
+
+	TArray<UStaticMeshComponent*> leftUpperarms;
+	int32 iLeftUpperarmFrame;
+	bool bLeftUpperarmAnimEnd = false;
+	FTimerHandle leftUpperarmHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightForearm23;
+
+	TArray<UStaticMeshComponent*> rightForearms;
+	int32 iRightForearmFrame;
+	bool bRightForearmAnimEnd = false;
+	FTimerHandle rightForearmHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightUpperarm23;
+
+	TArray<UStaticMeshComponent*> rightUpperarms;
+	int32 iRightUpperarmFrame;
+	bool bRightUpperarmAnimEnd = false;
+	FTimerHandle rightUpperarmHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* center23;
+
+	TArray<UStaticMeshComponent*> centers;
+	int32 iCenterFrame;
+	bool bCenterAnimEnd = false;
+	FTimerHandle centerHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftThigh23;
+
+	TArray<UStaticMeshComponent*> leftThighs;
+	int32 iLeftThighFrame;
+	bool bLeftThighAnimEnd = false;
+	FTimerHandle leftThighHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* leftCalf23;
+
+	TArray<UStaticMeshComponent*> leftCalfs;
+	int32 iLeftCalfFrame;
+	bool bLeftCalfAnimEnd = false;
+	FTimerHandle leftCalfHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightThigh23;
+
+	TArray<UStaticMeshComponent*> rightThighs;
+	int32 iRightThighFrame;
+	bool bRightThighAnimEnd = false;
+	FTimerHandle rightThighHandle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf1;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf2;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf3;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf4;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf5;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf6;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf7;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf8;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf9;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf10;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf11;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf12;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf13;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf14;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf15;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf16;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf17;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf18;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf19;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf20;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf21;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf22;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+		UStaticMeshComponent* rightCalf23;
+
+	TArray<UStaticMeshComponent*> rightCalfs;
+	int32 iRightCalfFrame;
+	bool bRightCalfAnimEnd = false;
+	FTimerHandle rightCalfHandle;
+
+	int32 iId;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)

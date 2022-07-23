@@ -116,9 +116,50 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 			MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
 
 			auto BoneName = MyCharacter->GetMesh()->FindClosestBone(GetActorLocation());
+			auto ParentBoneName = MyCharacter->GetMesh()->GetParentBone(BoneName);
+
 			MYLOG(Warning, TEXT("%s"), *BoneName.ToString());
-			if (BoneName.ToString() == TEXT("Base-HumanHead") || MyCharacter->GetMesh()->GetParentBone(BoneName) == TEXT("Base-HumanHead"))
+
+			if (BoneName == TEXT("Base-HumanHead") 
+				|| ParentBoneName == TEXT("Base-HumanHead"))
 				MyCharacter->FreezeHead();
+
+			if (BoneName == TEXT("Base-HumanLForearm")
+				|| ParentBoneName == TEXT("Base-HumanLForearm"))
+			{
+				MyCharacter->FreezeLeftForearm();
+				MyCharacter->FreezeLeftUpperarm();
+			}
+
+			if (BoneName == TEXT("Base-HumanRForearm")
+				|| ParentBoneName == TEXT("Base-HumanRForearm"))
+			{
+				MyCharacter->FreezeRightForearm();
+				MyCharacter->FreezeRightUpperarm();
+			}
+
+			if (BoneName == TEXT("Base-HumanLCalf")
+				|| ParentBoneName == TEXT("Base-HumanLCalf"))
+			{
+				MyCharacter->FreezeLeftThigh();
+				MyCharacter->FreezeLeftCalf();
+			}
+
+			if (BoneName == TEXT("Base-HumanRCalf")
+				|| ParentBoneName == TEXT("Base-HumanRCalf"))
+			{
+				MyCharacter->FreezeRightThigh();
+				MyCharacter->FreezeRightCalf();
+			}
+
+			if (ParentBoneName == TEXT("Base-HumanPelvis")
+				|| BoneName == TEXT("Base-HumanSpine1")
+				|| BoneName == TEXT("Base-HumanSpine2")
+				|| BoneName == TEXT("Base-HumanRibcage")
+				|| ParentBoneName == TEXT("Base-HumanRibcage")
+				|| BoneName == TEXT("Base-HumanLUpperarm")
+				|| BoneName == TEXT("Base-HumanRUpperarm"))
+				MyCharacter->FreezeCenter();
 		}
 	}
 	else
