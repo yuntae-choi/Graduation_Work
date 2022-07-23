@@ -22,10 +22,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_CurrentMatchCount, int
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FDele_Dynamic_MaxSnowIceballAndMatchCount, int32, NewMaxSnowballCount, int32, NewMaxIceballCount, int32, NewMaxMatchCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasUmbrella, bool, NewHasUmbrella);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasBag, bool, NewHasBag);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_HasShotgun, bool, NewHasShotgun);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_IsFarmingSnowdrift, bool, NewIsFarmingSnowdrift);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SnowdriftFarmDuration, float, NewSnowdriftFarmDuration);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedItem, int32, NewSelectedItem);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedProjectile, int32, NewSelectedProjectile);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedWeapon, int32, NewSelectedWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_GameResult, bool, GameResult);
 
 /**
@@ -91,10 +93,12 @@ public:
 	void CallDelegateUpdateMaxSnowIceballAndMatchCount();
 	void CallDelegateUpdateHasUmbrella();
 	void CallDelegateUpdateHasBag();
+	void CallDelegateUpdateHasShotgun();
 	void CallDelegateUpdateIsFarmingSnowdrift();
 	void CallDelegateUpdateSnowdriftFarmDuration(float farmDuration);
 	void CallDelegateUpdateSelectedItem();
 	void CallDelegateUpdateSelectedProjectile();
+	void CallDelegateUpdateSelectedWeapon();
 	void CallDelegateUpdateGameResult(bool isWinner);
 
 	void SetCharacterState(const int s_id, STATE_Type _state)
@@ -194,6 +198,9 @@ public:
 	FDele_Dynamic_HasBag FuncUpdateHasBag;
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_HasShotgun FuncUpdateHasShotgun;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_IsFarmingSnowdrift FuncUpdateIsFarmingSnowdrift;
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
@@ -204,6 +211,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_SelectedProjectile FuncUpdateSelectedProjectile;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_SelectedWeapon FuncUpdateSelectedWeapon;
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_GameResult FuncUpdateGameResult;
