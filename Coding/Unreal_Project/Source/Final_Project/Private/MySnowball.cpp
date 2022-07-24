@@ -78,6 +78,8 @@ void AMySnowball::Tick(float DeltaTime)
 
 void AMySnowball::Throw_Implementation(FVector Direction, float Speed)
 {
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("loc :%f, %f, %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
+
 	collisionComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	projectileMovementComponent->bSimulationEnabled = true;	// 눈덩이가 움직일 수 있도록 활성화
 	projectileMovementComponent->InitialSpeed = Speed;

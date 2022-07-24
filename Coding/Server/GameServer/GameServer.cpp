@@ -413,8 +413,8 @@ void process_packet(int s_id, unsigned char* p)
 				}
 			}
 			else
-			{ 
-				
+			{
+
 				string gm_id(packet->id);
 				gm_id += to_string(s_id);
 				Init_Pos(s_id, (char*)gm_id.c_str(), packet->pw, packet->z);
@@ -906,35 +906,24 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 	}
 	case CS_PACKET_THROW_SNOW: {
-	
+
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		switch (packet->bullet)
 		{
 		case BULLET_SNOWBALL:
 		{
 			if (cl.iCurrentSnowballCount <= 0) break;
-			if (!packet->mode) {
-				cout << "throw BULLET_SNOWBALL " << packet->speed << endl;
-				cl.iCurrentSnowballCount--;
-			}
-			else
-			{
-				printf("rel_BULLET_SNOWBALL\n");
-			}
 
+			cout << "throw BULLET_SNOWBALL " << packet->speed << endl;
+			cl.iCurrentSnowballCount--;
 			break;
 		}
 		case BULLET_ICEBALL:
 		{
-			if (!packet->mode) {
-				cout << "throw BULLET_ICEBALL "<< packet->speed << endl;
-				cl.iCurrentIceballCount--;
-			}
-			else
-			{
-				printf("rel_ BULLET_ICEBALL\n");
-			}
+			if (cl.iCurrentIceballCount <= 0) break;
 
+			cout << "throw BULLET_ICEBALL " << packet->speed << endl;
+			cl.iCurrentIceballCount--;
 			break;
 		}
 		default:
@@ -949,7 +938,18 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 
 	}
+	case CS_PACKET_CANCEL_SNOW: {
 
+		cs_packet_cancel_snow* packet = reinterpret_cast<cs_packet_cancel_snow*>(p);
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state)
+				continue;
+			packet->type = SC_PACKET_CANCEL_SNOW;
+			other.do_send(sizeof(*packet), packet);
+		}
+		break;
+
+	}
 	case CS_PACKET_GUNFIRE: {
 		if (cl.iCurrentSnowballCount < 4) break;
 		printf("gunfire\n");
@@ -975,10 +975,12 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_STATUS_CHANGE: {
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(p);
 
-		//printf_s("[Recv status change] status : %d\n", packet->state);
+		printf_s("[Recv status change] status : %d\n", packet->state);
 
 		if (packet->state == ST_INBURN)
 		{
+			cout << s_id << "플레이어 모닥불 내부" << endl;
+
 			if (cl.bIsSnowman) break;
 			if (false == cl.is_bone) {
 				cl.is_bone = true;
@@ -986,11 +988,12 @@ void process_packet(int s_id, unsigned char* p)
 			cl._is_active = true;
 			player_heal(cl._s_id);
 
-			//cout << s_id << "플레이어 모닥불 내부" << endl;
+			cout << s_id << "플레이어 모닥불 내부" << endl;
 
 		}
 		else if (packet->state == ST_OUTBURN)
 		{
+			cout << s_id << "플레이어 모닥불 밖" << endl;
 			if (cl.bIsSnowman) break;
 			if (true == cl.is_bone) {
 				cl.is_bone = false;
@@ -998,7 +1001,7 @@ void process_packet(int s_id, unsigned char* p)
 			}
 			cl._is_active = true;
 			player_damage(cl._s_id);
-			//cout << s_id << "플레이어 모닥불 밖" << endl;
+			cout << s_id << "플레이어 모닥불 밖" << endl;
 		}
 		else if (packet->state == ST_SNOWMAN)
 		{

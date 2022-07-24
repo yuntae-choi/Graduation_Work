@@ -762,6 +762,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 #endif
 		if (iSessionId == localPlayerController->iSessionId)
 		{
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
 			localPlayerController->SendPlayerInfo(COMMAND_DAMAGE);
 		}
 	}
@@ -785,7 +786,6 @@ void AMyCharacter::SendReleaseBullet(int bullet)
 	case BULLET_SNOWBALL: {
 		if (IsValid(snowball))
 		{
-			
 			localPlayerController->SendPlayerInfo(COMMAND_THROW_SB);
 		}
 		break;
@@ -852,18 +852,24 @@ void AMyCharacter::ReleaseSnowball()
 
 		if (snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
-			//던지는 순간 좌표값 보내는 코드
+			//공유 받은 rotatiom 값과 speed 값
 #ifdef MULTIPLAY_DEBUG
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			
-			FVector direction_;
-			direction_.X = PlayerController->GetCharactersInfo()->players[iSessionId].fCDx;
-			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
-			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
+			FRotator cameraRotation;
+			cameraRotation.Yaw = PlayerController->GetCharactersInfo()->players[iSessionId].fyaw;
+			cameraRotation.Pitch = PlayerController->GetCharactersInfo()->players[iSessionId].fpitch;
+			cameraRotation.Roll = PlayerController->GetCharactersInfo()->players[iSessionId].froll;
 
 			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 
-			II_Throwable::Execute_Throw(snowball, direction_, speed);
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[release snowball] \n [x] : %f \n [y] : %f \n [z] : %f \n [speed] : %f "), cameraRotation.Vector().X, cameraRotation.Vector().Y, cameraRotation.Vector().Z, speed));
+
+			FVector SnowBallLocation;
+			SnowBallLocation.X = PlayerController->GetCharactersInfo()->players[iSessionId].SBx;
+			SnowBallLocation.Y = PlayerController->GetCharactersInfo()->players[iSessionId].SBy;
+			SnowBallLocation.Z = PlayerController->GetCharactersInfo()->players[iSessionId].SBz;
+			snowball->SetActorLocation(SnowBallLocation);
+			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector(), speed);
 			// 속도 인자 추가
 #endif
 #ifdef SINGLEPLAY_DEBUG
@@ -897,19 +903,21 @@ void AMyCharacter::ReleaseIceball()
 		{
 
 #ifdef MULTIPLAY_DEBUG
+			//공유 받은 rotatiom 값과 speed 값
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			FVector direction_;
-			direction_.X = PlayerController->GetCharactersInfo()->players[iSessionId].fCDx;
-			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
-			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
-			
-			FVector cameraLocation;
 			FRotator cameraRotation;
-			GetActorEyesViewPoint(cameraLocation, cameraRotation);
-
-			cameraRotation.Vector() = direction_;
+			cameraRotation.Yaw = PlayerController->GetCharactersInfo()->players[iSessionId].fyaw;
+			cameraRotation.Pitch = PlayerController->GetCharactersInfo()->players[iSessionId].fpitch;
+			cameraRotation.Roll = PlayerController->GetCharactersInfo()->players[iSessionId].froll;
 
 			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
+
+			FVector IceBallLocation;
+			IceBallLocation.X = PlayerController->GetCharactersInfo()->players[iSessionId].IBx;
+			IceBallLocation.Y = PlayerController->GetCharactersInfo()->players[iSessionId].IBy;
+			IceBallLocation.Z = PlayerController->GetCharactersInfo()->players[iSessionId].IBz;
+			snowball->SetActorLocation(IceBallLocation);
+
 
 			II_Throwable::Execute_IceballThrow(iceball, cameraRotation, speed);
 
@@ -1260,8 +1268,9 @@ void AMyCharacter::UpdateTemperatureState()
 					UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 				}), 1.0f, true);
 #endif
-			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start())
+			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start()) {
 				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN, iSessionId);
+			}
 		}
 		else
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)

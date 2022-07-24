@@ -56,6 +56,7 @@ const char CS_PACKET_GUNATTACK = 15;
 const char CS_PACKET_GUNFIRE = 16;
 const char CS_PACKET_UMB = 17;
 const char CS_PACKET_ACCOUNT = 18;
+const char CS_PACKET_CANCEL_SNOW = 19;
 
 const char SC_PACKET_LOGIN_OK = 1;
 const char SC_PACKET_MOVE = 2;
@@ -81,6 +82,7 @@ const char SC_PACKET_GUNFIRE = 21;
 const char SC_PACKET_TELEPORT = 22;
 const char SC_PACKET_UMB = 23;
 const char SC_PACKET_ACCOUNT = 24;
+const char SC_PACKET_CANCEL_SNOW = 25;
 
 
 
@@ -209,10 +211,16 @@ struct cs_packet_throw_snow {
 	char	type;
 	int32 s_id;
 	int32 bullet;
-	bool    mode;
-	float x, y, z;
-	float dx, dy, dz;
+	float ball_x, ball_y, ball_z;
+	float yaw, pitch, roll;
 	float speed;
+};
+
+struct cs_packet_cancel_snow {
+	unsigned char size;
+	char	type;
+	int32 s_id;
+	int32 bullet;
 };
 
 struct cs_packet_fire {
@@ -324,7 +332,7 @@ struct sc_packet_status_change {
 	unsigned char size;
 	char type;
 	int32 s_id;
-	short   state;
+	int32  state;
 };
 
 struct sc_packet_ready { // 타 플레이어 레디
