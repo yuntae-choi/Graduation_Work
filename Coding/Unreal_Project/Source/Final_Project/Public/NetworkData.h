@@ -324,7 +324,7 @@ struct sc_packet_status_change {
 	unsigned char size;
 	char type;
 	int32 s_id;
-	short   state;
+	int32  state;
 };
 
 struct sc_packet_ready { // 타 플레이어 레디

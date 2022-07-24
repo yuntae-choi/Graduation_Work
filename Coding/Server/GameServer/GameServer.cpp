@@ -975,10 +975,12 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_STATUS_CHANGE: {
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(p);
 
-		//printf_s("[Recv status change] status : %d\n", packet->state);
+		printf_s("[Recv status change] status : %d\n", packet->state);
 
 		if (packet->state == ST_INBURN)
 		{
+			cout << s_id << "플레이어 모닥불 내부" << endl;
+
 			if (cl.bIsSnowman) break;
 			if (false == cl.is_bone) {
 				cl.is_bone = true;
@@ -986,11 +988,12 @@ void process_packet(int s_id, unsigned char* p)
 			cl._is_active = true;
 			player_heal(cl._s_id);
 
-			//cout << s_id << "플레이어 모닥불 내부" << endl;
+			cout << s_id << "플레이어 모닥불 내부" << endl;
 
 		}
 		else if (packet->state == ST_OUTBURN)
 		{
+			cout << s_id << "플레이어 모닥불 밖" << endl;
 			if (cl.bIsSnowman) break;
 			if (true == cl.is_bone) {
 				cl.is_bone = false;
@@ -998,7 +1001,7 @@ void process_packet(int s_id, unsigned char* p)
 			}
 			cl._is_active = true;
 			player_damage(cl._s_id);
-			//cout << s_id << "플레이어 모닥불 밖" << endl;
+			cout << s_id << "플레이어 모닥불 밖" << endl;
 		}
 		else if (packet->state == ST_SNOWMAN)
 		{

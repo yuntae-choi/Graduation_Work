@@ -192,8 +192,8 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			CharactersInfo.players[packet->s_id].fCz = packet->z;		// 카메라 위치
 			CharactersInfo.players[packet->s_id].fSpeed = packet->speed;		// 발사 속도
 			CharactersInfo.players[packet->s_id].fyaw = packet->yaw;		// yaw
-			CharactersInfo.players[packet->s_id].fpitch = packet->pitch;		// yaw
-			CharactersInfo.players[packet->s_id].froll = packet->roll;		// yaw
+			CharactersInfo.players[packet->s_id].fpitch = packet->pitch;		// pitch
+			CharactersInfo.players[packet->s_id].froll = packet->roll;		// roll
 
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[RECV THROW_SNOW] id : %d speed : %d yaw : %d "), packet->s_id, packet->speed, packet->yaw));
 			switch (packet->bullet)
@@ -459,8 +459,9 @@ void ClientSocket::Send_ReadyPacket()
 }
 
 
-void ClientSocket::Send_StatusPacket(STATE_Type _state, int s_id) {
+void ClientSocket::Send_StatusPacket(int _state, int s_id) {
 	//CharactersInfo.players[iMy_s_id].My_State = _state;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Send_StatusPacket")));
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
 	packet.s_id = s_id;

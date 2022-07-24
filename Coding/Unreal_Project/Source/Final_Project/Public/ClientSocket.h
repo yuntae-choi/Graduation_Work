@@ -266,7 +266,7 @@ public:
 	void ProcessPacket(unsigned char* ptr);
 	void Send_LoginPacket(char* _id, char* _pw);
 	void Send_Create_ID_Packet(char* send_id, char* send_pw);
-	void Send_StatusPacket(STATE_Type _state, int s_id);
+	void Send_StatusPacket(int _state, int s_id);
 
 	void Send_TelePortPacket(int point_num);
 	void Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVector MyVelocity, float dir);

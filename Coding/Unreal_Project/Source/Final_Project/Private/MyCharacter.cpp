@@ -1256,8 +1256,9 @@ void AMyCharacter::UpdateTemperatureState()
 					UpdateUI(UICategory::HP);	// 변경된 체력으로 ui 갱신
 				}), 1.0f, true);
 #endif
-			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start())
+			if (iSessionId == PlayerController->iSessionId && PlayerController->is_start()) {
 				PlayerController->GetSocket()->Send_StatusPacket(ST_INBURN, iSessionId);
+			}
 		}
 		else
 		{	// 모닥불 외부인 경우 초당 체온 감소 (초당 호출되는 람다함수)
