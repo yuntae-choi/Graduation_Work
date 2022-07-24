@@ -855,15 +855,17 @@ void AMyCharacter::ReleaseSnowball()
 			//던지는 순간 좌표값 보내는 코드
 #ifdef MULTIPLAY_DEBUG
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			
-			FVector direction_;
-			direction_.X = PlayerController->GetCharactersInfo()->players[iSessionId].fCDx;
-			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
-			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
+			FRotator cameraRotation;
+			cameraRotation.Yaw = PlayerController->GetCharactersInfo()->players[iSessionId].fyaw;
+			cameraRotation.Pitch = PlayerController->GetCharactersInfo()->players[iSessionId].fpitch;
+			cameraRotation.Roll = PlayerController->GetCharactersInfo()->players[iSessionId].froll;
 
 			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 
-			II_Throwable::Execute_Throw(snowball, direction_, speed);
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[release snowball] \n [x] : %f \n [y] : %f \n [z] : %f \n [speed] : %f "), direction_.X, direction_.Y, direction_.Z, speed));
+
+
+			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector(), speed);
 			// 속도 인자 추가
 #endif
 #ifdef SINGLEPLAY_DEBUG
@@ -898,16 +900,10 @@ void AMyCharacter::ReleaseIceball()
 
 #ifdef MULTIPLAY_DEBUG
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-			FVector direction_;
-			direction_.X = PlayerController->GetCharactersInfo()->players[iSessionId].fCDx;
-			direction_.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fCDy;
-			direction_.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fCDz;
-			
-			FVector cameraLocation;
 			FRotator cameraRotation;
-			GetActorEyesViewPoint(cameraLocation, cameraRotation);
-
-			cameraRotation.Vector() = direction_;
+			cameraRotation.Yaw = PlayerController->GetCharactersInfo()->players[iSessionId].fyaw;
+			cameraRotation.Pitch = PlayerController->GetCharactersInfo()->players[iSessionId].fpitch;
+			cameraRotation.Roll = PlayerController->GetCharactersInfo()->players[iSessionId].froll;
 
 			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 

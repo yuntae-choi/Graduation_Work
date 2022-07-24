@@ -150,8 +150,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 void AMyPlayerController::SetSocket()
 {
-    mySocket = new ClientSocket();         // 에디터용
-	//mySocket = ClientSocket::GetSingleton(); // 패키징 용
+    //mySocket = new ClientSocket();         // 에디터용
+	mySocket = ClientSocket::GetSingleton(); // 패키징 용
 
 	mySocket->SetPlayerController(this);
 	g_socket = mySocket;
@@ -629,7 +629,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	float dir = localPlayerCharacter->GetAnim()->GetDirection();
 	float fspeed = localPlayerCharacter->Getfspeed();
 	if (input == COMMAND_MOVE) 
-	mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
+	    mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
 	else if (input == COMMAND_SNOWBALL)
 		mySocket->Send_AttackPacket(iSessionId, BULLET_SNOWBALL);
 	else if (input == COMMAND_ICEBALL)
@@ -637,13 +637,13 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	else if (input == COMMAND_SHOTGUN)
 		mySocket->Send_GunAttackPacket(iSessionId);
 	else if (input == COMMAND_THROW_SB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),false, BULLET_SNOWBALL, fspeed);
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation,false, BULLET_SNOWBALL, fspeed);
 	else if (input == COMMAND_THROW_IB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(), false, BULLET_ICEBALL, fspeed);
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation, false, BULLET_ICEBALL, fspeed);
 	else if (input == COMMAND_CANCEL_SB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(),true, BULLET_SNOWBALL, fspeed);
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation,true, BULLET_SNOWBALL, fspeed);
 	else if (input == COMMAND_CANCEL_IB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation.Vector(), true, BULLET_ICEBALL, fspeed);
+		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation, true, BULLET_ICEBALL, fspeed);
 	else if (input == COMMAND_GUNFIRE)
 		mySocket->Send_GunFire_Packet(iSessionId, MyCameraLocation, MyCameraRotation);
 	else if (input == COMMAND_DAMAGE)

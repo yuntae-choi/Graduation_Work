@@ -122,6 +122,8 @@ public:
 	float fCx, fCy, fCz;
 	//카메라 방향
 	float fCDx, fCDy, fCDz;
+	//카메라 yaw
+	float fyaw, fpitch, froll;
 	//발사 속도
 	float fSpeed;
 
@@ -272,7 +274,7 @@ public:
 	void Send_GunAttackPacket(int s_id);
 
 	void Send_ChatPacket(int cheat_num);
-	void Send_Throw_Packet(int s_id, FVector MyLocation, FVector MyDirection, bool mode, int bullet, float speed);
+	void Send_Throw_Packet(int s_id, FVector MyLocation, FRotator MyRotation, bool mode, int bullet, float speed);
 	void Send_GunFire_Packet(int s_id, FVector MyLocation, FRotator MyRotation);
 
 	void Send_DamagePacket();

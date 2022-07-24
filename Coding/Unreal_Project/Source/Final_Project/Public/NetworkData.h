@@ -211,7 +211,7 @@ struct cs_packet_throw_snow {
 	int32 bullet;
 	bool    mode;
 	float x, y, z;
-	float dx, dy, dz;
+	float yaw, pitch, roll;
 	float speed;
 };
 
