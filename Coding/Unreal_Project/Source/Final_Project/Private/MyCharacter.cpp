@@ -762,6 +762,7 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 #endif
 		if (iSessionId == localPlayerController->iSessionId)
 		{
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
 			localPlayerController->SendPlayerInfo(COMMAND_DAMAGE);
 		}
 	}
@@ -785,7 +786,6 @@ void AMyCharacter::SendReleaseBullet(int bullet)
 	case BULLET_SNOWBALL: {
 		if (IsValid(snowball))
 		{
-			
 			localPlayerController->SendPlayerInfo(COMMAND_THROW_SB);
 		}
 		break;
@@ -852,7 +852,7 @@ void AMyCharacter::ReleaseSnowball()
 
 		if (snowball->GetClass()->ImplementsInterface(UI_Throwable::StaticClass()))
 		{
-			//던지는 순간 좌표값 보내는 코드
+			//공유 받은 rotatiom 값과 speed 값
 #ifdef MULTIPLAY_DEBUG
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			FRotator cameraRotation;
@@ -862,9 +862,13 @@ void AMyCharacter::ReleaseSnowball()
 
 			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[release snowball] \n [x] : %f \n [y] : %f \n [z] : %f \n [speed] : %f "), direction_.X, direction_.Y, direction_.Z, speed));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[release snowball] \n [x] : %f \n [y] : %f \n [z] : %f \n [speed] : %f "), cameraRotation.Vector().X, cameraRotation.Vector().Y, cameraRotation.Vector().Z, speed));
 
-
+			FVector SnowBallLocation;
+			SnowBallLocation.X = PlayerController->GetCharactersInfo()->players[iSessionId].SBx;
+			SnowBallLocation.Y = PlayerController->GetCharactersInfo()->players[iSessionId].SBy;
+			SnowBallLocation.Z = PlayerController->GetCharactersInfo()->players[iSessionId].SBz;
+			snowball->SetActorLocation(SnowBallLocation);
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector(), speed);
 			// 속도 인자 추가
 #endif
@@ -899,6 +903,7 @@ void AMyCharacter::ReleaseIceball()
 		{
 
 #ifdef MULTIPLAY_DEBUG
+			//공유 받은 rotatiom 값과 speed 값
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			FRotator cameraRotation;
 			cameraRotation.Yaw = PlayerController->GetCharactersInfo()->players[iSessionId].fyaw;
@@ -906,6 +911,13 @@ void AMyCharacter::ReleaseIceball()
 			cameraRotation.Roll = PlayerController->GetCharactersInfo()->players[iSessionId].froll;
 
 			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
+
+			FVector IceBallLocation;
+			IceBallLocation.X = PlayerController->GetCharactersInfo()->players[iSessionId].IBx;
+			IceBallLocation.Y = PlayerController->GetCharactersInfo()->players[iSessionId].IBy;
+			IceBallLocation.Z = PlayerController->GetCharactersInfo()->players[iSessionId].IBz;
+			snowball->SetActorLocation(IceBallLocation);
+
 
 			II_Throwable::Execute_IceballThrow(iceball, cameraRotation, speed);
 

@@ -150,8 +150,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 void AMyPlayerController::SetSocket()
 {
-    //mySocket = new ClientSocket();         // 에디터용
-	mySocket = ClientSocket::GetSingleton(); // 패키징 용
+    mySocket = new ClientSocket();         // 에디터용
+	//mySocket = ClientSocket::GetSingleton(); // 패키징 용
 
 	mySocket->SetPlayerController(this);
 	g_socket = mySocket;
@@ -618,43 +618,84 @@ void AMyPlayerController::Reset_Items(int s_id)
 
 void AMyPlayerController::SendPlayerInfo(int input)
 {
-	if (!localPlayerCharacter)
-		return;
-	auto loc = localPlayerCharacter->GetActorLocation();
-	float fNewYaw = localPlayerCharacter->GetActorRotation().Yaw;		//yaw 값만 필요함
-	auto vel = localPlayerCharacter->GetVelocity();
+	if (!localPlayerCharacter) return;
 	FVector MyCameraLocation;
 	FRotator MyCameraRotation;
-	localPlayerCharacter->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
-	float dir = localPlayerCharacter->GetAnim()->GetDirection();
-	float fspeed = localPlayerCharacter->Getfspeed();
-	if (input == COMMAND_MOVE) 
-	    mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
-	else if (input == COMMAND_SNOWBALL)
+	float fspeed;
+	switch (input)
+	{
+	case COMMAND_MOVE: {
+		auto loc = localPlayerCharacter->GetActorLocation();
+		float fNewYaw = localPlayerCharacter->GetActorRotation().Yaw;		//yaw 값만 필요함
+		auto vel = localPlayerCharacter->GetVelocity();
+		float dir = localPlayerCharacter->GetAnim()->GetDirection();
+		mySocket->Send_MovePacket(iSessionId, loc, fNewYaw, vel, dir);
+		break;
+	}
+	case COMMAND_SNOWBALL: {
 		mySocket->Send_AttackPacket(iSessionId, BULLET_SNOWBALL);
-	else if (input == COMMAND_ICEBALL)
+		break;
+	}
+	case COMMAND_ICEBALL: {
 		mySocket->Send_AttackPacket(iSessionId, BULLET_ICEBALL);
-	else if (input == COMMAND_SHOTGUN)
+		break;
+	}
+	case COMMAND_SHOTGUN: {
 		mySocket->Send_GunAttackPacket(iSessionId);
-	else if (input == COMMAND_THROW_SB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation,false, BULLET_SNOWBALL, fspeed);
-	else if (input == COMMAND_THROW_IB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation, false, BULLET_ICEBALL, fspeed);
-	else if (input == COMMAND_CANCEL_SB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation,true, BULLET_SNOWBALL, fspeed);
-	else if (input == COMMAND_CANCEL_IB)
-		mySocket->Send_Throw_Packet(iSessionId, MyCameraLocation, MyCameraRotation, true, BULLET_ICEBALL, fspeed);
-	else if (input == COMMAND_GUNFIRE)
+		break;
+	}
+	case COMMAND_THROW_SB: {
+		if (IsValid(localPlayerCharacter->snowball))
+		{
+			FVector MySnowBallLocation = localPlayerCharacter->snowball->GetActorLocation();
+			localPlayerCharacter->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
+			fspeed = localPlayerCharacter->Getfspeed();
+			mySocket->Send_Throw_Packet(iSessionId, MySnowBallLocation, MyCameraRotation, BULLET_SNOWBALL, fspeed);
+		}
+		break;
+	}
+	case COMMAND_THROW_IB: {
+		if (IsValid(localPlayerCharacter->iceball))
+		{
+			FVector MyIceBallLocation = localPlayerCharacter->iceball->GetActorLocation();
+			localPlayerCharacter->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
+			fspeed = localPlayerCharacter->Getfspeed();
+			mySocket->Send_Throw_Packet(iSessionId, MyIceBallLocation, MyCameraRotation, BULLET_ICEBALL, fspeed);
+		}
+        break;
+	}
+	case COMMAND_CANCEL_SB: {
+		mySocket->Send_Cancel_Packet(iSessionId, BULLET_SNOWBALL);
+        break;
+	}
+	case COMMAND_CANCEL_IB: {
+		mySocket->Send_Cancel_Packet(iSessionId, BULLET_ICEBALL);
+		break;
+	}
+	case COMMAND_GUNFIRE: {
+		localPlayerCharacter->GetActorEyesViewPoint(MyCameraLocation, MyCameraRotation);
 		mySocket->Send_GunFire_Packet(iSessionId, MyCameraLocation, MyCameraRotation);
-	else if (input == COMMAND_DAMAGE)
+		break;
+	}
+	case COMMAND_DAMAGE: {
 		mySocket->Send_DamagePacket();
-	else if (input == COMMAND_MATCH)
+        break;
+	}
+	case COMMAND_MATCH: {
 		mySocket->Send_MatchPacket();
-	else if (input == COMMAND_UMB_START)
+		break;
+	}
+	case COMMAND_UMB_START: {
 		mySocket->Send_UmbPacket(false);
-	else if (input == COMMAND_UMB_END)
+        break;
+	}
+	case COMMAND_UMB_END: {
 		mySocket->Send_UmbPacket(true);
-	
+		break;
+	}
+	default:
+		break;
+	}	
 }
 
 void AMyPlayerController::SendTeleportInfo(int input)

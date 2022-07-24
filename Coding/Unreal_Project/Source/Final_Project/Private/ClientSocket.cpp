@@ -182,57 +182,59 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 	case SC_PACKET_THROW_SNOW:
 	{
-		
+
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
-		
-		if (!packet->mode) 
-		{
-			CharactersInfo.players[packet->s_id].fCx = packet->x;		// 카메라 위치
-			CharactersInfo.players[packet->s_id].fCy = packet->y;		// 카메라 위치
-			CharactersInfo.players[packet->s_id].fCz = packet->z;		// 카메라 위치
-			CharactersInfo.players[packet->s_id].fSpeed = packet->speed;		// 발사 속도
-			CharactersInfo.players[packet->s_id].fyaw = packet->yaw;		// yaw
-			CharactersInfo.players[packet->s_id].fpitch = packet->pitch;		// pitch
-			CharactersInfo.players[packet->s_id].froll = packet->roll;		// roll
+		CharactersInfo.players[packet->s_id].fSpeed = packet->speed;		// 발사 속도
+		CharactersInfo.players[packet->s_id].fyaw = packet->yaw;		// yaw
+		CharactersInfo.players[packet->s_id].fpitch = packet->pitch;		// pitch
+		CharactersInfo.players[packet->s_id].froll = packet->roll;		// roll
 
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[RECV THROW_SNOW] id : %d speed : %d yaw : %d "), packet->s_id, packet->speed, packet->yaw));
-			switch (packet->bullet)
-			{
-			case BULLET_SNOWBALL:
-			{
-				MyPlayerController->SetAttack(packet->s_id, END_SNOWBALL);
-				break;
-			}
-			case BULLET_ICEBALL:
-			{
-				MyPlayerController->SetAttack(packet->s_id, END_ICEBALL);
-				break;
-			}
-			default:
-				break;
-			}
+		switch (packet->bullet)
+		{
+		case BULLET_SNOWBALL:
+		{
+			CharactersInfo.players[packet->s_id].SBx = packet->ball_x;		// 눈덩이 위치
+			CharactersInfo.players[packet->s_id].SBy = packet->ball_y;		// 눈덩이 위치
+			CharactersInfo.players[packet->s_id].SBz = packet->ball_z;		// 눈덩이 위치
+
+			MyPlayerController->SetAttack(packet->s_id, END_SNOWBALL);
+			break;
 		}
-		else
+		case BULLET_ICEBALL:
 		{
+			CharactersInfo.players[packet->s_id].IBx = packet->ball_x;		// 얼음 위치
+			CharactersInfo.players[packet->s_id].IBy = packet->ball_y;		// 얼음 위치
+			CharactersInfo.players[packet->s_id].IBz = packet->ball_z;		// 얼음 위치
 
-			switch (packet->bullet)
-			{
-			case BULLET_SNOWBALL:
-			{
-				MyPlayerController->SetAttack(packet->s_id, CANCEL_SNOWBALL);
-				break;
-			}
-			case BULLET_ICEBALL:
-			{
-					MyPlayerController->SetAttack(packet->s_id, CANCEL_ICEBALL);
-				break;
-			}
-			default:
-				break;
-			}
+			MyPlayerController->SetAttack(packet->s_id, END_ICEBALL);
+			break;
+		}
+		default:
+			break;
 		}
 
-		
+		break;
+	}
+	case SC_PACKET_CANCEL_SNOW:
+	{
+
+		cs_packet_cancel_snow* packet = reinterpret_cast<cs_packet_cancel_snow*>(ptr);
+
+		switch (packet->bullet)
+		{
+		case BULLET_SNOWBALL:
+		{
+			MyPlayerController->SetAttack(packet->s_id, CANCEL_SNOWBALL);
+			break;
+		}
+		case BULLET_ICEBALL:
+		{
+			MyPlayerController->SetAttack(packet->s_id, CANCEL_ICEBALL);
+			break;
+		}
+		default:
+			break;
+		}
 		break;
 	}
 	case SC_PACKET_GUNFIRE:
@@ -388,7 +390,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		default:
 			break;
 		}
-		
+
 		break;
 	}
 	case SC_PACKET_GUNATTACK:
@@ -461,7 +463,6 @@ void ClientSocket::Send_ReadyPacket()
 
 void ClientSocket::Send_StatusPacket(int _state, int s_id) {
 	//CharactersInfo.players[iMy_s_id].My_State = _state;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Send_StatusPacket")));
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
 	packet.s_id = s_id;
@@ -473,6 +474,7 @@ void ClientSocket::Send_StatusPacket(int _state, int s_id) {
 };
 
 void ClientSocket::Send_DamagePacket() {
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Send_DamagePacket")));
 	cs_packet_damage packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_DAMAGE;
@@ -550,24 +552,34 @@ void ClientSocket::Send_MovePacket(int s_id, FVector MyLocation, float yaw, FVec
 };
 
 
-void ClientSocket::Send_Throw_Packet(int s_id, FVector MyLocation, FRotator MyRotation, bool mode, int bullet, float speed)
+void ClientSocket::Send_Throw_Packet(int s_id, FVector BallLocation, FRotator MyRotation, int bullet, float speed)
 {
 
 	cs_packet_throw_snow packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_THROW_SNOW;
 	packet.s_id = s_id;
-	packet.mode = mode;
 	packet.bullet = bullet;
-	packet.x = MyLocation.X;
-	packet.y = MyLocation.Y;
-	packet.z = MyLocation.Z;
+	packet.ball_x = BallLocation.X;
+	packet.ball_y = BallLocation.Y;
+	packet.ball_z = BallLocation.Z;
 	packet.yaw = MyRotation.Yaw;
 	packet.pitch = MyRotation.Pitch;
 	packet.roll = MyRotation.Roll;
 	packet.speed = speed;
 	size_t sent = 0;
 	//MYLOG(Warning, TEXT("[Send throw snow] id: %d, loc: (%f, %f, %f), dir: (%f, %f, %f)"), s_id, packet.x, packet.y, packet.z, packet.dx, packet.dy, packet.dz);
+	SendPacket(&packet);
+};
+
+void ClientSocket::Send_Cancel_Packet(int s_id, int bullet)
+{
+
+	cs_packet_cancel_snow packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_CANCEL_SNOW;
+	packet.s_id = s_id;
+	packet.bullet = bullet;
 	SendPacket(&packet);
 };
 

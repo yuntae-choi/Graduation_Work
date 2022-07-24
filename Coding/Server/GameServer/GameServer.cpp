@@ -413,8 +413,8 @@ void process_packet(int s_id, unsigned char* p)
 				}
 			}
 			else
-			{ 
-				
+			{
+
 				string gm_id(packet->id);
 				gm_id += to_string(s_id);
 				Init_Pos(s_id, (char*)gm_id.c_str(), packet->pw, packet->z);
@@ -906,35 +906,24 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 	}
 	case CS_PACKET_THROW_SNOW: {
-	
+
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(p);
 		switch (packet->bullet)
 		{
 		case BULLET_SNOWBALL:
 		{
 			if (cl.iCurrentSnowballCount <= 0) break;
-			if (!packet->mode) {
-				cout << "throw BULLET_SNOWBALL " << packet->speed << endl;
-				cl.iCurrentSnowballCount--;
-			}
-			else
-			{
-				printf("rel_BULLET_SNOWBALL\n");
-			}
 
+			cout << "throw BULLET_SNOWBALL " << packet->speed << endl;
+			cl.iCurrentSnowballCount--;
 			break;
 		}
 		case BULLET_ICEBALL:
 		{
-			if (!packet->mode) {
-				cout << "throw BULLET_ICEBALL "<< packet->speed << endl;
-				cl.iCurrentIceballCount--;
-			}
-			else
-			{
-				printf("rel_ BULLET_ICEBALL\n");
-			}
+			if (cl.iCurrentIceballCount <= 0) break;
 
+			cout << "throw BULLET_ICEBALL " << packet->speed << endl;
+			cl.iCurrentIceballCount--;
 			break;
 		}
 		default:
@@ -949,7 +938,18 @@ void process_packet(int s_id, unsigned char* p)
 		break;
 
 	}
+	case CS_PACKET_CANCEL_SNOW: {
 
+		cs_packet_cancel_snow* packet = reinterpret_cast<cs_packet_cancel_snow*>(p);
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state)
+				continue;
+			packet->type = SC_PACKET_CANCEL_SNOW;
+			other.do_send(sizeof(*packet), packet);
+		}
+		break;
+
+	}
 	case CS_PACKET_GUNFIRE: {
 		if (cl.iCurrentSnowballCount < 4) break;
 		printf("gunfire\n");
