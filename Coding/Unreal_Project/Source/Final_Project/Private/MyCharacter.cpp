@@ -332,7 +332,6 @@ AMyCharacter::AMyCharacter()
 	SettingCenter();
 	SettingLeftThigh();
 	SettingLeftCalf();
-	SettingCenter();
 	SettingRightThigh();
 	SettingRightCalf();
 
@@ -2012,1150 +2011,328 @@ void AMyCharacter::UpdateJetski()
 
 void AMyCharacter::SettingHead() 
 {
-	heads.Add(head1);
-	heads.Add(head2);
-	heads.Add(head3);
-	heads.Add(head4);
-	heads.Add(head5);
-	heads.Add(head6);
-	heads.Add(head7);
-	heads.Add(head8);
-	heads.Add(head9);
-	heads.Add(head10);
-	heads.Add(head11);
-	heads.Add(head12);
-	heads.Add(head13);
-	heads.Add(head14);
-	heads.Add(head15);
-	heads.Add(head16);
-	heads.Add(head17);
-	heads.Add(head18);
-	heads.Add(head19);
-	heads.Add(head20);
-	heads.Add(head21);
-	heads.Add(head22);
-	heads.Add(head23);
+	TArray<const wchar_t*> names
+		= { TEXT("head1"), TEXT("head2"), TEXT("head3"), TEXT("head4"), TEXT("head5"), TEXT("head6"), TEXT("head7"), TEXT("head8"), TEXT("head9"), TEXT("head10"), TEXT("head11"), TEXT("head12")
+		, TEXT("head13"), TEXT("head14"), TEXT("head15"), TEXT("head16"), TEXT("head17"), TEXT("head18"), TEXT("head19"), TEXT("head20"), TEXT("head21"), TEXT("head22"), TEXT("head23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("head1"));
-	names.Add(TEXT("head2"));
-	names.Add(TEXT("head3"));
-	names.Add(TEXT("head4"));
-	names.Add(TEXT("head5"));
-	names.Add(TEXT("head6"));
-	names.Add(TEXT("head7"));
-	names.Add(TEXT("head8"));
-	names.Add(TEXT("head9"));
-	names.Add(TEXT("head10"));
-	names.Add(TEXT("head11"));
-	names.Add(TEXT("head12"));
-	names.Add(TEXT("head13"));
-	names.Add(TEXT("head14"));
-	names.Add(TEXT("head15"));
-	names.Add(TEXT("head16"));
-	names.Add(TEXT("head17"));
-	names.Add(TEXT("head18"));
-	names.Add(TEXT("head19"));
-	names.Add(TEXT("head20"));
-	names.Add(TEXT("head21"));
-	names.Add(TEXT("head22"));
-	names.Add(TEXT("head23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_HEADS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD1(TEXT("/Game/FX/Frozen/Meshes/head_2.head_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD2(TEXT("/Game/FX/Frozen/Meshes/head_3.head_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD3(TEXT("/Game/FX/Frozen/Meshes/head_4.head_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD4(TEXT("/Game/FX/Frozen/Meshes/head_5.head_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD5(TEXT("/Game/FX/Frozen/Meshes/head_6.head_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD6(TEXT("/Game/FX/Frozen/Meshes/head_7.head_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD7(TEXT("/Game/FX/Frozen/Meshes/head_8.head_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD8(TEXT("/Game/FX/Frozen/Meshes/head_9.head_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD9(TEXT("/Game/FX/Frozen/Meshes/head_10.head_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD10(TEXT("/Game/FX/Frozen/Meshes/head_11.head_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD11(TEXT("/Game/FX/Frozen/Meshes/head_12.head_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD12(TEXT("/Game/FX/Frozen/Meshes/head_13.head_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD13(TEXT("/Game/FX/Frozen/Meshes/head_14.head_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD14(TEXT("/Game/FX/Frozen/Meshes/head_15.head_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD15(TEXT("/Game/FX/Frozen/Meshes/head_16.head_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD16(TEXT("/Game/FX/Frozen/Meshes/head_17.head_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD17(TEXT("/Game/FX/Frozen/Meshes/head_18.head_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD18(TEXT("/Game/FX/Frozen/Meshes/head_19.head_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD19(TEXT("/Game/FX/Frozen/Meshes/head_20.head_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD20(TEXT("/Game/FX/Frozen/Meshes/head_21.head_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD21(TEXT("/Game/FX/Frozen/Meshes/head_22.head_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD22(TEXT("/Game/FX/Frozen/Meshes/head_23.head_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_HEAD23(TEXT("/Game/FX/Frozen/Meshes/head_24.head_24"));
-	SM_HEADS.Add(&SM_HEAD1);
-	SM_HEADS.Add(&SM_HEAD2);
-	SM_HEADS.Add(&SM_HEAD3);
-	SM_HEADS.Add(&SM_HEAD4);
-	SM_HEADS.Add(&SM_HEAD5);
-	SM_HEADS.Add(&SM_HEAD6);
-	SM_HEADS.Add(&SM_HEAD7);
-	SM_HEADS.Add(&SM_HEAD8);
-	SM_HEADS.Add(&SM_HEAD9);
-	SM_HEADS.Add(&SM_HEAD10);
-	SM_HEADS.Add(&SM_HEAD11);
-	SM_HEADS.Add(&SM_HEAD12);
-	SM_HEADS.Add(&SM_HEAD13);
-	SM_HEADS.Add(&SM_HEAD14);
-	SM_HEADS.Add(&SM_HEAD15);
-	SM_HEADS.Add(&SM_HEAD16);
-	SM_HEADS.Add(&SM_HEAD17);
-	SM_HEADS.Add(&SM_HEAD18);
-	SM_HEADS.Add(&SM_HEAD19);
-	SM_HEADS.Add(&SM_HEAD20);
-	SM_HEADS.Add(&SM_HEAD21);
-	SM_HEADS.Add(&SM_HEAD22);
-	SM_HEADS.Add(&SM_HEAD23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/head_2.head_2"), TEXT("/Game/FX/Frozen/Meshes/head_3.head_3"), TEXT("/Game/FX/Frozen/Meshes/head_4.head_4"),
+	TEXT("/Game/FX/Frozen/Meshes/head_5.head_5"), TEXT("/Game/FX/Frozen/Meshes/head_6.head_6"), TEXT("/Game/FX/Frozen/Meshes/head_7.head_7"),
+	TEXT("/Game/FX/Frozen/Meshes/head_8.head_8"), TEXT("/Game/FX/Frozen/Meshes/head_9.head_9"), TEXT("/Game/FX/Frozen/Meshes/head_10.head_10"),
+	TEXT("/Game/FX/Frozen/Meshes/head_11.head_11"), TEXT("/Game/FX/Frozen/Meshes/head_12.head_12"), TEXT("/Game/FX/Frozen/Meshes/head_13.head_13"),
+	TEXT("/Game/FX/Frozen/Meshes/head_14.head_14"), TEXT("/Game/FX/Frozen/Meshes/head_15.head_15"), TEXT("/Game/FX/Frozen/Meshes/head_16.head_16"),
+	TEXT("/Game/FX/Frozen/Meshes/head_17.head_17"), TEXT("/Game/FX/Frozen/Meshes/head_18.head_18"), TEXT("/Game/FX/Frozen/Meshes/head_19.head_19"),
+	TEXT("/Game/FX/Frozen/Meshes/head_20.head_20"), TEXT("/Game/FX/Frozen/Meshes/head_21.head_21"), TEXT("/Game/FX/Frozen/Meshes/head_22.head_22"),
+	TEXT("/Game/FX/Frozen/Meshes/head_23.head_23"), TEXT("/Game/FX/Frozen/Meshes/head_24.head_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!heads[i])
+		UStaticMeshComponent* head = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			heads[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_HEADS[i]->Succeeded())
-			{
-				heads[i]->SetStaticMesh(SM_HEADS[i]->Object);
-				heads[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				heads[i]->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
-				heads[i]->SetVisibility(false);
-			}
+			head->SetStaticMesh(SM_BONE.Object);
+			head->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			head->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
+			head->SetVisibility(false);
+			heads.Add(head);
 		}
 	}
 }
 
 void AMyCharacter::SettingLeftForearm()
 {
-	leftForearms.Add(leftForearm1);
-	leftForearms.Add(leftForearm2);
-	leftForearms.Add(leftForearm3);
-	leftForearms.Add(leftForearm4);
-	leftForearms.Add(leftForearm5);
-	leftForearms.Add(leftForearm6);
-	leftForearms.Add(leftForearm7);
-	leftForearms.Add(leftForearm8);
-	leftForearms.Add(leftForearm9);
-	leftForearms.Add(leftForearm10);
-	leftForearms.Add(leftForearm11);
-	leftForearms.Add(leftForearm12);
-	leftForearms.Add(leftForearm13);
-	leftForearms.Add(leftForearm14);
-	leftForearms.Add(leftForearm15);
-	leftForearms.Add(leftForearm16);
-	leftForearms.Add(leftForearm17);
-	leftForearms.Add(leftForearm18);
-	leftForearms.Add(leftForearm19);
-	leftForearms.Add(leftForearm20);
-	leftForearms.Add(leftForearm21);
-	leftForearms.Add(leftForearm22);
-	leftForearms.Add(leftForearm23);
+	TArray<const wchar_t*> names
+		= { TEXT("leftForearm1"), TEXT("leftForearm2"), TEXT("leftForearm3"), TEXT("leftForearm4"), TEXT("leftForearm5"), TEXT("leftForearm6"), TEXT("leftForearm7"), TEXT("leftForearm8"), 
+		TEXT("leftForearm9"), TEXT("leftForearm10"), TEXT("leftForearm11"), TEXT("leftForearm12"), TEXT("leftForearm13"), TEXT("leftForearm14"), TEXT("leftForearm15"), TEXT("leftForearm16"), 
+		TEXT("leftForearm17"), TEXT("leftForearm18"), TEXT("leftForearm19"), TEXT("leftForearm20"), TEXT("leftForearm21"), TEXT("leftForearm22"), TEXT("leftForearm23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("leftForearm1"));
-	names.Add(TEXT("leftForearm2"));
-	names.Add(TEXT("leftForearm3"));
-	names.Add(TEXT("leftForearm4"));
-	names.Add(TEXT("leftForearm5"));
-	names.Add(TEXT("leftForearm6"));
-	names.Add(TEXT("leftForearm7"));
-	names.Add(TEXT("leftForearm8"));
-	names.Add(TEXT("leftForearm9"));
-	names.Add(TEXT("leftForearm10"));
-	names.Add(TEXT("leftForearm11"));
-	names.Add(TEXT("leftForearm12"));
-	names.Add(TEXT("leftForearm13"));
-	names.Add(TEXT("leftForearm14"));
-	names.Add(TEXT("leftForearm15"));
-	names.Add(TEXT("leftForearm16"));
-	names.Add(TEXT("leftForearm17"));
-	names.Add(TEXT("leftForearm18"));
-	names.Add(TEXT("leftForearm19"));
-	names.Add(TEXT("leftForearm20"));
-	names.Add(TEXT("leftForearm21"));
-	names.Add(TEXT("leftForearm22"));
-	names.Add(TEXT("leftForearm23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_LEFTFOREARMS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM1(TEXT("/Game/FX/Frozen/Meshes/left_forearm_2.left_forearm_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM2(TEXT("/Game/FX/Frozen/Meshes/left_forearm_3.left_forearm_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM3(TEXT("/Game/FX/Frozen/Meshes/left_forearm_4.left_forearm_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM4(TEXT("/Game/FX/Frozen/Meshes/left_forearm_5.left_forearm_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM5(TEXT("/Game/FX/Frozen/Meshes/left_forearm_6.left_forearm_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM6(TEXT("/Game/FX/Frozen/Meshes/left_forearm_7.left_forearm_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM7(TEXT("/Game/FX/Frozen/Meshes/left_forearm_8.left_forearm_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM8(TEXT("/Game/FX/Frozen/Meshes/left_forearm_9.left_forearm_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM9(TEXT("/Game/FX/Frozen/Meshes/left_forearm_10.left_forearm_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM10(TEXT("/Game/FX/Frozen/Meshes/left_forearm_11.left_forearm_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM11(TEXT("/Game/FX/Frozen/Meshes/left_forearm_12.left_forearm_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM12(TEXT("/Game/FX/Frozen/Meshes/left_forearm_13.left_forearm_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM13(TEXT("/Game/FX/Frozen/Meshes/left_forearm_14.left_forearm_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM14(TEXT("/Game/FX/Frozen/Meshes/left_forearm_15.left_forearm_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM15(TEXT("/Game/FX/Frozen/Meshes/left_forearm_16.left_forearm_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM16(TEXT("/Game/FX/Frozen/Meshes/left_forearm_17.left_forearm_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM17(TEXT("/Game/FX/Frozen/Meshes/left_forearm_18.left_forearm_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM18(TEXT("/Game/FX/Frozen/Meshes/left_forearm_19.left_forearm_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM19(TEXT("/Game/FX/Frozen/Meshes/left_forearm_20.left_forearm_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM20(TEXT("/Game/FX/Frozen/Meshes/left_forearm_21.left_forearm_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM21(TEXT("/Game/FX/Frozen/Meshes/left_forearm_22.left_forearm_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM22(TEXT("/Game/FX/Frozen/Meshes/left_forearm_23.left_forearm_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTFOREARM23(TEXT("/Game/FX/Frozen/Meshes/left_forearm_24.left_forearm_24"));
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM1);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM2);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM3);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM4);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM5);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM6);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM7);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM8);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM9);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM10);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM11);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM12);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM13);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM14);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM15);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM16);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM17);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM18);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM19);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM20);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM21);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM22);
-	SM_LEFTFOREARMS.Add(&SM_LEFTFOREARM23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/left_forearm_2.left_forearm_2"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_3.left_forearm_3"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_4.left_forearm_4"),
+	TEXT("/Game/FX/Frozen/Meshes/left_forearm_5.left_forearm_5"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_6.left_forearm_6"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_7.left_forearm_7"),
+	TEXT("/Game/FX/Frozen/Meshes/left_forearm_8.left_forearm_8"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_9.left_forearm_9"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_10.left_forearm_10"),
+	TEXT("/Game/FX/Frozen/Meshes/left_forearm_11.left_forearm_11"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_12.left_forearm_12"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_13.left_forearm_13"),
+	TEXT("/Game/FX/Frozen/Meshes/left_forearm_14.left_forearm_14"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_15.left_forearm_15"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_16.left_forearm_16"),
+	TEXT("/Game/FX/Frozen/Meshes/left_forearm_17.left_forearm_17"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_18.left_forearm_18"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_19.left_forearm_19"),
+	TEXT("/Game/FX/Frozen/Meshes/left_forearm_20.left_forearm_20"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_21.left_forearm_21"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_22.left_forearm_22"),
+	TEXT("/Game/FX/Frozen/Meshes/left_forearm_23.left_forearm_23"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_24.left_forearm_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!leftForearms[i])
+		UStaticMeshComponent* leftForearm = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			leftForearms[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_LEFTFOREARMS[i]->Succeeded())
-			{
-				leftForearms[i]->SetStaticMesh(SM_LEFTFOREARMS[i]->Object);
-				leftForearms[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				leftForearms[i]->SetupAttachment(GetMesh(), TEXT("LeftForearmSocket"));
-				leftForearms[i]->SetVisibility(false);
-			}
+			leftForearm->SetStaticMesh(SM_BONE.Object);
+			leftForearm->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			leftForearm->SetupAttachment(GetMesh(), TEXT("LeftForearmSocket"));
+			leftForearm->SetVisibility(false);
+			leftForearms.Add(leftForearm);
 		}
 	}
 }
 
 void AMyCharacter::SettingLeftUpperArm()
 {
-	leftUpperarms.Add(leftUpperarm1);
-	leftUpperarms.Add(leftUpperarm2);
-	leftUpperarms.Add(leftUpperarm3);
-	leftUpperarms.Add(leftUpperarm4);
-	leftUpperarms.Add(leftUpperarm5);
-	leftUpperarms.Add(leftUpperarm6);
-	leftUpperarms.Add(leftUpperarm7);
-	leftUpperarms.Add(leftUpperarm8);
-	leftUpperarms.Add(leftUpperarm9);
-	leftUpperarms.Add(leftUpperarm10);
-	leftUpperarms.Add(leftUpperarm11);
-	leftUpperarms.Add(leftUpperarm12);
-	leftUpperarms.Add(leftUpperarm13);
-	leftUpperarms.Add(leftUpperarm14);
-	leftUpperarms.Add(leftUpperarm15);
-	leftUpperarms.Add(leftUpperarm16);
-	leftUpperarms.Add(leftUpperarm17);
-	leftUpperarms.Add(leftUpperarm18);
-	leftUpperarms.Add(leftUpperarm19);
-	leftUpperarms.Add(leftUpperarm20);
-	leftUpperarms.Add(leftUpperarm21);
-	leftUpperarms.Add(leftUpperarm22);
-	leftUpperarms.Add(leftUpperarm23);
+	TArray<const wchar_t*> names
+		= { TEXT("leftUpperarm1"), TEXT("leftUpperarm2"), TEXT("leftUpperarm3"), TEXT("leftUpperarm4"), TEXT("leftUpperarm5"), TEXT("leftUpperarm6"), TEXT("leftUpperarm7"), TEXT("leftUpperarm8"),
+		TEXT("leftUpperarm9"), TEXT("leftUpperarm10"), TEXT("leftUpperarm11"), TEXT("leftUpperarm12"), TEXT("leftUpperarm13"), TEXT("leftUpperarm14"), TEXT("leftUpperarm15"), TEXT("leftUpperarm16"),
+		TEXT("leftUpperarm17"), TEXT("leftUpperarm18"), TEXT("leftUpperarm19"), TEXT("leftUpperarm20"), TEXT("leftUpperarm21"), TEXT("leftUpperarm22"), TEXT("leftUpperarm23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("leftUpperarm1"));
-	names.Add(TEXT("leftUpperarm2"));
-	names.Add(TEXT("leftUpperarm3"));
-	names.Add(TEXT("leftUpperarm4"));
-	names.Add(TEXT("leftUpperarm5"));
-	names.Add(TEXT("leftUpperarm6"));
-	names.Add(TEXT("leftUpperarm7"));
-	names.Add(TEXT("leftUpperarm8"));
-	names.Add(TEXT("leftUpperarm9"));
-	names.Add(TEXT("leftUpperarm10"));
-	names.Add(TEXT("leftUpperarm11"));
-	names.Add(TEXT("leftUpperarm12"));
-	names.Add(TEXT("leftUpperarm13"));
-	names.Add(TEXT("leftUpperarm14"));
-	names.Add(TEXT("leftUpperarm15"));
-	names.Add(TEXT("leftUpperarm16"));
-	names.Add(TEXT("leftUpperarm17"));
-	names.Add(TEXT("leftUpperarm18"));
-	names.Add(TEXT("leftUpperarm19"));
-	names.Add(TEXT("leftUpperarm20"));
-	names.Add(TEXT("leftUpperarm21"));
-	names.Add(TEXT("leftUpperarm22"));
-	names.Add(TEXT("leftUpperarm23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_LEFTUPPERARMS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM1(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_2.left_upperarm_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM2(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_3.left_upperarm_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM3(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_4.left_upperarm_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM4(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_5.left_upperarm_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM5(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_6.left_upperarm_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM6(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_7.left_upperarm_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM7(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_8.left_upperarm_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM8(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_9.left_upperarm_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM9(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_10.left_upperarm_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM10(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_11.left_upperarm_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM11(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_12.left_upperarm_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM12(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_13.left_upperarm_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM13(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_14.left_upperarm_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM14(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_15.left_upperarm_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM15(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_16.left_upperarm_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM16(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_17.left_upperarm_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM17(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_18.left_upperarm_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM18(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_19.left_upperarm_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM19(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_20.left_upperarm_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM20(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_21.left_upperarm_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM21(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_22.left_upperarm_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM22(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_23.left_upperarm_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTUPPERARM23(TEXT("/Game/FX/Frozen/Meshes/left_upperarm_24.left_upperarm_24"));
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM1);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM2);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM3);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM4);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM5);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM6);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM7);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM8);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM9);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM10);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM11);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM12);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM13);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM14);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM15);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM16);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM17);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM18);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM19);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM20);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM21);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM22);
-	SM_LEFTUPPERARMS.Add(&SM_LEFTUPPERARM23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/left_upperarm_2.left_upperarm_2"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_3.left_upperarm_3"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_4.left_upperarm_4"),
+	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_5.left_upperarm_5"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_6.left_upperarm_6"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_7.left_upperarm_7"),
+	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_8.left_upperarm_8"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_9.left_upperarm_9"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_10.left_upperarm_10"),
+	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_11.left_upperarm_11"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_12.left_upperarm_12"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_13.left_upperarm_13"),
+	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_14.left_upperarm_14"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_15.left_upperarm_15"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_16.left_upperarm_16"),
+	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_17.left_upperarm_17"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_18.left_upperarm_18"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_19.left_upperarm_19"),
+	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_20.left_upperarm_20"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_21.left_upperarm_21"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_22.left_upperarm_22"),
+	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_23.left_upperarm_23"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_24.left_upperarm_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!leftUpperarms[i])
+		UStaticMeshComponent* leftUpperarm = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			leftUpperarms[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_LEFTUPPERARMS[i]->Succeeded())
-			{
-				leftUpperarms[i]->SetStaticMesh(SM_LEFTUPPERARMS[i]->Object);
-				leftUpperarms[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				leftUpperarms[i]->SetupAttachment(GetMesh(), TEXT("LeftUpperarmSocket"));
-				leftUpperarms[i]->SetVisibility(false);
-			}
+			leftUpperarm->SetStaticMesh(SM_BONE.Object);
+			leftUpperarm->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			leftUpperarm->SetupAttachment(GetMesh(), TEXT("LeftUpperarmSocket"));
+			leftUpperarm->SetVisibility(false);
+			leftUpperarms.Add(leftUpperarm);
 		}
 	}
 }
 
 void AMyCharacter::SettingRightForearm()
 {
-	rightForearms.Add(rightForearm1);
-	rightForearms.Add(rightForearm2);
-	rightForearms.Add(rightForearm3);
-	rightForearms.Add(rightForearm4);
-	rightForearms.Add(rightForearm5);
-	rightForearms.Add(rightForearm6);
-	rightForearms.Add(rightForearm7);
-	rightForearms.Add(rightForearm8);
-	rightForearms.Add(rightForearm9);
-	rightForearms.Add(rightForearm10);
-	rightForearms.Add(rightForearm11);
-	rightForearms.Add(rightForearm12);
-	rightForearms.Add(rightForearm13);
-	rightForearms.Add(rightForearm14);
-	rightForearms.Add(rightForearm15);
-	rightForearms.Add(rightForearm16);
-	rightForearms.Add(rightForearm17);
-	rightForearms.Add(rightForearm18);
-	rightForearms.Add(rightForearm19);
-	rightForearms.Add(rightForearm20);
-	rightForearms.Add(rightForearm21);
-	rightForearms.Add(rightForearm22);
-	rightForearms.Add(rightForearm23);
+	TArray<const wchar_t*> names
+		= { TEXT("rightForearm1"), TEXT("rightForearm2"), TEXT("rightForearm3"), TEXT("rightForearm4"), TEXT("rightForearm5"), TEXT("rightForearm6"), TEXT("rightForearm7"), TEXT("rightForearm8"),
+		TEXT("rightForearm9"), TEXT("rightForearm10"), TEXT("rightForearm11"), TEXT("rightForearm12"), TEXT("rightForearm13"), TEXT("rightForearm14"), TEXT("rightForearm15"), TEXT("rightForearm16"),
+		TEXT("rightForearm17"), TEXT("rightForearm18"), TEXT("rightForearm19"), TEXT("rightForearm20"), TEXT("rightForearm21"), TEXT("rightForearm22"), TEXT("rightForearm23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("rightForearm1"));
-	names.Add(TEXT("rightForearm2"));
-	names.Add(TEXT("rightForearm3"));
-	names.Add(TEXT("rightForearm4"));
-	names.Add(TEXT("rightForearm5"));
-	names.Add(TEXT("rightForearm6"));
-	names.Add(TEXT("rightForearm7"));
-	names.Add(TEXT("rightForearm8"));
-	names.Add(TEXT("rightForearm9"));
-	names.Add(TEXT("rightForearm10"));
-	names.Add(TEXT("rightForearm11"));
-	names.Add(TEXT("rightForearm12"));
-	names.Add(TEXT("rightForearm13"));
-	names.Add(TEXT("rightForearm14"));
-	names.Add(TEXT("rightForearm15"));
-	names.Add(TEXT("rightForearm16"));
-	names.Add(TEXT("rightForearm17"));
-	names.Add(TEXT("rightForearm18"));
-	names.Add(TEXT("rightForearm19"));
-	names.Add(TEXT("rightForearm20"));
-	names.Add(TEXT("rightForearm21"));
-	names.Add(TEXT("rightForearm22"));
-	names.Add(TEXT("rightForearm23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_RIGHTFOREARMS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM1(TEXT("/Game/FX/Frozen/Meshes/right_forearm_2.right_forearm_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM2(TEXT("/Game/FX/Frozen/Meshes/right_forearm_3.right_forearm_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM3(TEXT("/Game/FX/Frozen/Meshes/right_forearm_4.right_forearm_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM4(TEXT("/Game/FX/Frozen/Meshes/right_forearm_5.right_forearm_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM5(TEXT("/Game/FX/Frozen/Meshes/right_forearm_6.right_forearm_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM6(TEXT("/Game/FX/Frozen/Meshes/right_forearm_7.right_forearm_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM7(TEXT("/Game/FX/Frozen/Meshes/right_forearm_8.right_forearm_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM8(TEXT("/Game/FX/Frozen/Meshes/right_forearm_9.right_forearm_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM9(TEXT("/Game/FX/Frozen/Meshes/right_forearm_10.right_forearm_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM10(TEXT("/Game/FX/Frozen/Meshes/right_forearm_11.right_forearm_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM11(TEXT("/Game/FX/Frozen/Meshes/right_forearm_12.right_forearm_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM12(TEXT("/Game/FX/Frozen/Meshes/right_forearm_13.right_forearm_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM13(TEXT("/Game/FX/Frozen/Meshes/right_forearm_14.right_forearm_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM14(TEXT("/Game/FX/Frozen/Meshes/right_forearm_15.right_forearm_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM15(TEXT("/Game/FX/Frozen/Meshes/right_forearm_16.right_forearm_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM16(TEXT("/Game/FX/Frozen/Meshes/right_forearm_17.right_forearm_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM17(TEXT("/Game/FX/Frozen/Meshes/right_forearm_18.right_forearm_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM18(TEXT("/Game/FX/Frozen/Meshes/right_forearm_19.right_forearm_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM19(TEXT("/Game/FX/Frozen/Meshes/right_forearm_20.right_forearm_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM20(TEXT("/Game/FX/Frozen/Meshes/right_forearm_21.right_forearm_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM21(TEXT("/Game/FX/Frozen/Meshes/right_forearm_22.right_forearm_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM22(TEXT("/Game/FX/Frozen/Meshes/right_forearm_23.right_forearm_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTFOREARM23(TEXT("/Game/FX/Frozen/Meshes/right_forearm_24.right_forearm_24"));
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM1);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM2);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM3);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM4);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM5);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM6);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM7);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM8);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM9);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM10);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM11);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM12);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM13);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM14);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM15);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM16);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM17);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM18);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM19);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM20);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM21);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM22);
-	SM_RIGHTFOREARMS.Add(&SM_RIGHTFOREARM23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/right_forearm_2.right_forearm_2"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_3.right_forearm_3"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_4.right_forearm_4"),
+	TEXT("/Game/FX/Frozen/Meshes/right_forearm_5.right_forearm_5"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_6.right_forearm_6"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_7.right_forearm_7"),
+	TEXT("/Game/FX/Frozen/Meshes/right_forearm_8.right_forearm_8"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_9.right_forearm_9"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_10.right_forearm_10"),
+	TEXT("/Game/FX/Frozen/Meshes/right_forearm_11.right_forearm_11"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_12.right_forearm_12"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_13.right_forearm_13"),
+	TEXT("/Game/FX/Frozen/Meshes/right_forearm_14.right_forearm_14"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_15.right_forearm_15"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_16.right_forearm_16"),
+	TEXT("/Game/FX/Frozen/Meshes/right_forearm_17.right_forearm_17"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_18.right_forearm_18"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_19.right_forearm_19"),
+	TEXT("/Game/FX/Frozen/Meshes/right_forearm_20.right_forearm_20"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_21.right_forearm_21"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_22.right_forearm_22"),
+	TEXT("/Game/FX/Frozen/Meshes/right_forearm_23.right_forearm_23"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_24.right_forearm_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!rightForearms[i])
+		UStaticMeshComponent* rightForearm = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			rightForearms[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_RIGHTFOREARMS[i]->Succeeded())
-			{
-				rightForearms[i]->SetStaticMesh(SM_RIGHTFOREARMS[i]->Object);
-				rightForearms[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				rightForearms[i]->SetupAttachment(GetMesh(), TEXT("RightForearmSocket"));
-				rightForearms[i]->SetVisibility(false);
-			}
+			rightForearm->SetStaticMesh(SM_BONE.Object);
+			rightForearm->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			rightForearm->SetupAttachment(GetMesh(), TEXT("RightForearmSocket"));
+			rightForearm->SetVisibility(false);
+			rightForearms.Add(rightForearm);
 		}
 	}
 }
 
 void AMyCharacter::SettingRightUpperArm()
 {
-	rightUpperarms.Add(rightUpperarm1);
-	rightUpperarms.Add(rightUpperarm2);
-	rightUpperarms.Add(rightUpperarm3);
-	rightUpperarms.Add(rightUpperarm4);
-	rightUpperarms.Add(rightUpperarm5);
-	rightUpperarms.Add(rightUpperarm6);
-	rightUpperarms.Add(rightUpperarm7);
-	rightUpperarms.Add(rightUpperarm8);
-	rightUpperarms.Add(rightUpperarm9);
-	rightUpperarms.Add(rightUpperarm10);
-	rightUpperarms.Add(rightUpperarm11);
-	rightUpperarms.Add(rightUpperarm12);
-	rightUpperarms.Add(rightUpperarm13);
-	rightUpperarms.Add(rightUpperarm14);
-	rightUpperarms.Add(rightUpperarm15);
-	rightUpperarms.Add(rightUpperarm16);
-	rightUpperarms.Add(rightUpperarm17);
-	rightUpperarms.Add(rightUpperarm18);
-	rightUpperarms.Add(rightUpperarm19);
-	rightUpperarms.Add(rightUpperarm20);
-	rightUpperarms.Add(rightUpperarm21);
-	rightUpperarms.Add(rightUpperarm22);
-	rightUpperarms.Add(rightUpperarm23);
+	TArray<const wchar_t*> names
+		= { TEXT("rightUpperarm1"), TEXT("rightUpperarm2"), TEXT("rightUpperarm3"), TEXT("rightUpperarm4"), TEXT("rightUpperarm5"), TEXT("rightUpperarm6"), TEXT("rightUpperarm7"), TEXT("rightUpperarm8"),
+		TEXT("rightUpperarm9"), TEXT("rightUpperarm10"), TEXT("rightUpperarm11"), TEXT("rightUpperarm12"), TEXT("rightUpperarm13"), TEXT("rightUpperarm14"), TEXT("rightUpperarm15"), TEXT("rightUpperarm16"),
+		TEXT("rightUpperarm17"), TEXT("rightUpperarm18"), TEXT("rightUpperarm19"), TEXT("rightUpperarm20"), TEXT("rightUpperarm21"), TEXT("rightUpperarm22"), TEXT("rightUpperarm23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("rightUpperarm1"));
-	names.Add(TEXT("rightUpperarm2"));
-	names.Add(TEXT("rightUpperarm3"));
-	names.Add(TEXT("rightUpperarm4"));
-	names.Add(TEXT("rightUpperarm5"));
-	names.Add(TEXT("rightUpperarm6"));
-	names.Add(TEXT("rightUpperarm7"));
-	names.Add(TEXT("rightUpperarm8"));
-	names.Add(TEXT("rightUpperarm9"));
-	names.Add(TEXT("rightUpperarm10"));
-	names.Add(TEXT("rightUpperarm11"));
-	names.Add(TEXT("rightUpperarm12"));
-	names.Add(TEXT("rightUpperarm13"));
-	names.Add(TEXT("rightUpperarm14"));
-	names.Add(TEXT("rightUpperarm15"));
-	names.Add(TEXT("rightUpperarm16"));
-	names.Add(TEXT("rightUpperarm17"));
-	names.Add(TEXT("rightUpperarm18"));
-	names.Add(TEXT("rightUpperarm19"));
-	names.Add(TEXT("rightUpperarm20"));
-	names.Add(TEXT("rightUpperarm21"));
-	names.Add(TEXT("rightUpperarm22"));
-	names.Add(TEXT("rightUpperarm23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_RIGHTUPPERARMS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM1(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_2.right_upperarm_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM2(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_3.right_upperarm_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM3(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_4.right_upperarm_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM4(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_5.right_upperarm_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM5(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_6.right_upperarm_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM6(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_7.right_upperarm_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM7(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_8.right_upperarm_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM8(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_9.right_upperarm_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM9(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_10.right_upperarm_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM10(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_11.right_upperarm_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM11(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_12.right_upperarm_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM12(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_13.right_upperarm_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM13(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_14.right_upperarm_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM14(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_15.right_upperarm_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM15(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_16.right_upperarm_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM16(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_17.right_upperarm_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM17(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_18.right_upperarm_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM18(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_19.right_upperarm_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM19(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_20.right_upperarm_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM20(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_21.right_upperarm_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM21(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_22.right_upperarm_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM22(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_23.right_upperarm_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTUPPERARM23(TEXT("/Game/FX/Frozen/Meshes/right_upperarm_24.right_upperarm_24"));
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM1);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM2);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM3);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM4);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM5);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM6);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM7);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM8);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM9);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM10);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM11);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM12);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM13);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM14);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM15);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM16);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM17);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM18);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM19);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM20);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM21);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM22);
-	SM_RIGHTUPPERARMS.Add(&SM_RIGHTUPPERARM23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/right_upperarm_2.right_upperarm_2"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_3.right_upperarm_3"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_4.right_upperarm_4"),
+	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_5.right_upperarm_5"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_6.right_upperarm_6"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_7.right_upperarm_7"),
+	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_8.right_upperarm_8"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_9.right_upperarm_9"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_10.right_upperarm_10"),
+	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_11.right_upperarm_11"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_12.right_upperarm_12"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_13.right_upperarm_13"),
+	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_14.right_upperarm_14"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_15.right_upperarm_15"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_16.right_upperarm_16"),
+	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_17.right_upperarm_17"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_18.right_upperarm_18"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_19.right_upperarm_19"),
+	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_20.right_upperarm_20"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_21.right_upperarm_21"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_22.right_upperarm_22"),
+	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_23.right_upperarm_23"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_24.right_upperarm_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!rightUpperarms[i])
+		UStaticMeshComponent* rightUpperarm = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			rightUpperarms[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_RIGHTUPPERARMS[i]->Succeeded())
-			{
-				rightUpperarms[i]->SetStaticMesh(SM_RIGHTUPPERARMS[i]->Object);
-				rightUpperarms[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				rightUpperarms[i]->SetupAttachment(GetMesh(), TEXT("RightUpperarmSocket"));
-				rightUpperarms[i]->SetVisibility(false);
-			}
+			rightUpperarm->SetStaticMesh(SM_BONE.Object);
+			rightUpperarm->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			rightUpperarm->SetupAttachment(GetMesh(), TEXT("RightUpperarmSocket"));
+			rightUpperarm->SetVisibility(false);
+			rightUpperarms.Add(rightUpperarm);
 		}
 	}
 }
 
 void AMyCharacter::SettingCenter()
 {
-	centers.Add(center1);
-	centers.Add(center2);
-	centers.Add(center3);
-	centers.Add(center4);
-	centers.Add(center5);
-	centers.Add(center6);
-	centers.Add(center7);
-	centers.Add(center8);
-	centers.Add(center9);
-	centers.Add(center10);
-	centers.Add(center11);
-	centers.Add(center12);
-	centers.Add(center13);
-	centers.Add(center14);
-	centers.Add(center15);
-	centers.Add(center16);
-	centers.Add(center17);
-	centers.Add(center18);
-	centers.Add(center19);
-	centers.Add(center20);
-	centers.Add(center21);
-	centers.Add(center22);
-	centers.Add(center23);
+	TArray<const wchar_t*> names
+		= { TEXT("center1"), TEXT("center2"), TEXT("center3"), TEXT("center4"), TEXT("center5"), TEXT("center6"), TEXT("center7"), TEXT("center8"), TEXT("center9"), TEXT("center10"), TEXT("center11"), TEXT("center12"), 
+		TEXT("center13"), TEXT("center14"), TEXT("center15"), TEXT("center16"), TEXT("center17"), TEXT("center18"), TEXT("center19"), TEXT("center20"), TEXT("center21"), TEXT("center22"), TEXT("center23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("center1"));
-	names.Add(TEXT("center2"));
-	names.Add(TEXT("center3"));
-	names.Add(TEXT("center4"));
-	names.Add(TEXT("center5"));
-	names.Add(TEXT("center6"));
-	names.Add(TEXT("center7"));
-	names.Add(TEXT("center8"));
-	names.Add(TEXT("center9"));
-	names.Add(TEXT("center10"));
-	names.Add(TEXT("center11"));
-	names.Add(TEXT("center12"));
-	names.Add(TEXT("center13"));
-	names.Add(TEXT("center14"));
-	names.Add(TEXT("center15"));
-	names.Add(TEXT("center16"));
-	names.Add(TEXT("center17"));
-	names.Add(TEXT("center18"));
-	names.Add(TEXT("center19"));
-	names.Add(TEXT("center20"));
-	names.Add(TEXT("center21"));
-	names.Add(TEXT("center22"));
-	names.Add(TEXT("center23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_CENTERS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER1(TEXT("/Game/FX/Frozen/Meshes/center_2.center_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER2(TEXT("/Game/FX/Frozen/Meshes/center_3.center_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER3(TEXT("/Game/FX/Frozen/Meshes/center_4.center_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER4(TEXT("/Game/FX/Frozen/Meshes/center_5.center_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER5(TEXT("/Game/FX/Frozen/Meshes/center_6.center_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER6(TEXT("/Game/FX/Frozen/Meshes/center_7.center_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER7(TEXT("/Game/FX/Frozen/Meshes/center_8.center_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER8(TEXT("/Game/FX/Frozen/Meshes/center_9.center_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER9(TEXT("/Game/FX/Frozen/Meshes/center_10.center_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER10(TEXT("/Game/FX/Frozen/Meshes/center_11.center_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER11(TEXT("/Game/FX/Frozen/Meshes/center_12.center_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER12(TEXT("/Game/FX/Frozen/Meshes/center_13.center_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER13(TEXT("/Game/FX/Frozen/Meshes/center_14.center_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER14(TEXT("/Game/FX/Frozen/Meshes/center_15.center_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER15(TEXT("/Game/FX/Frozen/Meshes/center_16.center_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER16(TEXT("/Game/FX/Frozen/Meshes/center_17.center_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER17(TEXT("/Game/FX/Frozen/Meshes/center_18.center_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER18(TEXT("/Game/FX/Frozen/Meshes/center_19.center_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER19(TEXT("/Game/FX/Frozen/Meshes/center_20.center_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER20(TEXT("/Game/FX/Frozen/Meshes/center_21.center_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER21(TEXT("/Game/FX/Frozen/Meshes/center_22.center_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER22(TEXT("/Game/FX/Frozen/Meshes/center_23.center_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CENTER23(TEXT("/Game/FX/Frozen/Meshes/center_24.center_24"));
-	SM_CENTERS.Add(&SM_CENTER1);
-	SM_CENTERS.Add(&SM_CENTER2);
-	SM_CENTERS.Add(&SM_CENTER3);
-	SM_CENTERS.Add(&SM_CENTER4);
-	SM_CENTERS.Add(&SM_CENTER5);
-	SM_CENTERS.Add(&SM_CENTER6);
-	SM_CENTERS.Add(&SM_CENTER7);
-	SM_CENTERS.Add(&SM_CENTER8);
-	SM_CENTERS.Add(&SM_CENTER9);
-	SM_CENTERS.Add(&SM_CENTER10);
-	SM_CENTERS.Add(&SM_CENTER11);
-	SM_CENTERS.Add(&SM_CENTER12);
-	SM_CENTERS.Add(&SM_CENTER13);
-	SM_CENTERS.Add(&SM_CENTER14);
-	SM_CENTERS.Add(&SM_CENTER15);
-	SM_CENTERS.Add(&SM_CENTER16);
-	SM_CENTERS.Add(&SM_CENTER17);
-	SM_CENTERS.Add(&SM_CENTER18);
-	SM_CENTERS.Add(&SM_CENTER19);
-	SM_CENTERS.Add(&SM_CENTER20);
-	SM_CENTERS.Add(&SM_CENTER21);
-	SM_CENTERS.Add(&SM_CENTER22);
-	SM_CENTERS.Add(&SM_CENTER23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/center_2.center_2"), TEXT("/Game/FX/Frozen/Meshes/center_3.center_3"), TEXT("/Game/FX/Frozen/Meshes/center_4.center_4"),
+	TEXT("/Game/FX/Frozen/Meshes/center_5.center_5"), TEXT("/Game/FX/Frozen/Meshes/center_6.center_6"), TEXT("/Game/FX/Frozen/Meshes/center_7.center_7"),
+	TEXT("/Game/FX/Frozen/Meshes/center_8.center_8"), TEXT("/Game/FX/Frozen/Meshes/center_9.center_9"), TEXT("/Game/FX/Frozen/Meshes/center_10.center_10"),
+	TEXT("/Game/FX/Frozen/Meshes/center_11.center_11"), TEXT("/Game/FX/Frozen/Meshes/center_12.center_12"), TEXT("/Game/FX/Frozen/Meshes/center_13.center_13"),
+	TEXT("/Game/FX/Frozen/Meshes/center_14.center_14"), TEXT("/Game/FX/Frozen/Meshes/center_15.center_15"), TEXT("/Game/FX/Frozen/Meshes/center_16.center_16"),
+	TEXT("/Game/FX/Frozen/Meshes/center_17.center_17"), TEXT("/Game/FX/Frozen/Meshes/center_18.center_18"), TEXT("/Game/FX/Frozen/Meshes/center_19.center_19"),
+	TEXT("/Game/FX/Frozen/Meshes/center_20.center_20"), TEXT("/Game/FX/Frozen/Meshes/center_21.center_21"), TEXT("/Game/FX/Frozen/Meshes/center_22.center_22"),
+	TEXT("/Game/FX/Frozen/Meshes/center_23.center_23"), TEXT("/Game/FX/Frozen/Meshes/center_24.center_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!centers[i])
+		UStaticMeshComponent* center = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			centers[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_CENTERS[i]->Succeeded())
-			{
-				centers[i]->SetStaticMesh(SM_CENTERS[i]->Object);
-				centers[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				centers[i]->SetupAttachment(GetMesh(), TEXT("CenterSocket"));
-				centers[i]->SetVisibility(false);
-			}
+			center->SetStaticMesh(SM_BONE.Object);
+			center->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			center->SetupAttachment(GetMesh(), TEXT("CenterSocket"));
+			center->SetVisibility(false);
+			centers.Add(center);
 		}
 	}
 }
 
 void AMyCharacter::SettingLeftThigh()
 {
-	leftThighs.Add(leftThigh1);
-	leftThighs.Add(leftThigh2);
-	leftThighs.Add(leftThigh3);
-	leftThighs.Add(leftThigh4);
-	leftThighs.Add(leftThigh5);
-	leftThighs.Add(leftThigh6);
-	leftThighs.Add(leftThigh7);
-	leftThighs.Add(leftThigh8);
-	leftThighs.Add(leftThigh9);
-	leftThighs.Add(leftThigh10);
-	leftThighs.Add(leftThigh11);
-	leftThighs.Add(leftThigh12);
-	leftThighs.Add(leftThigh13);
-	leftThighs.Add(leftThigh14);
-	leftThighs.Add(leftThigh15);
-	leftThighs.Add(leftThigh16);
-	leftThighs.Add(leftThigh17);
-	leftThighs.Add(leftThigh18);
-	leftThighs.Add(leftThigh19);
-	leftThighs.Add(leftThigh20);
-	leftThighs.Add(leftThigh21);
-	leftThighs.Add(leftThigh22);
-	leftThighs.Add(leftThigh23);
+	TArray<const wchar_t*> names
+		= { TEXT("leftThigh1"), TEXT("leftThigh2"), TEXT("leftThigh3"), TEXT("leftThigh4"), TEXT("leftThigh5"), TEXT("leftThigh6"), TEXT("leftThigh7"), TEXT("leftThigh8"),
+		TEXT("leftThigh9"), TEXT("leftThigh10"), TEXT("leftThigh11"), TEXT("leftThigh12"), TEXT("leftThigh13"), TEXT("leftThigh14"), TEXT("leftThigh15"), TEXT("leftThigh16"),
+		TEXT("leftThigh17"), TEXT("leftThigh18"), TEXT("leftThigh19"), TEXT("leftThigh20"), TEXT("leftThigh21"), TEXT("leftThigh22"), TEXT("leftThigh23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("leftThigh1"));
-	names.Add(TEXT("leftThigh2"));
-	names.Add(TEXT("leftThigh3"));
-	names.Add(TEXT("leftThigh4"));
-	names.Add(TEXT("leftThigh5"));
-	names.Add(TEXT("leftThigh6"));
-	names.Add(TEXT("leftThigh7"));
-	names.Add(TEXT("leftThigh8"));
-	names.Add(TEXT("leftThigh9"));
-	names.Add(TEXT("leftThigh10"));
-	names.Add(TEXT("leftThigh11"));
-	names.Add(TEXT("leftThigh12"));
-	names.Add(TEXT("leftThigh13"));
-	names.Add(TEXT("leftThigh14"));
-	names.Add(TEXT("leftThigh15"));
-	names.Add(TEXT("leftThigh16"));
-	names.Add(TEXT("leftThigh17"));
-	names.Add(TEXT("leftThigh18"));
-	names.Add(TEXT("leftThigh19"));
-	names.Add(TEXT("leftThigh20"));
-	names.Add(TEXT("leftThigh21"));
-	names.Add(TEXT("leftThigh22"));
-	names.Add(TEXT("leftThigh23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_LEFTTHIGHS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH1(TEXT("/Game/FX/Frozen/Meshes/left_thigh_2.left_thigh_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH2(TEXT("/Game/FX/Frozen/Meshes/left_thigh_3.left_thigh_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH3(TEXT("/Game/FX/Frozen/Meshes/left_thigh_4.left_thigh_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH4(TEXT("/Game/FX/Frozen/Meshes/left_thigh_5.left_thigh_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH5(TEXT("/Game/FX/Frozen/Meshes/left_thigh_6.left_thigh_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH6(TEXT("/Game/FX/Frozen/Meshes/left_thigh_7.left_thigh_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH7(TEXT("/Game/FX/Frozen/Meshes/left_thigh_8.left_thigh_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH8(TEXT("/Game/FX/Frozen/Meshes/left_thigh_9.left_thigh_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH9(TEXT("/Game/FX/Frozen/Meshes/left_thigh_10.left_thigh_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH10(TEXT("/Game/FX/Frozen/Meshes/left_thigh_11.left_thigh_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH11(TEXT("/Game/FX/Frozen/Meshes/left_thigh_12.left_thigh_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH12(TEXT("/Game/FX/Frozen/Meshes/left_thigh_13.left_thigh_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH13(TEXT("/Game/FX/Frozen/Meshes/left_thigh_14.left_thigh_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH14(TEXT("/Game/FX/Frozen/Meshes/left_thigh_15.left_thigh_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH15(TEXT("/Game/FX/Frozen/Meshes/left_thigh_16.left_thigh_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH16(TEXT("/Game/FX/Frozen/Meshes/left_thigh_17.left_thigh_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH17(TEXT("/Game/FX/Frozen/Meshes/left_thigh_18.left_thigh_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH18(TEXT("/Game/FX/Frozen/Meshes/left_thigh_19.left_thigh_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH19(TEXT("/Game/FX/Frozen/Meshes/left_thigh_20.left_thigh_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH20(TEXT("/Game/FX/Frozen/Meshes/left_thigh_21.left_thigh_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH21(TEXT("/Game/FX/Frozen/Meshes/left_thigh_22.left_thigh_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH22(TEXT("/Game/FX/Frozen/Meshes/left_thigh_23.left_thigh_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTTHIGH23(TEXT("/Game/FX/Frozen/Meshes/left_thigh_24.left_thigh_24"));
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH1);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH2);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH3);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH4);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH5);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH6);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH7);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH8);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH9);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH10);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH11);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH12);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH13);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH14);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH15);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH16);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH17);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH18);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH19);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH20);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH21);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH22);
-	SM_LEFTTHIGHS.Add(&SM_LEFTTHIGH23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/left_thigh_2.left_thigh_2"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_3.left_thigh_3"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_4.left_thigh_4"),
+	TEXT("/Game/FX/Frozen/Meshes/left_thigh_5.left_thigh_5"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_6.left_thigh_6"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_7.left_thigh_7"),
+	TEXT("/Game/FX/Frozen/Meshes/left_thigh_8.left_thigh_8"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_9.left_thigh_9"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_10.left_thigh_10"),
+	TEXT("/Game/FX/Frozen/Meshes/left_thigh_11.left_thigh_11"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_12.left_thigh_12"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_13.left_thigh_13"),
+	TEXT("/Game/FX/Frozen/Meshes/left_thigh_14.left_thigh_14"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_15.left_thigh_15"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_16.left_thigh_16"),
+	TEXT("/Game/FX/Frozen/Meshes/left_thigh_17.left_thigh_17"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_18.left_thigh_18"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_19.left_thigh_19"),
+	TEXT("/Game/FX/Frozen/Meshes/left_thigh_20.left_thigh_20"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_21.left_thigh_21"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_22.left_thigh_22"),
+	TEXT("/Game/FX/Frozen/Meshes/left_thigh_23.left_thigh_23"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_24.left_thigh_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!leftThighs[i])
+		UStaticMeshComponent* leftThigh = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			leftThighs[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_LEFTTHIGHS[i]->Succeeded())
-			{
-				leftThighs[i]->SetStaticMesh(SM_LEFTTHIGHS[i]->Object);
-				leftThighs[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				leftThighs[i]->SetupAttachment(GetMesh(), TEXT("LeftThighSocket"));
-				leftThighs[i]->SetVisibility(false);
-			}
+			leftThigh->SetStaticMesh(SM_BONE.Object);
+			leftThigh->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			leftThigh->SetupAttachment(GetMesh(), TEXT("LeftThighSocket"));
+			leftThigh->SetVisibility(false);
+			leftThighs.Add(leftThigh);
 		}
 	}
 }
 
 void AMyCharacter::SettingLeftCalf()
 {
-	leftCalfs.Add(leftCalf1);
-	leftCalfs.Add(leftCalf2);
-	leftCalfs.Add(leftCalf3);
-	leftCalfs.Add(leftCalf4);
-	leftCalfs.Add(leftCalf5);
-	leftCalfs.Add(leftCalf6);
-	leftCalfs.Add(leftCalf7);
-	leftCalfs.Add(leftCalf8);
-	leftCalfs.Add(leftCalf9);
-	leftCalfs.Add(leftCalf10);
-	leftCalfs.Add(leftCalf11);
-	leftCalfs.Add(leftCalf12);
-	leftCalfs.Add(leftCalf13);
-	leftCalfs.Add(leftCalf14);
-	leftCalfs.Add(leftCalf15);
-	leftCalfs.Add(leftCalf16);
-	leftCalfs.Add(leftCalf17);
-	leftCalfs.Add(leftCalf18);
-	leftCalfs.Add(leftCalf19);
-	leftCalfs.Add(leftCalf20);
-	leftCalfs.Add(leftCalf21);
-	leftCalfs.Add(leftCalf22);
-	leftCalfs.Add(leftCalf23);
+	TArray<const wchar_t*> names
+		= { TEXT("leftCalf1"), TEXT("leftCalf2"), TEXT("leftCalf3"), TEXT("leftCalf4"), TEXT("leftCalf5"), TEXT("leftCalf6"), TEXT("leftCalf7"), TEXT("leftCalf8"),
+		TEXT("leftCalf9"), TEXT("leftCalf10"), TEXT("leftCalf11"), TEXT("leftCalf12"), TEXT("leftCalf13"), TEXT("leftCalf14"), TEXT("leftCalf15"), TEXT("leftCalf16"),
+		TEXT("leftCalf17"), TEXT("leftCalf18"), TEXT("leftCalf19"), TEXT("leftCalf20"), TEXT("leftCalf21"), TEXT("leftCalf22"), TEXT("leftCalf23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("leftCalf1"));
-	names.Add(TEXT("leftCalf2"));
-	names.Add(TEXT("leftCalf3"));
-	names.Add(TEXT("leftCalf4"));
-	names.Add(TEXT("leftCalf5"));
-	names.Add(TEXT("leftCalf6"));
-	names.Add(TEXT("leftCalf7"));
-	names.Add(TEXT("leftCalf8"));
-	names.Add(TEXT("leftCalf9"));
-	names.Add(TEXT("leftCalf10"));
-	names.Add(TEXT("leftCalf11"));
-	names.Add(TEXT("leftCalf12"));
-	names.Add(TEXT("leftCalf13"));
-	names.Add(TEXT("leftCalf14"));
-	names.Add(TEXT("leftCalf15"));
-	names.Add(TEXT("leftCalf16"));
-	names.Add(TEXT("leftCalf17"));
-	names.Add(TEXT("leftCalf18"));
-	names.Add(TEXT("leftCalf19"));
-	names.Add(TEXT("leftCalf20"));
-	names.Add(TEXT("leftCalf21"));
-	names.Add(TEXT("leftCalf22"));
-	names.Add(TEXT("leftCalf23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_LEFTCALFS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF1(TEXT("/Game/FX/Frozen/Meshes/left_calf_2.left_calf_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF2(TEXT("/Game/FX/Frozen/Meshes/left_calf_3.left_calf_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF3(TEXT("/Game/FX/Frozen/Meshes/left_calf_4.left_calf_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF4(TEXT("/Game/FX/Frozen/Meshes/left_calf_5.left_calf_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF5(TEXT("/Game/FX/Frozen/Meshes/left_calf_6.left_calf_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF6(TEXT("/Game/FX/Frozen/Meshes/left_calf_7.left_calf_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF7(TEXT("/Game/FX/Frozen/Meshes/left_calf_8.left_calf_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF8(TEXT("/Game/FX/Frozen/Meshes/left_calf_9.left_calf_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF9(TEXT("/Game/FX/Frozen/Meshes/left_calf_10.left_calf_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF10(TEXT("/Game/FX/Frozen/Meshes/left_calf_11.left_calf_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF11(TEXT("/Game/FX/Frozen/Meshes/left_calf_12.left_calf_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF12(TEXT("/Game/FX/Frozen/Meshes/left_calf_13.left_calf_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF13(TEXT("/Game/FX/Frozen/Meshes/left_calf_14.left_calf_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF14(TEXT("/Game/FX/Frozen/Meshes/left_calf_15.left_calf_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF15(TEXT("/Game/FX/Frozen/Meshes/left_calf_16.left_calf_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF16(TEXT("/Game/FX/Frozen/Meshes/left_calf_17.left_calf_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF17(TEXT("/Game/FX/Frozen/Meshes/left_calf_18.left_calf_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF18(TEXT("/Game/FX/Frozen/Meshes/left_calf_19.left_calf_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF19(TEXT("/Game/FX/Frozen/Meshes/left_calf_20.left_calf_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF20(TEXT("/Game/FX/Frozen/Meshes/left_calf_21.left_calf_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF21(TEXT("/Game/FX/Frozen/Meshes/left_calf_22.left_calf_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF22(TEXT("/Game/FX/Frozen/Meshes/left_calf_23.left_calf_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LEFTCALF23(TEXT("/Game/FX/Frozen/Meshes/left_calf_24.left_calf_24"));
-	SM_LEFTCALFS.Add(&SM_LEFTCALF1);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF2);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF3);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF4);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF5);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF6);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF7);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF8);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF9);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF10);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF11);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF12);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF13);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF14);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF15);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF16);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF17);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF18);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF19);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF20);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF21);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF22);
-	SM_LEFTCALFS.Add(&SM_LEFTCALF23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/left_calf_2.left_calf_2"), TEXT("/Game/FX/Frozen/Meshes/left_calf_3.left_calf_3"), TEXT("/Game/FX/Frozen/Meshes/left_calf_4.left_calf_4"),
+	TEXT("/Game/FX/Frozen/Meshes/left_calf_5.left_calf_5"), TEXT("/Game/FX/Frozen/Meshes/left_calf_6.left_calf_6"), TEXT("/Game/FX/Frozen/Meshes/left_calf_7.left_calf_7"),
+	TEXT("/Game/FX/Frozen/Meshes/left_calf_8.left_calf_8"), TEXT("/Game/FX/Frozen/Meshes/left_calf_9.left_calf_9"), TEXT("/Game/FX/Frozen/Meshes/left_calf_10.left_calf_10"),
+	TEXT("/Game/FX/Frozen/Meshes/left_calf_11.left_calf_11"), TEXT("/Game/FX/Frozen/Meshes/left_calf_12.left_calf_12"), TEXT("/Game/FX/Frozen/Meshes/left_calf_13.left_calf_13"),
+	TEXT("/Game/FX/Frozen/Meshes/left_calf_14.left_calf_14"), TEXT("/Game/FX/Frozen/Meshes/left_calf_15.left_calf_15"), TEXT("/Game/FX/Frozen/Meshes/left_calf_16.left_calf_16"),
+	TEXT("/Game/FX/Frozen/Meshes/left_calf_17.left_calf_17"), TEXT("/Game/FX/Frozen/Meshes/left_calf_18.left_calf_18"), TEXT("/Game/FX/Frozen/Meshes/left_calf_19.left_calf_19"),
+	TEXT("/Game/FX/Frozen/Meshes/left_calf_20.left_calf_20"), TEXT("/Game/FX/Frozen/Meshes/left_calf_21.left_calf_21"), TEXT("/Game/FX/Frozen/Meshes/left_calf_22.left_calf_22"),
+	TEXT("/Game/FX/Frozen/Meshes/left_calf_23.left_calf_23"), TEXT("/Game/FX/Frozen/Meshes/left_calf_24.left_calf_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!leftCalfs[i])
+		UStaticMeshComponent* leftCalf = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			leftCalfs[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_LEFTCALFS[i]->Succeeded())
-			{
-				leftCalfs[i]->SetStaticMesh(SM_LEFTCALFS[i]->Object);
-				leftCalfs[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				leftCalfs[i]->SetupAttachment(GetMesh(), TEXT("LeftCalfSocket"));
-				leftCalfs[i]->SetVisibility(false);
-			}
+			leftCalf->SetStaticMesh(SM_BONE.Object);
+			leftCalf->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			leftCalf->SetupAttachment(GetMesh(), TEXT("LeftCalfSocket"));
+			leftCalf->SetVisibility(false);
+			leftCalfs.Add(leftCalf);
 		}
 	}
 }
 
 void AMyCharacter::SettingRightThigh()
 {
-	rightThighs.Add(rightThigh1);
-	rightThighs.Add(rightThigh2);
-	rightThighs.Add(rightThigh3);
-	rightThighs.Add(rightThigh4);
-	rightThighs.Add(rightThigh5);
-	rightThighs.Add(rightThigh6);
-	rightThighs.Add(rightThigh7);
-	rightThighs.Add(rightThigh8);
-	rightThighs.Add(rightThigh9);
-	rightThighs.Add(rightThigh10);
-	rightThighs.Add(rightThigh11);
-	rightThighs.Add(rightThigh12);
-	rightThighs.Add(rightThigh13);
-	rightThighs.Add(rightThigh14);
-	rightThighs.Add(rightThigh15);
-	rightThighs.Add(rightThigh16);
-	rightThighs.Add(rightThigh17);
-	rightThighs.Add(rightThigh18);
-	rightThighs.Add(rightThigh19);
-	rightThighs.Add(rightThigh20);
-	rightThighs.Add(rightThigh21);
-	rightThighs.Add(rightThigh22);
-	rightThighs.Add(rightThigh23);
+	TArray<const wchar_t*> names
+		= { TEXT("rightThigh1"), TEXT("rightThigh2"), TEXT("rightThigh3"), TEXT("rightThigh4"), TEXT("rightThigh5"), TEXT("rightThigh6"), TEXT("rightThigh7"), TEXT("rightThigh8"),
+		TEXT("rightThigh9"), TEXT("rightThigh10"), TEXT("rightThigh11"), TEXT("rightThigh12"), TEXT("rightThigh13"), TEXT("rightThigh14"), TEXT("rightThigh15"), TEXT("rightThigh16"),
+		TEXT("rightThigh17"), TEXT("rightThigh18"), TEXT("rightThigh19"), TEXT("rightThigh20"), TEXT("rightThigh21"), TEXT("rightThigh22"), TEXT("rightThigh23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("rightThigh1"));
-	names.Add(TEXT("rightThigh2"));
-	names.Add(TEXT("rightThigh3"));
-	names.Add(TEXT("rightThigh4"));
-	names.Add(TEXT("rightThigh5"));
-	names.Add(TEXT("rightThigh6"));
-	names.Add(TEXT("rightThigh7"));
-	names.Add(TEXT("rightThigh8"));
-	names.Add(TEXT("rightThigh9"));
-	names.Add(TEXT("rightThigh10"));
-	names.Add(TEXT("rightThigh11"));
-	names.Add(TEXT("rightThigh12"));
-	names.Add(TEXT("rightThigh13"));
-	names.Add(TEXT("rightThigh14"));
-	names.Add(TEXT("rightThigh15"));
-	names.Add(TEXT("rightThigh16"));
-	names.Add(TEXT("rightThigh17"));
-	names.Add(TEXT("rightThigh18"));
-	names.Add(TEXT("rightThigh19"));
-	names.Add(TEXT("rightThigh20"));
-	names.Add(TEXT("rightThigh21"));
-	names.Add(TEXT("rightThigh22"));
-	names.Add(TEXT("rightThigh23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_RIGHTTHIGHS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH1(TEXT("/Game/FX/Frozen/Meshes/right_thigh_2.right_thigh_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH2(TEXT("/Game/FX/Frozen/Meshes/right_thigh_3.right_thigh_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH3(TEXT("/Game/FX/Frozen/Meshes/right_thigh_4.right_thigh_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH4(TEXT("/Game/FX/Frozen/Meshes/right_thigh_5.right_thigh_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH5(TEXT("/Game/FX/Frozen/Meshes/right_thigh_6.right_thigh_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH6(TEXT("/Game/FX/Frozen/Meshes/right_thigh_7.right_thigh_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH7(TEXT("/Game/FX/Frozen/Meshes/right_thigh_8.right_thigh_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH8(TEXT("/Game/FX/Frozen/Meshes/right_thigh_9.right_thigh_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH9(TEXT("/Game/FX/Frozen/Meshes/right_thigh_10.right_thigh_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH10(TEXT("/Game/FX/Frozen/Meshes/right_thigh_11.right_thigh_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH11(TEXT("/Game/FX/Frozen/Meshes/right_thigh_12.right_thigh_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH12(TEXT("/Game/FX/Frozen/Meshes/right_thigh_13.right_thigh_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH13(TEXT("/Game/FX/Frozen/Meshes/right_thigh_14.right_thigh_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH14(TEXT("/Game/FX/Frozen/Meshes/right_thigh_15.right_thigh_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH15(TEXT("/Game/FX/Frozen/Meshes/right_thigh_16.right_thigh_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH16(TEXT("/Game/FX/Frozen/Meshes/right_thigh_17.right_thigh_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH17(TEXT("/Game/FX/Frozen/Meshes/right_thigh_18.right_thigh_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH18(TEXT("/Game/FX/Frozen/Meshes/right_thigh_19.right_thigh_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH19(TEXT("/Game/FX/Frozen/Meshes/right_thigh_20.right_thigh_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH20(TEXT("/Game/FX/Frozen/Meshes/right_thigh_21.right_thigh_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH21(TEXT("/Game/FX/Frozen/Meshes/right_thigh_22.right_thigh_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH22(TEXT("/Game/FX/Frozen/Meshes/right_thigh_23.right_thigh_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTTHIGH23(TEXT("/Game/FX/Frozen/Meshes/right_thigh_24.right_thigh_24"));
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH1);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH2);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH3);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH4);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH5);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH6);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH7);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH8);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH9);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH10);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH11);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH12);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH13);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH14);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH15);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH16);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH17);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH18);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH19);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH20);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH21);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH22);
-	SM_RIGHTTHIGHS.Add(&SM_RIGHTTHIGH23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/right_thigh_2.right_thigh_2"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_3.right_thigh_3"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_4.right_thigh_4"),
+	TEXT("/Game/FX/Frozen/Meshes/right_thigh_5.right_thigh_5"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_6.right_thigh_6"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_7.right_thigh_7"),
+	TEXT("/Game/FX/Frozen/Meshes/right_thigh_8.right_thigh_8"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_9.right_thigh_9"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_10.right_thigh_10"),
+	TEXT("/Game/FX/Frozen/Meshes/right_thigh_11.right_thigh_11"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_12.right_thigh_12"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_13.right_thigh_13"),
+	TEXT("/Game/FX/Frozen/Meshes/right_thigh_14.right_thigh_14"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_15.right_thigh_15"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_16.right_thigh_16"),
+	TEXT("/Game/FX/Frozen/Meshes/right_thigh_17.right_thigh_17"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_18.right_thigh_18"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_19.right_thigh_19"),
+	TEXT("/Game/FX/Frozen/Meshes/right_thigh_20.right_thigh_20"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_21.right_thigh_21"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_22.right_thigh_22"),
+	TEXT("/Game/FX/Frozen/Meshes/right_thigh_23.right_thigh_23"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_24.right_thigh_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!rightThighs[i])
+		UStaticMeshComponent* rightThigh = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			rightThighs[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_RIGHTTHIGHS[i]->Succeeded())
-			{
-				rightThighs[i]->SetStaticMesh(SM_RIGHTTHIGHS[i]->Object);
-				rightThighs[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				rightThighs[i]->SetupAttachment(GetMesh(), TEXT("RightThighSocket"));
-				rightThighs[i]->SetVisibility(false);
-			}
+			rightThigh->SetStaticMesh(SM_BONE.Object);
+			rightThigh->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			rightThigh->SetupAttachment(GetMesh(), TEXT("RightThighSocket"));
+			rightThigh->SetVisibility(false);
+			rightThighs.Add(rightThigh);
 		}
 	}
 }
 
 void AMyCharacter::SettingRightCalf()
 {
-	rightCalfs.Add(rightCalf1);
-	rightCalfs.Add(rightCalf2);
-	rightCalfs.Add(rightCalf3);
-	rightCalfs.Add(rightCalf4);
-	rightCalfs.Add(rightCalf5);
-	rightCalfs.Add(rightCalf6);
-	rightCalfs.Add(rightCalf7);
-	rightCalfs.Add(rightCalf8);
-	rightCalfs.Add(rightCalf9);
-	rightCalfs.Add(rightCalf10);
-	rightCalfs.Add(rightCalf11);
-	rightCalfs.Add(rightCalf12);
-	rightCalfs.Add(rightCalf13);
-	rightCalfs.Add(rightCalf14);
-	rightCalfs.Add(rightCalf15);
-	rightCalfs.Add(rightCalf16);
-	rightCalfs.Add(rightCalf17);
-	rightCalfs.Add(rightCalf18);
-	rightCalfs.Add(rightCalf19);
-	rightCalfs.Add(rightCalf20);
-	rightCalfs.Add(rightCalf21);
-	rightCalfs.Add(rightCalf22);
-	rightCalfs.Add(rightCalf23);
+	TArray<const wchar_t*> names
+		= { TEXT("rightCalf1"), TEXT("rightCalf2"), TEXT("rightCalf3"), TEXT("rightCalf4"), TEXT("rightCalf5"), TEXT("rightCalf6"), TEXT("rightCalf7"), TEXT("rightCalf8"),
+		TEXT("rightCalf9"), TEXT("rightCalf10"), TEXT("rightCalf11"), TEXT("rightCalf12"), TEXT("rightCalf13"), TEXT("rightCalf14"), TEXT("rightCalf15"), TEXT("rightCalf16"),
+		TEXT("rightCalf17"), TEXT("rightCalf18"), TEXT("rightCalf19"), TEXT("rightCalf20"), TEXT("rightCalf21"), TEXT("rightCalf22"), TEXT("rightCalf23") };
 
-	TArray<const wchar_t*> names;
-	names.Add(TEXT("rightCalf1"));
-	names.Add(TEXT("rightCalf2"));
-	names.Add(TEXT("rightCalf3"));
-	names.Add(TEXT("rightCalf4"));
-	names.Add(TEXT("rightCalf5"));
-	names.Add(TEXT("rightCalf6"));
-	names.Add(TEXT("rightCalf7"));
-	names.Add(TEXT("rightCalf8"));
-	names.Add(TEXT("rightCalf9"));
-	names.Add(TEXT("rightCalf10"));
-	names.Add(TEXT("rightCalf11"));
-	names.Add(TEXT("rightCalf12"));
-	names.Add(TEXT("rightCalf13"));
-	names.Add(TEXT("rightCalf14"));
-	names.Add(TEXT("rightCalf15"));
-	names.Add(TEXT("rightCalf16"));
-	names.Add(TEXT("rightCalf17"));
-	names.Add(TEXT("rightCalf18"));
-	names.Add(TEXT("rightCalf19"));
-	names.Add(TEXT("rightCalf20"));
-	names.Add(TEXT("rightCalf21"));
-	names.Add(TEXT("rightCalf22"));
-	names.Add(TEXT("rightCalf23"));
-
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>*> SM_RIGHTCALFS;
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF1(TEXT("/Game/FX/Frozen/Meshes/right_calf_2.right_calf_2"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF2(TEXT("/Game/FX/Frozen/Meshes/right_calf_3.right_calf_3"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF3(TEXT("/Game/FX/Frozen/Meshes/right_calf_4.right_calf_4"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF4(TEXT("/Game/FX/Frozen/Meshes/right_calf_5.right_calf_5"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF5(TEXT("/Game/FX/Frozen/Meshes/right_calf_6.right_calf_6"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF6(TEXT("/Game/FX/Frozen/Meshes/right_calf_7.right_calf_7"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF7(TEXT("/Game/FX/Frozen/Meshes/right_calf_8.right_calf_8"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF8(TEXT("/Game/FX/Frozen/Meshes/right_calf_9.right_calf_9"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF9(TEXT("/Game/FX/Frozen/Meshes/right_calf_10.right_calf_10"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF10(TEXT("/Game/FX/Frozen/Meshes/right_calf_11.right_calf_11"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF11(TEXT("/Game/FX/Frozen/Meshes/right_calf_12.right_calf_12"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF12(TEXT("/Game/FX/Frozen/Meshes/right_calf_13.right_calf_13"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF13(TEXT("/Game/FX/Frozen/Meshes/right_calf_14.right_calf_14"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF14(TEXT("/Game/FX/Frozen/Meshes/right_calf_15.right_calf_15"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF15(TEXT("/Game/FX/Frozen/Meshes/right_calf_16.right_calf_16"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF16(TEXT("/Game/FX/Frozen/Meshes/right_calf_17.right_calf_17"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF17(TEXT("/Game/FX/Frozen/Meshes/right_calf_18.right_calf_18"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF18(TEXT("/Game/FX/Frozen/Meshes/right_calf_19.right_calf_19"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF19(TEXT("/Game/FX/Frozen/Meshes/right_calf_20.right_calf_20"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF20(TEXT("/Game/FX/Frozen/Meshes/right_calf_21.right_calf_21"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF21(TEXT("/Game/FX/Frozen/Meshes/right_calf_22.right_calf_22"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF22(TEXT("/Game/FX/Frozen/Meshes/right_calf_23.right_calf_23"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_RIGHTCALF23(TEXT("/Game/FX/Frozen/Meshes/right_calf_24.right_calf_24"));
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF1);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF2);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF3);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF4);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF5);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF6);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF7);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF8);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF9);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF10);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF11);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF12);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF13);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF14);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF15);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF16);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF17);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF18);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF19);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF20);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF21);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF22);
-	SM_RIGHTCALFS.Add(&SM_RIGHTCALF23);
+	TArray<const wchar_t*> refs
+		= { TEXT("/Game/FX/Frozen/Meshes/right_calf_2.right_calf_2"), TEXT("/Game/FX/Frozen/Meshes/right_calf_3.right_calf_3"), TEXT("/Game/FX/Frozen/Meshes/right_calf_4.right_calf_4"),
+	TEXT("/Game/FX/Frozen/Meshes/right_calf_5.right_calf_5"), TEXT("/Game/FX/Frozen/Meshes/right_calf_6.right_calf_6"), TEXT("/Game/FX/Frozen/Meshes/right_calf_7.right_calf_7"),
+	TEXT("/Game/FX/Frozen/Meshes/right_calf_8.right_calf_8"), TEXT("/Game/FX/Frozen/Meshes/right_calf_9.right_calf_9"), TEXT("/Game/FX/Frozen/Meshes/right_calf_10.right_calf_10"),
+	TEXT("/Game/FX/Frozen/Meshes/right_calf_11.right_calf_11"), TEXT("/Game/FX/Frozen/Meshes/right_calf_12.right_calf_12"), TEXT("/Game/FX/Frozen/Meshes/right_calf_13.right_calf_13"),
+	TEXT("/Game/FX/Frozen/Meshes/right_calf_14.right_calf_14"), TEXT("/Game/FX/Frozen/Meshes/right_calf_15.right_calf_15"), TEXT("/Game/FX/Frozen/Meshes/right_calf_16.right_calf_16"),
+	TEXT("/Game/FX/Frozen/Meshes/right_calf_17.right_calf_17"), TEXT("/Game/FX/Frozen/Meshes/right_calf_18.right_calf_18"), TEXT("/Game/FX/Frozen/Meshes/right_calf_19.right_calf_19"),
+	TEXT("/Game/FX/Frozen/Meshes/right_calf_20.right_calf_20"), TEXT("/Game/FX/Frozen/Meshes/right_calf_21.right_calf_21"), TEXT("/Game/FX/Frozen/Meshes/right_calf_22.right_calf_22"),
+	TEXT("/Game/FX/Frozen/Meshes/right_calf_23.right_calf_23"), TEXT("/Game/FX/Frozen/Meshes/right_calf_24.right_calf_24") };
 
 	for (int i = 0; i < 23; ++i)
 	{
-		if (!rightCalfs[i])
+		UStaticMeshComponent* rightCalf = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
+
+		if (SM_BONE.Succeeded())
 		{
-			rightCalfs[i] = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-			if (SM_RIGHTCALFS[i]->Succeeded())
-			{
-				rightCalfs[i]->SetStaticMesh(SM_RIGHTCALFS[i]->Object);
-				rightCalfs[i]->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-				rightCalfs[i]->SetupAttachment(GetMesh(), TEXT("RightCalfSocket"));
-				rightCalfs[i]->SetVisibility(false);
-			}
+			rightCalf->SetStaticMesh(SM_BONE.Object);
+			rightCalf->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+			rightCalf->SetupAttachment(GetMesh(), TEXT("RightCalfSocket"));
+			rightCalf->SetVisibility(false);
+			rightCalfs.Add(rightCalf);
 		}
 	}
 }
