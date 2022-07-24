@@ -30,6 +30,7 @@ const float fAimingTime = 0.2f;		// 조준하는 데 걸리는 시간 (카메라 전환만, 애니
 const float fThrowPower = 700.0f;
 const float fMaxChargingTime = 5.0f;	// 최대 차징 시간
 const float fSnowballInitialSpeed = 2000.0f;	// 눈덩이 초기 속도
+const int iEachBoneCount = 23; //부위별 얼리는 메시 개수
 
 // 색상별 곰 텍스쳐
 FString TextureStringArray[] = {
@@ -2002,10 +2003,6 @@ void AMyCharacter::UpdateJetski()
 
 void AMyCharacter::SettingHead() 
 {
-	TArray<const wchar_t*> names
-		= { TEXT("head1"), TEXT("head2"), TEXT("head3"), TEXT("head4"), TEXT("head5"), TEXT("head6"), TEXT("head7"), TEXT("head8"), TEXT("head9"), TEXT("head10"), TEXT("head11"), TEXT("head12")
-		, TEXT("head13"), TEXT("head14"), TEXT("head15"), TEXT("head16"), TEXT("head17"), TEXT("head18"), TEXT("head19"), TEXT("head20"), TEXT("head21"), TEXT("head22"), TEXT("head23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/head_2.head_2"), TEXT("/Game/FX/Frozen/Meshes/head_3.head_3"), TEXT("/Game/FX/Frozen/Meshes/head_4.head_4"),
 	TEXT("/Game/FX/Frozen/Meshes/head_5.head_5"), TEXT("/Game/FX/Frozen/Meshes/head_6.head_6"), TEXT("/Game/FX/Frozen/Meshes/head_7.head_7"),
@@ -2016,29 +2013,25 @@ void AMyCharacter::SettingHead()
 	TEXT("/Game/FX/Frozen/Meshes/head_20.head_20"), TEXT("/Game/FX/Frozen/Meshes/head_21.head_21"), TEXT("/Game/FX/Frozen/Meshes/head_22.head_22"),
 	TEXT("/Game/FX/Frozen/Meshes/head_23.head_23"), TEXT("/Game/FX/Frozen/Meshes/head_24.head_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* head = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> headMesh(refs[i]);
+		if (headMesh.Succeeded())
 		{
-			head->SetStaticMesh(SM_BONE.Object);
-			head->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			head->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
-			head->SetVisibility(false);
-			heads.Add(head);
+			headMeshes.Add(headMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	headComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("head"));
+	headComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	headComponent->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
+	headComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingLeftForearm()
 {
-	TArray<const wchar_t*> names
-		= { TEXT("leftForearm1"), TEXT("leftForearm2"), TEXT("leftForearm3"), TEXT("leftForearm4"), TEXT("leftForearm5"), TEXT("leftForearm6"), TEXT("leftForearm7"), TEXT("leftForearm8"), 
-		TEXT("leftForearm9"), TEXT("leftForearm10"), TEXT("leftForearm11"), TEXT("leftForearm12"), TEXT("leftForearm13"), TEXT("leftForearm14"), TEXT("leftForearm15"), TEXT("leftForearm16"), 
-		TEXT("leftForearm17"), TEXT("leftForearm18"), TEXT("leftForearm19"), TEXT("leftForearm20"), TEXT("leftForearm21"), TEXT("leftForearm22"), TEXT("leftForearm23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/left_forearm_2.left_forearm_2"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_3.left_forearm_3"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_4.left_forearm_4"),
 	TEXT("/Game/FX/Frozen/Meshes/left_forearm_5.left_forearm_5"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_6.left_forearm_6"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_7.left_forearm_7"),
@@ -2049,20 +2042,21 @@ void AMyCharacter::SettingLeftForearm()
 	TEXT("/Game/FX/Frozen/Meshes/left_forearm_20.left_forearm_20"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_21.left_forearm_21"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_22.left_forearm_22"),
 	TEXT("/Game/FX/Frozen/Meshes/left_forearm_23.left_forearm_23"), TEXT("/Game/FX/Frozen/Meshes/left_forearm_24.left_forearm_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* leftForearm = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> leftForearmMesh(refs[i]);
+		if (leftForearmMesh.Succeeded())
 		{
-			leftForearm->SetStaticMesh(SM_BONE.Object);
-			leftForearm->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			leftForearm->SetupAttachment(GetMesh(), TEXT("LeftForearmSocket"));
-			leftForearm->SetVisibility(false);
-			leftForearms.Add(leftForearm);
+			leftForearmMeshes.Add(leftForearmMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	leftForearmComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("leftForearm"));
+	leftForearmComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	leftForearmComponent->SetupAttachment(GetMesh(), TEXT("LeftForearmSocket"));
+	leftForearmComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingLeftUpperArm()
@@ -2082,29 +2076,25 @@ void AMyCharacter::SettingLeftUpperArm()
 	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_20.left_upperarm_20"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_21.left_upperarm_21"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_22.left_upperarm_22"),
 	TEXT("/Game/FX/Frozen/Meshes/left_upperarm_23.left_upperarm_23"), TEXT("/Game/FX/Frozen/Meshes/left_upperarm_24.left_upperarm_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* leftUpperarm = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> leftUpperarmMesh(refs[i]);
+		if (leftUpperarmMesh.Succeeded())
 		{
-			leftUpperarm->SetStaticMesh(SM_BONE.Object);
-			leftUpperarm->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			leftUpperarm->SetupAttachment(GetMesh(), TEXT("LeftUpperarmSocket"));
-			leftUpperarm->SetVisibility(false);
-			leftUpperarms.Add(leftUpperarm);
+			leftUpperarmMeshes.Add(leftUpperarmMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	leftUpperarmComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("leftUpperarm"));
+	leftUpperarmComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	leftUpperarmComponent->SetupAttachment(GetMesh(), TEXT("LeftUpperarmSocket"));
+	leftUpperarmComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingRightForearm()
 {
-	TArray<const wchar_t*> names
-		= { TEXT("rightForearm1"), TEXT("rightForearm2"), TEXT("rightForearm3"), TEXT("rightForearm4"), TEXT("rightForearm5"), TEXT("rightForearm6"), TEXT("rightForearm7"), TEXT("rightForearm8"),
-		TEXT("rightForearm9"), TEXT("rightForearm10"), TEXT("rightForearm11"), TEXT("rightForearm12"), TEXT("rightForearm13"), TEXT("rightForearm14"), TEXT("rightForearm15"), TEXT("rightForearm16"),
-		TEXT("rightForearm17"), TEXT("rightForearm18"), TEXT("rightForearm19"), TEXT("rightForearm20"), TEXT("rightForearm21"), TEXT("rightForearm22"), TEXT("rightForearm23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/right_forearm_2.right_forearm_2"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_3.right_forearm_3"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_4.right_forearm_4"),
 	TEXT("/Game/FX/Frozen/Meshes/right_forearm_5.right_forearm_5"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_6.right_forearm_6"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_7.right_forearm_7"),
@@ -2115,29 +2105,25 @@ void AMyCharacter::SettingRightForearm()
 	TEXT("/Game/FX/Frozen/Meshes/right_forearm_20.right_forearm_20"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_21.right_forearm_21"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_22.right_forearm_22"),
 	TEXT("/Game/FX/Frozen/Meshes/right_forearm_23.right_forearm_23"), TEXT("/Game/FX/Frozen/Meshes/right_forearm_24.right_forearm_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* rightForearm = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> rightForearmMesh(refs[i]);
+		if (rightForearmMesh.Succeeded())
 		{
-			rightForearm->SetStaticMesh(SM_BONE.Object);
-			rightForearm->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			rightForearm->SetupAttachment(GetMesh(), TEXT("RightForearmSocket"));
-			rightForearm->SetVisibility(false);
-			rightForearms.Add(rightForearm);
+			rightForearmMeshes.Add(rightForearmMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	rightForearmComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rightForearm"));
+	rightForearmComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	rightForearmComponent->SetupAttachment(GetMesh(), TEXT("RightForearmSocket"));
+	rightForearmComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingRightUpperArm()
 {
-	TArray<const wchar_t*> names
-		= { TEXT("rightUpperarm1"), TEXT("rightUpperarm2"), TEXT("rightUpperarm3"), TEXT("rightUpperarm4"), TEXT("rightUpperarm5"), TEXT("rightUpperarm6"), TEXT("rightUpperarm7"), TEXT("rightUpperarm8"),
-		TEXT("rightUpperarm9"), TEXT("rightUpperarm10"), TEXT("rightUpperarm11"), TEXT("rightUpperarm12"), TEXT("rightUpperarm13"), TEXT("rightUpperarm14"), TEXT("rightUpperarm15"), TEXT("rightUpperarm16"),
-		TEXT("rightUpperarm17"), TEXT("rightUpperarm18"), TEXT("rightUpperarm19"), TEXT("rightUpperarm20"), TEXT("rightUpperarm21"), TEXT("rightUpperarm22"), TEXT("rightUpperarm23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/right_upperarm_2.right_upperarm_2"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_3.right_upperarm_3"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_4.right_upperarm_4"),
 	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_5.right_upperarm_5"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_6.right_upperarm_6"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_7.right_upperarm_7"),
@@ -2148,28 +2134,25 @@ void AMyCharacter::SettingRightUpperArm()
 	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_20.right_upperarm_20"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_21.right_upperarm_21"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_22.right_upperarm_22"),
 	TEXT("/Game/FX/Frozen/Meshes/right_upperarm_23.right_upperarm_23"), TEXT("/Game/FX/Frozen/Meshes/right_upperarm_24.right_upperarm_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* rightUpperarm = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> rightUpperarmMesh(refs[i]);
+		if (rightUpperarmMesh.Succeeded())
 		{
-			rightUpperarm->SetStaticMesh(SM_BONE.Object);
-			rightUpperarm->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			rightUpperarm->SetupAttachment(GetMesh(), TEXT("RightUpperarmSocket"));
-			rightUpperarm->SetVisibility(false);
-			rightUpperarms.Add(rightUpperarm);
+			rightUpperarmMeshes.Add(rightUpperarmMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	rightUpperarmComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rightUpperarm"));
+	rightUpperarmComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	rightUpperarmComponent->SetupAttachment(GetMesh(), TEXT("RightUpperarmSocket"));
+	rightUpperarmComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingCenter()
 {
-	TArray<const wchar_t*> names
-		= { TEXT("center1"), TEXT("center2"), TEXT("center3"), TEXT("center4"), TEXT("center5"), TEXT("center6"), TEXT("center7"), TEXT("center8"), TEXT("center9"), TEXT("center10"), TEXT("center11"), TEXT("center12"), 
-		TEXT("center13"), TEXT("center14"), TEXT("center15"), TEXT("center16"), TEXT("center17"), TEXT("center18"), TEXT("center19"), TEXT("center20"), TEXT("center21"), TEXT("center22"), TEXT("center23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/center_2.center_2"), TEXT("/Game/FX/Frozen/Meshes/center_3.center_3"), TEXT("/Game/FX/Frozen/Meshes/center_4.center_4"),
 	TEXT("/Game/FX/Frozen/Meshes/center_5.center_5"), TEXT("/Game/FX/Frozen/Meshes/center_6.center_6"), TEXT("/Game/FX/Frozen/Meshes/center_7.center_7"),
@@ -2180,29 +2163,25 @@ void AMyCharacter::SettingCenter()
 	TEXT("/Game/FX/Frozen/Meshes/center_20.center_20"), TEXT("/Game/FX/Frozen/Meshes/center_21.center_21"), TEXT("/Game/FX/Frozen/Meshes/center_22.center_22"),
 	TEXT("/Game/FX/Frozen/Meshes/center_23.center_23"), TEXT("/Game/FX/Frozen/Meshes/center_24.center_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* center = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> centerMesh(refs[i]);
+		if (centerMesh.Succeeded())
 		{
-			center->SetStaticMesh(SM_BONE.Object);
-			center->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			center->SetupAttachment(GetMesh(), TEXT("CenterSocket"));
-			center->SetVisibility(false);
-			centers.Add(center);
+			centerMeshes.Add(centerMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	centerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("center"));
+	centerComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	centerComponent->SetupAttachment(GetMesh(), TEXT("CenterSocket"));
+	centerComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingLeftThigh()
 {
-	TArray<const wchar_t*> names
-		= { TEXT("leftThigh1"), TEXT("leftThigh2"), TEXT("leftThigh3"), TEXT("leftThigh4"), TEXT("leftThigh5"), TEXT("leftThigh6"), TEXT("leftThigh7"), TEXT("leftThigh8"),
-		TEXT("leftThigh9"), TEXT("leftThigh10"), TEXT("leftThigh11"), TEXT("leftThigh12"), TEXT("leftThigh13"), TEXT("leftThigh14"), TEXT("leftThigh15"), TEXT("leftThigh16"),
-		TEXT("leftThigh17"), TEXT("leftThigh18"), TEXT("leftThigh19"), TEXT("leftThigh20"), TEXT("leftThigh21"), TEXT("leftThigh22"), TEXT("leftThigh23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/left_thigh_2.left_thigh_2"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_3.left_thigh_3"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_4.left_thigh_4"),
 	TEXT("/Game/FX/Frozen/Meshes/left_thigh_5.left_thigh_5"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_6.left_thigh_6"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_7.left_thigh_7"),
@@ -2213,29 +2192,25 @@ void AMyCharacter::SettingLeftThigh()
 	TEXT("/Game/FX/Frozen/Meshes/left_thigh_20.left_thigh_20"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_21.left_thigh_21"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_22.left_thigh_22"),
 	TEXT("/Game/FX/Frozen/Meshes/left_thigh_23.left_thigh_23"), TEXT("/Game/FX/Frozen/Meshes/left_thigh_24.left_thigh_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* leftThigh = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> leftThighMesh(refs[i]);
+		if (leftThighMesh.Succeeded())
 		{
-			leftThigh->SetStaticMesh(SM_BONE.Object);
-			leftThigh->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			leftThigh->SetupAttachment(GetMesh(), TEXT("LeftThighSocket"));
-			leftThigh->SetVisibility(false);
-			leftThighs.Add(leftThigh);
+			leftThighMeshes.Add(leftThighMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	leftThighComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("leftThigh"));
+	leftThighComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	leftThighComponent->SetupAttachment(GetMesh(), TEXT("LeftThighSocket"));
+	leftThighComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingLeftCalf()
 {
-	TArray<const wchar_t*> names
-		= { TEXT("leftCalf1"), TEXT("leftCalf2"), TEXT("leftCalf3"), TEXT("leftCalf4"), TEXT("leftCalf5"), TEXT("leftCalf6"), TEXT("leftCalf7"), TEXT("leftCalf8"),
-		TEXT("leftCalf9"), TEXT("leftCalf10"), TEXT("leftCalf11"), TEXT("leftCalf12"), TEXT("leftCalf13"), TEXT("leftCalf14"), TEXT("leftCalf15"), TEXT("leftCalf16"),
-		TEXT("leftCalf17"), TEXT("leftCalf18"), TEXT("leftCalf19"), TEXT("leftCalf20"), TEXT("leftCalf21"), TEXT("leftCalf22"), TEXT("leftCalf23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/left_calf_2.left_calf_2"), TEXT("/Game/FX/Frozen/Meshes/left_calf_3.left_calf_3"), TEXT("/Game/FX/Frozen/Meshes/left_calf_4.left_calf_4"),
 	TEXT("/Game/FX/Frozen/Meshes/left_calf_5.left_calf_5"), TEXT("/Game/FX/Frozen/Meshes/left_calf_6.left_calf_6"), TEXT("/Game/FX/Frozen/Meshes/left_calf_7.left_calf_7"),
@@ -2246,29 +2221,25 @@ void AMyCharacter::SettingLeftCalf()
 	TEXT("/Game/FX/Frozen/Meshes/left_calf_20.left_calf_20"), TEXT("/Game/FX/Frozen/Meshes/left_calf_21.left_calf_21"), TEXT("/Game/FX/Frozen/Meshes/left_calf_22.left_calf_22"),
 	TEXT("/Game/FX/Frozen/Meshes/left_calf_23.left_calf_23"), TEXT("/Game/FX/Frozen/Meshes/left_calf_24.left_calf_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* leftCalf = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> leftCalfMesh(refs[i]);
+		if (leftCalfMesh.Succeeded())
 		{
-			leftCalf->SetStaticMesh(SM_BONE.Object);
-			leftCalf->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			leftCalf->SetupAttachment(GetMesh(), TEXT("LeftCalfSocket"));
-			leftCalf->SetVisibility(false);
-			leftCalfs.Add(leftCalf);
+			leftCalfMeshes.Add(leftCalfMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	leftCalfComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("leftCalf"));
+	leftCalfComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	leftCalfComponent->SetupAttachment(GetMesh(), TEXT("LeftCalfSocket"));
+	leftCalfComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingRightThigh()
 {
-	TArray<const wchar_t*> names
-		= { TEXT("rightThigh1"), TEXT("rightThigh2"), TEXT("rightThigh3"), TEXT("rightThigh4"), TEXT("rightThigh5"), TEXT("rightThigh6"), TEXT("rightThigh7"), TEXT("rightThigh8"),
-		TEXT("rightThigh9"), TEXT("rightThigh10"), TEXT("rightThigh11"), TEXT("rightThigh12"), TEXT("rightThigh13"), TEXT("rightThigh14"), TEXT("rightThigh15"), TEXT("rightThigh16"),
-		TEXT("rightThigh17"), TEXT("rightThigh18"), TEXT("rightThigh19"), TEXT("rightThigh20"), TEXT("rightThigh21"), TEXT("rightThigh22"), TEXT("rightThigh23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/right_thigh_2.right_thigh_2"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_3.right_thigh_3"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_4.right_thigh_4"),
 	TEXT("/Game/FX/Frozen/Meshes/right_thigh_5.right_thigh_5"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_6.right_thigh_6"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_7.right_thigh_7"),
@@ -2279,29 +2250,25 @@ void AMyCharacter::SettingRightThigh()
 	TEXT("/Game/FX/Frozen/Meshes/right_thigh_20.right_thigh_20"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_21.right_thigh_21"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_22.right_thigh_22"),
 	TEXT("/Game/FX/Frozen/Meshes/right_thigh_23.right_thigh_23"), TEXT("/Game/FX/Frozen/Meshes/right_thigh_24.right_thigh_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* rightThigh = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> rightThighMesh(refs[i]);
+		if (rightThighMesh.Succeeded())
 		{
-			rightThigh->SetStaticMesh(SM_BONE.Object);
-			rightThigh->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			rightThigh->SetupAttachment(GetMesh(), TEXT("RightThighSocket"));
-			rightThigh->SetVisibility(false);
-			rightThighs.Add(rightThigh);
+			rightThighMeshes.Add(rightThighMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	rightThighComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rightThigh"));
+	rightThighComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	rightThighComponent->SetupAttachment(GetMesh(), TEXT("RightThighSocket"));
+	rightThighComponent->SetVisibility(false);
 }
 
 void AMyCharacter::SettingRightCalf()
 {
-	TArray<const wchar_t*> names
-		= { TEXT("rightCalf1"), TEXT("rightCalf2"), TEXT("rightCalf3"), TEXT("rightCalf4"), TEXT("rightCalf5"), TEXT("rightCalf6"), TEXT("rightCalf7"), TEXT("rightCalf8"),
-		TEXT("rightCalf9"), TEXT("rightCalf10"), TEXT("rightCalf11"), TEXT("rightCalf12"), TEXT("rightCalf13"), TEXT("rightCalf14"), TEXT("rightCalf15"), TEXT("rightCalf16"),
-		TEXT("rightCalf17"), TEXT("rightCalf18"), TEXT("rightCalf19"), TEXT("rightCalf20"), TEXT("rightCalf21"), TEXT("rightCalf22"), TEXT("rightCalf23") };
-
 	TArray<const wchar_t*> refs
 		= { TEXT("/Game/FX/Frozen/Meshes/right_calf_2.right_calf_2"), TEXT("/Game/FX/Frozen/Meshes/right_calf_3.right_calf_3"), TEXT("/Game/FX/Frozen/Meshes/right_calf_4.right_calf_4"),
 	TEXT("/Game/FX/Frozen/Meshes/right_calf_5.right_calf_5"), TEXT("/Game/FX/Frozen/Meshes/right_calf_6.right_calf_6"), TEXT("/Game/FX/Frozen/Meshes/right_calf_7.right_calf_7"),
@@ -2312,215 +2279,100 @@ void AMyCharacter::SettingRightCalf()
 	TEXT("/Game/FX/Frozen/Meshes/right_calf_20.right_calf_20"), TEXT("/Game/FX/Frozen/Meshes/right_calf_21.right_calf_21"), TEXT("/Game/FX/Frozen/Meshes/right_calf_22.right_calf_22"),
 	TEXT("/Game/FX/Frozen/Meshes/right_calf_23.right_calf_23"), TEXT("/Game/FX/Frozen/Meshes/right_calf_24.right_calf_24") };
 
+	//스태틱 메시마다 변수 필요
 	for (int i = 0; i < 23; ++i)
 	{
-		UStaticMeshComponent* rightCalf = CreateDefaultSubobject<UStaticMeshComponent>(names[i]);
-		ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BONE(refs[i]);
-
-		if (SM_BONE.Succeeded())
+		ConstructorHelpers::FObjectFinder<UStaticMesh> rightCalfMesh(refs[i]);
+		if (rightCalfMesh.Succeeded())
 		{
-			rightCalf->SetStaticMesh(SM_BONE.Object);
-			rightCalf->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
-			rightCalf->SetupAttachment(GetMesh(), TEXT("RightCalfSocket"));
-			rightCalf->SetVisibility(false);
-			rightCalfs.Add(rightCalf);
+			rightCalfMeshes.Add(rightCalfMesh.Object);
 		}
 	}
+
+	//스태틱 메시컴포넌트에 메시 설정하지 말기
+	rightCalfComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rightCalf"));
+	rightCalfComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+	rightCalfComponent->SetupAttachment(GetMesh(), TEXT("RightCalfSocket"));
+	rightCalfComponent->SetVisibility(false);
 }
 
 void AMyCharacter::FreezeHead()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(headHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iHeadFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iHeadFrame == i) {
-					FreezeAnimation(heads, iHeadFrame, bHeadAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(headHandle, iHeadFrame, bHeadAnimEnd, headComponent, headMeshes);
 }
 
 void AMyCharacter::FreezeLeftForearm()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(leftForearmHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iLeftForearmFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iLeftForearmFrame == i) {
-					FreezeAnimation(leftForearms, iLeftForearmFrame, bLeftForearmAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(leftForearmHandle, iLeftForearmFrame, bLeftForearmAnimEnd, leftForearmComponent, leftForearmMeshes);
 }
 
 void AMyCharacter::FreezeLeftUpperarm()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(leftUpperarmHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iLeftUpperarmFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iLeftUpperarmFrame == i) {
-					FreezeAnimation(leftUpperarms, iLeftUpperarmFrame, bLeftUpperarmAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(leftUpperarmHandle, iLeftUpperarmFrame, bLeftUpperarmAnimEnd, leftUpperarmComponent, leftUpperarmMeshes);
 }
 
 void AMyCharacter::FreezeRightForearm()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(rightForearmHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iRightForearmFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iRightForearmFrame == i) {
-					FreezeAnimation(rightForearms, iRightForearmFrame, bRightForearmAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(rightForearmHandle, iRightForearmFrame, bRightForearmAnimEnd, rightForearmComponent, rightForearmMeshes);
 }
 
 void AMyCharacter::FreezeRightUpperarm()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(rightUpperarmHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iRightUpperarmFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iRightUpperarmFrame == i) {
-					FreezeAnimation(rightUpperarms, iRightUpperarmFrame, bRightUpperarmAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(rightUpperarmHandle, iRightUpperarmFrame, bRightUpperarmAnimEnd, rightUpperarmComponent, rightUpperarmMeshes);
 }
 
 void AMyCharacter::FreezeCenter()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(centerHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iCenterFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iCenterFrame == i) {
-					FreezeAnimation(centers, iCenterFrame, bCenterAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(centerHandle, iCenterFrame, bCenterAnimEnd, centerComponent, centerMeshes);
 }
 
 void AMyCharacter::FreezeLeftThigh()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(leftThighHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iLeftThighFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iLeftThighFrame == i) {
-					FreezeAnimation(leftThighs, iLeftThighFrame, bLeftThighAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(leftThighHandle, iLeftThighFrame, bLeftThighAnimEnd, leftThighComponent, leftThighMeshes);
 }
 
 void AMyCharacter::FreezeLeftCalf()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(leftCalfHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iLeftCalfFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iLeftCalfFrame == i) {
-					FreezeAnimation(leftCalfs, iLeftCalfFrame, bLeftCalfAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(leftCalfHandle, iLeftCalfFrame, bLeftCalfAnimEnd, leftCalfComponent, leftCalfMeshes);
 }
 
 void AMyCharacter::FreezeRightThigh()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(rightThighHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iRightThighFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iRightThighFrame == i) {
-					FreezeAnimation(rightThighs, iRightThighFrame, bRightThighAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(rightThighHandle, iRightThighFrame, bRightThighAnimEnd, rightThighComponent, rightThighMeshes);
 }
 
 void AMyCharacter::FreezeRightCalf()
 {
-	float WaitTime = 0.1f;
-	GetWorld()->GetTimerManager().SetTimer(rightCalfHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//MYLOG(Warning, TEXT("%d"), iRightCalfFrame);
-
-			for (int i = 0; i < 23; ++i)
-			{
-				if (iRightCalfFrame == i) {
-					FreezeAnimation(rightCalfs, iRightCalfFrame, bRightCalfAnimEnd);
-					break;
-				}
-			}
-		}), WaitTime, true);
+	FreezeAnimation(rightCalfHandle, iRightCalfFrame, bRightCalfAnimEnd, rightCalfComponent, rightCalfMeshes);
 }
 
-void AMyCharacter::FreezeAnimation(TArray<UStaticMeshComponent*> bones, int& frame, bool& end)
+void AMyCharacter::FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& end, UStaticMeshComponent*& bone, TArray<UStaticMesh*>& FrozenMeshes)
 {
-	//투명모드 조정
-	if (iHeadFrame != 0)
-		bones[frame - 1]->SetVisibility(false);
-	bones[frame]->SetVisibility(true);
+	bone->SetVisibility(true);
 
-	//머리만 머티리얼로 점점 얼리기
-	if (bones == heads)
-	{
-		auto mat = bones[frame]->CreateDynamicMaterialInstance(1);
-		mat->SetScalarParameterValue(TEXT("Emissive"), frame * 0.125);
-		mat->SetTextureParameterValue(FName("Tex"), bearTextureArray[iId]);	// 본인 색상의 곰 텍스쳐 사용
-	}
+	float WaitTime = 0.1f;
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			//MYLOG(Warning, TEXT("%d"), frame);
 
-	//배열 끝 판정
-	if (bones.Num() - 1 == frame)
-	{
-		end = true;
-		frame = 0;
-	}
-	else
-		frame += 1;
+			bone->SetStaticMesh(FrozenMeshes[frame]);
+
+			if (bone == headComponent)
+			{
+				auto mat = bone->CreateDynamicMaterialInstance(1);
+				mat->SetScalarParameterValue(TEXT("Emissive"), frame * 0.125);
+				mat->SetTextureParameterValue(FName("Tex"), bearTextureArray[iId]);	// 본인 색상의 곰 텍스쳐 사용
+			}
+
+			//배열 끝 판정
+			if (iEachBoneCount - 1 == frame)
+			{
+				end = true;
+				frame = 0;
+			}
+			else
+				frame += 1;
+		}), WaitTime, true);
 }
 
 void AMyCharacter::FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end)
