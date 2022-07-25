@@ -4,6 +4,7 @@
 
 // winsock2 사용을 위해 아래 코멘트 추가
 #pragma comment(lib, "ws2_32.lib")
+#include "HoloLens/AllowWindowsPlatformAtomics.h"
 #include <winsock2.h>
 #include <mswsock.h>
 #include <ws2tcpip.h>
@@ -12,8 +13,9 @@
 #include <vector>
 #include <chrono>
 #include <mutex>
+#include "HoloLens/HideWindowsPlatformAtomics.h"
 
-#include "ExtraProject.h"
+#include "Final_Project.h"
 
 #define	MAX_BUFFER		4096
 #define SERVER_PORT		9090
@@ -30,6 +32,8 @@ using std::chrono::system_clock;
 const int32  MAX_NAME_SIZE = 20;
 const int32  MAX_CHAT_SIZE = 100;
 const int32 BUF_SIZE = 2048;
+const int32 Tornado_id = 100;
+const int32  MAX_BULLET_RANG = 8;
 
 // 소켓 통신 구조체
 
@@ -48,7 +52,12 @@ const char CS_PACKET_READY = 11;
 const char CS_PACKET_STOP_SNOW_FARMING = 12;
 const char CS_PACKET_MATCH = 13;
 const char CS_PACKET_OPEN_BOX = 14;
-
+const char CS_PACKET_GUNATTACK = 15;
+const char CS_PACKET_GUNFIRE = 16;
+const char CS_PACKET_UMB = 17;
+const char CS_PACKET_ACCOUNT = 18;
+const char CS_PACKET_CANCEL_SNOW = 19;
+const char CS_PACKET_PLAYER_COUNT = 20;
 
 const char SC_PACKET_LOGIN_OK = 1;
 const char SC_PACKET_MOVE = 2;
@@ -69,15 +78,47 @@ const char SC_PACKET_IS_BONE = 16;
 const char SC_PACKET_LOGOUT = 17;
 const char SC_PACKET_END = 18;
 const char SC_PACKET_OPEN_BOX = 19;
+const char SC_PACKET_GUNATTACK = 20;
+const char SC_PACKET_GUNFIRE = 21;
+const char SC_PACKET_TELEPORT = 22;
+const char SC_PACKET_UMB = 23;
+const char SC_PACKET_ACCOUNT = 24;
+const char SC_PACKET_CANCEL_SNOW = 25;
+const char SC_PACKET_PLAYER_COUNT = 26;
+
+
 
 enum COMMAND_Type
 {
-	COMMAND_ATTACK = 1,
+	COMMAND_SNOWBALL = 1,
+	COMMAND_ICEBALL,
 	COMMAND_MOVE,
 	COMMAND_DAMAGE,
 	COMMAND_MATCH,
-	COMMAND_THROW
+	COMMAND_THROW_SB,
+	COMMAND_THROW_IB,
+	COMMAND_CANCEL_SB,
+	COMMAND_CANCEL_IB,
+	COMMAND_SHOTGUN,
+	COMMAND_GUNFIRE,
+	COMMAND_UMB_START,
+	COMMAND_UMB_END
+};
 
+enum TELEPORT_Type
+{
+	TEL_FIRE = 1,
+	TEL_BRIDGE,
+	TEL_TOWER,
+	TEL_ICE
+};
+
+enum CHEAT_Type
+{
+	CHEAT_HP_UP = 1,
+	CHEAT_HP_DOWN,
+	CHEAT_SNOW_PLUS,
+	CHEAT_ICE_PLUS
 };
 
 enum ITEM_Type
@@ -85,8 +126,34 @@ enum ITEM_Type
 	ITEM_MAT = 0,
 	ITEM_UMB,
 	ITEM_BAG,
-	ITEM_SNOW
+	ITEM_SNOW,
+	ITEM_JET,
+	ITEM_ICE
 };
+
+enum ATTACK_Type
+{
+	ATTACK_SNOWBALL = 0,
+	ATTACK_ICEBALL,
+	ATTACK_SHOTGUN,
+	END_SNOWBALL,
+	END_ICEBALL,
+	END_SHOTGUN,
+	CANCEL_SNOWBALL,
+	CANCEL_ICEBALL
+};
+
+enum BULLET_Type
+{
+	BULLET_SNOWBALL = 0,
+	BULLET_ICEBALL,
+	BULLET_SNOWBOMB
+};
+
+enum OBJ_Type { PLAYER, ITEM_BOX, TONARDO };
+
+enum Login_fail_Type { OVERLAP_ID, WORNG_ID, WORNG_PW, OVERLAP_AC, CREATE_AC };
+
 
 // 패킷
 
@@ -106,6 +173,8 @@ struct sc_packet_login_ok {
 	int32		s_id;
 	float x, y, z;
 	float yaw;
+	char	id[MAX_NAME_SIZE];
+	char	pw[MAX_NAME_SIZE];
 };
 
 struct cs_packet_logout {
@@ -143,8 +212,25 @@ struct cs_packet_throw_snow {
 	unsigned char size;
 	char	type;
 	int32 s_id;
-	float x, y, z;
-	float dx, dy, dz;
+	int32 bullet;
+	float ball_x, ball_y, ball_z;
+	float yaw, pitch, roll;
+	float speed;
+};
+
+struct cs_packet_cancel_snow {
+	unsigned char size;
+	char	type;
+	int32 s_id;
+	int32 bullet;
+};
+
+struct cs_packet_fire {
+	unsigned char size;
+	char	type;
+	int32 s_id;
+	float pitch;
+	int32 rand_int[MAX_BULLET_RANG];
 };
 
 struct cs_packet_damage {
@@ -155,6 +241,13 @@ struct cs_packet_damage {
 struct cs_packet_match {
 	unsigned char size;
 	char	type;
+};
+
+struct cs_packet_umb {
+	unsigned char size;
+	char	type;
+	int     s_id;
+	bool    end;
 };
 
 struct sc_packet_hp_change {
@@ -168,22 +261,30 @@ struct cs_packet_attack {
 	unsigned char size;
 	char	type;
 	int32 s_id;
+	int32 bullet;
+
 };
+
+struct cs_packet_shotattack {
+	unsigned char size;
+	char	type;
+	int32 s_id;
+};
+
 
 
 struct cs_packet_chat {
 	unsigned char size;
 	char	type;
 	int32 s_id;
-	float x, y, z;
-	char	message[MAX_CHAT_SIZE];
+	int32 cheat_type;
 };
 
 struct cs_packet_teleport {
-	// 서버에서 장애물이 없는 랜덤 좌표로 텔레포트 시킨다.
-	// 더미 클라이언트에서 동접 테스트용으로 사용.
 	unsigned char size;
 	char	type;
+	int	    Point;
+
 };
 
 struct cs_packet_get_item {
@@ -191,7 +292,7 @@ struct cs_packet_get_item {
 	char	type;
 	int32 s_id;
 	int32 item_type;
-	int32 current_snowball;
+	int32 current_bullet;
 	int32 destroy_obj_id;
 };
 
@@ -226,14 +327,14 @@ struct sc_packet_chat {
 struct sc_packet_login_fail {
 	unsigned char size;
 	char type;
-	int32	 reason;		// 0: 중복 ID,  1:사용자 Full
+	int32	 reason;
 };
 
 struct sc_packet_status_change {
 	unsigned char size;
 	char type;
 	int32 s_id;
-	short   state;
+	int32  state;
 };
 
 struct sc_packet_ready { // 타 플레이어 레디
@@ -262,7 +363,12 @@ struct sc_packet_game_end {
 	char	type;
 	int     s_id;
 };
-
+struct sc_packet_player_count {
+	unsigned char size;
+	char type;
+	int32 snowman;
+	int32   bear;
+};
 
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
@@ -297,7 +403,7 @@ public:
 
 
 
-class EXTRAPROJECT_API NetworkData
+class FINAL_PROJECT_API NetworkData
 {
 public:
 };
