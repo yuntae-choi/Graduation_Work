@@ -535,6 +535,7 @@ void AMyCharacter::UpDown(float NewAxisValue)
 
 void AMyCharacter::LeftRight(float NewAxisValue)
 {
+	if (bIsRiding) return;	// 운전 중에는 좌우 이동 x
 	AddMovementInput(GetActorRightVector(), NewAxisValue);
 }
 
@@ -548,10 +549,18 @@ void AMyCharacter::Turn(float NewAxisValue)
 	AddControllerYawInput(NewAxisValue);
 }
 
+void AMyCharacter::Jump()
+{
+	if (bIsRiding) return;	// 운전 중에는 점프 x
+	Super::Jump();
+}
+
 void AMyCharacter::Attack()
 {
 	if (isAttacking) return;
 	if (bIsSnowman) return;
+	if (bIsRiding) return;	// 운전 중에는 공격 x
+	// 우산 사용 중 공격 x하도록
 
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId == PlayerController->iSessionId)
@@ -591,7 +600,9 @@ void AMyCharacter::Attack()
 }
 
 void AMyCharacter::ReleaseAttack()
-{	// 임시 - 아이스볼로 공격 중 release
+{	// 공격 중 release
+	if (bIsRiding) return;
+	
 	if (iSelectedProjectile == Projectile::Iceball)
 	{
 		if (iSessionId == localPlayerController->iSessionId)
@@ -1011,8 +1022,10 @@ void AMyCharacter::StartFarming()
 {
 	if (!IsValid(farmingItem)) return;	//오버랩하면 바로 넣어줌
 	if (bIsSnowman) return;
+	if (bIsRiding) return; // 운전 중 아이템 파밍 x
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId != PlayerController->iSessionId || !PlayerController->IsStart()) return;
+	
 	if (Cast<ASnowdrift>(farmingItem))
 	{
 		if (iCurrentSnowballCount >= iMaxSnowballCount) return;	// 눈덩이 최대보유량 이상은 눈 무더기 파밍 못하도록
@@ -1463,7 +1476,9 @@ void AMyCharacter::SelectUmbrella()
 
 void AMyCharacter::UseSelectedItem()
 {
-	if (bIsSnowman) return;	// 눈사람은 아이템 사용 x
+	if (bIsSnowman) return;		// 눈사람은 아이템 사용 x
+	if (isAttacking) return;	// 공격 중 아이템 사용 x
+	if (bIsRiding) return;		// 운전 중에는 아이템 사용 x
 
 	switch (iSelectedItem) {
 	case ItemTypeList::Match: {	// 성냥 아이템 사용 시
@@ -1900,6 +1915,8 @@ void AMyCharacter::UpdateAiming()
 void AMyCharacter::GetOnOffJetski()
 {
 	if (bIsSnowman) return;		// 눈사람은 jetski 탑승 x
+	if (isAttacking) return;	// 공격 중 제트스키 탑승 및 하차 x
+	if (myAnim->GetIsInAir()) return;	// 공중에서는 제트스키 탑승 및 하차 x
 
 	if (iSessionId == localPlayerController->iSessionId)
 	{

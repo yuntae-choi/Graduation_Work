@@ -32,6 +32,8 @@ public:
 	float GetDirection() const { return fCurrentPawnDirection; }
 	void SetDirection(const float dir) { fCurrentPawnDirection = dir; }
 
+	bool GetIsInAir() { return bIsInAir; }
+
 private:
 	UFUNCTION()
 	void AnimNotify_SnowballRelease();
