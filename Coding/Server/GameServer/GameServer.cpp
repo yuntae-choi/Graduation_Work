@@ -614,6 +614,26 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				cout << "게임종료" << endl;
 			}
+			else {
+				int bear_cnt = 0;
+				int snowman_cnt = 0;;
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state) continue;
+					if (false == other.bIsSnowman)
+					{
+						bear_cnt++;
+					}
+					else if (true == other.bIsSnowman)
+					{
+						snowman_cnt++;
+					}
+				}
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					send_player_count(other._s_id, bear_cnt, snowman_cnt);
+				}
+			}
 		}
 
 		break;
@@ -1133,9 +1153,26 @@ void process_packet(int s_id, unsigned char* p)
 			other.do_send(sizeof(s_packet), &s_packet);
 		}
 
+		int bear_cnt = 0;
+		int snowman_cnt = 0;;
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state) continue;
+			if (false == other.bIsSnowman)
+			{
+				bear_cnt++;
+			}
+			else if (true == other.bIsSnowman)
+			{
+				snowman_cnt++;
+			}
+		}
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state)
+				continue;
+			send_player_count(other._s_id, bear_cnt, snowman_cnt);
+		}
 		SetEvent(g_timer);
 		GA.g_start_game = true;
-
 		cout << "게임 스타트" << endl;
 		break;
 	}
@@ -1308,6 +1345,26 @@ void worker_thread()
 							send_game_end(target_s_id, other._s_id);
 						}
 						cout << "게임종료" << endl;
+					}
+					else {
+						int bear_cnt = 0;
+						int snowman_cnt = 0;;
+						for (auto& other : clients) {
+							if (ST_INGAME != other._state) continue;
+							if (false == other.bIsSnowman)
+							{
+								bear_cnt++;
+							}
+							else if (true == other.bIsSnowman)
+							{
+								snowman_cnt++;
+							}
+						}
+						for (auto& other : clients) {
+							if (ST_INGAME != other._state)
+								continue;
+							send_player_count(other._s_id, bear_cnt, snowman_cnt);
+						}
 					}
 				}
 			}

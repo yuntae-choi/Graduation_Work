@@ -46,6 +46,8 @@ AMyPlayerController::AMyPlayerController()
 	victory_player.store(-1);
 	bInGame = false;
 	PrimaryActorTick.bCanEverTick = true;
+	bear_cnt = 0;
+	snowman_cnt = 0;
 	
 	static ConstructorHelpers::FClassFinder<UUserWidget> READY_UI(TEXT("/Game/Blueprints/ReadyUI.ReadyUI_C"));
 	if (READY_UI.Succeeded() && (READY_UI.Class != nullptr))

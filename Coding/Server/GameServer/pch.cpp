@@ -205,3 +205,13 @@ void send_state_change(int s_id, int target, int stat)
 	_packet.s_id = s_id;
 	clients[target].do_send(sizeof(_packet), &_packet);
 }
+
+void send_player_count(int s_id, int bear, int snowman)
+{
+	sc_packet_player_count _packet;
+	_packet.size = sizeof(_packet);
+	_packet.type = SC_PACKET_PLAYER_COUNT;
+	_packet.bear = bear;
+	_packet.snowman = snowman;
+	clients[s_id].do_send(sizeof(_packet), &_packet);
+}

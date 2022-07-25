@@ -36,6 +36,8 @@ const char CS_PACKET_GUNFIRE = 16;
 const char CS_PACKET_UMB = 17;
 const char CS_PACKET_ACCOUNT = 18;
 const char CS_PACKET_CANCEL_SNOW = 19;
+const char CS_PACKET_PLAYER_COUNT = 20;
+
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -63,6 +65,7 @@ const char SC_PACKET_TELEPORT = 22;
 const char SC_PACKET_UMB = 23;
 const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
+const char SC_PACKET_PLAYER_COUNT = 26;
 
 
 #pragma pack (push, 1)
@@ -266,5 +269,12 @@ struct sc_packet_status_change {
 	char type;
 	int32 s_id;
 	int32   state;
+};
+
+struct sc_packet_player_count {
+	unsigned char size;
+	char type;
+	int32 snowman;
+	int32   bear;
 };
 #pragma pack(pop)

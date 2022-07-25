@@ -118,6 +118,19 @@ public:
 	{
 		bisBone = true;
 	}
+	void set_cnt(int bear, int snowman)
+	{
+		bear_cnt = bear;
+		snowman_cnt = snowman;
+	}
+	int get_bear_cnt()
+	{
+		return bear_cnt;
+	}
+	int get_snowman_cnt()
+	{
+		return snowman_cnt;
+	}
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
@@ -236,6 +249,9 @@ private:
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
 	bool							bisBone = false;
+	int                             bear_cnt;
+	int                             snowman_cnt;
+
 
 	atomic<bool>                    bSetStart;
 	// 스폰시킬 다른 캐릭터

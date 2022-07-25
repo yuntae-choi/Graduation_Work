@@ -405,6 +405,12 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		MyPlayerController->SetItem(packet->s_id, ITEM_UMB, packet->end);
 		break;
 	}
+	case SC_PACKET_PLAYER_COUNT:
+	{
+		sc_packet_player_count* packet = reinterpret_cast<sc_packet_player_count*>(ptr);
+		MyPlayerController->set_cnt(packet->bear, packet->snowman);
+		break;
+	}
 	}
 }
 
