@@ -585,10 +585,18 @@ void AMyCharacter::Attack()
 			}
 			break;
 		case Projectile::Iceball:
-			if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
-			PlayerController->SendPlayerInfo(COMMAND_ICEBALL);
-			//IceballAttack();
-			isAttacking = true;
+			switch (iSelectedWeapon) {
+			case Weapon::Hand:
+				if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
+				PlayerController->SendPlayerInfo(COMMAND_ICEBALL);
+				//IceballAttack();
+				isAttacking = true;
+				break;
+			case Weapon::Shotgun:
+				break;
+			default:
+				break;
+			}
 			break;
 		default:
 			break;
