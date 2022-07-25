@@ -43,11 +43,11 @@ AMyPlayerController::AMyPlayerController()
 	//bNewPlayerEntered = false;
 	bInitPlayerSetting = false;
 	bSetStart.store(false);
-	victory_player.store(-1);
+	ivictoryPlayer.store(-1);
 	bInGame = false;
 	PrimaryActorTick.bCanEverTick = true;
-	bear_cnt = 0;
-	snowman_cnt = 0;
+	iBearCnt = 0;
+	iSnowmanCnt = 0;
 	
 	static ConstructorHelpers::FClassFinder<UUserWidget> READY_UI(TEXT("/Game/Blueprints/ReadyUI.ReadyUI_C"));
 	if (READY_UI.Succeeded() && (READY_UI.Class != nullptr))
@@ -192,35 +192,35 @@ void AMyPlayerController::SetAttack(const int s_id, int at_type)
 	switch (at_type)
 	{
 	case ATTACK_SNOWBALL: {
-		charactersInfo->players[s_id].Start_SnowBall = true;
+		charactersInfo->players[s_id].bStartSnowBall = true;
 		break;
 	}
 	case ATTACK_ICEBALL: {
-		charactersInfo->players[s_id].Start_IceBall = true;
+		charactersInfo->players[s_id].bStartIceBall = true;
 		break;
 	}
 	case ATTACK_SHOTGUN: {
-		charactersInfo->players[s_id].Start_ShotGun = true;
+		charactersInfo->players[s_id].bStartShotGun = true;
 		break;
 	}
 	case END_SNOWBALL: {
-		charactersInfo->players[s_id].End_SnowBall = true;
+		charactersInfo->players[s_id].bEndSnowBall = true;
 		break;
 	}
 	case END_ICEBALL: {
-		charactersInfo->players[s_id].End_IceBall = true;
+		charactersInfo->players[s_id].bEndIceBall = true;
 		break;
 	}
 	case END_SHOTGUN: {
-		charactersInfo->players[s_id].End_ShotGun = true;
+		charactersInfo->players[s_id].bEndShotGun = true;
 		break;
 	}
 	case CANCEL_SNOWBALL: {
-		charactersInfo->players[s_id].Cancel_SnowBall = true;
+		charactersInfo->players[s_id].bCancelSnowBall = true;
 		break;
 	}
 	case CANCEL_ICEBALL: {
-		charactersInfo->players[s_id].Cancel_IceBall = true;
+		charactersInfo->players[s_id].bCancelIceBall = true;
 		break;
 	}
 	default:
@@ -235,15 +235,15 @@ void AMyPlayerController::SetItem(const int s_id, int item_type, bool end)
 	{
 	case ITEM_UMB: {
 		if (!end) {
-			charactersInfo->players[s_id].start_umb = true;
+			charactersInfo->players[s_id].bStartUmb = true;
 		}
 		else {
-			charactersInfo->players[s_id].end_umb = true;
+			charactersInfo->players[s_id].bEndUmb = true;
 		}
 		break;
 	}
 	case ITEM_JET: {
-		charactersInfo->players[s_id].SET_JET_SKI = true;
+		charactersInfo->players[s_id].bSetJetSki = true;
 		break;
 	}
 	default:
@@ -374,7 +374,7 @@ void AMyPlayerController::InitPlayerSetting()
 
 	//컨트롤러의 회전
 	SetControlRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
-	if (itonardoId == 0)
+	if (iTonardoId == 0)
 		localPlayerCharacter->SetCharacterMaterial(iSessionId - 1);
 	else
 		localPlayerCharacter->SetCharacterMaterial(iSessionId);
@@ -385,12 +385,12 @@ void AMyPlayerController::UpdateTornado()
 	UWorld* World = GetWorld();
 	TArray<AActor*> SpawnedTornado;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATornado::StaticClass(), SpawnedTornado);
-	if (itonardoId == -1) return;
+	if (iTonardoId == -1) return;
 	for (auto sd : SpawnedTornado)
 	{
 		ATornado* tornado = Cast<ATornado>(sd);
 
-		cCharacter* info = &charactersInfo->players[itonardoId];
+		cCharacter* info = &charactersInfo->players[iTonardoId];
 		FVector CharacterLocation;
 		CharacterLocation.X = info->X;
 		CharacterLocation.Y = info->Y;
@@ -438,67 +438,67 @@ bool AMyPlayerController::UpdateWorldInfo()
 		cCharacter* info = &charactersInfo->players[player_->iSessionId];
 		if (!info->IsAlive) continue;
 
-		if (info->Start_SnowBall) { 
+		if (info->bStartSnowBall) { 
 			player_->SnowBallAttack();
-			info->Start_SnowBall = false;
+			info->bStartSnowBall = false;
 		}
 		
-		if (info->Start_IceBall) {
+		if (info->bStartIceBall) {
 			player_->IceballAttack();
-			info->Start_IceBall = false;
+			info->bStartIceBall = false;
 		}
 		
-		if (info->Start_ShotGun) {
+		if (info->bStartShotGun) {
 			player_->ShotgunAttack();
-			info->Start_ShotGun = false;
+			info->bStartShotGun = false;
 		}
 
-		if (info->Cancel_SnowBall) {
-			player_->Cancel_SnowBallAttack();
-			info->Cancel_SnowBall = false;
+		if (info->bCancelSnowBall) {
+			player_->CancelSnowBallAttack();
+			info->bCancelSnowBall = false;
 		}
 
-		if (info->Cancel_IceBall) {
-			player_->Cancel_IceBallAttack();
-			info->Cancel_IceBall = false;
+		if (info->bCancelIceBall) {
+			player_->CancelIceBallAttack();
+			info->bCancelIceBall = false;
 		}
 
-		if (info->End_SnowBall) {
+		if (info->bEndSnowBall) {
 			player_->ReleaseSnowball();
-			info->End_SnowBall = false;
-			info->current_snow_count--;
+			info->bEndSnowBall = false;
+			info->iCurrentSnowCount--;
 		}
 
-		if (info->End_IceBall) {
+		if (info->bEndIceBall) {
 			player_->ReleaseIceball();
-			info->End_IceBall = false;
-			info->current_ice_count--;
+			info->bEndIceBall = false;
+			info->iCurrentIceCount--;
 		}
 
-		if (info->End_ShotGun) {
-			MYLOG(Warning, TEXT("End_ShotGun"));
+		if (info->bEndShotGun) {
+			MYLOG(Warning, TEXT("bEndShotGun"));
 			player_->SpawnSnowballBomb();
-			info->End_ShotGun = false;
-			info->current_snow_count-=5;
+			info->bEndShotGun = false;
+			info->iCurrentSnowCount-=5;
 		}
 
-		if (info->start_umb) {
-			MYLOG(Warning, TEXT("start_umb"));
+		if (info->bStartUmb) {
+			MYLOG(Warning, TEXT("bStartUmb"));
 			player_->StartUmbrella();
-			info->start_umb = false;
+			info->bStartUmb = false;
 		}
 
-		if (info->end_umb) {
-			MYLOG(Warning, TEXT("end_umb"));
+		if (info->bEndUmb) {
+			MYLOG(Warning, TEXT("bEndUmb"));
 			//player_->ReleaseUmbrella();
 			player_->GetAnim()->ResumeUmbrellaMontage();
 			player_->CloseUmbrellaAnim();
-			info->end_umb = false;
+			info->bEndUmb = false;
 		}
-		if (info->SET_JET_SKI) {
+		if (info->bSetJetSki) {
 			MYLOG(Warning, TEXT("jetski"));
 			player_->GetOnOffJetski();
-			info->SET_JET_SKI = false;
+			info->bSetJetSki = false;
 		}
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
@@ -529,25 +529,25 @@ bool AMyPlayerController::UpdateWorldInfo()
 		//눈사람 변화
 		if (!player_->IsSnowman())
 		{
-			if (info->My_State == ST_SNOWMAN)
+			if (info->myState == ST_SNOWMAN)
 			{
-				info->current_snow_count = 0;
+				info->iCurrentSnowCount = 0;
 				Reset_Items(player_->iSessionId);
 				player_->ChangeSnowman();
 			}
 		}
 		else if (player_->IsSnowman())
 		{
-			if (info->My_State == ST_ANIMAL)
+			if (info->myState == ST_ANIMAL)
 			{
 				Reset_Items(player_->iSessionId);
 				player_->ChangeAnimal();
 			}
 		}
 		// 캐릭터 속성 업데이트
-		if (player_->iCurrentSnowballCount != info->current_snow_count)
+		if (player_->iCurrentSnowballCount != info->iCurrentSnowCount)
 		{
-			player_->iCurrentSnowballCount = info->current_snow_count;
+			player_->iCurrentSnowballCount = info->iCurrentSnowCount;
 		}
 
 	}
@@ -577,20 +577,20 @@ void AMyPlayerController::UpdateNewPlayer()
 	SpawnParams.Instigator = GetInstigator();
 	SpawnParams.Name = FName(*FString(to_string(newplayer.get()->SessionId).c_str()));
 
-	if (newplayer.get()->SessionId != itonardoId)
+	if (newplayer.get()->SessionId != iTonardoId)
 	{
 		WhoToSpawn = AMyCharacter::StaticClass();
 		AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 		SpawnCharacter->SpawnDefaultController();
 		SpawnCharacter->iSessionId = newplayer.get()->SessionId;
-		if(itonardoId == 0) 
+		if(iTonardoId == 0) 
 			SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId -1);
 		else
 			SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
 	}
-	else if(newplayer.get()->SessionId == itonardoId)
+	else if(newplayer.get()->SessionId == iTonardoId)
 	{
-		if (itonardoId == -1) return;
+		if (iTonardoId == -1) return;
 
 		TornadoToSpawn = ATornado::StaticClass();
 		ATornado* SpawnTornado = World->SpawnActor<ATornado>(TornadoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
@@ -623,8 +623,8 @@ void AMyPlayerController::Reset_Items(int s_id)
 	// 필드의 플레이어 정보에 추가
 	if (charactersInfo != nullptr)
 	{
-		charactersInfo->players[s_id].current_snow_count = 0;
-		//charactersInfo->players[s_id].current_match_count = 0;
+		charactersInfo->players[s_id].iCurrentSnowCount = 0;
+		//charactersInfo->players[s_id].iCurrentMatchCount = 0;
 		//charactersInfo->players[s_id].bHasUmbrella = false;
 		//charactersInfo->players[s_id].bHasBag = false;;
 	
@@ -788,14 +788,14 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 	}
 	else
 	{
-		if (bisBone) { 
+		if (bIsBone) { 
 			player_->UpdateTemperatureState();
-			bisBone = false;
+			bIsBone = false;
 		}
 		//눈사람 변화
 		if (player_->IsSnowman())
 		{
-			if (info.My_State == ST_ANIMAL)
+			if (info.myState == ST_ANIMAL)
 			{
 				Reset_Items(player_->iSessionId);
 				info.HealthValue = player_->iBeginSlowHP;
@@ -804,7 +804,7 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 		}
 		else if (!player_->IsSnowman())
 		{
-			if (info.My_State == ST_SNOWMAN)
+			if (info.myState == ST_SNOWMAN)
 			{
 				Reset_Items(player_->iSessionId);
 				info.HealthValue = player_->iMinHP;
@@ -820,17 +820,17 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 
 		}
 		// 캐릭터 속성 업데이트
-		if (player_->iCurrentSnowballCount != info.current_snow_count)
+		if (player_->iCurrentSnowballCount != info.iCurrentSnowCount)
 		{
 			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
-			player_->iCurrentSnowballCount = info.current_snow_count;
+			player_->iCurrentSnowballCount = info.iCurrentSnowCount;
 			CallDelegateUpdateCurrentSnowballCount();
 		}
 		// 캐릭터 속성 업데이트
-		if (player_->iCurrentIceballCount != info.current_ice_count)
+		if (player_->iCurrentIceballCount != info.iCurrentIceCount)
 		{
 			//MYLOG(Warning, TEXT("Player damaged hp: %d"), info.HealthValue);
-			player_->iCurrentIceballCount = info.current_ice_count;
+			player_->iCurrentIceballCount = info.iCurrentIceCount;
 			CallDelegateUpdateCurrentIceballCount();
 		}
 

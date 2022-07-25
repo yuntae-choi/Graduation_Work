@@ -98,8 +98,8 @@ public:
 	// 세션 아이디
 	int SessionId = -1;
 	// 아이디 비번
-	char	user_id[MAX_NAME_SIZE] = {};
-	char	user_pw[MAX_NAME_SIZE] = {};
+	char	userId[MAX_NAME_SIZE] = {};
+	char	userPw[MAX_NAME_SIZE] = {};
 	// 위치
 	float X = 0;
 	float Y = 0;
@@ -119,47 +119,47 @@ public:
 	int	HealthValue = 390.0f;
 	bool	IsAttacking = false;
 	//카메라 위치
-	float fCx, fCy, fCz;
+	float fCX, fCY, fCZ;
 	//카메라 방향
-	float fCDx, fCDy, fCDz;
+	float fCDX, fCDY, fCDZ;
 	//카메라 yaw
-	float fyaw, fpitch, froll;
+	float fCYaw, fCPitch, fCRoll;
 	//발사 속도
 	float fSpeed;
 
 	//눈덩이 위치
-	float SBx, SBy, SBz;
+	float fSBallX, fSBallY, fSBallZ;
 	//아이스볼 위치
-	float IBx, IBy, IBz;
+	float fIBallX, fIBallY, fIBallZ;
 
 
-	STATE_Type My_State = ST_ANIMAL;
-	int current_snow_count = 0;
-	int current_ice_count = 0;
-	int current_match_count = 0;
+	STATE_Type myState = ST_ANIMAL;
+	int iCurrentSnowCount = 0;
+	int iCurrentIceCount = 0;
+	int iCurrentMatchCount = 0;
 
-	int max_snow_count = 10;
-	int max_match_count = 2;
+	int iMaxSnowCount = 10;
+	int iMaxMatchCount = 2;
 
-	bool Start_ShotGun = false;
-	bool Start_SnowBall = false;
-	bool Start_IceBall = false;
+	bool bStartShotGun = false;
+	bool bStartSnowBall = false;
+	bool bStartIceBall = false;
 	
-	bool End_SnowBall = false;
-	bool End_IceBall = false;
-	bool End_ShotGun = false;
+	bool bEndSnowBall = false;
+	bool bEndIceBall = false;
+	bool bEndShotGun = false;
 
-	bool Cancel_SnowBall = false;
-	bool Cancel_IceBall = false;
+	bool bCancelSnowBall = false;
+	bool bCancelIceBall = false;
 
-	bool has_umb = false;
-	bool start_umb = false;
-	bool end_umb = false;
-	bool SET_JET_SKI = false;
+	bool bHasUmb = false;
+	bool bStartUmb = false;
+	bool bEndUmb = false;
+	bool bSetJetSki = false;
 
 
 
-	int random_bullet[MAX_BULLET_RANG] = {};
+	int iRandBulletArr[MAX_BULLET_RANG] = {};
 
 
 	friend ostream& operator<<(ostream& stream, cCharacter& info)

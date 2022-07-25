@@ -86,8 +86,8 @@ public:
 	void ResetHasItems();	// 소유한 아이템 및 효과들 초기화
 	void Attack();
 	void ReleaseAttack();      //호출시 서버로 메세지 전송
-	void Cancel_SnowBallAttack(); //서버에서 전송이 왔을때
-	void Cancel_IceBallAttack(); //서버에서 전송이 왔을때
+	void CancelSnowBallAttack(); //서버에서 전송이 왔을때
+	void CancelIceBallAttack(); //서버에서 전송이 왔을때
 
 	void SnowBallAttack();    // 일반 공격
 	void ShotgunAttack(); //샷건 공격

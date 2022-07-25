@@ -49,7 +49,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		info.Y = packet->y;
 		info.Z = packet->z;
 		info.Yaw = packet->yaw;
-		strcpy_s(info.user_id, packet->id);
+		strcpy_s(info.userId, packet->id);
 		my_s_id = packet->s_id;
 		CharactersInfo.players[info.SessionId] = info;
 		MyPlayerController->SetSessionId(info.SessionId);
@@ -112,7 +112,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_START:
 	{
 		// 게임시작
-		MyPlayerController->Start_Signal();
+		MyPlayerController->StartSignal();
 		break;
 	}
 
@@ -131,7 +131,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			info->Y = packet->y;
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
-			strcpy_s(info->user_id, packet->name);
+			strcpy_s(info->userId, packet->name);
 			MyPlayerController->SetNewCharacterInfo(info);
 			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
@@ -144,7 +144,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		case TONARDO:
 		{
 			my_tonardo_id = packet->s_id;
-			MyPlayerController->itonardoId = packet->s_id;
+			MyPlayerController->iTonardoId = packet->s_id;
 			auto info = make_shared<cCharacter>();
 			info->SessionId = packet->s_id;
 			info->X = packet->x;
@@ -185,26 +185,26 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		cs_packet_throw_snow* packet = reinterpret_cast<cs_packet_throw_snow*>(ptr);
 		CharactersInfo.players[packet->s_id].fSpeed = packet->speed;		// 발사 속도
-		CharactersInfo.players[packet->s_id].fyaw = packet->yaw;		// yaw
-		CharactersInfo.players[packet->s_id].fpitch = packet->pitch;		// pitch
-		CharactersInfo.players[packet->s_id].froll = packet->roll;		// roll
+		CharactersInfo.players[packet->s_id].fCYaw = packet->yaw;		// yaw
+		CharactersInfo.players[packet->s_id].fCPitch = packet->pitch;		// pitch
+		CharactersInfo.players[packet->s_id].fCRoll = packet->roll;		// roll
 
 		switch (packet->bullet)
 		{
 		case BULLET_SNOWBALL:
 		{
-			CharactersInfo.players[packet->s_id].SBx = packet->ball_x;		// 눈덩이 위치
-			CharactersInfo.players[packet->s_id].SBy = packet->ball_y;		// 눈덩이 위치
-			CharactersInfo.players[packet->s_id].SBz = packet->ball_z;		// 눈덩이 위치
+			CharactersInfo.players[packet->s_id].fSBallX = packet->ball_x;		// 눈덩이 위치
+			CharactersInfo.players[packet->s_id].fSBallY = packet->ball_y;		// 눈덩이 위치
+			CharactersInfo.players[packet->s_id].fSBallZ = packet->ball_z;		// 눈덩이 위치
 
 			MyPlayerController->SetAttack(packet->s_id, END_SNOWBALL);
 			break;
 		}
 		case BULLET_ICEBALL:
 		{
-			CharactersInfo.players[packet->s_id].IBx = packet->ball_x;		// 얼음 위치
-			CharactersInfo.players[packet->s_id].IBy = packet->ball_y;		// 얼음 위치
-			CharactersInfo.players[packet->s_id].IBz = packet->ball_z;		// 얼음 위치
+			CharactersInfo.players[packet->s_id].fIBallX = packet->ball_x;		// 얼음 위치
+			CharactersInfo.players[packet->s_id].fIBallY = packet->ball_y;		// 얼음 위치
+			CharactersInfo.players[packet->s_id].fIBallZ = packet->ball_z;		// 얼음 위치
 
 			MyPlayerController->SetAttack(packet->s_id, END_ICEBALL);
 			break;
@@ -241,7 +241,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_fire* packet = reinterpret_cast<cs_packet_fire*>(ptr);
 		for (int i = 0; i < MAX_BULLET_RANG; ++i)
-			CharactersInfo.players[packet->s_id].random_bullet[i] = packet->rand_int[i];
+			CharactersInfo.players[packet->s_id].iRandBulletArr[i] = packet->rand_int[i];
 		CharactersInfo.players[packet->s_id].Pitch = packet->pitch;		// 카메라 pitch
 		MyPlayerController->SetAttack(packet->s_id, END_SHOTGUN);
 		break;
@@ -273,11 +273,11 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		//MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
 		if (ST_SNOWMAN == packet->state) {
 
-			CharactersInfo.players[packet->s_id].My_State = ST_SNOWMAN;
+			CharactersInfo.players[packet->s_id].myState = ST_SNOWMAN;
 			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
 		}
 		else if (ST_ANIMAL == packet->state) {
-			CharactersInfo.players[packet->s_id].My_State = ST_ANIMAL;
+			CharactersInfo.players[packet->s_id].myState = ST_ANIMAL;
 		}
 		break;
 	}
@@ -308,20 +308,20 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		{
 			if (MyPlayerController->iSessionId == packet->s_id)
 				MyPlayerController->get_item(ITEM_MAT);
-			//CharactersInfo.players[packet->s_id].current_match_count++;
+			//CharactersInfo.players[packet->s_id].iCurrentMatchCount++;
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 
 			break;
 		}
 		case ITEM_SNOW:
 		{
-			CharactersInfo.players[packet->s_id].current_snow_count = packet->current_bullet;
+			CharactersInfo.players[packet->s_id].iCurrentSnowCount = packet->current_bullet;
 			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
 			break;
 		}
 		case ITEM_ICE:
 		{
-			CharactersInfo.players[packet->s_id].current_ice_count = packet->current_bullet;
+			CharactersInfo.players[packet->s_id].iCurrentIceCount = packet->current_bullet;
 			MyPlayerController->SetDestroyIcedritt(packet->destroy_obj_id);
 			break;
 		}
@@ -340,7 +340,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	}
 	case SC_PACKET_IS_BONE:
 	{
-		MyPlayerController->get_bone();
+		MyPlayerController->GetBone();
 		break;
 	}
 	case SC_PACKET_LOGOUT:
@@ -408,7 +408,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	case SC_PACKET_PLAYER_COUNT:
 	{
 		sc_packet_player_count* packet = reinterpret_cast<sc_packet_player_count*>(ptr);
-		MyPlayerController->set_cnt(packet->bear, packet->snowman);
+		MyPlayerController->SetCnt(packet->bear, packet->snowman);
 		break;
 	}
 	}
@@ -468,7 +468,7 @@ void ClientSocket::Send_ReadyPacket()
 
 
 void ClientSocket::Send_StatusPacket(int _state, int s_id) {
-	//CharactersInfo.players[iMy_s_id].My_State = _state;
+	//CharactersInfo.players[iMy_s_id].myState = _state;
 	sc_packet_status_change packet;
 	packet.size = sizeof(packet);
 	packet.s_id = s_id;

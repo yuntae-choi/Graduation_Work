@@ -99,37 +99,37 @@ public:
 
 	void SetCharacterState(const int s_id, STATE_Type _state)
 	{
-		charactersInfo->players[s_id].My_State = _state;
+		charactersInfo->players[s_id].myState = _state;
 	}
 	void SetCharacterHP(const int s_id, int _hp)
 	{
 		charactersInfo->players[s_id].HealthValue = _hp;
 	}
-	void Start_Signal()
+	void StartSignal()
 	{
 		//bInGame = true;
 		StartGame();
 	}
-	bool is_start()
+	bool IsStart()
 	{
 		return bInGame;
 	}
-	void get_bone()
+	void GetBone()
 	{
-		bisBone = true;
+		bIsBone = true;
 	}
-	void set_cnt(int bear, int snowman)
+	void SetCnt(int iBear, int iSnowman)
 	{
-		bear_cnt = bear;
-		snowman_cnt = snowman;
+		iBearCnt = iBear;
+	    iSnowmanCnt = iSnowman;
 	}
-	int get_bear_cnt()
+	int GetBearCnt()
 	{
-		return bear_cnt;
+		return iBearCnt;
 	}
-	int get_snowman_cnt()
+	int GetSnowmanCnt()
 	{
-		return snowman_cnt;
+		return iSnowmanCnt;
 	}
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -150,7 +150,7 @@ private:
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
-	int							itonardoId = -1;			// 토네이도 아이디
+	int							iTonardoId = -1;			// 토네이도 아이디
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
@@ -236,11 +236,11 @@ private:
 	shared_ptr<cCharacter> newplayer;
 	//queue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
 	LockQueue<int> newBalls;
-	LockQueue<int> destory_snowdrift;
-	LockQueue<int> destory_itembox;
-	LockQueue<int> open_itembox;
-	LockQueue<int> destory_player;
-	atomic<int> victory_player;
+	LockQueue<int> destorySnowdrift;
+	LockQueue<int> destoryItemBox;
+	LockQueue<int> openItemBox;
+	LockQueue<int> destoryPlayer;
+	atomic<int> ivictoryPlayer;
 
 
 	//queue <int>				newBalls;
@@ -248,9 +248,9 @@ private:
 
 	bool							bNewPlayerEntered;
 	bool							bInitPlayerSetting;
-	bool							bisBone = false;
-	int                             bear_cnt;
-	int                             snowman_cnt;
+	bool							bIsBone = false;
+	int                             iBearCnt;
+	int                             iSnowmanCnt;
 
 
 	atomic<bool>                    bSetStart;
