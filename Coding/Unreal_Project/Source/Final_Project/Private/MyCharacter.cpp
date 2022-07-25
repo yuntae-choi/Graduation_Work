@@ -915,7 +915,7 @@ void AMyCharacter::ReleaseIceball()
 			IceBallLocation.X = PlayerController->GetCharactersInfo()->players[iSessionId].IBx;
 			IceBallLocation.Y = PlayerController->GetCharactersInfo()->players[iSessionId].IBy;
 			IceBallLocation.Z = PlayerController->GetCharactersInfo()->players[iSessionId].IBz;
-			snowball->SetActorLocation(IceBallLocation);
+			iceball->SetActorLocation(IceBallLocation);
 
 
 			II_Throwable::Execute_IceballThrow(iceball, cameraRotation, speed);
