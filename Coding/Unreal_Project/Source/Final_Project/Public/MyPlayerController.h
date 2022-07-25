@@ -123,10 +123,12 @@ public:
 		iBearCnt = iBear;
 	    iSnowmanCnt = iSnowman;
 	}
+	UFUNCTION(BlueprintCallable)
 	int GetBearCnt()
 	{
 		return iBearCnt;
 	}
+	UFUNCTION(BlueprintCallable)
 	int GetSnowmanCnt()
 	{
 		return iSnowmanCnt;
