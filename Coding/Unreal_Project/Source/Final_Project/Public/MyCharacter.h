@@ -159,7 +159,7 @@ public:
 	void FreezeLeftCalf();
 	void FreezeRightThigh();
 	void FreezeRightCalf();
-	void FreezeAnimation(TArray<UStaticMeshComponent*> bones, int& frame, bool& end);
+	void FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& end, UStaticMeshComponent*& bone, TArray<UStaticMesh*>& FrozenMeshes);
 	void FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end);
 protected:
 	virtual void BeginPlay() override;
@@ -338,52 +338,103 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	class AMyPlayerController* localPlayerController;
 
-	TArray<UStaticMeshComponent*> heads;
-	int32 iHeadFrame;
+	//Freeze Effect
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* headComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> headMeshes;
+
+	int32 iHeadFrame = 0;
 	bool bHeadAnimEnd = false;
 	FTimerHandle headHandle;
 
-	TArray<UStaticMeshComponent*> leftForearms;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* leftForearmComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> leftForearmMeshes;
+
 	int32 iLeftForearmFrame;
 	bool bLeftForearmAnimEnd = false;
 	FTimerHandle leftForearmHandle;
 
-	TArray<UStaticMeshComponent*> leftUpperarms;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* leftUpperarmComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> leftUpperarmMeshes;
+
 	int32 iLeftUpperarmFrame;
 	bool bLeftUpperarmAnimEnd = false;
 	FTimerHandle leftUpperarmHandle;
 
-	TArray<UStaticMeshComponent*> rightForearms;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* rightForearmComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> rightForearmMeshes;
+
 	int32 iRightForearmFrame;
 	bool bRightForearmAnimEnd = false;
 	FTimerHandle rightForearmHandle;
 
-	TArray<UStaticMeshComponent*> rightUpperarms;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* rightUpperarmComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> rightUpperarmMeshes;
+
 	int32 iRightUpperarmFrame;
 	bool bRightUpperarmAnimEnd = false;
 	FTimerHandle rightUpperarmHandle;
 
-	TArray<UStaticMeshComponent*> centers;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* centerComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> centerMeshes;
+
 	int32 iCenterFrame;
 	bool bCenterAnimEnd = false;
 	FTimerHandle centerHandle;
 
-	TArray<UStaticMeshComponent*> leftThighs;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* leftThighComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> leftThighMeshes;
+
 	int32 iLeftThighFrame;
 	bool bLeftThighAnimEnd = false;
 	FTimerHandle leftThighHandle;
 
-	TArray<UStaticMeshComponent*> leftCalfs;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* leftCalfComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> leftCalfMeshes;
+
 	int32 iLeftCalfFrame;
 	bool bLeftCalfAnimEnd = false;
 	FTimerHandle leftCalfHandle;
 
-	TArray<UStaticMeshComponent*> rightThighs;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* rightThighComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> rightThighMeshes;
+
 	int32 iRightThighFrame;
 	bool bRightThighAnimEnd = false;
 	FTimerHandle rightThighHandle;
 
-	TArray<UStaticMeshComponent*> rightCalfs;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	UStaticMeshComponent* rightCalfComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
+	TArray<UStaticMesh*> rightCalfMeshes;
+
 	int32 iRightCalfFrame;
 	bool bRightCalfAnimEnd = false;
 	FTimerHandle rightCalfHandle;
