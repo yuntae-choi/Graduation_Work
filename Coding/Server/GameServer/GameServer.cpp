@@ -816,9 +816,10 @@ void process_packet(int s_id, unsigned char* p)
 				cout << "플레이어: [" << cl._s_id << "] 가방 파밍 성공" << endl;
 			}
 			else
+				break;
 				//cout << "플레이어: [" << cl._s_id << "] 가방 파밍 실패" << endl;
 
-				break;
+		break;
 		}
 		case ITEM_UMB:
 		{
@@ -836,10 +837,11 @@ void process_packet(int s_id, unsigned char* p)
 				cout << "플레이어: [" << cl._s_id << "] 우산 파밍 성공" << endl;
 			}
 			else
+				break;
 				//cout << "플레이어: [" << cl._s_id << "] 우산 파밍 실패" << endl;
 
 
-				break;
+		break;
 		}
 		case ITEM_JET:
 		{
@@ -870,10 +872,11 @@ void process_packet(int s_id, unsigned char* p)
 				cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 성공" << endl;
 			}
 			else
+				break;
 				//cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 실패" << endl;
 
 
-				break;
+		break;
 		}
 		case ITEM_SNOW:
 		{
@@ -898,6 +901,7 @@ void process_packet(int s_id, unsigned char* p)
 			else
 				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
 				break;
+		break;
 		}
 		case ITEM_ICE:
 		{
@@ -917,7 +921,8 @@ void process_packet(int s_id, unsigned char* p)
 					packet->type = SC_PACKET_GET_ITEM;
 					other.do_send(sizeof(*packet), packet);
 				}
-				cout << "플레이어: [" << cl._s_id << "] 얼음무더기 파밍 성공" << endl;
+
+				cout << "플레이어: [" << cl._s_id << "] 얼음무더기 파밍 성공 현재 눈개수"  << cl.iCurrentIceballCount << endl;
 			}
 			else
 				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
