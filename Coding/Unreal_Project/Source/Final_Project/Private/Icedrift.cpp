@@ -6,6 +6,7 @@
 
 const float AIcedrift::fFarmDurationMax = 3.0f;
 const int AIcedrift::iNumOfIceball = 5;
+int AIcedrift::iIdCountHelper = -1;
 
 // Sets default values
 AIcedrift::AIcedrift()
@@ -43,7 +44,8 @@ AIcedrift::AIcedrift()
 void AIcedrift::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	iId = ++iIdCountHelper;
+
 }
 
 // Called every frame

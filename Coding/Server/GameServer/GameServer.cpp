@@ -137,6 +137,7 @@ void Wsa_err_display(int err_no)
 void Init_Arr()
 {
 	for (int i = 0; i < MAX_SNOWDRIFT; ++i) GA.g_snow_drift[i] = true;
+	for (int i = 0; i < MAX_SNOWDRIFT; ++i) GA.g_ice_drift[i] = true;
 	for (int i = 0; i < MAX_ITEM; ++i) GA.g_item[i] = true;
 	for (int i = 0; i < MAX_USER; ++i) clients[i]._s_id = i;
 }
@@ -893,6 +894,30 @@ void process_packet(int s_id, unsigned char* p)
 					other.do_send(sizeof(*packet), packet);
 				}
 				cout << "플레이어: [" << cl._s_id << "] 눈무더기 파밍 성공" << endl;
+			}
+			else
+				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
+				break;
+		}
+		case ITEM_ICE:
+		{
+			int ice_drift_num = packet->destroy_obj_id;
+			bool get_iceball = is_icedrift(ice_drift_num);
+			if (get_iceball) {
+				if (cl.iMaxIceballCount >= cl.iCurrentIceballCount + 5)
+					cl.iCurrentIceballCount += 5;
+				else
+					cl.iCurrentIceballCount = cl.iMaxIceballCount;
+
+				packet->type = SC_PACKET_GET_ITEM;
+				packet->current_bullet = cl.iCurrentIceballCount;
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					packet->type = SC_PACKET_GET_ITEM;
+					other.do_send(sizeof(*packet), packet);
+				}
+				cout << "플레이어: [" << cl._s_id << "] 얼음무더기 파밍 성공" << endl;
 			}
 			else
 				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;

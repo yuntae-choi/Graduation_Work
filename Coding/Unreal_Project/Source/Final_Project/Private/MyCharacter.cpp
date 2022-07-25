@@ -1158,12 +1158,16 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 
 		if (newFarmDuration <= 0)
 		{
-			iCurrentIceballCount = FMath::Clamp<int>(iCurrentIceballCount + icedrift->iNumOfIceball, 0, iMaxIceballCount);
+			//얼음 파밍 시 서버 전송
+#ifdef MULTIPLAY_DEBUG
+			PlayerController->GetSocket()->Send_ItemPacket(ITEM_ICE, icedrift->GetId());
+#endif
+			//iCurrentIceballCount = FMath::Clamp<int>(iCurrentIceballCount + icedrift->iNumOfIceball, 0, iMaxIceballCount);
 			UpdateUI(UICategory::CurIceball);
 			bIsFarming = false;	// 얼음무더기 파밍 끝나면 false로 변경 후 UI 갱신 (눈무더기 파밍 바 ui 안보이도록)
 			UpdateUI(UICategory::IsFarmingSnowdrift);
-			icedrift->Destroy();
-			icedrift = nullptr;
+			//icedrift->Destroy();
+			//icedrift = nullptr;
 		}
 	}
 }

@@ -26,6 +26,8 @@ public:
 
 	float GetFarmDuration() { return fFarmDuration; };
 	void SetFarmDuration(float duration) { fFarmDuration = duration; };
+	
+	int32 GetId() const { return iId; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -45,4 +47,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Farm)
 	float fFarmDuration;	// 파밍에 걸리는 시간 중 현재 남은 시간
+	int32 iId;
+
 };

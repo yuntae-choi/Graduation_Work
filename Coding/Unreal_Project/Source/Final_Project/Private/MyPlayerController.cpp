@@ -8,6 +8,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Debug.h"
 #include "Snowdrift.h"
+#include "Icedrift.h"
 #include "Itembox.h"
 #include "Tornado.h"
 
@@ -288,6 +289,26 @@ void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
 		}
 	}
 		
+}
+
+void AMyPlayerController::SetDestroyIcedritt(const int obj_id)
+{
+	UWorld* World = GetWorld();
+	TArray<AActor*> Icedrifts;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AIcedrift::StaticClass(), Icedrifts);
+
+	if (obj_id == -1) return;
+	for (auto sd : Icedrifts)
+	{
+		AIcedrift* icedrift = Cast<AIcedrift>(sd);
+
+		if (icedrift->GetId() == obj_id)
+		{
+			icedrift->Destroy();
+			icedrift = nullptr;
+		}
+	}
+
 }
 
 void AMyPlayerController::SetOpenItembox(const int obj_id)

@@ -49,6 +49,7 @@ public:
 	void SetInitInfo(const cCharacter& me);
 
 	void SetDestroySnowdritt(const int s_id);
+	void SetDestroyIcedritt(const int obj_id);
 	void SetDestroyitembox(const int obj_id);
 	void SetDestroyPlayer(const int del_sid);
 	void SetGameEnd(const int target_id);

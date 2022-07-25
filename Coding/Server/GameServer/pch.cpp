@@ -48,6 +48,16 @@ bool is_snowdrift(int obj_id)
 	return false;
 }
 
+bool is_icedrift(int obj_id)
+{
+	unique_lock<mutex> _lock(g_snow_mutex);
+	if (GA.g_ice_drift[obj_id]) {
+		GA.g_ice_drift[obj_id] = false;
+		return true;
+	}
+	return false;
+}
+
 bool is_item(int obj_id)
 {
 	unique_lock<mutex> _lock(g_item_mutex);

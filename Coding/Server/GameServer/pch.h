@@ -22,6 +22,7 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 
 mutex  g_snow_mutex;
+mutex  g_ice_mutex;
 mutex  g_item_mutex;
 
 const int RANGE = 10000;
@@ -50,6 +51,7 @@ void error_display(int err_no);
 
 struct global_arr {
     bool g_snow_drift[MAX_SNOWDRIFT] = {};
+    bool g_ice_drift[MAX_SNOWDRIFT] = {};
     bool g_item[MAX_ITEM] = {};
     bool g_start_game = false;
     int g_tonardo_id = -1;
@@ -63,6 +65,7 @@ bool is_player(int id);
 bool is_bonfire(int a);
 bool is_near(int a, int b);
 bool is_snowdrift(int obj_id);
+bool is_icedrift(int obj_id);
 bool is_item(int obj_id);
 void send_login_ok_packet(int _s_id);
 void send_login_fail_packet(int _s_id, int _reason);

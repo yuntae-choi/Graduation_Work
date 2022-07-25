@@ -322,7 +322,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		case ITEM_ICE:
 		{
 			CharactersInfo.players[packet->s_id].current_ice_count = packet->current_bullet;
-			MyPlayerController->SetDestroySnowdritt(packet->destroy_obj_id);
+			MyPlayerController->SetDestroyIcedritt(packet->destroy_obj_id);
 			break;
 		}
 		case ITEM_JET:
