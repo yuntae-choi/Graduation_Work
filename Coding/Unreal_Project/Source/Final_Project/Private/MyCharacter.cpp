@@ -1506,6 +1506,7 @@ void AMyCharacter::UseSelectedItem()
 		{
 			MYLOG(Warning, TEXT("select_umb"));
 			localPlayerController->SendPlayerInfo(COMMAND_UMB_START);
+			isAttacking = true;
 		}
 		
 		// 디버깅용 - 실제로는 주석 해제
@@ -1725,7 +1726,7 @@ void AMyCharacter::ReleaseRightMouseButton()
 {
 	switch (iSelectedItem) {
 	case ItemTypeList::Umbrella:	// 우산 사용 해제
-		MYLOG(Warning, TEXT("relese_mouse"));
+		//MYLOG(Warning, TEXT("relese_mouse"));
 		ReleaseUmbrella();
 		break;
 	default:
@@ -1735,10 +1736,6 @@ void AMyCharacter::ReleaseRightMouseButton()
 
 void AMyCharacter::StartUmbrella()
 {
-	if (isAttacking) return;
-
-	IsAttacking = true;
-
 	myAnim->PlayUmbrellaMontage();
 
 	bReleaseUmbrella = false;

@@ -242,10 +242,6 @@ public:
 	static const int iMinHP;
 	static const int iBeginSlowHP;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
 
-	bool	IsAlive;		// 살아있는지
-	bool	IsAttacking;	// 공격중인지
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 iCurrentHP;
 
