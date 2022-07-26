@@ -70,6 +70,7 @@ public:
 
 	void SetIsFarming(bool value) { bIsFarming = value; };
 	bool GetIsFarming() { return bIsFarming; };
+	UFUNCTION(BlueprintCallable, Category = GamePlay)
 	void SetCanFarmItem(AActor* item) { farmingItem = item; };
 	bool GetItem(int itemType);
 
@@ -133,6 +134,8 @@ public:
 
 	void GetBag();
 
+	void GetSupplyBox();
+
 	void GetOnOffJetski();
 	void GetOnJetski();
 	void GetOffJetski();
@@ -145,6 +148,7 @@ public:
 	void Cheat_IncreaseHP();
 	void Cheat_DecreaseHP();
 	void Cheat_IncreaseSnowball();
+	void Cheat_SpawnSupplyBox();
 
 	UFUNCTION()
 	class UMyAnimInstance* GetAnim() const { return myAnim; }
@@ -519,4 +523,7 @@ private:
 	TSubclassOf<class AJetski> jetskiClass;
 
 	UAnimationAsset* driveAnimAsset;
+
+	UPROPERTY(VisibleAnywhere, Category = Class)
+	TSubclassOf<class AActor> supplyboxClass;
 };

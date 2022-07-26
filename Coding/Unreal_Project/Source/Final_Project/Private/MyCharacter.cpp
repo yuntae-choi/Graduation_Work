@@ -12,6 +12,7 @@
 #include "EmptyActor.h"
 #include "GameFramework/HUD.h"
 #include "Jetski.h"
+#include "SupplyBox.h"
 
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
@@ -325,6 +326,15 @@ AMyCharacter::AMyCharacter()
 		}
 	}
 
+	if (!supplyboxClass)
+	{
+		static ConstructorHelpers::FClassFinder<AActor> SupplyBox_Class(TEXT("/Game/Blueprints/SupplyBox_BP.SupplyBox_BP_C"));
+		if (SupplyBox_Class.Succeeded())
+		{
+			supplyboxClass = SupplyBox_Class.Class;
+		}
+	}
+
 	SettingHead();
 	SettingLeftForearm();
 	SettingLeftUpperArm();
@@ -526,6 +536,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("Cheat_DecreaseHP"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_DecreaseHP);
 
 	PlayerInputComponent->BindAction(TEXT("Cheat_IncreaseSnowball"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_IncreaseSnowball);
+
+	PlayerInputComponent->BindAction(TEXT("Cheat_SpawnSupplyBox"), EInputEvent::IE_Pressed, this, &AMyCharacter::Cheat_SpawnSupplyBox);
 }
 
 void AMyCharacter::UpDown(float NewAxisValue)
@@ -1078,6 +1090,10 @@ void AMyCharacter::StartFarming()
 		default:
 			break;
 		}
+	}
+	else if (Cast<ASupplyBox>(farmingItem))
+	{
+		GetSupplyBox();
 	}
 }
 
@@ -1719,6 +1735,25 @@ void AMyCharacter::Cheat_IncreaseSnowball()
 	else 
 	{
 		localPlayerController->SendCheatInfo(CHEAT_SNOW_PLUS);
+	}
+}
+
+void AMyCharacter::Cheat_SpawnSupplyBox()
+{
+	if (supplyboxClass)
+	{
+		UWorld* World = GetWorld();
+
+		if (World)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+
+			FVector vector = FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 600.0f);
+			FTransform transform = FTransform(FRotator(0.0f), vector, FVector(1.0f));
+			World->SpawnActor<AActor>(supplyboxClass, transform, SpawnParams);
+		}
 	}
 }
 
@@ -2424,3 +2459,19 @@ float AMyCharacter::Getfspeed()
 	float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
 	return speed;
 };
+
+void AMyCharacter::GetSupplyBox()
+{
+	// ´«µ¢ÀÌ, ¾ÆÀÌ½ºº¼, ¼º³É ÃÖ´ëÄ¡·Î È¹µæ & ¼¦°Ç È¹µæ)
+	iCurrentSnowballCount = iMaxSnowballCount;
+	iCurrentIceballCount = iMaxIceballCount;
+	iCurrentMatchCount = iMaxMatchCount;
+	bHasShotgun = true;
+	UpdateUI(UICategory::CurSnowball);
+	UpdateUI(UICategory::CurIceball);
+	UpdateUI(UICategory::CurMatch);
+	UpdateUI(UICategory::HasShotgun);
+
+	farmingItem->Destroy();
+	SetCanFarmItem(nullptr);
+}
