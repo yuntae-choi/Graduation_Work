@@ -97,6 +97,8 @@ public:
 	void CallDelegateUpdateSelectedWeapon();
 	void CallDelegateUpdateGameResult(bool isWinner);
 
+	void SpawnSupplyBox(float x, float y, float z = 4500.0f);	// 해당 위치에 보급상자 스폰
+
 	void SetCharacterState(const int s_id, STATE_Type _state)
 	{
 		charactersInfo->players[s_id].myState = _state;
@@ -268,4 +270,7 @@ private:
 
 	float fOldYaw = 0.0f;
 	float bIsSpeedZero = false;
+
+	UPROPERTY(VisibleAnywhere, Category = Class)
+	TSubclassOf<class AActor> supplyboxClass;
 };

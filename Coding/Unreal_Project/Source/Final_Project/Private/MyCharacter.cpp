@@ -326,15 +326,6 @@ AMyCharacter::AMyCharacter()
 		}
 	}
 
-	if (!supplyboxClass)
-	{
-		static ConstructorHelpers::FClassFinder<AActor> SupplyBox_Class(TEXT("/Game/Blueprints/SupplyBox_BP.SupplyBox_BP_C"));
-		if (SupplyBox_Class.Succeeded())
-		{
-			supplyboxClass = SupplyBox_Class.Class;
-		}
-	}
-
 	SettingHead();
 	SettingLeftForearm();
 	SettingLeftUpperArm();
@@ -1751,22 +1742,8 @@ void AMyCharacter::Cheat_IncreaseSnowball()
 }
 
 void AMyCharacter::Cheat_SpawnSupplyBox()
-{
-	if (supplyboxClass)
-	{
-		UWorld* World = GetWorld();
-
-		if (World)
-		{
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-			SpawnParams.Instigator = GetInstigator();
-
-			FVector vector = FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 600.0f);
-			FTransform transform = FTransform(FRotator(0.0f), vector, FVector(1.0f));
-			World->SpawnActor<AActor>(supplyboxClass, transform, SpawnParams);
-		}
-	}
+{	// 캐릭터 머리 위에 SupplyBox 생성
+	localPlayerController->SpawnSupplyBox(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 600.0f);
 }
 
 void AMyCharacter::ReleaseRightMouseButton()

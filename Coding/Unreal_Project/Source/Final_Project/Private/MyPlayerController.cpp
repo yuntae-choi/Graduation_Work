@@ -70,6 +70,15 @@ AMyPlayerController::AMyPlayerController()
 		loginUIClass = LOGIN_UI.Class;
 	}
 
+	if (!supplyboxClass)
+	{
+		static ConstructorHelpers::FClassFinder<AActor> SupplyBox_Class(TEXT("/Game/Blueprints/SupplyBox_BP.SupplyBox_BP_C"));
+		if (SupplyBox_Class.Succeeded())
+		{
+			supplyboxClass = SupplyBox_Class.Class;
+		}
+	}
+
 	bIsReady = false;
 	loginInfoText = TEXT("LOGIN");
 }
@@ -1153,4 +1162,23 @@ void AMyPlayerController::DeleteLoginUICreateReadyUI()
 {
 	loginUI->RemoveFromParent();	// LoginUI Á¦°Å
 	LoadReadyUI(); // ReadyUI ¶ç¿ì±â
+}
+
+void AMyPlayerController::SpawnSupplyBox(float x, float y, float z)
+{
+	if (supplyboxClass)
+	{
+		UWorld* World = GetWorld();
+
+		if (World)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+
+			FVector vector = FVector(x, y, z);
+			FTransform transform = FTransform(FRotator(0.0f), vector, FVector(1.0f));
+			World->SpawnActor<AActor>(supplyboxClass, transform, SpawnParams);
+		}
+	}
 }
