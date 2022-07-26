@@ -155,6 +155,8 @@ public:
 
 	void init_Socket();
 
+	bool GetIsSnowman() { return bIsSnowman; };
+
 	void FreezeHead();
 	void FreezeLeftForearm();
 	void FreezeLeftUpperarm();
@@ -184,7 +186,6 @@ private:
 	void UpdateFarming(float deltaTime);
 	void UpdateHP();
 	
-	bool GetIsSnowman() { return bIsSnowman; };
 	void WaitForStartGame();	// 게임 시작 후 대기
 
 	void UpdateZByTornado();
@@ -208,6 +209,8 @@ private:
 	void SettingLeftCalf();
 	void SettingRightThigh();
 	void SettingRightCalf();
+
+	void InitializeFreeze();
 
 
 public:
@@ -442,6 +445,9 @@ public:
 	FTimerHandle rightCalfHandle;
 
 	int32 iId;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraSystem* stunNiagara;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)

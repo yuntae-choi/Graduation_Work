@@ -346,6 +346,8 @@ AMyCharacter::AMyCharacter()
 	SettingRightThigh();
 	SettingRightCalf();
 
+	stunNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/Stun/NS_Stun.NS_Stun"), nullptr, LOAD_None, nullptr);
+
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
 
@@ -1010,6 +1012,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 			//PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
 			//otherCharacter->ChangeSnowman();
 			//PlayerController->SetCharacterState(otherCharacter->iSessionId, ST_SNOWMAN);
+
 #endif
 #ifdef SINGLEPLAY_DEBUG
 			ChangeAnimal();
@@ -1272,6 +1275,9 @@ void AMyCharacter::ChangeSnowman()
 
 	CloseUmbrellaAnim();
 	HideUmbrella();
+
+	//부위 얼리는 소켓 초기화
+	InitializeFreeze();
 }
 
 void AMyCharacter::WaitForStartGame()
@@ -1349,6 +1355,12 @@ void AMyCharacter::StartStun(float waitTime)
 	{	// 토네이도에 의한 스턴이면 캐릭터가 회전하도록, 애니메이션은 재생되도록
 		rotateCont = true;
 		GetMesh()->bPauseAnims = false;
+	}
+
+	//스턴 이펙트
+	if (stunNiagara) {
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), stunNiagara, GetActorLocation() + FVector(0.0f, -40.0f, 90.0f), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+		//NiagaraComp->SetNiagaraVariableFloat(FString("StrengthCoef"), CoefStrength);
 	}
 }
 
@@ -2097,7 +2109,8 @@ void AMyCharacter::SettingHead()
 	headComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("head"));
 	headComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	headComponent->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
-	headComponent->SetVisibility(false);
+	headComponent->SetVisibility(true);
+	headComponent->SetStaticMesh(nullptr);
 }
 
 void AMyCharacter::SettingLeftForearm()
@@ -2126,7 +2139,7 @@ void AMyCharacter::SettingLeftForearm()
 	leftForearmComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("leftForearm"));
 	leftForearmComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	leftForearmComponent->SetupAttachment(GetMesh(), TEXT("LeftForearmSocket"));
-	leftForearmComponent->SetVisibility(false);
+	leftForearmComponent->SetVisibility(true);
 }
 
 void AMyCharacter::SettingLeftUpperArm()
@@ -2160,7 +2173,7 @@ void AMyCharacter::SettingLeftUpperArm()
 	leftUpperarmComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("leftUpperarm"));
 	leftUpperarmComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	leftUpperarmComponent->SetupAttachment(GetMesh(), TEXT("LeftUpperarmSocket"));
-	leftUpperarmComponent->SetVisibility(false);
+	leftUpperarmComponent->SetVisibility(true);
 }
 
 void AMyCharacter::SettingRightForearm()
@@ -2189,7 +2202,7 @@ void AMyCharacter::SettingRightForearm()
 	rightForearmComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rightForearm"));
 	rightForearmComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	rightForearmComponent->SetupAttachment(GetMesh(), TEXT("RightForearmSocket"));
-	rightForearmComponent->SetVisibility(false);
+	rightForearmComponent->SetVisibility(true);
 }
 
 void AMyCharacter::SettingRightUpperArm()
@@ -2218,7 +2231,7 @@ void AMyCharacter::SettingRightUpperArm()
 	rightUpperarmComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rightUpperarm"));
 	rightUpperarmComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	rightUpperarmComponent->SetupAttachment(GetMesh(), TEXT("RightUpperarmSocket"));
-	rightUpperarmComponent->SetVisibility(false);
+	rightUpperarmComponent->SetVisibility(true);
 }
 
 void AMyCharacter::SettingCenter()
@@ -2247,7 +2260,7 @@ void AMyCharacter::SettingCenter()
 	centerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("center"));
 	centerComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	centerComponent->SetupAttachment(GetMesh(), TEXT("CenterSocket"));
-	centerComponent->SetVisibility(false);
+	centerComponent->SetVisibility(true);
 }
 
 void AMyCharacter::SettingLeftThigh()
@@ -2276,7 +2289,7 @@ void AMyCharacter::SettingLeftThigh()
 	leftThighComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("leftThigh"));
 	leftThighComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	leftThighComponent->SetupAttachment(GetMesh(), TEXT("LeftThighSocket"));
-	leftThighComponent->SetVisibility(false);
+	leftThighComponent->SetVisibility(true);
 }
 
 void AMyCharacter::SettingLeftCalf()
@@ -2305,7 +2318,7 @@ void AMyCharacter::SettingLeftCalf()
 	leftCalfComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("leftCalf"));
 	leftCalfComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	leftCalfComponent->SetupAttachment(GetMesh(), TEXT("LeftCalfSocket"));
-	leftCalfComponent->SetVisibility(false);
+	leftCalfComponent->SetVisibility(true);
 }
 
 void AMyCharacter::SettingRightThigh()
@@ -2334,7 +2347,7 @@ void AMyCharacter::SettingRightThigh()
 	rightThighComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rightThigh"));
 	rightThighComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	rightThighComponent->SetupAttachment(GetMesh(), TEXT("RightThighSocket"));
-	rightThighComponent->SetVisibility(false);
+	rightThighComponent->SetVisibility(true);
 }
 
 void AMyCharacter::SettingRightCalf()
@@ -2363,7 +2376,7 @@ void AMyCharacter::SettingRightCalf()
 	rightCalfComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rightCalf"));
 	rightCalfComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	rightCalfComponent->SetupAttachment(GetMesh(), TEXT("RightCalfSocket"));
-	rightCalfComponent->SetVisibility(false);
+	rightCalfComponent->SetVisibility(true);
 }
 
 void AMyCharacter::FreezeHead()
@@ -2418,7 +2431,7 @@ void AMyCharacter::FreezeRightCalf()
 
 void AMyCharacter::FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& end, UStaticMeshComponent*& bone, TArray<UStaticMesh*>& FrozenMeshes)
 {
-	bone->SetVisibility(true);
+	//bone->SetVisibility(true);
 
 	float WaitTime = 0.1f;
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
@@ -2454,11 +2467,25 @@ void AMyCharacter::FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end)
 	}
 }
 
+void AMyCharacter::InitializeFreeze()
+{
+	headComponent->SetStaticMesh(nullptr);
+	leftForearmComponent->SetStaticMesh(nullptr);
+	leftUpperarmComponent->SetStaticMesh(nullptr);
+	rightForearmComponent->SetStaticMesh(nullptr);
+	rightUpperarmComponent->SetStaticMesh(nullptr);
+	centerComponent->SetStaticMesh(nullptr);
+	leftThighComponent->SetStaticMesh(nullptr);
+	leftCalfComponent->SetStaticMesh(nullptr);
+	rightThighComponent->SetStaticMesh(nullptr);
+	rightCalfComponent->SetStaticMesh(nullptr);
+}
+
 float AMyCharacter::Getfspeed()
 {
 	float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
 	return speed;
-};
+}
 
 void AMyCharacter::GetSupplyBox()
 {
