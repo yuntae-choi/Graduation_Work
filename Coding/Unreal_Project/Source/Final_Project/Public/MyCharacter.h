@@ -449,6 +449,12 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UNiagaraSystem* stunNiagara;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraSystem* changeNiagara;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraComponent* tmpNiagara;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;

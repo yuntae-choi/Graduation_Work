@@ -338,6 +338,14 @@ AMyCharacter::AMyCharacter()
 	SettingRightCalf();
 
 	stunNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/Stun/NS_Stun.NS_Stun"), nullptr, LOAD_None, nullptr);
+	changeNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_FrostExplosion.NS_FrostExplosion"), nullptr, LOAD_None, nullptr);
+
+	//tmpNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("tmpComponent"));
+	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TMP(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_FrostSpray.NS_FrostSpray"));
+	//tmpNiagara->SetAsset(NS_TMP.Object);
+	//tmpNiagara->SetupAttachment(GetMesh());
+	//tmpNiagara->SetRelativeLocation(FVector(0.0f, 0.0f, 160.0f));
+	//tmpNiagara->SetVisibility(true);
 
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
@@ -1269,6 +1277,11 @@ void AMyCharacter::ChangeSnowman()
 
 	//부위 얼리는 소켓 초기화
 	InitializeFreeze();
+
+	//변신 이펙트
+	if (changeNiagara) {
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), changeNiagara, GetActorLocation(), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+	}
 }
 
 void AMyCharacter::WaitForStartGame()
@@ -1351,7 +1364,6 @@ void AMyCharacter::StartStun(float waitTime)
 	//스턴 이펙트
 	if (stunNiagara) {
 		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), stunNiagara, GetActorLocation() + FVector(0.0f, -40.0f, 90.0f), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
-		//NiagaraComp->SetNiagaraVariableFloat(FString("StrengthCoef"), CoefStrength);
 	}
 }
 
@@ -1417,6 +1429,11 @@ void AMyCharacter::ChangeAnimal()
 	iCharacterState = CharacterState::AnimalNormal;
 
 	isAttacking = false;	// 공격 도중에 상태 변할 시 발생하는 오류 방지
+
+	//q 이펙트
+	if (changeNiagara) {
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), changeNiagara, GetActorLocation(), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+	}
 }
 
 void AMyCharacter::SetCharacterMaterial(int id)
