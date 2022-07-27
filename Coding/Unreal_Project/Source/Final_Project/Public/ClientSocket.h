@@ -156,6 +156,8 @@ public:
 	bool bStartUmb = false;
 	bool bEndUmb = false;
 	bool bSetJetSki = false;
+	bool bGetSpBox = false;
+
 
 
 
@@ -286,6 +288,7 @@ public:
 
 	void Send_DamagePacket();
 	void Send_ItemPacket(int item_no, int destroy_obj_id);
+	void SendPutObjPacket(char cObjType, int iObjId, FVector ObjLocation, float fYaw);
 	void Send_LogoutPacket(const int& s_id);
 	void Send_ReadyPacket();
 	void Send_MatchPacket(); 

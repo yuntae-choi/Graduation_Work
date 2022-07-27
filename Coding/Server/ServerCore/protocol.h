@@ -37,6 +37,7 @@ const char CS_PACKET_UMB = 17;
 const char CS_PACKET_ACCOUNT = 18;
 const char CS_PACKET_CANCEL_SNOW = 19;
 const char CS_PACKET_PLAYER_COUNT = 20;
+const char CS_PACKET_PUT_OBJECT = 21;
 
 
 
@@ -112,6 +113,7 @@ struct sc_packet_put_object {
 	unsigned char size;
 	char type;
 	int32 s_id;
+	int32 obj_id;
 	float x, y, z;
 	float yaw;
 	char object_type;

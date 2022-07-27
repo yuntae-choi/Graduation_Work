@@ -68,6 +68,15 @@ bool is_item(int obj_id)
 	return false;
 }
 
+bool is_spitem(int obj_id)
+{
+	unique_lock<mutex> _lock(g_spitem_mutex);
+	if (GA.g_spitem[obj_id]) {
+		GA.g_spitem[obj_id] = false;
+		return true;
+	}
+	return false;
+}
 //로그인 허용
 void send_login_ok_packet(int _s_id)
 {

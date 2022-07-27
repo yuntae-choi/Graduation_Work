@@ -157,6 +157,16 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 			break;
 		}
+		case SUPPLYBOX:
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("spbox :%f, %f"), packet->x, packet->y ));
+
+			MyPlayerController->SpawnSupplyBox(packet->x, packet->y, 4500.0f);
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("spbox :%f, %f"), packet->x, packet->y));
+
+			break;
+		}
 		default:
 			break;
 		}
@@ -292,14 +302,14 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		case ITEM_BAG:
 		{
 			if (MyPlayerController->iSessionId == packet->s_id)
-				MyPlayerController->get_item(ITEM_BAG);
+				MyPlayerController->GetItem(packet->s_id, ITEM_BAG);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 			break;
 		}
 		case ITEM_UMB:
 		{
 			if (MyPlayerController->iSessionId == packet->s_id)
-				MyPlayerController->get_item(ITEM_UMB);
+				MyPlayerController->GetItem(packet->s_id, ITEM_UMB);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 
 			break;
@@ -307,7 +317,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		case ITEM_MAT:
 		{
 			if (MyPlayerController->iSessionId == packet->s_id)
-				MyPlayerController->get_item(ITEM_MAT);
+				MyPlayerController->GetItem(packet->s_id, ITEM_MAT);
 			//CharactersInfo.players[packet->s_id].iCurrentMatchCount++;
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 
@@ -329,6 +339,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		{
 			if (MyPlayerController->iSessionId != packet->s_id)
 				MyPlayerController->SetItem(packet->s_id, ITEM_JET, true);
+			break;
+		}
+		case ITEM_SPBOX:
+		{
+			if (MyPlayerController->iSessionId == packet->s_id)
+				MyPlayerController->GetItem(packet->s_id, ITEM_SPBOX);
+			MyPlayerController->SetDestroySpBox(packet->destroy_obj_id);
 			break;
 		}
 		default:
@@ -622,6 +639,23 @@ void ClientSocket::Send_OpenBoxPacket(int open_box_id)
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_OPEN_BOX;
 	packet.open_obj_id = open_box_id;
+	SendPacket(&packet);
+};
+
+void ClientSocket::SendPutObjPacket(char cObjType, int iObjId, FVector ObjLocation, float fYaw)
+{
+	sc_packet_put_object packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_PUT_OBJECT;
+	packet.s_id = MyPlayerController->iSessionId;
+	packet.obj_id = iObjId;
+	packet.object_type = cObjType;
+	packet.x = ObjLocation.X;
+	packet.y = ObjLocation.Y;
+	packet.z = ObjLocation.Z;
+	packet.yaw = fYaw;
+	size_t sent = 0;
+	//MYLOG(Warning, TEXT("[Send item] id : %d, objId : %d, item : %d"), packet.s_id, destroy_obj_id, item_type);
 	SendPacket(&packet);
 };
 

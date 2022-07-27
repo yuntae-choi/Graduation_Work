@@ -51,13 +51,15 @@ public:
 	void SetDestroySnowdritt(const int s_id);
 	void SetDestroyIcedritt(const int obj_id);
 	void SetDestroyitembox(const int obj_id);
+	void SetDestroySpBox(const int obj_id);
 	void SetDestroyPlayer(const int del_sid);
 	void SetGameEnd(const int target_id);
 	void SetOpenItembox(const int obj_id);
 	void SetAttack(const int s_id, int at_type);
 	void SetItem(const int s_id, int item_type, bool end);
 	void SetSocket();
-	void get_item(int itemType);
+	void GetItem(int sId, int itemType);
+
 
 	void UpdateTornado();
 
@@ -98,6 +100,7 @@ public:
 	void CallDelegateUpdateGameResult(bool isWinner);
 
 	void SpawnSupplyBox(float x, float y, float z = 4500.0f);	// 해당 위치에 보급상자 스폰
+
 
 	void SetCharacterState(const int s_id, STATE_Type _state)
 	{

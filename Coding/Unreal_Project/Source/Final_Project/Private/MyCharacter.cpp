@@ -1087,7 +1087,9 @@ void AMyCharacter::StartFarming()
 	}
 	else if (Cast<ASupplyBox>(farmingItem))
 	{
-		GetSupplyBox();
+		ASupplyBox* spbox = Cast<ASupplyBox>(farmingItem);
+		PlayerController->GetSocket()->Send_ItemPacket(ITEM_SPBOX, spbox->iSpBoxId);
+		//GetSupplyBox();
 	}
 }
 
@@ -1743,7 +1745,10 @@ void AMyCharacter::Cheat_IncreaseSnowball()
 
 void AMyCharacter::Cheat_SpawnSupplyBox()
 {	// 캐릭터 머리 위에 SupplyBox 생성
-	localPlayerController->SpawnSupplyBox(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 600.0f);
+	FVector vector = GetActorLocation();
+
+	localPlayerController->GetSocket()->SendPutObjPacket(SUPPLYBOX, 0, vector, 0.0);
+	//localPlayerController->SpawnSupplyBox(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 600.0f);
 }
 
 void AMyCharacter::ReleaseRightMouseButton()
@@ -2476,6 +2481,6 @@ void AMyCharacter::GetSupplyBox()
 	UpdateUI(UICategory::CurMatch);
 	UpdateUI(UICategory::HasShotgun);
 
-	farmingItem->Destroy();
+	//farmingItem->Destroy();
 	SetCanFarmItem(nullptr);
 }

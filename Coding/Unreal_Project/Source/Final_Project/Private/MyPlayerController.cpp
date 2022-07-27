@@ -10,6 +10,7 @@
 #include "Snowdrift.h"
 #include "Icedrift.h"
 #include "Itembox.h"
+#include "SupplyBox.h"
 #include "Tornado.h"
 
 #pragma comment(lib, "ws2_32.lib")
@@ -367,13 +368,69 @@ void AMyPlayerController::SetDestroyitembox(const int obj_id)
 	
 }
 
-void AMyPlayerController::get_item(int itemType)
+void AMyPlayerController::SetDestroySpBox(const int obj_id)
+{
+	UWorld* World = GetWorld();
+
+
+	TArray<AActor*> SpBox;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASupplyBox::StaticClass(), SpBox);
+
+	for (auto sd : SpBox)
+	{
+		ASupplyBox* spBox = Cast<ASupplyBox>(sd);
+
+		if (spBox->GetId() == obj_id)
+		{
+			spBox->Destroy();
+		}
+	}
+
+}
+
+void AMyPlayerController::GetItem(int sId, int itemType)
 {
 
 	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!player_)
 		return;
-	//player_->GetItem(itemType);
+	switch (itemType)
+	{
+
+	case ITEM_BAG:
+	{
+		break;
+	}
+	case ITEM_UMB:
+	{
+
+		break;
+	}
+	case ITEM_MAT:
+	{
+
+		break;
+	}
+	case ITEM_SNOW:
+	{
+		break;
+	}
+	case ITEM_ICE:
+	{
+		break;
+	}
+	case ITEM_JET:
+	{
+		break;
+	}
+	case ITEM_SPBOX:
+	{
+		charactersInfo->players[sId].bGetSpBox = true;
+		break;
+	}
+	default:
+		break;
+	}
 }
 void AMyPlayerController::InitPlayerSetting()
 {
@@ -447,6 +504,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 		cCharacter* info = &charactersInfo->players[player_->iSessionId];
 		if (!info->IsAlive) continue;
 
+		if (info->bGetSpBox) {
+			player_->GetSupplyBox();
+			info->bGetSpBox = false;
+		}
+
 		if (info->bStartSnowBall) { 
 			player_->SnowBallAttack();
 			info->bStartSnowBall = false;
@@ -509,6 +571,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->GetOnOffJetski();
 			info->bSetJetSki = false;
 		}
+
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
 		{

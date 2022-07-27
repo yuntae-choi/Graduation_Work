@@ -41,6 +41,11 @@ public:
 	const int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기)
 	const int32 iOriginMaxSnowballCount = 10;// 눈 최대보유량 (초기)
 	const int32 iOriginMaxIceballCount = 10;     // 얼음 최대보유량 (초기)
+
+	const int32 iBagMaxMatchCount = 3;     // 성냥 최대보유량 (가방)
+	const int32 iBagMaxSnowballCount = 15;// 눈 최대보유량 (가방)
+	const int32 iBagMaxIceballCount = 15;     // 얼음 최대보유량 (가방)
+
 	int32 iCurrentSnowballCount;
 	int32 iCurrentIceballCount;
 	int32 iCurrentMatchCount;

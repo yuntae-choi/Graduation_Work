@@ -14,6 +14,8 @@ class FINAL_PROJECT_API ASupplyBox : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ASupplyBox();
+	int32 GetId() const { return iSpBoxId; }
+	void SetId(int32 id) { iSpBoxId = id; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -22,5 +24,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+public:
+	static int iIdCountHelper;
+	int32 iSpBoxId;
 
 };

@@ -139,6 +139,7 @@ void Init_Arr()
 	for (int i = 0; i < MAX_SNOWDRIFT; ++i) GA.g_snow_drift[i] = true;
 	for (int i = 0; i < MAX_SNOWDRIFT; ++i) GA.g_ice_drift[i] = true;
 	for (int i = 0; i < MAX_ITEM; ++i) GA.g_item[i] = true;
+	for (int i = 0; i < MAX_ITEM; ++i) GA.g_spitem[i] = true;
 	for (int i = 0; i < MAX_USER; ++i) clients[i]._s_id = i;
 }
 
@@ -819,9 +820,9 @@ void process_packet(int s_id, unsigned char* p)
 			int item_num = packet->destroy_obj_id;
 			bool get_item = is_item(item_num);
 			if (!cl.bHasBag) {
-				cl.iMaxSnowballCount += 5;	// 눈덩이 10 -> 15 까지 보유 가능
-				cl.iMaxIceballCount += 5;	// 얼음 10 -> 15 까지 보유 가능
-				cl.iMaxMatchCount += 1;	// 성냥 2 -> 3 까지 보유 가능
+				cl.iMaxSnowballCount = cl.iBagMaxSnowballCount;	// 눈덩이 10 -> 15 까지 보유 가능
+				cl.iMaxIceballCount = cl.iBagMaxIceballCount;	// 얼음 10 -> 15 까지 보유 가능
+				cl.iMaxMatchCount = cl.iBagMaxMatchCount;	// 성냥 2 -> 3 까지 보유 가능
 				cl.bHasBag = true;
 			}
 			if (get_item && cl.bHasBag == true) {
@@ -943,6 +944,29 @@ void process_packet(int s_id, unsigned char* p)
 				}
 
 				cout << "플레이어: [" << cl._s_id << "] 얼음무더기 파밍 성공 현재 눈개수"  << cl.iCurrentIceballCount << endl;
+			}
+			else
+				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
+				break;
+		}
+		case ITEM_SPBOX:
+		{
+			int spitem_num = packet->destroy_obj_id;
+			bool get_spitem = is_spitem(spitem_num);
+			if (get_spitem) {
+				cl.iCurrentSnowballCount = cl.iMaxSnowballCount;	// 눈덩이 10 
+				cl.iCurrentIceballCount = cl.iMaxIceballCount;	// 얼음 10 
+				cl.iCurrentMatchCount = cl.iMaxMatchCount;	// 성냥 2 
+
+				packet->type = SC_PACKET_GET_ITEM;
+				for (auto& other : clients) {
+					if (ST_INGAME != other._state)
+						continue;
+					packet->type = SC_PACKET_GET_ITEM;
+					other.do_send(sizeof(*packet), packet);
+				}
+
+				cout << "플레이어: [" << cl._s_id << "] 보급 파밍 성공 " << endl;
 			}
 			else
 				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
@@ -1188,7 +1212,17 @@ void process_packet(int s_id, unsigned char* p)
 		}
 		break;
 	}
-
+	case CS_PACKET_PUT_OBJECT: {
+		if (cl.bIsSnowman) break;
+		printf("SupplyBOX\n");
+		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(p);
+		for (auto& other : clients) {
+			if (ST_INGAME != other._state) continue;
+			packet->type = SC_PACKET_PUT_OBJECT;
+			other.do_send(sizeof(*packet), packet);
+		}
+		break;
+	}
 	default:
 		cout << " 오류패킷타입" << packet_type << endl;
 		printf("Unknown PACKET type\n");
