@@ -1248,6 +1248,8 @@ void AMyCharacter::ChangeSnowman()
 {
 	bIsSnowman = true;
 
+	InitializeFreeze();
+
 	// 스켈레탈메시, 애니메이션 블루프린트 변경
 	myAnim->SetDead();
 	GetMesh()->SetSkeletalMesh(snowman);
@@ -1274,9 +1276,6 @@ void AMyCharacter::ChangeSnowman()
 
 	CloseUmbrellaAnim();
 	HideUmbrella();
-
-	//부위 얼리는 소켓 초기화
-	InitializeFreeze();
 
 	//변신 이펙트
 	if (changeNiagara) {
@@ -2104,7 +2103,6 @@ void AMyCharacter::SettingHead()
 	headComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	headComponent->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
 	headComponent->SetVisibility(true);
-	headComponent->SetStaticMesh(nullptr);
 }
 
 void AMyCharacter::SettingLeftForearm()
@@ -2427,10 +2425,17 @@ void AMyCharacter::FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& 
 {
 	//bone->SetVisibility(true);
 
+	if (GetIsSnowman())
+	{
+		InitializeFreeze();
+		return;
+	}
+
 	float WaitTime = 0.1f;
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
 		{
 			//MYLOG(Warning, TEXT("%d"), frame);
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%d"), frame));
 
 			bone->SetStaticMesh(FrozenMeshes[frame]);
 
@@ -2439,6 +2444,14 @@ void AMyCharacter::FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& 
 				auto mat = bone->CreateDynamicMaterialInstance(1);
 				mat->SetScalarParameterValue(TEXT("Emissive"), frame * 0.125);
 				mat->SetTextureParameterValue(FName("Tex"), bearTextureArray[iId]);	// 본인 색상의 곰 텍스쳐 사용
+			}
+
+			//부위 얼리는 소켓 초기화
+			if (GetIsSnowman())
+			{
+				InitializeFreeze();
+				end = true;
+				frame = 0;
 			}
 
 			//배열 끝 판정
@@ -2464,6 +2477,9 @@ void AMyCharacter::FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end)
 void AMyCharacter::InitializeFreeze()
 {
 	headComponent->SetStaticMesh(nullptr);
+	if (headComponent->GetStaticMesh())
+		headComponent->CreateDynamicMaterialInstance(1)->SetScalarParameterValue(TEXT("Emissive"), 0.0f);
+
 	leftForearmComponent->SetStaticMesh(nullptr);
 	leftUpperarmComponent->SetStaticMesh(nullptr);
 	rightForearmComponent->SetStaticMesh(nullptr);
