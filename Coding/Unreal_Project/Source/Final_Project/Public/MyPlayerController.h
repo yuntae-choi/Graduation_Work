@@ -28,7 +28,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SnowdriftFarmDuration,
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedItem, int32, NewSelectedItem);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedProjectile, int32, NewSelectedProjectile);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedWeapon, int32, NewSelectedWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FDele_Dynamic_KillLog, int32, Attacker, int32, Victim, int32, Cause);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_GameResult, bool, GameResult);
+
+enum CauseOfDeath {
+	DeathBySnowball, DeathBySnowballBomb, DeathByCold, DeathBySnowman
+};
 
 /**
  *
@@ -95,6 +100,7 @@ public:
 	void CallDelegateUpdateSelectedItem();
 	void CallDelegateUpdateSelectedProjectile();
 	void CallDelegateUpdateSelectedWeapon();
+	void CallDelegateUpdateKillLog(int attacker, int victim, int cause);
 	void CallDelegateUpdateGameResult(bool isWinner);
 
 	void SpawnSupplyBox(float x, float y, float z = 4500.0f);	// 해당 위치에 보급상자 스폰
@@ -226,6 +232,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_SelectedWeapon FuncUpdateSelectedWeapon;
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FDele_Dynamic_KillLog FuncUpdateKillLog;
 
 	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
 	FDele_Dynamic_GameResult FuncUpdateGameResult;

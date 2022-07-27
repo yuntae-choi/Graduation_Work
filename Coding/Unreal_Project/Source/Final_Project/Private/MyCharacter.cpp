@@ -717,6 +717,7 @@ void AMyCharacter::SnowBallAttack()
 			FAttachmentTransformRules atr = FAttachmentTransformRules(
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 			snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
+			snowball->SetOwnerSessionId(iSessionId);	// 눈덩이에 자신을 생성한 캐릭터의 session id 저장
 		}
 	}
 
@@ -1665,6 +1666,7 @@ void AMyCharacter::SpawnSnowballBomb()
 			for (int i = 0; i < 5; ++i)
 			{
 				ASnowballBomb* snowballBomb = GetWorld()->SpawnActor<ASnowballBomb>(shotgunProjectileClass, muzzleSocketTransform, SpawnParams);
+				snowballBomb->SetOwnerSessionId(iSessionId);	// 눈덩이 폭탄에 자신을 생성한 캐릭터의 session id 저장
 
 				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[PlayerController->GetCharactersInfo()->players[iSessionId].iRandBulletArr[i]], 0.0f);
 			}

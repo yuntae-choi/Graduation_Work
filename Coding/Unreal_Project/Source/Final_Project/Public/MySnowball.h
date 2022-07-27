@@ -32,6 +32,9 @@ public:
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
 	int32 GetDamage() const{ return iDamage; };
+	
+	int32 GetOwnerSessionId() const { return iOwnerSessionId; };
+	void SetOwnerSessionId(int32 OwnerSessionId) { iOwnerSessionId = OwnerSessionId; };
 
 protected:
 	// Called when the game starts or when spawned
@@ -58,4 +61,6 @@ private:
 
 	// 디버깅용 (true - 날아가는 궤적 로그 띄우기)
 	bool bCheckTrajectory;
+
+	int32 iOwnerSessionId;	// 눈덩이를 생성한 캐릭터의 session id
 };
