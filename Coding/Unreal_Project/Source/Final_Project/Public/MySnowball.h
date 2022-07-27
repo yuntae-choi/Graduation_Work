@@ -34,7 +34,7 @@ public:
 	int32 GetDamage() const{ return iDamage; };
 	
 	int32 GetOwnerSessionId() const { return iOwnerSessionId; };
-	int32 SetOwnerSessionId(int32 OwnerSessionId) { iOwnerSessionId = OwnerSessionId; };
+	void SetOwnerSessionId(int32 OwnerSessionId) { iOwnerSessionId = OwnerSessionId; };
 
 protected:
 	// Called when the game starts or when spawned
