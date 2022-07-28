@@ -598,6 +598,8 @@ bool AMyPlayerController::UpdateWorldInfo()
 		player_->SetActorRotation(CharacterRotation);
 		player_->SetActorLocation(CharacterLocation);
 		player_->GetAnim()->SetDirection(info->direction);
+
+
 		
 		//´«»ç¶÷ º¯È­
 		if (!player_->IsSnowman())
@@ -660,6 +662,15 @@ void AMyPlayerController::UpdateNewPlayer()
 			SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId -1);
 		else
 			SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
+
+		cCharacter* info = &charactersInfo->players[SpawnCharacter->iSessionId];
+		SpawnCharacter->SetUserId(info->userId);
+
+		char testId[MAX_NAME_SIZE];
+		SpawnCharacter->GetUserId(testId);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("setuserId :%s"), SpawnCharacter->userId));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("info-> userId :%s"), info->userId));
+
 	}
 	else if(newplayer.get()->SessionId == iTonardoId)
 	{
@@ -681,6 +692,7 @@ void AMyPlayerController::UpdateNewPlayer()
 		info.Yaw = newplayer.get()->Yaw;
 
 		charactersInfo->players[newplayer.get()->SessionId] = info;
+
 	}
 
 	newplayer = NULL;

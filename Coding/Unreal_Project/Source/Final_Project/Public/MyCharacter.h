@@ -171,6 +171,11 @@ public:
 	void FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end);
 
 	void InitializeFreeze();
+
+	void GetUserId(char id[MAX_NAME_SIZE]) { strcpy_s(id, 20, userId); };
+
+	void SetUserId(char id[MAX_NAME_SIZE]) { strcpy_s(userId, id); };
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -453,6 +458,8 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UNiagaraComponent* tmpNiagara;
+
+	char userId[MAX_NAME_SIZE];
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)

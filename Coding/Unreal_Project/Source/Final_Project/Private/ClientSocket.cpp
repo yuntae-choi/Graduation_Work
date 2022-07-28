@@ -56,9 +56,10 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		MyPlayerController->SetCharactersInfo(&CharactersInfo);
 		MyPlayerController->SetInitInfo(info);
 
-
 		// id, pw가 유효한 경우
 		MyPlayerController->DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
+		
+		
 
 		//MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
 
@@ -132,8 +133,9 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
 			strcpy_s(info->userId, packet->name);
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("put info-> userId :%s"), (TCHAR*)info->userId));
 			MyPlayerController->SetNewCharacterInfo(info);
-			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+			MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"),info->userId ,info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
 			break;
 		}
@@ -159,11 +161,10 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		}
 		case SUPPLYBOX:
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("spbox :%f, %f"), packet->x, packet->y ));
 
 			MyPlayerController->SpawnSupplyBox(packet->x, packet->y, 4500.0f);
 
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("spbox :%f, %f"), packet->x, packet->y));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("spbox :%f, %f"), packet->x, packet->y));
 
 			break;
 		}
@@ -458,6 +459,8 @@ void ClientSocket::Send_LoginPacket(char* send_id, char* send_pw)
 
 	//MYLOG(Warning, TEXT("[Send login] z : %f"), packet.z);
 	SendPacket(&packet);
+	
+
 
 };
 

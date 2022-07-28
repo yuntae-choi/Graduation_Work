@@ -312,7 +312,7 @@ void Accept_Player(int _s_id)
 
 		sc_packet_put_object packet;
 		packet.s_id = cl._s_id;
-		strcpy_s(packet.name, cl.name);
+		strcpy_s(packet.name, cl._id);
 		packet.size = sizeof(packet);
 		packet.type = SC_PACKET_PUT_OBJECT;
 		packet.x = cl.x;
@@ -395,6 +395,7 @@ void process_packet(int s_id, unsigned char* p)
 				if (_OverLap == true) break;
 				if (DB_odbc(s_id, packet->id, packet->pw) == true)
 				{
+					strcpy_s(cl._id, packet->id);
 					Init_Pos(s_id, packet->id, packet->pw, packet->z);
 					printf(" [DB_odbc] 플레이어[id] - ID : %s 로그인 성공 \n", cl._id);
 					send_login_ok_packet(s_id);
