@@ -488,24 +488,6 @@ void process_packet(int s_id, unsigned char* p)
 		cl.VZ = packet->vz;
 		cl.direction = packet->direction;
 
-		unordered_set <int> near_list;
-		for (auto& other : clients) {
-			if (other._s_id == s_id)
-				continue;
-			if (ST_INGAME != other.cl_state)
-				continue;
-			if (false == is_near(s_id, other._s_id))
-				continue;
-
-			near_list.insert(other._s_id);
-		}
-
-		cl.vl.lock();
-
-		unordered_set <int> my_vl{ cl.viewlist };
-
-		cl.vl.unlock();
-
 		for (auto& other : clients) {
 			if (other._s_id == s_id)
 				continue;
@@ -1221,9 +1203,8 @@ void process_packet(int s_id, unsigned char* p)
 					continue;
 				if (ST_TORNADO == other.pl_state)
 					continue;
-				packet->size = sizeof(packet);
 				packet->type = SC_PACKET_NPC_MOVE;
-				other.do_send(sizeof(packet), &packet);
+				other.do_send(sizeof(*packet), packet);
 			}
 		}
 		else {
