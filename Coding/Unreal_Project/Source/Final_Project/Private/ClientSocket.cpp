@@ -49,6 +49,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		info.Y = packet->y;
 		info.Z = packet->z;
 		info.Yaw = packet->yaw;
+		info.iColor = packet->color;
 		strcpy_s(info.userId, packet->id);
 		my_s_id = packet->s_id;
 		CharactersInfo.players[info.SessionId] = info;
@@ -58,8 +59,9 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		// id, pw가 유효한 경우
 		MyPlayerController->DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
-		
-		
+		FString str = info.userId;
+		MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"), *str, info.SessionId, info.X, info.Y, info.Z, info.Yaw);
+
 
 		//MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
 
@@ -128,14 +130,17 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		{
 			auto info = make_shared<cCharacter>();
 			info->SessionId = packet->s_id;
+			info->iColor = packet->obj_id;
 			info->X = packet->x;
 			info->Y = packet->y;
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
 			strcpy_s(info->userId, packet->name);
+			info->myState = ST_ANIMAL;
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("put info-> userId :%s"), (TCHAR*)info->userId));
 			MyPlayerController->SetNewCharacterInfo(info);
-			MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"),info->userId ,info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+			FString str = info->userId;
+			MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"),*str ,info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
 			break;
 		}
@@ -145,16 +150,16 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		}
 		case TONARDO:
 		{
-			my_tonardo_id = packet->s_id;
-			MyPlayerController->iTonardoId = packet->s_id;
+			MyPlayerController->bTornado = true;
 			auto info = make_shared<cCharacter>();
 			info->SessionId = packet->s_id;
 			info->X = packet->x;
 			info->Y = packet->y;
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
+			info->myState = ST_TORNADO;
 
-			MyPlayerController->SetNewCharacterInfo(info);
+			MyPlayerController->SetNewTornadoInfo(info);
 			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
 			break;

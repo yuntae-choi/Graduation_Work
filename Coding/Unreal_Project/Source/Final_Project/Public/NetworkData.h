@@ -173,6 +173,8 @@ struct sc_packet_login_ok {
 	char type;
 	// 세션 아이디
 	int32		s_id;
+	int32		color;// 캐릭터 컬러
+
 	float x, y, z;
 	float yaw;
 	char	id[MAX_NAME_SIZE];

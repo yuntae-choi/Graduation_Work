@@ -51,6 +51,8 @@ public:
 	void SetSessionId(const int sessionId) { iSessionId = sessionId; }
 	void SetCharactersInfo(cCharactersInfo* ci_) { if (ci_ != nullptr)	charactersInfo = ci_; }
 	void SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_);
+	void SetNewTornadoInfo(shared_ptr<cCharacter> newTornado);
+
 	void SetInitInfo(const cCharacter& me);
 
 	void SetDestroySnowdritt(const int s_id);
@@ -151,10 +153,11 @@ protected:
 	virtual void OnPossess(APawn* pawn_) override;
 
 private:
-	void InitPlayerSetting();
+	void InitPlayerSetting();   
 	bool UpdateWorldInfo();		// 월드 동기화
-	void UpdateNewPlayer();
-	void UpdatePlayerInfo(cCharacter& info);
+	void UpdateNewPlayer();     // 타 플레이어 생성
+	void UpdateNewTornado();    // 토네이도 생성
+	void UpdatePlayerInfo(cCharacter& info); // 플레이어 정보 업데이트
 	void LoadReadyUI();	// ReadyUI 띄우기, UI에 대한 입력만 허용
 	void LoadCharacterUI();	// CharacterUI 띄우기, 게임에 대한 입력 허용
 	void LoadLoginUI();	// LoginUI 띄우기, UI에 대한 입력만 허용
@@ -163,7 +166,7 @@ private:
 
 public:
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
-	int							iTonardoId = -1;			// 토네이도 아이디
+	bool                        bTornado;       // 토네이도 접속 여부       
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
@@ -248,14 +251,13 @@ private:
 	
 	cCharacter				initInfo;
 	LockQueue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
+	LockQueue<shared_ptr<cCharacter>>				newTornados;			// 토네이도 로그인 시 캐릭터 정보
+
 		//새 플레이어 스폰
 	shared_ptr<cCharacter> newplayer;
+	shared_ptr<cCharacter> newtornado;
+
 	//queue<shared_ptr<cCharacter>>				newPlayers;			// 플레이어 로그인 시 캐릭터 정보
-	LockQueue<int> newBalls;
-	LockQueue<int> destorySnowdrift;
-	LockQueue<int> destoryItemBox;
-	LockQueue<int> openItemBox;
-	LockQueue<int> destoryPlayer;
 	atomic<int> ivictoryPlayer;
 
 

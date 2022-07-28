@@ -84,6 +84,7 @@ void send_login_ok_packet(int _s_id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_LOGIN_OK;
 	packet.s_id = _s_id;
+	packet.color = clients[_s_id].color;
 	packet.x = clients[_s_id].x;
 	packet.y = clients[_s_id].y;
 	packet.z = clients[_s_id].z;

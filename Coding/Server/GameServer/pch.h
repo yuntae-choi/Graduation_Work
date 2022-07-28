@@ -57,7 +57,7 @@ struct global_arr {
     bool g_spitem[MAX_ITEM] = {};
     bool g_item[MAX_ITEM] = {};
     bool g_start_game = false;
-    int g_tonardo_id = -1;
+    atomic<int> g_color = 0;
     bool g_tonardo = false;
 };
 

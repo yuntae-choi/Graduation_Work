@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CLIENT.h"
 
-CLIENT::CLIENT() : _state(ST_FREE), _combat(COMBAT_END), _prev_size(0)
+CLIENT::CLIENT() : cl_state(ST_FREE), _combat(COMBAT_END), _prev_size(0)
 {
 	_s_id = {}; //플레이어 배열 넘버
 	ZeroMemory(&name, sizeof(name));

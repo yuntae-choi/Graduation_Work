@@ -63,7 +63,8 @@ public:
 	mutex lua_lock;
 
 	mutex state_lock;
-	CL_STATE _state;
+	CL_STATE cl_state;  //  접속 상태
+	STATE_Type  pl_state;    //인게임 상태
 	atomic_bool   _is_active;
 
 	COMBAT _combat;
@@ -74,6 +75,7 @@ public:
 	SOCKET  _socket;
 	int      _prev_size;
 	int      last_move_time;
+	int      color;
 public:
 	CLIENT(); 
 	~CLIENT()
