@@ -93,7 +93,7 @@ void AItembox::BeginPlay()
 	//임시로 랜덤하게 설정된 아이템타입을 아이템 id%3으로 바꿔줌
 	iId = ++iIdCountHelper;
 	iItemType = iId % 3;
-	UE_LOG(LogTemp, Warning, TEXT("iItemType %d"), iItemType);
+	//UE_LOG(LogTemp, Warning, TEXT("iItemType %d"), iItemType);
 
 	SetItem(iItemType);
 	//// 디버깅용 - 특정 아이템으로 고정
