@@ -61,6 +61,10 @@ void AMyPlayerController::BeginPlay()
 	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
 	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
 	g_socket->Send_LoginPacket();
+
+	UWorld* World = GetWorld();
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), Tornado_AIClass, tonado_ai);
+
 	SleepEx(0, true);
 }
 
@@ -72,14 +76,7 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMyPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-
-
-
-	UWorld* World = GetWorld();
-	TArray<AActor*> tonado_ai;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), Tornado_AIClass, tonado_ai);
-
+	int Tid = 0;
 	for (auto sd : tonado_ai)
 	{
 
@@ -87,8 +84,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 		auto loc = Tornado_AI->GetActorLocation();
 		float fNewYaw = Tornado_AI->GetActorRotation().Yaw;		//yaw 값만 필요함
 		auto vel = Tornado_AI->GetVelocity();
-		mySocket->Send_MovePacket(loc, vel);
-
+		mySocket->Send_MovePacket(Tid++, loc, vel);
 	}
 
 	SleepEx(0, true);

@@ -75,12 +75,6 @@ void ClientSocket::Send_LoginPacket()
 	packet.type = CS_PACKET_LOGIN;
 	strcpy_s(packet.id, _id);
 	strcpy_s(packet.pw, _pw);
-
-	//auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(MyPlayerController, 0));
-	//if (!player_) return;
-	//auto location_ = player_->GetActorLocation();
-
-	//packet.z = location_.Z;
 	size_t sent = 0;
 
 
@@ -94,13 +88,13 @@ void ClientSocket::Send_LoginPacket()
 
 
 
-void ClientSocket::Send_MovePacket(FVector MyLocation, FVector MyVelocity)
+void ClientSocket::Send_MovePacket(int id,  FVector MyLocation, FVector MyVelocity)
 {
 	if (_login_ok) {
 		cs_packet_move packet;
 		packet.size = sizeof(packet);
-		packet.type = CS_PACKET_MOVE;
-		packet.sessionID = my_s_id;
+		packet.type = CS_PACKET_NPC_MOVE;
+		packet.sessionID = id + MAX_USER;
 		packet.x = MyLocation.X;
 		packet.y = MyLocation.Y;
 		packet.z = MyLocation.Z;

@@ -158,7 +158,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
 			info->myState = ST_TORNADO;
-
+			MYLOG(Warning, TEXT("recv TONARDO"));
 			MyPlayerController->SetNewTornadoInfo(info);
 			//MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
@@ -432,6 +432,22 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		sc_packet_player_count* packet = reinterpret_cast<sc_packet_player_count*>(ptr);
 		MyPlayerController->SetCnt(packet->bear, packet->snowman);
+		break;
+	}
+	case SC_PACKET_NPC_MOVE:
+	{
+		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(ptr);
+
+		CharactersInfo.players[packet->sessionID].X = packet->x;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Y = packet->y;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Z = packet->z;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].Yaw = packet->yaw;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VX = packet->vx;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
+		CharactersInfo.players[packet->sessionID].direction = packet->direction;		// 캐릭터 정보
+
+		//MYLOG(Warning, TEXT("[Recv move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), packet->sessionID, packet->x, packet->y, packet->z, packet->yaw, packet->vx, packet->vy, packet->vz, packet->direction);
 		break;
 	}
 	}

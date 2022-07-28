@@ -340,25 +340,8 @@ void Accept_Player(int _s_id)
 	// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
 	for (auto& other : clients) {
 		if (other._s_id == _s_id) continue;
-		if (ST_INGAME != other.cl_state) {
-			if (GA.g_tonardo) {
-				if (ST_TORNADO == other.pl_state){
-					//토네이도 생성위치 보내기
-					sc_packet_put_object packet;
-					packet.s_id = other._s_id;
-					packet.size = sizeof(packet);
-					packet.type = SC_PACKET_PUT_OBJECT;
-					packet.x = other.x;
-					packet.y = other.y;
-					packet.z = other.z;
-					packet.yaw = 0.0f;
-					packet.object_type = TONARDO;
-					printf_s("[토네이도 생성] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
-					cl.do_send(sizeof(packet), &packet);
-				}
-			}
-		}
-		else {
+		if (other.pl_state == ST_TORNADO) continue;
+		if (ST_INGAME != other.cl_state)continue; 
 			sc_packet_put_object packet;
 			packet.s_id = other._s_id;
 			packet.obj_id = other.color;
@@ -371,6 +354,23 @@ void Accept_Player(int _s_id)
 			packet.yaw = other.Yaw;
 			packet.object_type = PLAYER;
 			strcpy_s(packet.name, other._id);
+			cl.do_send(sizeof(packet), &packet);
+	}
+	// 토네이도 생성
+	if (GA.g_tonardo) {
+		int iMAX_USER = MAX_USER;
+		for (int32 i = 0; i < 3; i++)
+		{
+			sc_packet_put_object packet;
+			packet.s_id = clients[iMAX_USER + i]._s_id;
+			packet.size = sizeof(packet);
+			packet.type = SC_PACKET_PUT_OBJECT;
+			packet.x = clients[iMAX_USER + i].x;
+			packet.y = clients[iMAX_USER + i].y;
+			packet.z = clients[iMAX_USER + i].z;
+			packet.yaw = 0.0f;
+			packet.object_type = TONARDO;
+			printf_s("[토네이도 생성] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
 			cl.do_send(sizeof(packet), &packet);
 		}
 	}
@@ -1212,13 +1212,6 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_NPC_MOVE: {
 
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(p);
-
-		cl.x = packet->x;
-		cl.y = packet->y;
-		cl.z = packet->z;
-		cl.VX = packet->vx;
-		cl.VY = packet->vy;
-		cl.VZ = packet->vz;
 		if (GA.g_start_game) {
 			// cout << "토네이도 move" << endl;
 			for (auto& other : clients) {
@@ -1228,18 +1221,18 @@ void process_packet(int s_id, unsigned char* p)
 					continue;
 				if (ST_TORNADO == other.pl_state)
 					continue;
-				cs_packet_move packet;
-				packet.sessionID = s_id;
-				packet.size = sizeof(packet);
-				packet.type = SC_PACKET_NPC_MOVE;
-				packet.x = cl.x;
-				packet.y = cl.y;
-				packet.z = cl.z;
-				packet.vx = cl.VX;
-				packet.vy = cl.VY;
-				packet.vz = cl.VZ;
+				packet->size = sizeof(packet);
+				packet->type = SC_PACKET_NPC_MOVE;
 				other.do_send(sizeof(packet), &packet);
 			}
+		}
+		else {
+			clients[packet->sessionID].x = packet->x;
+			clients[packet->sessionID].y = packet->y;
+			clients[packet->sessionID].z = packet->z;
+			clients[packet->sessionID].VX = packet->vx;
+			clients[packet->sessionID].VY = packet->vy;
+			clients[packet->sessionID].VZ = packet->vz;
 		}
 		break;
 	}

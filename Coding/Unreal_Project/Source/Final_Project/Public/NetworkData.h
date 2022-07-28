@@ -34,7 +34,9 @@ const int32  MAX_CHAT_SIZE = 100;
 const int32 BUF_SIZE = 2048;
 const int32 Tornado_id = 100;
 const int32  MAX_BULLET_RANG = 8;
-
+const int32  MAX_USER = 100;
+const int32  MAX_NPC = 100;
+const int32  MAX_OBJ = 20;
 // 소켓 통신 구조체
 
 // 패킷 정보
@@ -59,6 +61,7 @@ const char CS_PACKET_ACCOUNT = 18;
 const char CS_PACKET_CANCEL_SNOW = 19;
 const char CS_PACKET_PLAYER_COUNT = 20;
 const char CS_PACKET_PUT_OBJECT = 21;
+const char CS_PACKET_NPC_MOVE = 22;
 
 const char SC_PACKET_LOGIN_OK = 1;
 const char SC_PACKET_MOVE = 2;
@@ -86,6 +89,7 @@ const char SC_PACKET_UMB = 23;
 const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
 const char SC_PACKET_PLAYER_COUNT = 26;
+const char SC_PACKET_NPC_MOVE = 27;
 
 
 

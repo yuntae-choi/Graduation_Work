@@ -202,7 +202,9 @@ void AMyPlayerController::SetNewTornadoInfo(shared_ptr<cCharacter> newTornado)
 {
 	if (newTornado != nullptr)
 	{
-		newtornado = newTornado;
+		MYLOG(Warning, TEXT("SetNewTornadoInfo"));
+		newplayer = newTornado;
+		//newtornado = newTornado;
 		UpdateNewTornado();
 	}
 }
@@ -717,46 +719,45 @@ void AMyPlayerController::UpdateNewTornado()
 {
 	UWorld* const World = GetWorld();
 
-	int size_ = newPlayers.Size();
 
 
 	// 새로운 플레이어를 필드에 스폰
 	FVector SpawnLocation_;
-	SpawnLocation_.X = newtornado.get()->X;
-	SpawnLocation_.Y = newtornado.get()->Y;
-	SpawnLocation_.Z = newtornado.get()->Z;
+	SpawnLocation_.X = newplayer.get()->X;
+	SpawnLocation_.Y = newplayer.get()->Y;
+	SpawnLocation_.Z = newplayer.get()->Z;
 
 	FRotator SpawnRotation;
-	SpawnRotation.Yaw = newtornado.get()->Yaw;
+	SpawnRotation.Yaw = newplayer.get()->Yaw;
 	SpawnRotation.Pitch = 0.0f;
 	SpawnRotation.Roll = 0.0f;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = GetInstigator();
-	SpawnParams.Name = FName(*FString(to_string(newtornado.get()->SessionId).c_str()));
+	SpawnParams.Name = FName(*FString(to_string(newplayer.get()->SessionId).c_str()));
 
 	TornadoToSpawn = ATornado::StaticClass();
 	ATornado* SpawnTornado = World->SpawnActor<ATornado>(TornadoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 	SpawnTornado->SpawnDefaultController();
-	SpawnTornado->iSessionId = newtornado.get()->SessionId;
+	SpawnTornado->iSessionId = newplayer.get()->SessionId;
 	// 필드의 플레이어 정보에 추가
 	if (charactersInfo != nullptr)
 	{
 		cCharacter info;
-		info.SessionId = newtornado.get()->SessionId;
-		info.X = newtornado.get()->X;
-		info.Y = newtornado.get()->Y;
-		info.Z = newtornado.get()->Z;
-		info.Yaw = newtornado.get()->Yaw;
+		info.SessionId = newplayer.get()->SessionId;
+		info.X = newplayer.get()->X;
+		info.Y = newplayer.get()->Y;
+		info.Z = newplayer.get()->Z;
+		info.Yaw = newplayer.get()->Yaw;
 		info.myState = ST_TORNADO;
-		charactersInfo->players[newtornado.get()->SessionId] = info;
+		charactersInfo->players[newplayer.get()->SessionId] = info;
 
 	}
 
 	newplayer = NULL;
 
-	//MYLOG(Warning, TEXT("other player(id : %d) spawned."), newPlayers.front()->SessionId);
+	MYLOG(Warning, TEXT("UpdateNewTornado"));
 
 	//bNewPlayerEntered = false;
 }
