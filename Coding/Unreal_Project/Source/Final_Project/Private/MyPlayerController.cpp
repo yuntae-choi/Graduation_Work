@@ -1203,7 +1203,28 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 {	// 추위에 의한 죽음은 attacker id = -2
 	if (!characterUI) return;
 
-	if (FuncUpdateKillLog.IsBound() == true) FuncUpdateKillLog.Broadcast(attacker, victim, cause);
+	char* userId;
+	if (attacker != -2)
+		userId = charactersInfo->players[attacker].userId;
+	else
+		userId = "none";
+	FString attackerUserId = userId;
+	userId = charactersInfo->players[victim].userId;
+	FString victimUserId = userId;
+
+	int killLogType;
+	if (attacker == iSessionId)
+		killLogType = KillLogType::Attacker;
+	else if (victim == iSessionId)
+		killLogType = KillLogType::Victim;
+	else
+		killLogType = KillLogType::None;
+
+
+	if (FuncUpdateKillLog.IsBound() == true) FuncUpdateKillLog.Broadcast(attackerUserId, victimUserId, cause, killLogType);
+
+	if (cause == CauseOfDeath::DeathBySnowman && (attacker != victim))
+		CallDelegateUpdateKillLog(attacker, attacker, cause);
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause);
 }
