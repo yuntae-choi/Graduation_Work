@@ -203,8 +203,8 @@ void AMyPlayerController::SetNewTornadoInfo(shared_ptr<cCharacter> newTornado)
 	if (newTornado != nullptr)
 	{
 		MYLOG(Warning, TEXT("SetNewTornadoInfo"));
-		newplayer = newTornado;
-		//newtornado = newTornado;
+		//newplayer = newTornado;
+		newtornado = newTornado;
 		UpdateNewTornado();
 	}
 }
@@ -482,16 +482,6 @@ void AMyPlayerController::UpdateTornado()
 		CharacterLocation.Y = info->Y;
 		CharacterLocation.Z = info->Z;
 
-		FRotator CharacterRotation;
-		CharacterRotation.Yaw = info->Yaw;
-		CharacterRotation.Pitch = 0.0f;
-		CharacterRotation.Roll = 0.0f;
-
-		FVector CharacterVelocity;
-		CharacterVelocity.X = info->VX;
-		CharacterVelocity.Y = info->VY;
-		CharacterVelocity.Z = info->VZ;
-
 		//tornado->AddMovementInput(CharacterVelocity);
 		//tornado->SetActorRotation(CharacterRotation);
 		tornado->SetActorLocation(CharacterLocation);
@@ -723,39 +713,40 @@ void AMyPlayerController::UpdateNewTornado()
 
 	// 새로운 플레이어를 필드에 스폰
 	FVector SpawnLocation_;
-	SpawnLocation_.X = newplayer.get()->X;
-	SpawnLocation_.Y = newplayer.get()->Y;
-	SpawnLocation_.Z = newplayer.get()->Z;
+	SpawnLocation_.X = newtornado.get()->X;
+	SpawnLocation_.Y = newtornado.get()->Y;
+	SpawnLocation_.Z = newtornado.get()->Z;
 
 	FRotator SpawnRotation;
-	SpawnRotation.Yaw = newplayer.get()->Yaw;
+	SpawnRotation.Yaw = newtornado.get()->Yaw;
 	SpawnRotation.Pitch = 0.0f;
 	SpawnRotation.Roll = 0.0f;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = GetInstigator();
-	SpawnParams.Name = FName(*FString(to_string(newplayer.get()->SessionId).c_str()));
+	SpawnParams.Name = FName(*FString(to_string(newtornado.get()->SessionId).c_str()));
 
 	TornadoToSpawn = ATornado::StaticClass();
 	ATornado* SpawnTornado = World->SpawnActor<ATornado>(TornadoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 	SpawnTornado->SpawnDefaultController();
-	SpawnTornado->iSessionId = newplayer.get()->SessionId;
+	SpawnTornado->iSessionId = newtornado.get()->SessionId;
 	// 필드의 플레이어 정보에 추가
 	if (charactersInfo != nullptr)
 	{
 		cCharacter info;
-		info.SessionId = newplayer.get()->SessionId;
-		info.X = newplayer.get()->X;
-		info.Y = newplayer.get()->Y;
-		info.Z = newplayer.get()->Z;
-		info.Yaw = newplayer.get()->Yaw;
+		info.SessionId = newtornado.get()->SessionId;
+		info.X = newtornado.get()->X;
+		info.Y = newtornado.get()->Y;
+		info.Z = newtornado.get()->Z;
+		info.Yaw = newtornado.get()->Yaw;
 		info.myState = ST_TORNADO;
-		charactersInfo->players[newplayer.get()->SessionId] = info;
+		charactersInfo->players[newtornado.get()->SessionId] = info;
 
 	}
 
-	newplayer = NULL;
+	newtornado = NULL;
+	bTornado = true;
 
 	MYLOG(Warning, TEXT("UpdateNewTornado"));
 

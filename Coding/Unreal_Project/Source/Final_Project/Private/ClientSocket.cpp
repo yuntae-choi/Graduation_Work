@@ -150,7 +150,6 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		}
 		case TONARDO:
 		{
-			MyPlayerController->bTornado = true;
 			auto info = make_shared<cCharacter>();
 			info->SessionId = packet->s_id;
 			info->X = packet->x;

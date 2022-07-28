@@ -362,12 +362,12 @@ void Accept_Player(int _s_id)
 		for (int32 i = 0; i < 3; i++)
 		{
 			sc_packet_put_object packet;
-			packet.s_id = clients[iMAX_USER + i]._s_id;
+			packet.s_id = clients[i + iMAX_USER]._s_id;
 			packet.size = sizeof(packet);
 			packet.type = SC_PACKET_PUT_OBJECT;
-			packet.x = clients[iMAX_USER + i].x;
-			packet.y = clients[iMAX_USER + i].y;
-			packet.z = clients[iMAX_USER + i].z;
+			packet.x = clients[i + iMAX_USER].x;
+			packet.y = clients[i + iMAX_USER].y;
+			packet.z = clients[i + iMAX_USER].z;
 			packet.yaw = 0.0f;
 			packet.object_type = TONARDO;
 			printf_s("[토네이도 생성] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
@@ -1227,6 +1227,7 @@ void process_packet(int s_id, unsigned char* p)
 			}
 		}
 		else {
+			clients[packet->sessionID]._s_id = packet->sessionID;
 			clients[packet->sessionID].x = packet->x;
 			clients[packet->sessionID].y = packet->y;
 			clients[packet->sessionID].z = packet->z;
