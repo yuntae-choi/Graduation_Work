@@ -55,8 +55,7 @@ public:
 	void ProcessPacket(unsigned char* ptr);
 	void Send_LoginPacket();
 
-	void Send_MovePacket(FVector MyLocation, FVector MyVelocity);
-
+	void Send_MovePacket(int id, FVector MyLocation, FVector MyVelocity);
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);
 	void process_data(unsigned char* net_buf, size_t io_byte);

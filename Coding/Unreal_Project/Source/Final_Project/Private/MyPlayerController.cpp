@@ -202,6 +202,8 @@ void AMyPlayerController::SetNewTornadoInfo(shared_ptr<cCharacter> newTornado)
 {
 	if (newTornado != nullptr)
 	{
+		MYLOG(Warning, TEXT("SetNewTornadoInfo"));
+		//newplayer = newTornado;
 		newtornado = newTornado;
 		UpdateNewTornado();
 	}
@@ -480,16 +482,6 @@ void AMyPlayerController::UpdateTornado()
 		CharacterLocation.Y = info->Y;
 		CharacterLocation.Z = info->Z;
 
-		FRotator CharacterRotation;
-		CharacterRotation.Yaw = info->Yaw;
-		CharacterRotation.Pitch = 0.0f;
-		CharacterRotation.Roll = 0.0f;
-
-		FVector CharacterVelocity;
-		CharacterVelocity.X = info->VX;
-		CharacterVelocity.Y = info->VY;
-		CharacterVelocity.Z = info->VZ;
-
 		//tornado->AddMovementInput(CharacterVelocity);
 		//tornado->SetActorRotation(CharacterRotation);
 		tornado->SetActorLocation(CharacterLocation);
@@ -717,7 +709,6 @@ void AMyPlayerController::UpdateNewTornado()
 {
 	UWorld* const World = GetWorld();
 
-	int size_ = newPlayers.Size();
 
 
 	// 새로운 플레이어를 필드에 스폰
@@ -754,9 +745,10 @@ void AMyPlayerController::UpdateNewTornado()
 
 	}
 
-	newplayer = NULL;
+	newtornado = NULL;
+	bTornado = true;
 
-	//MYLOG(Warning, TEXT("other player(id : %d) spawned."), newPlayers.front()->SessionId);
+	MYLOG(Warning, TEXT("UpdateNewTornado"));
 
 	//bNewPlayerEntered = false;
 }
@@ -1211,7 +1203,28 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 {	// 추위에 의한 죽음은 attacker id = -2
 	if (!characterUI) return;
 
-	if (FuncUpdateKillLog.IsBound() == true) FuncUpdateKillLog.Broadcast(attacker, victim, cause);
+	char* userId;
+	if (attacker != -2)
+		userId = charactersInfo->players[attacker].userId;
+	else
+		userId = "none";
+	FString attackerUserId = userId;
+	userId = charactersInfo->players[victim].userId;
+	FString victimUserId = userId;
+
+	int killLogType;
+	if (attacker == iSessionId)
+		killLogType = KillLogType::Attacker;
+	else if (victim == iSessionId)
+		killLogType = KillLogType::Victim;
+	else
+		killLogType = KillLogType::None;
+
+
+	if (FuncUpdateKillLog.IsBound() == true) FuncUpdateKillLog.Broadcast(attackerUserId, victimUserId, cause, killLogType);
+
+	if (cause == CauseOfDeath::DeathBySnowman && (attacker != victim))
+		CallDelegateUpdateKillLog(attacker, attacker, cause);
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause);
 }

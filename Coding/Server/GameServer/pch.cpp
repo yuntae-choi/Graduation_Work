@@ -1,7 +1,7 @@
 #include "pch.h"
 
 global_arr GA;
-array <CLIENT, MAX_USER> clients;
+array <CLIENT, MAX_USER + MAX_NPC> clients;
 
 void error_display(int err_no)
 {

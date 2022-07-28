@@ -41,5 +41,6 @@ public:
 
 	ClientSocket* mySocket;
 
+	TArray<AActor*> tonado_ai;
 
 };

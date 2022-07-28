@@ -65,7 +65,7 @@ struct global_arr {
 };
 
 extern global_arr GA;
-extern array <CLIENT, MAX_USER> clients;
+extern array <CLIENT, MAX_USER + MAX_NPC> clients;
 
 bool is_player(int id);
 bool is_bonfire(int a);
