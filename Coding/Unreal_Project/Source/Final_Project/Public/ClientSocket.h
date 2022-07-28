@@ -19,7 +19,7 @@ using namespace std;
 //================================================================
 // 플레이어 변신 상태 + 모닥불 충돌 여부
 //================================================================
-enum STATE_Type { ST_SNOWMAN, ST_INBURN, ST_OUTBURN, ST_ANIMAL };
+enum STATE_Type { ST_SNOWMAN, ST_INBURN, ST_OUTBURN, ST_ANIMAL, ST_TORNADO};
 
 //================================================================
 // 멀티쓰레드 상황에서 큐에 동시성을 보장해줌
@@ -79,6 +79,7 @@ public:
 		unique_lock<mutex> lock(_mutex);
 		return _queue.size();
 	}
+
 
 private:
 	std::queue<T> _queue;
@@ -156,11 +157,11 @@ public:
 	bool bStartUmb = false;
 	bool bEndUmb = false;
 	bool bSetJetSki = false;
-
-
+	bool bGetSpBox = false;
 
 	int iRandBulletArr[MAX_BULLET_RANG] = {};
 
+	int iColor = 0;
 
 	friend ostream& operator<<(ostream& stream, cCharacter& info)
 	{
@@ -286,6 +287,7 @@ public:
 
 	void Send_DamagePacket();
 	void Send_ItemPacket(int item_no, int destroy_obj_id);
+	void SendPutObjPacket(char cObjType, int iObjId, FVector ObjLocation, float fYaw);
 	void Send_LogoutPacket(const int& s_id);
 	void Send_ReadyPacket();
 	void Send_MatchPacket(); 
@@ -355,7 +357,7 @@ public:
 	bool     _stop = false;
 	bool     _login_ok =false;
 	int       my_s_id = -1;
-	int       my_tonardo_id = -1;
+
 
 private:
 	cCharactersInfo CharactersInfo;		// 캐릭터 정보

@@ -40,4 +40,6 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	class UNiagaraComponent* tornadoNiagara;
+
+	int32 iSessionId;
 };

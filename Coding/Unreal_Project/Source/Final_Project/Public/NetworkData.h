@@ -58,6 +58,7 @@ const char CS_PACKET_UMB = 17;
 const char CS_PACKET_ACCOUNT = 18;
 const char CS_PACKET_CANCEL_SNOW = 19;
 const char CS_PACKET_PLAYER_COUNT = 20;
+const char CS_PACKET_PUT_OBJECT = 21;
 
 const char SC_PACKET_LOGIN_OK = 1;
 const char SC_PACKET_MOVE = 2;
@@ -128,7 +129,8 @@ enum ITEM_Type
 	ITEM_BAG,
 	ITEM_SNOW,
 	ITEM_JET,
-	ITEM_ICE
+	ITEM_ICE,
+	ITEM_SPBOX
 };
 
 enum ATTACK_Type
@@ -150,7 +152,7 @@ enum BULLET_Type
 	BULLET_SNOWBOMB
 };
 
-enum OBJ_Type { PLAYER,ITEM_BOX, TONARDO };
+enum OBJ_Type { PLAYER,ITEM_BOX, TONARDO, SUPPLYBOX };
 
 enum Login_fail_Type { OVERLAP_ID, WORNG_ID, WORNG_PW, OVERLAP_AC, CREATE_AC};
 
@@ -171,6 +173,8 @@ struct sc_packet_login_ok {
 	char type;
 	// 세션 아이디
 	int32		s_id;
+	int32		color;// 캐릭터 컬러
+
 	float x, y, z;
 	float yaw;
 	char	id[MAX_NAME_SIZE];
@@ -202,6 +206,7 @@ struct sc_packet_put_object {
 	unsigned char size;
 	char type;
 	int32 s_id;
+	int32 obj_id;
 	float x, y, z;
 	float yaw;
 	char object_type;

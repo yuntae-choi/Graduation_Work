@@ -41,6 +41,11 @@ public:
 	const int32 iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기)
 	const int32 iOriginMaxSnowballCount = 10;// 눈 최대보유량 (초기)
 	const int32 iOriginMaxIceballCount = 10;     // 얼음 최대보유량 (초기)
+
+	const int32 iBagMaxMatchCount = 3;     // 성냥 최대보유량 (가방)
+	const int32 iBagMaxSnowballCount = 15;// 눈 최대보유량 (가방)
+	const int32 iBagMaxIceballCount = 15;     // 얼음 최대보유량 (가방)
+
 	int32 iCurrentSnowballCount;
 	int32 iCurrentIceballCount;
 	int32 iCurrentMatchCount;
@@ -58,7 +63,8 @@ public:
 	mutex lua_lock;
 
 	mutex state_lock;
-	CL_STATE _state;
+	CL_STATE cl_state;  //  접속 상태
+	STATE_Type  pl_state;    //인게임 상태
 	atomic_bool   _is_active;
 
 	COMBAT _combat;
@@ -69,6 +75,7 @@ public:
 	SOCKET  _socket;
 	int      _prev_size;
 	int      last_move_time;
+	int      color;
 public:
 	CLIENT(); 
 	~CLIENT()

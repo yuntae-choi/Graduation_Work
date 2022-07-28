@@ -49,6 +49,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		info.Y = packet->y;
 		info.Z = packet->z;
 		info.Yaw = packet->yaw;
+		info.iColor = packet->color;
 		strcpy_s(info.userId, packet->id);
 		my_s_id = packet->s_id;
 		CharactersInfo.players[info.SessionId] = info;
@@ -56,9 +57,11 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		MyPlayerController->SetCharactersInfo(&CharactersInfo);
 		MyPlayerController->SetInitInfo(info);
 
-
 		// id, pw가 유효한 경우
 		MyPlayerController->DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
+		FString str = info.userId;
+		//MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"), *str, info.SessionId, info.X, info.Y, info.Z, info.Yaw);
+
 
 		//MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
 
@@ -127,13 +130,17 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		{
 			auto info = make_shared<cCharacter>();
 			info->SessionId = packet->s_id;
+			info->iColor = packet->obj_id;
 			info->X = packet->x;
 			info->Y = packet->y;
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
 			strcpy_s(info->userId, packet->name);
+			info->myState = ST_ANIMAL;
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("put info-> userId :%s"), (TCHAR*)info->userId));
 			MyPlayerController->SetNewCharacterInfo(info);
-			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+			FString str = info->userId;
+			//MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"),*str ,info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
 			break;
 		}
@@ -143,17 +150,26 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		}
 		case TONARDO:
 		{
-			my_tonardo_id = packet->s_id;
-			MyPlayerController->iTonardoId = packet->s_id;
+			MyPlayerController->bTornado = true;
 			auto info = make_shared<cCharacter>();
 			info->SessionId = packet->s_id;
 			info->X = packet->x;
 			info->Y = packet->y;
 			info->Z = packet->z;
 			info->Yaw = packet->yaw;
+			info->myState = ST_TORNADO;
 
-			MyPlayerController->SetNewCharacterInfo(info);
-			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+			MyPlayerController->SetNewTornadoInfo(info);
+			//MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+
+			break;
+		}
+		case SUPPLYBOX:
+		{
+
+			MyPlayerController->SpawnSupplyBox(packet->x, packet->y, 4500.0f);
+
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("spbox :%f, %f"), packet->x, packet->y));
 
 			break;
 		}
@@ -292,14 +308,14 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		case ITEM_BAG:
 		{
 			if (MyPlayerController->iSessionId == packet->s_id)
-				MyPlayerController->get_item(ITEM_BAG);
+				MyPlayerController->GetItem(packet->s_id, ITEM_BAG);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 			break;
 		}
 		case ITEM_UMB:
 		{
 			if (MyPlayerController->iSessionId == packet->s_id)
-				MyPlayerController->get_item(ITEM_UMB);
+				MyPlayerController->GetItem(packet->s_id, ITEM_UMB);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 
 			break;
@@ -307,7 +323,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		case ITEM_MAT:
 		{
 			if (MyPlayerController->iSessionId == packet->s_id)
-				MyPlayerController->get_item(ITEM_MAT);
+				MyPlayerController->GetItem(packet->s_id, ITEM_MAT);
 			//CharactersInfo.players[packet->s_id].iCurrentMatchCount++;
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 
@@ -329,6 +345,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		{
 			if (MyPlayerController->iSessionId != packet->s_id)
 				MyPlayerController->SetItem(packet->s_id, ITEM_JET, true);
+			break;
+		}
+		case ITEM_SPBOX:
+		{
+			if (MyPlayerController->iSessionId == packet->s_id)
+				MyPlayerController->GetItem(packet->s_id, ITEM_SPBOX);
+			MyPlayerController->SetDestroySpBox(packet->destroy_obj_id);
 			break;
 		}
 		default:
@@ -441,6 +464,8 @@ void ClientSocket::Send_LoginPacket(char* send_id, char* send_pw)
 
 	//MYLOG(Warning, TEXT("[Send login] z : %f"), packet.z);
 	SendPacket(&packet);
+	
+
 
 };
 
@@ -622,6 +647,23 @@ void ClientSocket::Send_OpenBoxPacket(int open_box_id)
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_OPEN_BOX;
 	packet.open_obj_id = open_box_id;
+	SendPacket(&packet);
+};
+
+void ClientSocket::SendPutObjPacket(char cObjType, int iObjId, FVector ObjLocation, float fYaw)
+{
+	sc_packet_put_object packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_PUT_OBJECT;
+	packet.s_id = MyPlayerController->iSessionId;
+	packet.obj_id = iObjId;
+	packet.object_type = cObjType;
+	packet.x = ObjLocation.X;
+	packet.y = ObjLocation.Y;
+	packet.z = ObjLocation.Z;
+	packet.yaw = fYaw;
+	size_t sent = 0;
+	//MYLOG(Warning, TEXT("[Send item] id : %d, objId : %d, item : %d"), packet.s_id, destroy_obj_id, item_type);
 	SendPacket(&packet);
 };
 

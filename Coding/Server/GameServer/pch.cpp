@@ -68,6 +68,15 @@ bool is_item(int obj_id)
 	return false;
 }
 
+bool is_spitem(int obj_id)
+{
+	unique_lock<mutex> _lock(g_spitem_mutex);
+	if (GA.g_spitem[obj_id]) {
+		GA.g_spitem[obj_id] = false;
+		return true;
+	}
+	return false;
+}
 //로그인 허용
 void send_login_ok_packet(int _s_id)
 {
@@ -75,11 +84,14 @@ void send_login_ok_packet(int _s_id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_LOGIN_OK;
 	packet.s_id = _s_id;
+	packet.color = clients[_s_id].color;
 	packet.x = clients[_s_id].x;
 	packet.y = clients[_s_id].y;
 	packet.z = clients[_s_id].z;
 	packet.yaw = clients[_s_id].Yaw;
 	strcpy_s(packet.id, clients[_s_id]._id);
+	printf(" 로그인 성공 전송 \n", packet.id);
+
 	//packet.Yaw = clients[_s_id].Yaw;
 	//packet.Pitch = clients[_s_id].Pitch;
 	//packet.Roll = clients[_s_id].Roll;*/

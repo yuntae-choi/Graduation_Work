@@ -37,6 +37,8 @@ const char CS_PACKET_UMB = 17;
 const char CS_PACKET_ACCOUNT = 18;
 const char CS_PACKET_CANCEL_SNOW = 19;
 const char CS_PACKET_PLAYER_COUNT = 20;
+const char CS_PACKET_PUT_OBJECT = 21;
+const char CS_PACKET_NPC_MOVE = 22;
 
 
 
@@ -66,6 +68,7 @@ const char SC_PACKET_UMB = 23;
 const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
 const char SC_PACKET_PLAYER_COUNT = 26;
+const char SC_PACKET_NPC_MOVE = 27;
 
 
 #pragma pack (push, 1)
@@ -82,6 +85,7 @@ struct sc_packet_login_ok {
 	char type;
 	// 세션 아이디
 	int32		s_id;
+	int32		color;
 	float x, y, z;
 	float yaw;
 	char	id[MAX_NAME_SIZE];
@@ -105,6 +109,22 @@ struct cs_packet_move {
 	// 회전값
 	float yaw;
 	float direction;
+
+	//long long move_time;
+};
+
+struct cs_packet_npc_move {
+	unsigned char size;
+	char	type;
+	//char	direction;			// 0 : up,  1: down, 2:left, 3:right
+	int32 sessionID;
+	float x, y, z;
+	// 속도
+	float vx, vy, vz;
+	// 회전값
+	float yaw;
+	float direction;
+
 	//long long move_time;
 };
 
@@ -112,6 +132,7 @@ struct sc_packet_put_object {
 	unsigned char size;
 	char type;
 	int32 s_id;
+	int32 obj_id;
 	float x, y, z;
 	float yaw;
 	char object_type;

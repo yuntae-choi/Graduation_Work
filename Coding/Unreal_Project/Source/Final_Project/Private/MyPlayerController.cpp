@@ -10,6 +10,7 @@
 #include "Snowdrift.h"
 #include "Icedrift.h"
 #include "Itembox.h"
+#include "SupplyBox.h"
 #include "Tornado.h"
 
 #pragma comment(lib, "ws2_32.lib")
@@ -21,7 +22,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_byte, LPWSAOVERLAPPED recv_over
 	//MYLOG(Warning, TEXT("recv_callback"));
 	if (num_byte == 0) {
 		g_socket->CloseSocket();
-		g_socket = nullptr; 
+		g_socket = nullptr;
 		MYLOG(Warning, TEXT("recv_error"));
 
 		return;
@@ -48,7 +49,8 @@ AMyPlayerController::AMyPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 	iBearCnt = 0;
 	iSnowmanCnt = 0;
-	
+	bTornado = false;
+
 	static ConstructorHelpers::FClassFinder<UUserWidget> READY_UI(TEXT("/Game/Blueprints/ReadyUI.ReadyUI_C"));
 	if (READY_UI.Succeeded() && (READY_UI.Class != nullptr))
 	{
@@ -88,19 +90,19 @@ void AMyPlayerController::OnPossess(APawn* pawn_)
 	Super::OnPossess(pawn_);
 
 	//mySocket->StartListen();
-	
+
 	localPlayerCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	
+
 	LoadLoginUI();	// loginUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
 	//LoadReadyUI();	// readyUI 띄우고 게임에 대한 입력 x, UI에 대한 입력만 받음
-	
+
 	FPlatformProcess::Sleep(0);
 }
 
 void AMyPlayerController::BeginPlay()
 {
 	MYLOG(Warning, TEXT("BeginPlay!"));
-	
+
 	// 실행시 클릭없이 바로 조작
 	//SetSocket();
 	//SleepEx(0, true);
@@ -150,7 +152,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 	//	MYLOG(Warning, TEXT("id : %d"), itembox->GetId());
 	//}
-	
+
 	// 월드 동기화
 	UpdateWorldInfo();
 
@@ -163,7 +165,7 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 void AMyPlayerController::SetSocket()
 {
-    mySocket = new ClientSocket();         // 에디터용
+	mySocket = new ClientSocket();         // 에디터용
 	//mySocket = ClientSocket::GetSingleton(); // 패키징 용
 
 	mySocket->SetPlayerController(this);
@@ -175,8 +177,8 @@ void AMyPlayerController::SetSocket()
 	g_socket->_recv_over._wsa_buf.buf = reinterpret_cast<char*>(g_socket->_recv_over._net_buf + g_socket->_prev_size);
 	g_socket->_recv_over._wsa_buf.len = sizeof(g_socket->_recv_over._net_buf) - g_socket->_prev_size;
 	WSARecv(g_socket->_socket, &g_socket->_recv_over._wsa_buf, 1, 0, &recv_flag, &g_socket->_recv_over._wsa_over, recv_callback);
-	SleepEx(0, true); 
-	
+	SleepEx(0, true);
+
 }
 
 void AMyPlayerController::SetInitInfo(const cCharacter& me)
@@ -184,7 +186,7 @@ void AMyPlayerController::SetInitInfo(const cCharacter& me)
 	initInfo = me;
 	bInitPlayerSetting = true;
 	InitPlayerSetting();
-	
+
 }
 
 void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
@@ -195,6 +197,16 @@ void AMyPlayerController::SetNewCharacterInfo(shared_ptr<cCharacter> NewPlayer_)
 		UpdateNewPlayer();
 	}
 }
+
+void AMyPlayerController::SetNewTornadoInfo(shared_ptr<cCharacter> newTornado)
+{
+	if (newTornado != nullptr)
+	{
+		newtornado = newTornado;
+		UpdateNewTornado();
+	}
+}
+
 
 void AMyPlayerController::SetAttack(const int s_id, int at_type)
 {
@@ -280,7 +292,7 @@ void AMyPlayerController::SetDestroyPlayer(const int del_sid)
 
 		}
 	}
-	
+
 }
 
 void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
@@ -288,7 +300,7 @@ void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
 	UWorld* World = GetWorld();
 	TArray<AActor*> Snowdrifts;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASnowdrift::StaticClass(), Snowdrifts);
-	 
+
 	if (obj_id == -1) return;
 	for (auto sd : Snowdrifts)
 	{
@@ -300,7 +312,7 @@ void AMyPlayerController::SetDestroySnowdritt(const int obj_id)
 			snowdrift = nullptr;
 		}
 	}
-		
+
 }
 
 void AMyPlayerController::SetDestroyIcedritt(const int obj_id)
@@ -339,7 +351,7 @@ void AMyPlayerController::SetOpenItembox(const int obj_id)
 		}
 	}
 
-	
+
 }
 
 void AMyPlayerController::SetGameEnd(const int target_id)
@@ -351,43 +363,105 @@ void AMyPlayerController::SetGameEnd(const int target_id)
 void AMyPlayerController::SetDestroyitembox(const int obj_id)
 {
 	UWorld* World = GetWorld();
-	
-	
-		TArray<AActor*> ItemBox;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), ItemBox);
 
-		for (auto sd : ItemBox)
+
+	TArray<AActor*> ItemBox;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItembox::StaticClass(), ItemBox);
+
+	for (auto sd : ItemBox)
+	{
+		AItembox* itembox = Cast<AItembox>(sd);
+
+		if (itembox->GetId() == obj_id)
 		{
-			AItembox* itembox = Cast<AItembox>(sd);
-
-			if (itembox->GetId() == obj_id)
-			{
-				itembox->DeleteItem();
-			}
+			itembox->DeleteItem();
 		}
-	
+	}
+
 }
 
-void AMyPlayerController::get_item(int itemType)
+void AMyPlayerController::SetDestroySpBox(const int obj_id)
+{
+	UWorld* World = GetWorld();
+
+
+	TArray<AActor*> SpBox;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASupplyBox::StaticClass(), SpBox);
+
+	for (auto sd : SpBox)
+	{
+		ASupplyBox* spBox = Cast<ASupplyBox>(sd);
+
+		if (spBox->GetId() == obj_id)
+		{
+			spBox->Destroy();
+		}
+	}
+
+}
+
+void AMyPlayerController::GetItem(int sId, int itemType)
 {
 
 	auto player_ = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!player_)
 		return;
-	//player_->GetItem(itemType);
+	switch (itemType)
+	{
+
+	case ITEM_BAG:
+	{
+		break;
+	}
+	case ITEM_UMB:
+	{
+
+		break;
+	}
+	case ITEM_MAT:
+	{
+
+		break;
+	}
+	case ITEM_SNOW:
+	{
+		break;
+	}
+	case ITEM_ICE:
+	{
+		break;
+	}
+	case ITEM_JET:
+	{
+		break;
+	}
+	case ITEM_SPBOX:
+	{
+		charactersInfo->players[sId].bGetSpBox = true;
+		break;
+	}
+	default:
+		break;
+	}
 }
 void AMyPlayerController::InitPlayerSetting()
 {
 	if (!localPlayerCharacter) return;
 	localPlayerCharacter->SetActorLocation(FVector(initInfo.X, initInfo.Y, initInfo.Z));
 	localPlayerCharacter->iSessionId = initInfo.SessionId;
-
+	localPlayerCharacter->SetCharacterMaterial(initInfo.iColor);
 	//컨트롤러의 회전
 	SetControlRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
-	if (iTonardoId == 0)
-		localPlayerCharacter->SetCharacterMaterial(iSessionId - 1);
-	else
-		localPlayerCharacter->SetCharacterMaterial(iSessionId);
+	
+	cCharacter* inputId = &charactersInfo->players[localPlayerCharacter->iSessionId];
+	localPlayerCharacter->SetUserId(inputId->userId);
+
+	char testId[MAX_NAME_SIZE];
+	localPlayerCharacter->GetUserId(testId);
+
+	FString str = testId;
+	//MYLOG(Warning, TEXT("[PlayerCharacter] id : %s"), *str);
+
 	bInitPlayerSetting = false;
 }
 void AMyPlayerController::UpdateTornado()
@@ -395,12 +469,12 @@ void AMyPlayerController::UpdateTornado()
 	UWorld* World = GetWorld();
 	TArray<AActor*> SpawnedTornado;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATornado::StaticClass(), SpawnedTornado);
-	if (iTonardoId == -1) return;
+	if (!bTornado) return;
 	for (auto sd : SpawnedTornado)
 	{
 		ATornado* tornado = Cast<ATornado>(sd);
 
-		cCharacter* info = &charactersInfo->players[iTonardoId];
+		cCharacter* info = &charactersInfo->players[tornado->iSessionId];
 		FVector CharacterLocation;
 		CharacterLocation.X = info->X;
 		CharacterLocation.Y = info->Y;
@@ -438,8 +512,8 @@ bool AMyPlayerController::UpdateWorldInfo()
 	// 스폰캐릭터들배열 하나 생성하고 월드에 있는 캐릭터들을 배열에 넣어주기
 	TArray<AActor*> SpawnedCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyCharacter::StaticClass(), SpawnedCharacters);
-	
-	
+
+
 	for (auto& Character_ : SpawnedCharacters)
 	{
 		//자신포함 모든플레이어
@@ -447,17 +521,22 @@ bool AMyPlayerController::UpdateWorldInfo()
 
 		cCharacter* info = &charactersInfo->players[player_->iSessionId];
 		if (!info->IsAlive) continue;
+	
+		if (info->bGetSpBox) {
+			player_->GetSupplyBox();
+			info->bGetSpBox = false;
+		}
 
-		if (info->bStartSnowBall) { 
+		if (info->bStartSnowBall) {
 			player_->SnowBallAttack();
 			info->bStartSnowBall = false;
 		}
-		
+
 		if (info->bStartIceBall) {
 			player_->IceballAttack();
 			info->bStartIceBall = false;
 		}
-		
+
 		if (info->bStartShotGun) {
 			player_->ShotgunAttack();
 			info->bStartShotGun = false;
@@ -489,7 +568,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 			MYLOG(Warning, TEXT("bEndShotGun"));
 			player_->SpawnSnowballBomb();
 			info->bEndShotGun = false;
-			info->iCurrentSnowCount-=5;
+			info->iCurrentSnowCount -= 5;
 		}
 
 		if (info->bStartUmb) {
@@ -510,6 +589,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->GetOnOffJetski();
 			info->bSetJetSki = false;
 		}
+
 		//타플레이어 구별
 		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
 		{
@@ -535,7 +615,9 @@ bool AMyPlayerController::UpdateWorldInfo()
 		player_->SetActorRotation(CharacterRotation);
 		player_->SetActorLocation(CharacterLocation);
 		player_->GetAnim()->SetDirection(info->direction);
-		
+
+
+
 		//눈사람 변화
 		if (!player_->IsSnowman())
 		{
@@ -587,26 +669,28 @@ void AMyPlayerController::UpdateNewPlayer()
 	SpawnParams.Instigator = GetInstigator();
 	SpawnParams.Name = FName(*FString(to_string(newplayer.get()->SessionId).c_str()));
 
-	if (newplayer.get()->SessionId != iTonardoId)
-	{
-		WhoToSpawn = AMyCharacter::StaticClass();
-		AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
-		SpawnCharacter->SpawnDefaultController();
-		SpawnCharacter->iSessionId = newplayer.get()->SessionId;
-		if(iTonardoId == 0) 
-			SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId -1);
-		else
-			SpawnCharacter->SetCharacterMaterial(SpawnCharacter->iSessionId);
-	}
-	else if(newplayer.get()->SessionId == iTonardoId)
-	{
-		if (iTonardoId == -1) return;
+	WhoToSpawn = AMyCharacter::StaticClass();
+	AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
+	SpawnCharacter->SpawnDefaultController();
+	SpawnCharacter->iSessionId = newplayer.get()->SessionId;
 
-		TornadoToSpawn = ATornado::StaticClass();
-		ATornado* SpawnTornado = World->SpawnActor<ATornado>(TornadoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
-		SpawnTornado -> SpawnDefaultController();
-	}
-	// 필드의 플레이어 정보에 추가
+	SpawnCharacter->SetCharacterMaterial(newplayer.get()->iColor);
+
+	
+	cCharacter* inputId = &charactersInfo->players[SpawnCharacter->iSessionId];
+	SpawnCharacter->SetUserId(inputId->userId);
+
+	char testId[MAX_NAME_SIZE];
+	SpawnCharacter->GetUserId(testId);
+
+	FString str = testId;
+	//MYLOG(Warning, TEXT("[SpawnCharacter] id : %s"), *str);
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("setuserId :%s"), SpawnCharacter->userId));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("info-> userId :%s"), info->userId));
+
+
+// 필드의 플레이어 정보에 추가
 	if (charactersInfo != nullptr)
 	{
 		cCharacter info;
@@ -616,8 +700,10 @@ void AMyPlayerController::UpdateNewPlayer()
 		info.Z = newplayer.get()->Z;
 
 		info.Yaw = newplayer.get()->Yaw;
+		info.myState = ST_ANIMAL;
 
 		charactersInfo->players[newplayer.get()->SessionId] = info;
+
 	}
 
 	newplayer = NULL;
@@ -627,6 +713,53 @@ void AMyPlayerController::UpdateNewPlayer()
 	//bNewPlayerEntered = false;
 }
 
+void AMyPlayerController::UpdateNewTornado()
+{
+	UWorld* const World = GetWorld();
+
+	int size_ = newPlayers.Size();
+
+
+	// 새로운 플레이어를 필드에 스폰
+	FVector SpawnLocation_;
+	SpawnLocation_.X = newtornado.get()->X;
+	SpawnLocation_.Y = newtornado.get()->Y;
+	SpawnLocation_.Z = newtornado.get()->Z;
+
+	FRotator SpawnRotation;
+	SpawnRotation.Yaw = newtornado.get()->Yaw;
+	SpawnRotation.Pitch = 0.0f;
+	SpawnRotation.Roll = 0.0f;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+	SpawnParams.Name = FName(*FString(to_string(newtornado.get()->SessionId).c_str()));
+
+	TornadoToSpawn = ATornado::StaticClass();
+	ATornado* SpawnTornado = World->SpawnActor<ATornado>(TornadoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
+	SpawnTornado->SpawnDefaultController();
+	SpawnTornado->iSessionId = newtornado.get()->SessionId;
+	// 필드의 플레이어 정보에 추가
+	if (charactersInfo != nullptr)
+	{
+		cCharacter info;
+		info.SessionId = newtornado.get()->SessionId;
+		info.X = newtornado.get()->X;
+		info.Y = newtornado.get()->Y;
+		info.Z = newtornado.get()->Z;
+		info.Yaw = newtornado.get()->Yaw;
+		info.myState = ST_TORNADO;
+		charactersInfo->players[newtornado.get()->SessionId] = info;
+
+	}
+
+	newplayer = NULL;
+
+	//MYLOG(Warning, TEXT("other player(id : %d) spawned."), newPlayers.front()->SessionId);
+
+	//bNewPlayerEntered = false;
+}
 
 void AMyPlayerController::Reset_Items(int s_id)
 {
@@ -637,7 +770,7 @@ void AMyPlayerController::Reset_Items(int s_id)
 		//charactersInfo->players[s_id].iCurrentMatchCount = 0;
 		//charactersInfo->players[s_id].bHasUmbrella = false;
 		//charactersInfo->players[s_id].bHasBag = false;;
-	
+
 	}
 	/*iCurrentSnowballCount = 0;
 	iMaxSnowballCount = iOriginMaxSnowballCount;
@@ -695,11 +828,11 @@ void AMyPlayerController::SendPlayerInfo(int input)
 			fspeed = localPlayerCharacter->Getfspeed();
 			mySocket->Send_Throw_Packet(iSessionId, MyIceBallLocation, MyCameraRotation, BULLET_ICEBALL, fspeed);
 		}
-        break;
+		break;
 	}
 	case COMMAND_CANCEL_SB: {
 		mySocket->Send_Cancel_Packet(iSessionId, BULLET_SNOWBALL);
-        break;
+		break;
 	}
 	case COMMAND_CANCEL_IB: {
 		mySocket->Send_Cancel_Packet(iSessionId, BULLET_ICEBALL);
@@ -712,7 +845,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	}
 	case COMMAND_DAMAGE: {
 		mySocket->Send_DamagePacket();
-        break;
+		break;
 	}
 	case COMMAND_MATCH: {
 		mySocket->Send_MatchPacket();
@@ -720,7 +853,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	}
 	case COMMAND_UMB_START: {
 		mySocket->Send_UmbPacket(false);
-        break;
+		break;
 	}
 	case COMMAND_UMB_END: {
 		mySocket->Send_UmbPacket(true);
@@ -728,22 +861,22 @@ void AMyPlayerController::SendPlayerInfo(int input)
 	}
 	default:
 		break;
-	}	
+	}
 }
 
 void AMyPlayerController::SendTeleportInfo(int input)
 {
 	/*if (!localPlayerCharacter)
 		return;
-	
+
 	if (input == TEL_FIRE)
-		
+
 	else if (input == TEL_BRIDGE)
-		
+
 	else if (input == TEL_TOWER)
-		
+
 	else if (input == TEL_ICE)
-	*/	
+	*/
 }
 
 void AMyPlayerController::SendCheatInfo(int input)
@@ -798,7 +931,7 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 	}
 	else
 	{
-		if (bIsBone) { 
+		if (bIsBone) {
 			player_->UpdateTemperatureState();
 			bIsBone = false;
 		}
@@ -927,7 +1060,7 @@ void AMyPlayerController::LoadGameResultUI(int winnerSessionId)
 		{
 			characterUI->RemoveFromParent();	// character ui 제거
 			gameResultUI->AddToViewport();		// game result ui 띄우기
-			
+
 			bool bIsWinner = (iSessionId == winnerSessionId) ? true : false;
 			CallDelegateUpdateGameResult(bIsWinner);
 
@@ -1086,7 +1219,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 void AMyPlayerController::CallDelegateUpdateGameResult(bool isWinner)
 {
 	if (!gameResultUI) return;
-	
+
 	if (FuncUpdateGameResult.IsBound() == true) FuncUpdateGameResult.Broadcast(isWinner);
 }
 
@@ -1144,7 +1277,7 @@ void AMyPlayerController::BtnLogin(FString id, FString pw)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("LOGIN id : %s, pw : %s"), *id, *pw);
 
-	
+
 	// 디버깅용 - id, pw에 입력 x인 경우 게임 플레이 되도록
 	if (id.Len() == 0 && pw.Len() == 0)
 	{
