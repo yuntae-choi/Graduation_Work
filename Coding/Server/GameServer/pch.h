@@ -32,6 +32,9 @@ const int BONFIRE_RANGE = 1700;
 
 const int Tornado_id = 100;
 
+const int Gm_id = 1000;
+
+
 struct timer_ev {
 
     int this_id = {};

@@ -32,6 +32,7 @@ void rand_arr(int* r_arr);
 void Player_Event(int target, int player_id, COMMAND type);
 void player_heal(int s_id);
 void player_damage(int s_id);
+void supply_box();
 int get_id();
 void Accept_Player(int _s_id);
 void Disconnect(int _s_id);
@@ -192,6 +193,13 @@ void player_damage(int s_id)
 //}
 }
 
+void supply_box()
+{
+    Timer_Event(Gm_id, Gm_id, SP_DROP, 60000ms);
+	cout << "supply_box " << endl;
+
+}
+
 
 //새로운 id(인덱스) 할당
 int get_id()
@@ -278,6 +286,8 @@ void Disconnect(int _s_id)
 //플레이어 이벤트 등록
 void Player_Event(int target, int player_id, COMMAND type)
 {
+	if (type == OP_OBJ_SPAWN)
+	   cout << "Player_Event " << type << endl;
 	Overlap* exp_over = new Overlap;
 	exp_over->_op = type;
 	exp_over->_target = player_id;
@@ -293,6 +303,8 @@ void Timer_Event(int np_s_id, int user_id, int ev, std::chrono::milliseconds ms)
 	order.order = ev;
 	order.start_t = chrono::system_clock::now() + ms;
 	timer_q.Push(order);
+	//cout << "Timer_Event  " << ev << endl;
+
 }
 
 //플레이어 접속 정보 전송
@@ -302,7 +314,7 @@ void Accept_Player(int _s_id)
 	// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
 	for (auto& other : clients) {
 		if (other._s_id == _s_id) continue;
-		if (ST_TORNADO != other.pl_state) continue;
+		if (ST_TORNADO == other.pl_state) continue;
 		other.state_lock.lock();
 		if (ST_INGAME != other.cl_state) {
 			other.state_lock.unlock();
@@ -330,7 +342,7 @@ void Accept_Player(int _s_id)
 		if (other._s_id == _s_id) continue;
 		if (ST_INGAME != other.cl_state) {
 			if (GA.g_tonardo) {
-				if (ST_TORNADO != other.pl_state){
+				if (ST_TORNADO == other.pl_state){
 					//토네이도 생성위치 보내기
 					sc_packet_put_object packet;
 					packet.s_id = other._s_id;
@@ -349,7 +361,7 @@ void Accept_Player(int _s_id)
 		else {
 			sc_packet_put_object packet;
 			packet.s_id = other._s_id;
-			packet.obj_id = cl.color;
+			packet.obj_id = other.color;
 			strcpy_s(packet.name, other.name);
 			packet.size = sizeof(packet);
 			packet.type = SC_PACKET_PUT_OBJECT;
@@ -424,6 +436,7 @@ void process_packet(int s_id, unsigned char* p)
 				string gm_id(packet->id);
 				gm_id += to_string(s_id);
 				Init_Pos(s_id, (char*)gm_id.c_str(), packet->pw, packet->z);
+				cl.color = GA.g_color++;
 				printf(" [GM] 플레이어[id] - ID : %s 로그인 성공 \n", cl._id);
 				send_login_ok_packet(s_id);
 				Accept_Player(s_id);
@@ -1213,7 +1226,7 @@ void process_packet(int s_id, unsigned char* p)
 					continue;
 				if (ST_INGAME != other.cl_state)
 					continue;
-				if (ST_TORNADO != other.pl_state)
+				if (ST_TORNADO == other.pl_state)
 					continue;
 				cs_packet_move packet;
 				packet.sessionID = s_id;
@@ -1341,6 +1354,7 @@ void worker_thread()
 
 			delete exp_over;
 			break;
+
 		}
 		case OP_PLAYER_DAMAGE: {
 			if (clients[_s_id].bIsSnowman) break;
@@ -1412,6 +1426,30 @@ void worker_thread()
 			delete exp_over;
 			break;
 		}
+		case OP_OBJ_SPAWN: {
+			cout << "OP_OBJ_SPAWN " << endl;
+
+			float f_x = rand() % 20000 - 10000;
+			float f_y = rand() % 20000 - 10000;
+
+			printf("SupplyBOX %f, %f\n" , f_x, f_y);
+			sc_packet_put_object packet;
+			for (auto& other : clients) {
+				if (ST_INGAME != other.cl_state) continue;
+				if (ST_TORNADO == other.pl_state) continue;
+				packet.size = sizeof(packet);
+				packet.type = SC_PACKET_PUT_OBJECT;
+				packet.object_type = SUPPLYBOX;
+				packet.x = f_x;
+				packet.y = f_y;
+				size_t sent = 0;
+				other.do_send(sizeof(packet), &packet);
+			}
+
+			supply_box();
+			delete exp_over;
+			break;
+		}
 		}
 
 
@@ -1426,37 +1464,55 @@ void ev_timer()
 	{
 		timer_q.Clear();
 	}
+	supply_box();
 	while (true) {
 		timer_ev order;
 		timer_q.WaitPop(order);
 		//auto t = order.start_t - chrono::system_clock::now();
 		int s_id = order.this_id;
-		if (false == is_player(s_id)) continue;
-		if (clients[s_id].cl_state != ST_INGAME) continue;
-		if (clients[s_id]._is_active == false) continue;
-		if (order.start_t <= chrono::system_clock::now()) {
-			if (order.order == CL_BONEFIRE) {
-				if (clients[s_id].is_bone == false) continue;
-				Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
-				this_thread::sleep_for(50ms);
+		int target_id = order.target_id;
+		if (s_id == Gm_id)
+		{
+			if (order.start_t <= chrono::system_clock::now()) {
+				if (order.order == SP_DROP) {
+					cout << "ev_timer " << endl;
+					Player_Event(0, 0, OP_OBJ_SPAWN);
+					this_thread::sleep_for(50ms);
+				}
 			}
-			else if (order.order == CL_BONEOUT) {
-				if (clients[s_id].is_bone == true) continue;
-				Player_Event(s_id, order.target_id, OP_PLAYER_DAMAGE);
-				this_thread::sleep_for(50ms);
-			}
-			else if (order.order == CL_MATCH) {
-				Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
-				this_thread::sleep_for(50ms);
-			}
-			else if (order.order == CL_END_MATCH) {
-				send_is_bone_packet(s_id);
-				this_thread::sleep_for(50ms);
+			else {
+				timer_q.Push(order);
+				this_thread::sleep_for(10ms);
 			}
 		}
 		else {
-			timer_q.Push(order);
-			this_thread::sleep_for(10ms);
+			if (false == is_player(s_id)) continue;
+			if (clients[s_id].cl_state != ST_INGAME) continue;
+			if (clients[s_id]._is_active == false) continue;
+			if (order.start_t <= chrono::system_clock::now()) {
+				if (order.order == CL_BONEFIRE) {
+					if (clients[s_id].is_bone == false) continue;
+					Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
+					this_thread::sleep_for(50ms);
+				}
+				else if (order.order == CL_BONEOUT) {
+					if (clients[s_id].is_bone == true) continue;
+					Player_Event(s_id, order.target_id, OP_PLAYER_DAMAGE);
+					this_thread::sleep_for(50ms);
+				}
+				else if (order.order == CL_MATCH) {
+					Player_Event(s_id, order.target_id, OP_PLAYER_HEAL);
+					this_thread::sleep_for(50ms);
+				}
+				else if (order.order == CL_END_MATCH) {
+					send_is_bone_packet(s_id);
+					this_thread::sleep_for(50ms);
+				}
+			}
+			else {
+				timer_q.Push(order);
+				this_thread::sleep_for(10ms);
+			}
 		}
 	}
 
