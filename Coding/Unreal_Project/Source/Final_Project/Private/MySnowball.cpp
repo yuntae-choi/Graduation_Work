@@ -57,6 +57,7 @@ AMySnowball::AMySnowball()
 	//crumbleNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/Snowball/snowballHoudini.snowballHoudini"), nullptr, LOAD_None, nullptr);
 
 	iDamage = 10;
+	iOwnerSessionId = -1;
 }
 
 // Called when the game starts or when spawned

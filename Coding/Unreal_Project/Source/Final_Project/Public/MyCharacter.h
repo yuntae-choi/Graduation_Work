@@ -169,6 +169,8 @@ public:
 	void FreezeRightCalf();
 	void FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& end, UStaticMeshComponent*& bone, TArray<UStaticMesh*>& FrozenMeshes);
 	void FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end);
+
+	void InitializeFreeze();
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -209,9 +211,6 @@ private:
 	void SettingLeftCalf();
 	void SettingRightThigh();
 	void SettingRightCalf();
-
-	void InitializeFreeze();
-
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -448,6 +447,12 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UNiagaraSystem* stunNiagara;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraSystem* changeNiagara;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraComponent* tmpNiagara;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)

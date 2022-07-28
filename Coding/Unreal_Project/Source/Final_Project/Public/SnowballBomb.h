@@ -34,6 +34,9 @@ public:
 
 	int32 GetDamage() const { return iDamage; };
 
+	int32 GetOwnerSessionId() const { return iOwnerSessionId; };
+	void SetOwnerSessionId(int32 OwnerSessionId) { iOwnerSessionId = OwnerSessionId; };
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -54,4 +57,6 @@ public:
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)
 	int32 iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
+
+	int32 iOwnerSessionId;	// 눈덩이 폭탄을 생성한 캐릭터의 session id
 };

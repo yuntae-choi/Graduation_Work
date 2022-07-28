@@ -132,6 +132,7 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	FuncUpdateSelectedItem.Clear();
 	FuncUpdateSelectedProjectile.Clear();
 	FuncUpdateSelectedWeapon.Clear();
+	FuncUpdateKillLog.Clear();
 	FuncUpdateGameResult.Clear();
 }
 
@@ -1134,6 +1135,15 @@ void AMyPlayerController::CallDelegateUpdateSelectedWeapon()
 	if (FuncUpdateSelectedWeapon.IsBound() == true) FuncUpdateSelectedWeapon.Broadcast(localPlayerCharacter->iSelectedWeapon);
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update selected weapon %d"), localPlayerCharacter->iSelectedWeapon);
+}
+
+void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, int cause)
+{	// 추위에 의한 죽음은 attacker id = -2
+	if (!characterUI) return;
+
+	if (FuncUpdateKillLog.IsBound() == true) FuncUpdateKillLog.Broadcast(attacker, victim, cause);
+
+	//UE_LOG(LogTemp, Warning, TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause);
 }
 
 void AMyPlayerController::CallDelegateUpdateGameResult(bool isWinner)

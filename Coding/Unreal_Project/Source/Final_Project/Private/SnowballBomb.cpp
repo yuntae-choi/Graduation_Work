@@ -46,6 +46,7 @@ ASnowballBomb::ASnowballBomb()
 	explosionNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/NS_Explosion_MV.NS_Explosion_MV"), nullptr, LOAD_None, nullptr);
 
 	iDamage = 10;
+	iOwnerSessionId = -1;
 }
 
 // Called when the game starts or when spawned

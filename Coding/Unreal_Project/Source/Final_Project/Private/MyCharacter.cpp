@@ -338,6 +338,14 @@ AMyCharacter::AMyCharacter()
 	SettingRightCalf();
 
 	stunNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/Stun/NS_Stun.NS_Stun"), nullptr, LOAD_None, nullptr);
+	changeNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_FrostExplosion.NS_FrostExplosion"), nullptr, LOAD_None, nullptr);
+
+	//tmpNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("tmpComponent"));
+	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TMP(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_FrostSpray.NS_FrostSpray"));
+	//tmpNiagara->SetAsset(NS_TMP.Object);
+	//tmpNiagara->SetupAttachment(GetMesh());
+	//tmpNiagara->SetRelativeLocation(FVector(0.0f, 0.0f, 160.0f));
+	//tmpNiagara->SetVisibility(true);
 
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
 	isAttacking = false;
@@ -709,6 +717,7 @@ void AMyCharacter::SnowBallAttack()
 			FAttachmentTransformRules atr = FAttachmentTransformRules(
 				EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, true);
 			snowball->AttachToComponent(GetMesh(), atr, TEXT("SnowballSocket"));
+			snowball->SetOwnerSessionId(iSessionId);	// 눈덩이에 자신을 생성한 캐릭터의 session id 저장
 		}
 	}
 
@@ -1242,6 +1251,8 @@ void AMyCharacter::ChangeSnowman()
 {
 	bIsSnowman = true;
 
+	InitializeFreeze();
+
 	// 스켈레탈메시, 애니메이션 블루프린트 변경
 	myAnim->SetDead();
 	GetMesh()->SetSkeletalMesh(snowman);
@@ -1269,8 +1280,10 @@ void AMyCharacter::ChangeSnowman()
 	CloseUmbrellaAnim();
 	HideUmbrella();
 
-	//부위 얼리는 소켓 초기화
-	InitializeFreeze();
+	//변신 이펙트
+	if (changeNiagara) {
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), changeNiagara, GetActorLocation(), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+	}
 }
 
 void AMyCharacter::WaitForStartGame()
@@ -1353,7 +1366,6 @@ void AMyCharacter::StartStun(float waitTime)
 	//스턴 이펙트
 	if (stunNiagara) {
 		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), stunNiagara, GetActorLocation() + FVector(0.0f, -40.0f, 90.0f), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
-		//NiagaraComp->SetNiagaraVariableFloat(FString("StrengthCoef"), CoefStrength);
 	}
 }
 
@@ -1419,6 +1431,11 @@ void AMyCharacter::ChangeAnimal()
 	iCharacterState = CharacterState::AnimalNormal;
 
 	isAttacking = false;	// 공격 도중에 상태 변할 시 발생하는 오류 방지
+
+	//q 이펙트
+	if (changeNiagara) {
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), changeNiagara, GetActorLocation(), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+	}
 }
 
 void AMyCharacter::SetCharacterMaterial(int id)
@@ -1651,6 +1668,7 @@ void AMyCharacter::SpawnSnowballBomb()
 			for (int i = 0; i < 5; ++i)
 			{
 				ASnowballBomb* snowballBomb = GetWorld()->SpawnActor<ASnowballBomb>(shotgunProjectileClass, muzzleSocketTransform, SpawnParams);
+				snowballBomb->SetOwnerSessionId(iSessionId);	// 눈덩이 폭탄에 자신을 생성한 캐릭터의 session id 저장
 
 				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[PlayerController->GetCharactersInfo()->players[iSessionId].iRandBulletArr[i]], 0.0f);
 			}
@@ -2092,7 +2110,6 @@ void AMyCharacter::SettingHead()
 	headComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 	headComponent->SetupAttachment(GetMesh(), TEXT("HeadSocket"));
 	headComponent->SetVisibility(true);
-	headComponent->SetStaticMesh(nullptr);
 }
 
 void AMyCharacter::SettingLeftForearm()
@@ -2415,10 +2432,17 @@ void AMyCharacter::FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& 
 {
 	//bone->SetVisibility(true);
 
+	if (GetIsSnowman())
+	{
+		InitializeFreeze();
+		return;
+	}
+
 	float WaitTime = 0.1f;
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
 		{
 			//MYLOG(Warning, TEXT("%d"), frame);
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%d"), frame));
 
 			bone->SetStaticMesh(FrozenMeshes[frame]);
 
@@ -2427,6 +2451,14 @@ void AMyCharacter::FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& 
 				auto mat = bone->CreateDynamicMaterialInstance(1);
 				mat->SetScalarParameterValue(TEXT("Emissive"), frame * 0.125);
 				mat->SetTextureParameterValue(FName("Tex"), bearTextureArray[iId]);	// 본인 색상의 곰 텍스쳐 사용
+			}
+
+			//부위 얼리는 소켓 초기화
+			if (GetIsSnowman())
+			{
+				InitializeFreeze();
+				end = true;
+				frame = 0;
 			}
 
 			//배열 끝 판정
@@ -2452,6 +2484,9 @@ void AMyCharacter::FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end)
 void AMyCharacter::InitializeFreeze()
 {
 	headComponent->SetStaticMesh(nullptr);
+	if (headComponent->GetStaticMesh())
+		headComponent->CreateDynamicMaterialInstance(1)->SetScalarParameterValue(TEXT("Emissive"), 0.0f);
+
 	leftForearmComponent->SetStaticMesh(nullptr);
 	leftUpperarmComponent->SetStaticMesh(nullptr);
 	rightForearmComponent->SetStaticMesh(nullptr);
