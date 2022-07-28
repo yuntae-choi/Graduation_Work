@@ -50,9 +50,6 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UProjectileMovementComponent* projectileMovementComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Component)
-	UNiagaraSystem* crumbleNiagara;
-
 	AEditorManager* editorManager;
 
 private:

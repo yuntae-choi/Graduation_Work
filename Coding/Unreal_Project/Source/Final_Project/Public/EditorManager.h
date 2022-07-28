@@ -20,6 +20,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Component)
 	UNiagaraSystem* crumbleNiagara;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Component)
+	UParticleSystem* snowSplash;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Component)
+	UMaterial* snowPaint;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

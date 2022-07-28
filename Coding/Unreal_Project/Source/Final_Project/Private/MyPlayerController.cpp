@@ -202,6 +202,8 @@ void AMyPlayerController::SetNewTornadoInfo(shared_ptr<cCharacter> newTornado)
 {
 	if (newTornado != nullptr)
 	{
+		MYLOG(Warning, TEXT("SetNewTornadoInfo"));
+		//newplayer = newTornado;
 		newtornado = newTornado;
 		UpdateNewTornado();
 	}
@@ -480,16 +482,6 @@ void AMyPlayerController::UpdateTornado()
 		CharacterLocation.Y = info->Y;
 		CharacterLocation.Z = info->Z;
 
-		FRotator CharacterRotation;
-		CharacterRotation.Yaw = info->Yaw;
-		CharacterRotation.Pitch = 0.0f;
-		CharacterRotation.Roll = 0.0f;
-
-		FVector CharacterVelocity;
-		CharacterVelocity.X = info->VX;
-		CharacterVelocity.Y = info->VY;
-		CharacterVelocity.Z = info->VZ;
-
 		//tornado->AddMovementInput(CharacterVelocity);
 		//tornado->SetActorRotation(CharacterRotation);
 		tornado->SetActorLocation(CharacterLocation);
@@ -717,7 +709,6 @@ void AMyPlayerController::UpdateNewTornado()
 {
 	UWorld* const World = GetWorld();
 
-	int size_ = newPlayers.Size();
 
 
 	// 새로운 플레이어를 필드에 스폰
@@ -754,9 +745,10 @@ void AMyPlayerController::UpdateNewTornado()
 
 	}
 
-	newplayer = NULL;
+	newtornado = NULL;
+	bTornado = true;
 
-	//MYLOG(Warning, TEXT("other player(id : %d) spawned."), newPlayers.front()->SessionId);
+	MYLOG(Warning, TEXT("UpdateNewTornado"));
 
 	//bNewPlayerEntered = false;
 }

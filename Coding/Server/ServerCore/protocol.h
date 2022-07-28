@@ -10,7 +10,8 @@ const int32  ReZone_HEIGHT = 2000;
 const int32  ReZone_WIDTH = 2000;
 const int32  MAX_NAME_SIZE = 20;
 const int32  MAX_CHAT_SIZE = 100;
-const int32  MAX_USER = 10;
+const int32  MAX_USER = 100;
+const int32  MAX_NPC = 100;
 const int32  MAX_OBJ = 20;
 const int32  MAX_SNOWDRIFT = 1000;
 

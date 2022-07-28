@@ -4,6 +4,8 @@
 #include "MySnowball.h"
 #include "MyCharacter.h"
 #include "MyPlayerController.h"
+#include "Components/DecalComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 //#define CHECKTRAJECTORY	// 눈덩이가 던져지는 시점에서부터 충돌할 때까지의 궤적 로그 출력
 
@@ -54,7 +56,16 @@ AMySnowball::AMySnowball()
 		projectileMovementComponent->bSimulationEnabled = false;	// 생성 후 움직이지 않도록 (눈덩이 릴리즈 시 활성화)
 	}
 
-	//crumbleNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/Snowball/snowballHoudini.snowballHoudini"), nullptr, LOAD_None, nullptr);
+	if (!meshComponent)
+	{
+		meshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMeshComponent"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SNOWBALL(TEXT("/Game/NonCharacters/snowball1_130.snowball1_130"));
+		if (SM_SNOWBALL.Succeeded())
+		{
+			meshComponent->SetStaticMesh(SM_SNOWBALL.Object);
+			meshComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
+		}
+	}
 
 	iDamage = 10;
 	iOwnerSessionId = -1;
@@ -178,11 +189,37 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 
 	TArray<AActor*> ems;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEditorManager::StaticClass(), ems);
-
 	AEditorManager* em = Cast<AEditorManager>(ems[0]);
+
+	//눈 터지는 이펙트
+	if (em->snowSplash)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), em->snowSplash, GetActorLocation());
 	em->PlaySnowballCrumbleEffect(GetActorLocation());
 
+	//눈덩이 스탑 후 삭제
+	projectileMovementComponent->StopMovementImmediately();
 	Destroy();
+
+
+	//눈자국
+	FRotator RandomDecalRotation = UKismetMathLibrary::MakeRotFromX(Hit.Normal);
+	auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-30.0f, 100.0f, 100.0f),
+		OtherComponent, NAME_None,
+		GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
+
+	float rand = FMath::RandRange(0.0f, 300.0f);
+
+	comp->AddRelativeRotation(FRotator(0.0f, 0.0f, rand));
+	comp->AddRelativeLocation(FVector(1.0f, 0.0f, 0.0f));
+
+	//눈자국 몇초 뒤에 사라지게
+	FTimerHandle timerHandle;
+	float WaitTime = 10.0f;
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			//if (comp)
+			//	comp->DestroyComponent();
+		}), WaitTime, false);
 	
 #ifdef CHECKTRAJECTORY
 	bCheckTrajectory = false;
