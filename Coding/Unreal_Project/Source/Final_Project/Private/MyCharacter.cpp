@@ -264,7 +264,7 @@ AMyCharacter::AMyCharacter()
 	if (!bagMeshComponent)
 	{
 		bagMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("bagMeshComponent"));
-		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BAG(TEXT("/Game/NonCharacters/bag.bag"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BAG(TEXT("/Game/NonCharacters/Backpack_SM.Backpack_SM"));
 		if (SM_BAG.Succeeded())
 		{
 			bagMeshComponent->SetStaticMesh(SM_BAG.Object);
