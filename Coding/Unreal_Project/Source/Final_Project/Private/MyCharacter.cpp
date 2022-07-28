@@ -587,6 +587,7 @@ void AMyCharacter::Attack()
 				isAttacking = true;
 				break;
 			case Weapon::Shotgun:
+				if (!bHasShotgun) return;	// 샷건을 소유하고 있지 않으면 공격 x
 				if (iCurrentSnowballCount < 5) return;	// 눈덩이가 5개 이상 없으면 공격 x
 				PlayerController->SendPlayerInfo(COMMAND_SHOTGUN);
 				MYLOG(Warning, TEXT("gunattack"));
