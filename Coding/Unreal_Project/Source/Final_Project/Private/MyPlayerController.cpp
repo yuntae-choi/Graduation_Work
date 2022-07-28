@@ -460,7 +460,7 @@ void AMyPlayerController::InitPlayerSetting()
 	localPlayerCharacter->GetUserId(testId);
 
 	FString str = testId;
-	MYLOG(Warning, TEXT("[PlayerCharacter] id : %s"), *str);
+	//MYLOG(Warning, TEXT("[PlayerCharacter] id : %s"), *str);
 
 	bInitPlayerSetting = false;
 }
@@ -684,7 +684,7 @@ void AMyPlayerController::UpdateNewPlayer()
 	SpawnCharacter->GetUserId(testId);
 
 	FString str = testId;
-	MYLOG(Warning, TEXT("[SpawnCharacter] id : %s"), *str);
+	//MYLOG(Warning, TEXT("[SpawnCharacter] id : %s"), *str);
 
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("setuserId :%s"), SpawnCharacter->userId));
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("info-> userId :%s"), info->userId));

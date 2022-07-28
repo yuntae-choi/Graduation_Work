@@ -60,7 +60,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		// id, pw가 유효한 경우
 		MyPlayerController->DeleteLoginUICreateReadyUI();	// Ready UI로 넘어가도록 하는 코드
 		FString str = info.userId;
-		MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"), *str, info.SessionId, info.X, info.Y, info.Z, info.Yaw);
+		//MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"), *str, info.SessionId, info.X, info.Y, info.Z, info.Yaw);
 
 
 		//MYLOG(Warning, TEXT("[Recv login ok] id : %d, location : (%f,%f,%f), yaw : %f"), info.SessionId, info.X, info.Y, info.Z, info.Yaw);
@@ -140,7 +140,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("put info-> userId :%s"), (TCHAR*)info->userId));
 			MyPlayerController->SetNewCharacterInfo(info);
 			FString str = info->userId;
-			MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"),*str ,info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+			//MYLOG(Warning, TEXT("[Recv put object] id : %s, sid : %d, location : (%f,%f,%f), yaw : %f"),*str ,info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
 			break;
 		}
@@ -160,7 +160,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 			info->myState = ST_TORNADO;
 
 			MyPlayerController->SetNewTornadoInfo(info);
-			MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
+			//MYLOG(Warning, TEXT("[Recv put object] id : %d, location : (%f,%f,%f), yaw : %f"), info->SessionId, info->X, info->Y, info->Z, info->Yaw);
 
 			break;
 		}
