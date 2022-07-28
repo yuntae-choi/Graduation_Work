@@ -8,7 +8,7 @@
 FString ItemMeshStringArray[] = {
 	TEXT("/Game/NonCharacters/match.match"),								// 성냥
 	TEXT("/Game/NonCharacters/umbrellaForItemBox.umbrellaForItemBox"),		// 우산
-	TEXT("/Game/NonCharacters/bag.bag")};									// 가방 - 임시 (리소스 제작 필요)
+	TEXT("/Game/NonCharacters/Backpack_SM.Backpack_SM")};					// 가방
 
 int AItembox::iIdCountHelper = -1;
 
