@@ -1969,7 +1969,7 @@ void AMyCharacter::GetOnOffJetski()
 {
 	if (bIsSnowman) return;		// 눈사람은 jetski 탑승 x
 	if (isAttacking) return;	// 공격 중 제트스키 탑승 및 하차 x
-	if (myAnim->GetIsInAir()) return;	// 공중에서는 제트스키 탑승 및 하차 x
+	if (GetMovementComponent()->IsFalling()) return;	// 공중에서는 제트스키 탑승 및 하차 x
 
 	if (iSessionId == localPlayerController->iSessionId)
 	{
@@ -2003,9 +2003,12 @@ void AMyCharacter::GetOnJetski()
 
 		// 배치된 jetski의 위치로 캐릭터 이동 및 회전
 		SetActorLocation(overlapActorsArray[0]->GetActorLocation());
-		FRotator newRotation = FRotator(
-			GetControlRotation().Pitch, overlapActorsArray[0]->GetActorRotation().Yaw, GetControlRotation().Roll);
-		localPlayerController->SetControlRotation(newRotation);
+		if (iSessionId == localPlayerController->iSessionId)
+		{
+			FRotator newRotation = FRotator(
+				GetControlRotation().Pitch, overlapActorsArray[0]->GetActorRotation().Yaw, GetControlRotation().Roll);
+			localPlayerController->SetControlRotation(newRotation);
+		}
 
 		// 배치된 jetski 제거
 		overlapActorsArray[0]->Destroy();
@@ -2019,7 +2022,10 @@ void AMyCharacter::GetOnJetski()
 		// 운전용 카메라로 전환, 크로스헤어 제거
 		camera->Deactivate();
 		camera3->Activate();
-		localPlayerController->GetHUD()->bShowHUD = false;
+		if (iSessionId == localPlayerController->iSessionId)
+		{
+			localPlayerController->GetHUD()->bShowHUD = false;
+		}
 
 		// 이동속도 설정
 		GetCharacterMovement()->MaxWalkSpeed = iJetskiSpeed;
@@ -2076,8 +2082,8 @@ void AMyCharacter::UpdateJetski()
 	if (bIsRiding)
 	{	// jetski 메시 위치 및 회전 갱신, 뒤집어짐 방지
 		jetskiMeshComponent->SetWorldLocation(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - 56.0f));
-		float pitch = UKismetMathLibrary::ClampAngle(jetskiMeshComponent->GetComponentRotation().Pitch, -40.0f, 40.0f);
-		float roll = UKismetMathLibrary::ClampAngle(jetskiMeshComponent->GetComponentRotation().Roll, -20.0f, 20.0f);
+		float pitch = UKismetMathLibrary::ClampAngle(jetskiMeshComponent->GetComponentRotation().Pitch, -20.0f, 20.0f);
+		float roll = UKismetMathLibrary::ClampAngle(jetskiMeshComponent->GetComponentRotation().Roll, -10.0f, 10.0f);
 		//FRotator newRotation = FRotator(jetskiMeshComponent->GetComponentRotation().Pitch, GetActorRotation().Yaw, roll);
 		FRotator newRotation = FRotator(pitch, GetActorRotation().Yaw, roll);
 		jetskiMeshComponent->SetWorldRotation(newRotation);
