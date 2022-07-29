@@ -18,7 +18,7 @@
 #include "ExtraProject.h"
 
 #define	MAX_BUFFER		4096
-#define SERVER_PORT		9090
+#define SERVER_PORT		10001
 //#define SERVER_IP		"112.148.142.95" // 외부 IP
 //#define SERVER_IP		"192.168.219.106" //로컬IP
 #define SERVER_IP		"127.0.0.1" //로컬IP
