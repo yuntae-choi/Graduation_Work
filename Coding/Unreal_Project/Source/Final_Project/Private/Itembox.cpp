@@ -167,8 +167,8 @@ void AItembox::SetItem(int itemType)
 		break;
 	case ItemTypeList::Bag:
 		itemMeshComponent->SetStaticMesh(itemMeshArray[ItemTypeList::Bag]);
-		itemMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
-		itemMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -5.0f));
+		itemMeshComponent->SetRelativeRotation(FRotator(-90.0f, -26.56f, 656.56f));
+		itemMeshComponent->SetRelativeLocation(FVector(2.0f, 21.0f, -12.0f));
 		iItemType = ItemTypeList::Bag;
 		break;
 	case ItemTypeList::Random:
