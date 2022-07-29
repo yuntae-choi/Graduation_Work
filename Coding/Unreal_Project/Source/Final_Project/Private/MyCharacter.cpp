@@ -1267,6 +1267,7 @@ void AMyCharacter::ChangeSnowman()
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
+	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	SetCharacterMaterial();	// 눈사람으로 머티리얼 변경할 때는 색상 필요 x (디폴트값으로)
 
 	iCurrentHP = iMinHP;
