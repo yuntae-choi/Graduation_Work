@@ -166,7 +166,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		case SUPPLYBOX:
 		{
 
-			MyPlayerController->SpawnSupplyBox(packet->x, packet->y, 4500.0f);
+			MyPlayerController->SpawnSupplyBox(packet->x, packet->y, packet->z);
 
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("spbox :%f, %f"), packet->x, packet->y));
 

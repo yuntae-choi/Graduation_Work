@@ -1765,6 +1765,7 @@ void AMyCharacter::Cheat_IncreaseSnowball()
 void AMyCharacter::Cheat_SpawnSupplyBox()
 {	// 캐릭터 머리 위에 SupplyBox 생성
 	FVector vector = GetActorLocation();
+	vector.Z += 600.0f;
 
 	localPlayerController->GetSocket()->SendPutObjPacket(SUPPLYBOX, 0, vector, 0.0);
 	//localPlayerController->SpawnSupplyBox(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 600.0f);

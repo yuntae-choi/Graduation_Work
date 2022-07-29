@@ -19,6 +19,8 @@ SOCKET sever_socket;
 condition_variable cv;
 default_random_engine dre;
 uniform_int_distribution<> uid{ 0,7 };// 범위 지정
+uniform_int_distribution<> sprang{ 0,20000 };// 보급 박스 범위 지정
+
 
 LockQueue<timer_ev> timer_q;
 
@@ -1404,10 +1406,10 @@ void worker_thread()
 		case OP_OBJ_SPAWN: {
 			cout << "OP_OBJ_SPAWN " << endl;
 
-			float f_x = rand() % 20000 - 10000;
-			float f_y = rand() % 20000 - 10000;
+			float f_x = sprang(dre) - 10000.0f;
+			float f_y = sprang(dre) - 10000.0f;
 
-			printf("SupplyBOX %f, %f\n" , f_x, f_y);
+			//printf("SupplyBOX %f, %f\n" , f_x, f_y);
 			sc_packet_put_object packet;
 			for (auto& other : clients) {
 				if (ST_INGAME != other.cl_state) continue;
@@ -1417,6 +1419,7 @@ void worker_thread()
 				packet.object_type = SUPPLYBOX;
 				packet.x = f_x;
 				packet.y = f_y;
+				packet.z = 4500.0f;
 				size_t sent = 0;
 				other.do_send(sizeof(packet), &packet);
 			}
@@ -1442,7 +1445,7 @@ void ev_timer()
 	supply_box();
 	while (true) {
 		timer_ev order;
-		timer_q.WaitPop(order);
+		timer_q.TryPop(order);
 		//auto t = order.start_t - chrono::system_clock::now();
 		int s_id = order.this_id;
 		int target_id = order.target_id;
