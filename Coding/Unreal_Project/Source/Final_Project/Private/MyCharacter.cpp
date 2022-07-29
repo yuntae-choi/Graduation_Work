@@ -111,6 +111,16 @@ AMyCharacter::AMyCharacter()
 	check(camera3 != nullptr);
 	camera3->SetupAttachment(springArm3);
 
+	springArm4 = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM4"));
+	springArm4->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
+	springArm4->TargetArmLength = 300.0f;
+	springArm4->SetRelativeRotation(FRotator(-90.0f, 180.0f, 180.0f));
+	springArm4->bUsePawnControlRotation = false;
+	springArm4->bInheritPitch = true;
+	springArm4->bInheritRoll = true;
+	springArm4->bInheritYaw = true;
+	springArm4->bDoCollisionTest = true;
+
 	bear = CreateDefaultSubobject<USkeletalMesh>(TEXT("BEAR"));
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_BEAR(TEXT("/Game/Characters/Bear/bear.bear"));
 	if (SK_BEAR.Succeeded())
@@ -323,6 +333,18 @@ AMyCharacter::AMyCharacter()
 		if (ANIM_Drive.Succeeded())
 		{
 			driveAnimAsset = ANIM_Drive.Object;
+		}
+	}
+
+	if (!minimapCaptureComponent)
+	{
+		minimapCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MinimapCapture"));
+		minimapCaptureComponent->SetupAttachment(springArm4);
+		static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> TextureRenderTarget(TEXT("/Game/Blueprints/MinimapRenderTarget2D.MinimapRenderTarget2D"));
+		if (TextureRenderTarget.Succeeded())
+		{
+			minimapCaptureComponent->TextureTarget = TextureRenderTarget.Object;
+			UE_LOG(LogTemp, Warning, TEXT("textureRenderTarget success"));
 		}
 	}
 

@@ -15,6 +15,7 @@
 #include "Tornado.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "MyCharacter.generated.h"
 
 enum CharacterState {
@@ -233,6 +234,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* springArm3;
 
+	// minimap¿ë
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	USpringArmComponent* springArm4;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* camera3;
 
@@ -342,6 +347,9 @@ public:
 	bool bReleaseUmbrella;
 	
 	ATornado* overlappedTornado;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	USceneCaptureComponent2D* minimapCaptureComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	class AMyPlayerController* localPlayerController;
