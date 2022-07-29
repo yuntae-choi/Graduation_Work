@@ -544,14 +544,19 @@ void process_packet(int s_id, unsigned char* p)
 
 		if (cl._hp <= cl._min_hp)
 		{
+
+			cl._hp = cl._min_hp;
 			cl.iCurrentSnowballCount = 0;
 			cl.iCurrentIceballCount = 0;
 			cl.iCurrentMatchCount = 0;
 			cl.iMaxSnowballCount = cl.iOriginMaxSnowballCount;
+			cl.iMaxIceballCount = cl.iOriginMaxIceballCount;
 			cl.iMaxMatchCount = cl.iOriginMaxMatchCount;
 			cl.bHasBag = false;
+			cl.bHasShotGun = false;
 			cl.bHasUmbrella = false;
 			cl.bIsSnowman = true;
+
 			sc_packet_status_change _packet;
 			_packet.size = sizeof(_packet);
 			_packet.type = SC_PACKET_STATUS_CHANGE;
@@ -806,9 +811,6 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				cout << "플레이어: [" << cl._s_id << "] 가방 파밍 성공" << endl;
 			}
-			else
-				break;
-			//cout << "플레이어: [" << cl._s_id << "] 가방 파밍 실패" << endl;
 
 			break;
 		}
@@ -827,10 +829,7 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				cout << "플레이어: [" << cl._s_id << "] 우산 파밍 성공" << endl;
 			}
-			else
-				break;
-			//cout << "플레이어: [" << cl._s_id << "] 우산 파밍 실패" << endl;
-
+			
 
 			break;
 		}
@@ -862,9 +861,7 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 성공" << endl;
 			}
-			else
-				break;
-			//cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 실패" << endl;
+		
 
 
 			break;
@@ -889,9 +886,6 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				cout << "플레이어: [" << cl._s_id << "] 눈무더기 파밍 성공" << endl;
 			}
-			else
-				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
-				break;
 			break;
 		}
 		case ITEM_ICE:
@@ -915,9 +909,7 @@ void process_packet(int s_id, unsigned char* p)
 
 				cout << "플레이어: [" << cl._s_id << "] 얼음무더기 파밍 성공 현재 눈개수" << cl.iCurrentIceballCount << endl;
 			}
-			else
-				//cout << "플레이어: [" << cl._s_id << "]눈무더기 파밍 실패" << endl;
-				break;
+			break;
 		}
 		case ITEM_SPBOX:
 		{
@@ -1052,9 +1044,18 @@ void process_packet(int s_id, unsigned char* p)
 			//cout << "플레이어" << s_id <<"가 플레이어" <<packet->s_id << "가 눈사람이라 전송함" << endl;
 
 			if (false == clients[packet->s_id].bIsSnowman) {
-				clients[packet->s_id].bIsSnowman = true;
 				clients[packet->s_id]._hp = clients[packet->s_id]._min_hp;
-				//send_hp_packet(packet->s_id);
+				clients[packet->s_id].iCurrentSnowballCount = 0;
+				clients[packet->s_id].iCurrentIceballCount = 0;
+				clients[packet->s_id].iCurrentMatchCount = 0;
+				clients[packet->s_id].iMaxSnowballCount = clients[packet->s_id].iOriginMaxSnowballCount;
+				clients[packet->s_id].iMaxIceballCount = clients[packet->s_id].iOriginMaxIceballCount;
+				clients[packet->s_id].iMaxMatchCount = clients[packet->s_id].iOriginMaxMatchCount;
+				clients[packet->s_id].bHasBag = false;
+				clients[packet->s_id].bHasShotGun = false;
+				clients[packet->s_id].bHasUmbrella = false;
+				clients[packet->s_id].bIsSnowman = true;
+
 				for (auto& other : clients) {
 					if (ST_INGAME != other.cl_state)
 						continue;
@@ -1062,7 +1063,7 @@ void process_packet(int s_id, unsigned char* p)
 					//cout << "눈사람" << endl;
 					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
-
+				
 				int cnt = 0;
 				int target_s_id;
 				for (auto& other : clients) {
@@ -1351,6 +1352,7 @@ void worker_thread()
 					clients[_s_id].iMaxIceballCount = clients[_s_id].iOriginMaxIceballCount;
 					clients[_s_id].iMaxMatchCount = clients[_s_id].iOriginMaxMatchCount;
 					clients[_s_id].bHasBag = false;
+					clients[_s_id].bHasShotGun = false;
 					clients[_s_id].bHasUmbrella = false;
 					clients[_s_id].bIsSnowman = true;
 					clients[_s_id]._hp -= 1;

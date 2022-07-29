@@ -52,6 +52,7 @@ public:
 	bool bHasUmbrella;
 	bool bIsRiding;
 	bool bHasBag;
+	bool bHasShotGun;
 	bool bIsSnowman;	// 현재 캐릭터가 눈사람인지
 	bool b_ready;
 	atomic_bool dot_dam ;
