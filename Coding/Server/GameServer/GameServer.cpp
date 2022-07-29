@@ -1085,6 +1085,26 @@ void process_packet(int s_id, unsigned char* p)
 					}
 					cout << "게임종료" << endl;
 				}
+				else {
+					int bear_cnt = 0;
+					int snowman_cnt = 0;;
+					for (auto& other : clients) {
+						if (ST_INGAME != other.cl_state) continue;
+						if (false == other.bIsSnowman)
+						{
+							bear_cnt++;
+						}
+						else if (true == other.bIsSnowman)
+						{
+							snowman_cnt++;
+						}
+					}
+					for (auto& other : clients) {
+						if (ST_INGAME != other.cl_state)
+							continue;
+						send_player_count(other._s_id, bear_cnt, snowman_cnt);
+					}
+				}
 
 			}
 			//cout << "플레이어" << packet->s_id <<" 눈사람" << endl;
