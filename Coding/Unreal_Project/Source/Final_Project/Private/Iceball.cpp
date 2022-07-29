@@ -125,7 +125,8 @@ void AIceball::SpawnIceWall()
 			SpawnParams.Instigator = GetInstigator();
 
 			FRotator newRotation = FRotator(0.0f, rotation.Yaw, 0.0f);
-			FTransform transform = FTransform(newRotation, GetActorLocation(), FVector(1.0f));
+			FVector newLocation = FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - 20.0f);
+			FTransform transform = FTransform(newRotation, newLocation, FVector(1.0f));
 			World->SpawnActor<AActor>(icewallClass, transform, SpawnParams);
 		}
 	}
