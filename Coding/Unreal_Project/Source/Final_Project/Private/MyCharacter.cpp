@@ -356,6 +356,8 @@ AMyCharacter::AMyCharacter()
 	jetskiClass = AJetski::StaticClass();
 
 	iSessionId = -1;
+	iColor = 0;
+
 	iCurrentHP = iMaxHP;	// 실제 설정값
 	//iCurrentHP = iMinHP + 1;	// 디버깅용 - 대기시간 후 눈사람으로 변화
 
@@ -413,7 +415,7 @@ void AMyCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 수정 필요 - 캐릭터의 session id가 결정될 때 이 함수가 호출되도록
-	SetCharacterMaterial(iSessionId-1);	// 캐릭터 머티리얼 설정(색상)
+	SetCharacterMaterial(iColor);	// 캐릭터 머티리얼 설정(색상)
 
 	playerController = Cast<APlayerController>(GetController());	// 생성자에서 하면 x (컨트롤러가 생성되기 전인듯)
 	localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -1410,7 +1412,7 @@ void AMyCharacter::ChangeAnimal()
 	GetMesh()->SetSkeletalMesh(bear);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(bearAnim);
-	SetCharacterMaterial(iSessionId-1);
+	SetCharacterMaterial(iColor);
 
 	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	MYCHECK(nullptr != myAnim);

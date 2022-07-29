@@ -459,6 +459,7 @@ public:
 	UNiagaraComponent* tmpNiagara;
 
 	char userId[MAX_NAME_SIZE]; // 플레이어 아이디
+	int  iColor;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)

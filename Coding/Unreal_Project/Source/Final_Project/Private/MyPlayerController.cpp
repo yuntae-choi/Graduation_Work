@@ -451,6 +451,7 @@ void AMyPlayerController::InitPlayerSetting()
 	if (!localPlayerCharacter) return;
 	localPlayerCharacter->SetActorLocation(FVector(initInfo.X, initInfo.Y, initInfo.Z));
 	localPlayerCharacter->iSessionId = initInfo.SessionId;
+	localPlayerCharacter->iColor = initInfo.iColor;
 	localPlayerCharacter->SetCharacterMaterial(initInfo.iColor);
 	//컨트롤러의 회전
 	SetControlRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
@@ -665,6 +666,7 @@ void AMyPlayerController::UpdateNewPlayer()
 	AMyCharacter* SpawnCharacter = World->SpawnActor<AMyCharacter>(WhoToSpawn, SpawnLocation_, SpawnRotation, SpawnParams);
 	SpawnCharacter->SpawnDefaultController();
 	SpawnCharacter->iSessionId = newplayer.get()->SessionId;
+	SpawnCharacter->iColor = newplayer.get()->iColor;
 
 	SpawnCharacter->SetCharacterMaterial(newplayer.get()->iColor);
 
