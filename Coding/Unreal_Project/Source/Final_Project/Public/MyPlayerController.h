@@ -254,6 +254,7 @@ public:
 	FDele_Dynamic_GameResult FuncUpdateGameResult;
 
 	ClientSocket* mySocket;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
 	bool	bInGame = false;
 private:
 	
