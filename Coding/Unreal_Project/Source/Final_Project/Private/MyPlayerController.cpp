@@ -541,6 +541,24 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->SetActorLocation(CharacterLocation);
 			player_->GetAnim()->SetDirection(info->direction);
 
+			if (!player_->IsSnowman())
+			{
+				if (info->myState == ST_SNOWMAN)
+				{
+					info->iCurrentSnowCount = 0;
+					Reset_Items(player_->iSessionId);
+					player_->ChangeSnowman();
+				}
+			}
+			else if (player_->IsSnowman())
+			{
+				if (info->myState == ST_ANIMAL)
+				{
+					Reset_Items(player_->iSessionId);
+					player_->ChangeAnimal();
+				}
+			}
+
 			// 캐릭터 속성 업데이트
 			if (player_->iCurrentSnowballCount != info->iCurrentSnowCount)
 			{
@@ -1190,6 +1208,8 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 {	// 추위에 의한 죽음은 attacker id = -2
 	if (!characterUI) return;
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause));
+
 	char* userId;
 	if (attacker != -2)
 		userId = charactersInfo->players[attacker].userId;
@@ -1197,6 +1217,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 		userId = "none";
 
 	FString attackerUserId = userId;
+
 	userId = charactersInfo->players[victim].userId;
 	FString victimUserId = userId;
 
@@ -1213,6 +1234,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 
 	if (cause == CauseOfDeath::DeathBySnowman && (attacker != victim))
 		CallDelegateUpdateKillLog(attacker, attacker, cause);
+
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause);
 }

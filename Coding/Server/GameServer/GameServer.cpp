@@ -573,6 +573,7 @@ void process_packet(int s_id, unsigned char* p)
 				else if (packet->bullet == BULLET_SNOWBOMB)
 					send_kill_log(other._s_id, packet->attacker, cl._s_id, DeathBySnowballBomb);
 			}
+			cout << "플레이어" << packet->attacker << "가 눈덩이로 플레이어 " << cl._s_id << "을 눈사람으로 만듬" << endl;
 			int cnt = 0;
 			int target_s_id;
 			for (auto& other : clients) {
