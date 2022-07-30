@@ -111,6 +111,16 @@ AMyCharacter::AMyCharacter()
 	check(camera3 != nullptr);
 	camera3->SetupAttachment(springArm3);
 
+	springArm4 = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM4"));
+	springArm4->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
+	springArm4->TargetArmLength = 300.0f;
+	springArm4->SetRelativeRotation(FRotator(-90.0f, 180.0f, 180.0f));
+	springArm4->bUsePawnControlRotation = false;
+	springArm4->bInheritPitch = true;
+	springArm4->bInheritRoll = true;
+	springArm4->bInheritYaw = true;
+	springArm4->bDoCollisionTest = true;
+
 	bear = CreateDefaultSubobject<USkeletalMesh>(TEXT("BEAR"));
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_BEAR(TEXT("/Game/Characters/Bear/bear.bear"));
 	if (SK_BEAR.Succeeded())
@@ -323,6 +333,18 @@ AMyCharacter::AMyCharacter()
 		if (ANIM_Drive.Succeeded())
 		{
 			driveAnimAsset = ANIM_Drive.Object;
+		}
+	}
+
+	if (!minimapCaptureComponent)
+	{
+		minimapCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MinimapCapture"));
+		minimapCaptureComponent->SetupAttachment(springArm4);
+		static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> TextureRenderTarget(TEXT("/Game/Blueprints/MinimapRenderTarget2D.MinimapRenderTarget2D"));
+		if (TextureRenderTarget.Succeeded())
+		{
+			minimapCaptureComponent->TextureTarget = TextureRenderTarget.Object;
+			UE_LOG(LogTemp, Warning, TEXT("textureRenderTarget success"));
 		}
 	}
 
@@ -1252,6 +1274,14 @@ void AMyCharacter::UpdateSpeed()
 
 void AMyCharacter::ChangeSnowman()
 {
+	if (bIsRiding) GetOffJetski();
+	if (bIsAiming) HideProjectilePath();
+	if (isAttacking)
+	{
+		if (IsValid(snowball)) ReleaseSnowball();
+		else if (IsValid(iceball)) ReleaseIceball();
+	}
+
 	bIsSnowman = true;
 
 	InitializeFreeze();
@@ -1261,6 +1291,7 @@ void AMyCharacter::ChangeSnowman()
 	GetMesh()->SetSkeletalMesh(snowman);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetAnimInstanceClass(snowmanAnim);
+	myAnim = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	SetCharacterMaterial();	// 눈사람으로 머티리얼 변경할 때는 색상 필요 x (디폴트값으로)
 
 	iCurrentHP = iMinHP;
@@ -1590,12 +1621,18 @@ void AMyCharacter::UpdateControllerRotateByTornado()
 
 void AMyCharacter::ChangeWeapon()
 {
+	if (bIsAiming) return;
+	if (isAttacking) return;
+
 	iSelectedWeapon = (iSelectedWeapon + 1) % iNumOfWeapons;
 	UpdateUI(UICategory::SelectedWeapon);
 }
 
 void AMyCharacter::ChangeProjectile()
 {
+	if (bIsAiming) return;
+	if (isAttacking) return;
+
 	iSelectedProjectile = (iSelectedProjectile + 1) % iNumOfProjectiles;
 	UpdateUI(UICategory::SelectedProjectile);
 }
@@ -2042,7 +2079,10 @@ void AMyCharacter::GetOffJetski()
 
 	// jetski 왼쪽으로 캐릭터 이동 및 회전
 	SetActorLocation(FVector(GetActorLocation() - jetskiMeshComponent->GetRightVector() * 80));
-	localPlayerController->SetControlRotation(FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.0f));
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		localPlayerController->SetControlRotation(FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.0f));
+	}
 
 	// jetski 물리, 충돌, 시야 비활성화
 	jetskiMeshComponent->SetSimulatePhysics(false);
@@ -2074,7 +2114,10 @@ void AMyCharacter::GetOffJetski()
 	// 기존 카메라로 전환, 크로스헤어 생성
 	camera->Activate();
 	camera3->Deactivate();
-	localPlayerController->GetHUD()->bShowHUD = true;
+	if (iSessionId == localPlayerController->iSessionId)
+	{
+		localPlayerController->GetHUD()->bShowHUD = true;
+	}
 
 	// 이동속도 설정
 	GetCharacterMovement()->MaxWalkSpeed = iNormalSpeed;

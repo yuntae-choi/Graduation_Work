@@ -1055,8 +1055,7 @@ void AMyPlayerController::LoadGameResultUI(int winnerSessionId)
 			characterUI->RemoveFromParent();	// character ui Á¦°Å
 			gameResultUI->AddToViewport();		// game result ui ¶ç¿ì±â
 
-			bool bIsWinner = (iSessionId == winnerSessionId) ? true : false;
-			CallDelegateUpdateGameResult(bIsWinner);
+			CallDelegateUpdateGameResult(winnerSessionId);
 
 			FInputModeUIOnly InputMode;
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
@@ -1231,11 +1230,11 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause);
 }
 
-void AMyPlayerController::CallDelegateUpdateGameResult(bool isWinner)
+void AMyPlayerController::CallDelegateUpdateGameResult(int winnerId)
 {
 	if (!gameResultUI) return;
 
-	if (FuncUpdateGameResult.IsBound() == true) FuncUpdateGameResult.Broadcast(isWinner);
+	if (FuncUpdateGameResult.IsBound() == true) FuncUpdateGameResult.Broadcast(winnerId);
 }
 
 void AMyPlayerController::FixRotation()
@@ -1339,4 +1338,11 @@ void AMyPlayerController::SpawnSupplyBox(float x, float y, float z)
 			World->SpawnActor<AActor>(supplyboxClass, transform, SpawnParams);
 		}
 	}
+}
+
+FString AMyPlayerController::GetUserId(int sessionId)
+{
+	char* userId = charactersInfo->players[sessionId].userId;
+	FString strUserId = userId;
+	return strUserId;
 }

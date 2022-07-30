@@ -28,8 +28,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SnowdriftFarmDuration,
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedItem, int32, NewSelectedItem);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedProjectile, int32, NewSelectedProjectile);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedWeapon, int32, NewSelectedWeapon);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDele_Dynamic_KillLog, FString, Attacker, FString, Victim, int32, Cause, int32, iKillLogType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_GameResult, bool, GameResult);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDele_Dynamic_KillLog, FString, iAttacker, FString, iVictim, int32, Cause, int32, iKillLogType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_GameResult, int32, iWinnerId);
 
 enum CauseOfDeath {
 	DeathBySnowball, DeathBySnowballBomb, DeathByCold, DeathBySnowman
@@ -93,6 +93,9 @@ public:
 
 	void DeleteLoginUICreateReadyUI();
 
+	UFUNCTION(BlueprintCallable)
+	FString GetUserId(int sessionId);
+
 	// UpdateUI 델리게이트 이벤트 호출
 	void CallDelegateUpdateAllOfUI();
 	void CallDelegateUpdateHP();
@@ -109,7 +112,7 @@ public:
 	void CallDelegateUpdateSelectedProjectile();
 	void CallDelegateUpdateSelectedWeapon();
 	void CallDelegateUpdateKillLog(int attacker, int victim, int cause);
-	void CallDelegateUpdateGameResult(bool isWinner);
+	void CallDelegateUpdateGameResult(int winnerId);
 
 	void SpawnSupplyBox(float x, float y, float z = 4500.0f);	// 해당 위치에 보급상자 스폰
 
@@ -169,6 +172,7 @@ private:
 	void FixRotation();
 
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
 	int							iSessionId;			// 캐릭터의 세션 고유 아이디
 	bool                        bTornado;       // 토네이도 접속 여부       
 
@@ -250,6 +254,7 @@ public:
 	FDele_Dynamic_GameResult FuncUpdateGameResult;
 
 	ClientSocket* mySocket;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
 	bool	bInGame = false;
 private:
 	

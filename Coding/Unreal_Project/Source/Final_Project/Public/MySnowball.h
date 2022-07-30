@@ -9,6 +9,7 @@
 #include "I_Throwable.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Components/DecalComponent.h"
 #include "MySnowball.generated.h"
 
 UCLASS()
@@ -51,6 +52,8 @@ public:
 	UProjectileMovementComponent* projectileMovementComponent;
 
 	AEditorManager* editorManager;
+
+	TArray<UDecalComponent*> paints;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)

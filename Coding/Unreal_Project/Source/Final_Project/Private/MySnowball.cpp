@@ -4,7 +4,6 @@
 #include "MySnowball.h"
 #include "MyCharacter.h"
 #include "MyPlayerController.h"
-#include "Components/DecalComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
 //#define CHECKTRAJECTORY	// 눈덩이가 던져지는 시점에서부터 충돌할 때까지의 궤적 로그 출력
@@ -115,16 +114,40 @@ void AMySnowball::Throw_Implementation(FVector Direction, float Speed)
 void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	auto MyCharacter = Cast<AMyCharacter>(OtherActor);
+	auto umbrella = Cast<UBoxComponent>(OtherComponent);
+	auto socketMesh = Cast<UStaticMeshComponent>(OtherComponent);
+
+	FString staticmeshName;
+	if (socketMesh)
+	{
+		socketMesh->GetName(staticmeshName);
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *staticmeshName);
+	}
+
+	projectileMovementComponent->StopMovementImmediately();
 
 	//MYLOG(Warning, TEXT("loc :%f, %f, %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("loc :%f, %f, %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
 
+	//에디터매니저
+	TArray<AActor*> ems;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEditorManager::StaticClass(), ems);
+	AEditorManager* em = Cast<AEditorManager>(ems[0]);
+
+	//눈 터지는 이펙트
+	if (em->snowSplash)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), em->snowSplash, GetActorLocation());
+	em->PlaySnowballCrumbleEffect(GetActorLocation());
+
+	//눈덩이 삭제
+	Destroy();
+
 	if (nullptr != MyCharacter)
 	{
-		// 우산과 충돌했는지 확인
-		UBoxComponent* boxCollision = Cast<UBoxComponent>(OtherComponent);
-		if (boxCollision)
-		{
+		if (umbrella
+			|| staticmeshName.Compare(FString("jetskiMeshComponent")) == 0
+			|| staticmeshName.Compare(FString("bagMeshComponent")) == 0)
+		{	// 우산 or 제트스키 or 가방 or 스노우볼과 충돌한 경우	(눈자국, 몸 어는 이펙트 재생 x 해야함)
 			//UE_LOG(LogTemp, Warning, TEXT("no damage, hit umbrella"));
 		}
 		else
@@ -184,42 +207,29 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	}
 	else
 	{
-		//MYLOG(Warning, TEXT("no damage"));
+		//눈자국
+		FRotator RandomDecalRotation = UKismetMathLibrary::MakeRotFromX(Hit.Normal);
+		auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-30.0f, 50.0f, 50.0f),
+			OtherComponent, NAME_None,
+			GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
+
+		float rand = FMath::RandRange(0.0f, 300.0f);
+
+		comp->AddRelativeRotation(FRotator(0.0f, 0.0f, rand));
+		comp->AddRelativeLocation(FVector(1.0f, 0.0f, 0.0f));
+
+		paints.Add(comp);
+
+		//눈자국 몇초 뒤에 사라지게
+		FTimerHandle timerHandle;
+		float WaitTime = 10.0f;
+		GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+			{
+				if (paints.Num() > 0)
+					paints[0]->DestroyComponent();
+				paints.RemoveAt(0);
+			}), WaitTime, false);
 	}
-
-	TArray<AActor*> ems;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEditorManager::StaticClass(), ems);
-	AEditorManager* em = Cast<AEditorManager>(ems[0]);
-
-	//눈 터지는 이펙트
-	if (em->snowSplash)
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), em->snowSplash, GetActorLocation());
-	em->PlaySnowballCrumbleEffect(GetActorLocation());
-
-	//눈덩이 스탑 후 삭제
-	projectileMovementComponent->StopMovementImmediately();
-	Destroy();
-
-
-	//눈자국
-	FRotator RandomDecalRotation = UKismetMathLibrary::MakeRotFromX(Hit.Normal);
-	auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-30.0f, 100.0f, 100.0f),
-		OtherComponent, NAME_None,
-		GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
-
-	float rand = FMath::RandRange(0.0f, 300.0f);
-
-	comp->AddRelativeRotation(FRotator(0.0f, 0.0f, rand));
-	comp->AddRelativeLocation(FVector(1.0f, 0.0f, 0.0f));
-
-	//눈자국 몇초 뒤에 사라지게
-	FTimerHandle timerHandle;
-	float WaitTime = 10.0f;
-	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			//if (comp)
-			//	comp->DestroyComponent();
-		}), WaitTime, false);
 	
 #ifdef CHECKTRAJECTORY
 	bCheckTrajectory = false;

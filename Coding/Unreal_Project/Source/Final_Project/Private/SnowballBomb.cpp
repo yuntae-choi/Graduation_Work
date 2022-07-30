@@ -74,14 +74,25 @@ void ASnowballBomb::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 
 	if (nullptr != MyCharacter)
 	{
-		// 우산과 충돌했는지 확인
 		UBoxComponent* boxCollision = Cast<UBoxComponent>(OtherComponent);
-		if (boxCollision)
+		UStaticMeshComponent* staticMesh = Cast<UStaticMeshComponent>(OtherComponent);
+		FString staticmeshName;
+		if (staticMesh)
 		{
+			staticMesh->GetName(staticmeshName);
+			//UE_LOG(LogTemp, Warning, TEXT("%s"), *staticmeshName);
+		}
+
+		if (boxCollision)
+		{	// 우산과 충돌한 경우	(눈자국, 몸 어는 이펙트 재생 x 해야함)
 			//UE_LOG(LogTemp, Warning, TEXT("no damage, hit umbrella"));
 		}
+		else if (staticmeshName.Compare(FString("jetskiMeshComponent")) == 0 || staticmeshName.Compare(FString("bagMeshComponent")) == 0)
+		{	// 제트스키 or 가방과 충돌한 경우	(눈자국, 몸 어는 이펙트 재생 x 해야함)
+			//UE_LOG(LogTemp, Warning, TEXT("no damage, hit jetski or bag"));
+		}
 		else
-		{
+		{	// 캐릭터와 충돌 시 데미지
 			FDamageEvent DamageEvent;
 			MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
 		}
