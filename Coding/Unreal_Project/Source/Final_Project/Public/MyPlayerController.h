@@ -61,6 +61,8 @@ public:
 	void SetGameEnd(const int target_id);
 	void SetOpenItembox(const int obj_id);
 	void SetAttack(const int s_id, int at_type);
+	void SetFreeze(const int s_id, int body_type);
+	void StartFreeze(AMyCharacter* player_, cCharacter* info);
 	void SetItem(const int s_id, int item_type, bool end);
 	void SetSocket();
 	void GetItem(int sId, int itemType);

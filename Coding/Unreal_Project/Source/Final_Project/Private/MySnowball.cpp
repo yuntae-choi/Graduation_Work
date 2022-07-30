@@ -178,35 +178,31 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 				MYLOG(Warning, TEXT("%s"), *BoneName.ToString());
 
 				if (BoneName == TEXT("Base-HumanHead")
-					|| ParentBoneName == TEXT("Base-HumanHead"))
-					MyCharacter->FreezeHead();
-
+					|| ParentBoneName == TEXT("Base-HumanHead")) {
+					MyCharacter->SendFreeze(BODDY_HEAD);
+				}
 				if (BoneName == TEXT("Base-HumanLForearm")
 					|| ParentBoneName == TEXT("Base-HumanLForearm"))
 				{
-					MyCharacter->FreezeLeftForearm();
-					MyCharacter->FreezeLeftUpperarm();
+					MyCharacter->SendFreeze(BODDY_LEFTHAND);
 				}
 
 				if (BoneName == TEXT("Base-HumanRForearm")
 					|| ParentBoneName == TEXT("Base-HumanRForearm"))
 				{
-					MyCharacter->FreezeRightForearm();
-					MyCharacter->FreezeRightUpperarm();
+					MyCharacter->SendFreeze(BODDY_RIGHTHAND);
 				}
 
 				if (BoneName == TEXT("Base-HumanLCalf")
 					|| ParentBoneName == TEXT("Base-HumanLCalf"))
 				{
-					MyCharacter->FreezeLeftThigh();
-					MyCharacter->FreezeLeftCalf();
+					MyCharacter->SendFreeze(BODDY_LEFTLEG);
 				}
 
 				if (BoneName == TEXT("Base-HumanRCalf")
 					|| ParentBoneName == TEXT("Base-HumanRCalf"))
 				{
-					MyCharacter->FreezeRightThigh();
-					MyCharacter->FreezeRightCalf();
+					MyCharacter->SendFreeze(BODDY_RIGHTLEG);
 				}
 
 				if (ParentBoneName == TEXT("Base-HumanPelvis")
@@ -216,7 +212,8 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 					|| ParentBoneName == TEXT("Base-HumanRibcage")
 					|| BoneName == TEXT("Base-HumanLUpperarm")
 					|| BoneName == TEXT("Base-HumanRUpperarm"))
-					MyCharacter->FreezeCenter();
+					MyCharacter->SendFreeze(BODDY_CENTER);
+
 			}
 		}
 	}

@@ -54,5 +54,14 @@ enum KillLogType {
 	None, Attacker, Victim
 };
 
+enum BODDYPARTS_Type
+{
+	BODDY_HEAD = 0,
+	BODDY_LEFTHAND,
+	BODDY_RIGHTHAND,
+	BODDY_LEFTLEG,
+	BODDY_RIGHTLEG,
+	BODDY_CENTER
+};
 
 #endif // !__ENUM_H__

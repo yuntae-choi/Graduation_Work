@@ -252,6 +252,81 @@ void AMyPlayerController::SetAttack(const int s_id, int at_type)
 	}
 }
 
+void AMyPlayerController::SetFreeze(const int s_id, int body_type)
+{
+	UWorld* World = GetWorld();
+	switch (body_type)
+	{
+	case BODDY_HEAD: {
+		charactersInfo->players[s_id].bFreezeHead = true;
+		break;
+	}
+	case BODDY_LEFTHAND: {
+		charactersInfo->players[s_id].bFreezeLHand = true;
+		break;
+	}
+	case BODDY_RIGHTHAND: {
+		charactersInfo->players[s_id].bFreezeRHand = true;
+		break;
+	}
+	case BODDY_LEFTLEG: {
+		charactersInfo->players[s_id].bFreezeLLeg = true;
+		break;
+	}
+	case BODDY_RIGHTLEG: {
+		charactersInfo->players[s_id].bFreezeRLeg = true;
+		break;
+	}
+	case BODDY_CENTER: {
+		charactersInfo->players[s_id].bFreezeCenter = true;
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void AMyPlayerController::StartFreeze(AMyCharacter* player_, cCharacter* info)
+{
+
+	if (info->bFreezeHead)
+	{
+		player_->FreezeHead();
+		info->bFreezeHead = false;
+	}
+	if (info->bFreezeLHand)
+	{
+		player_->FreezeLeftForearm();
+		player_->FreezeLeftUpperarm();
+		info->bFreezeLHand = false;
+	}
+	if (info->bFreezeRHand) 
+	{
+		player_->FreezeRightForearm();
+		player_->FreezeRightUpperarm();
+		info->bFreezeRHand = false;
+
+	}
+	if (info->bFreezeLLeg) 
+	{
+		player_->FreezeLeftThigh();
+		player_->FreezeLeftCalf();
+		info->bFreezeLLeg = false;
+	}
+	if (info->bFreezeRLeg) 
+	{
+		player_->FreezeRightThigh();
+		player_->FreezeRightCalf();
+		info->bFreezeRLeg = false;
+	}
+	if (info->bFreezeCenter) 
+	{ 
+		player_->FreezeCenter(); 
+		info->bFreezeCenter = false;
+	}
+
+}
+
 void AMyPlayerController::SetItem(const int s_id, int item_type, bool end)
 {
 	UWorld* World = GetWorld();
@@ -514,11 +589,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 		AMyCharacter* player_ = Cast<AMyCharacter>(Character_);
 
 		cCharacter* info = &charactersInfo->players[player_->iSessionId];
-		
+
 		//타플레이어 구별
 		if (!info->IsAlive)  continue;
 		if (!player_ || player_->iSessionId == -1) continue;
-		
+
 		if (player_->iSessionId != iSessionId)
 		{
 			FVector CharacterLocation;
@@ -565,6 +640,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 				player_->iCurrentSnowballCount = info->iCurrentSnowCount;
 			}
 		}
+
 
 		if (info->bGetSpBox) {
 			player_->GetSupplyBox();
@@ -638,6 +714,8 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->GetOnOffJetski();
 			info->bSetJetSki = false;
 		}
+
+		StartFreeze(player_, info);
 	}
 	return true;
 }
@@ -854,6 +932,10 @@ void AMyPlayerController::SendPlayerInfo(int input)
 		break;
 	}
 	case COMMAND_UMB_END: {
+		mySocket->Send_UmbPacket(true);
+		break;
+	}
+	case COMMAND_FREEZE: {
 		mySocket->Send_UmbPacket(true);
 		break;
 	}
