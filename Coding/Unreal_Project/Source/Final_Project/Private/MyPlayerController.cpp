@@ -413,6 +413,7 @@ void AMyPlayerController::GetItem(int sId, int itemType)
 
 	case ITEM_BAG:
 	{
+		charactersInfo->players[sId].bGetSpBag = true;
 		break;
 	}
 	case ITEM_UMB:
@@ -518,6 +519,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 		if (info->bGetSpBox) {
 			player_->GetSupplyBox();
 			info->bGetSpBox = false;
+		}
+
+		if (info->bGetSpBag) {
+			player_->GetBag();
+			info->bGetSpBag = false;
 		}
 
 		if (info->bStartSnowBall) {

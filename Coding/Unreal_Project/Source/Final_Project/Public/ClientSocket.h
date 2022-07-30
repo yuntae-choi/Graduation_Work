@@ -158,6 +158,8 @@ public:
 	bool bEndUmb = false;
 	bool bSetJetSki = false;
 	bool bGetSpBox = false;
+	bool bGetSpBag = false;
+
 
 	int iRandBulletArr[MAX_BULLET_RANG] = {};
 

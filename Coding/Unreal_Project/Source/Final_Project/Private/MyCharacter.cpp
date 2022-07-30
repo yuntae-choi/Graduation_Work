@@ -1100,7 +1100,7 @@ void AMyCharacter::StartFarming()
 			if (GetItem(itembox->GetItemType())) { 
 				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
 
-				MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
+				//MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
 				//아이템 파밍 시 서버 전송
 #ifdef MULTIPLAY_DEBUG
 				PlayerController->GetSocket()->Send_ItemPacket(itembox->GetItemType(), itembox->GetId());

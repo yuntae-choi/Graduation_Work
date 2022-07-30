@@ -306,8 +306,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 
 		case ITEM_BAG:
 		{
-			if (MyPlayerController->iSessionId == packet->s_id)
-				MyPlayerController->GetItem(packet->s_id, ITEM_BAG);
+		    MyPlayerController->GetItem(packet->s_id, ITEM_BAG);
 			MyPlayerController->SetDestroyitembox(packet->destroy_obj_id);
 			break;
 		}
@@ -390,7 +389,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 	{
 		cs_packet_open_box* packet = reinterpret_cast<cs_packet_open_box*>(ptr);
 		int open_obj_id = packet->open_obj_id;
-		//MYLOG(Warning, TEXT("open box "));
+		MYLOG(Warning, TEXT("recv open box "));
 		MyPlayerController->SetOpenItembox(open_obj_id);
 
 		break;
@@ -665,6 +664,8 @@ void ClientSocket::Send_OpenBoxPacket(int open_box_id)
 	packet.type = CS_PACKET_OPEN_BOX;
 	packet.open_obj_id = open_box_id;
 	SendPacket(&packet);
+	MYLOG(Warning, TEXT("send open box "));
+
 };
 
 void ClientSocket::SendPutObjPacket(char cObjType, int iObjId, FVector ObjLocation, float fYaw)

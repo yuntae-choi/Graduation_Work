@@ -282,7 +282,7 @@ public:
 	bool bHasUmbrella;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool bHasBag;
+	bool bHasBag = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bHasShotgun;
