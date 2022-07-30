@@ -8,6 +8,8 @@
 
 //#define CHECKTRAJECTORY	// 눈덩이가 던져지는 시점에서부터 충돌할 때까지의 궤적 로그 출력
 
+TArray<UDecalComponent*> paints;
+
 // Sets default values
 AMySnowball::AMySnowball()
 {
@@ -65,6 +67,22 @@ AMySnowball::AMySnowball()
 			meshComponent->BodyInstance.SetCollisionProfileName(TEXT("NoCollision"));
 		}
 	}
+
+	projectileNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("projectileNiagaraComponent"));
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_PROJECTILE(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_FrostEnergy_Projectile.NS_FrostEnergy_Projectile"));
+	projectileNiagara->SetAsset(NS_PROJECTILE.Object);
+	projectileNiagara->SetupAttachment(meshComponent);
+	projectileNiagara->SetRelativeLocation(FVector(-30.0f, 0.0f, 0.0f));
+	projectileNiagara->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
+	projectileNiagara->SetVisibility(true);
+
+	trailNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("trailNiagaraComponent"));
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TRAIL(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_Trail_DryIce_Large.NS_Trail_DryIce_Large"));
+	trailNiagara->SetAsset(NS_TRAIL.Object);
+	trailNiagara->SetupAttachment(meshComponent);
+	projectileNiagara->SetRelativeLocation(FVector(-30.0f, 0.0f, 0.0f));
+	projectileNiagara->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
+	trailNiagara->SetVisibility(true);
 
 	iDamage = 10;
 	iOwnerSessionId = -1;
@@ -139,9 +157,6 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), em->snowSplash, GetActorLocation());
 	em->PlaySnowballCrumbleEffect(GetActorLocation());
 
-	//눈덩이 삭제
-	Destroy();
-
 	if (nullptr != MyCharacter)
 	{
 		if (umbrella
@@ -208,28 +223,30 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	else
 	{
 		//눈자국
-		FRotator RandomDecalRotation = UKismetMathLibrary::MakeRotFromX(Hit.Normal);
-		auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-30.0f, 50.0f, 50.0f),
+		//FRotator RandomDecalRotation = UKismetMathLibrary::MakeRotFromX(Hit.Normal);
+		FRotator RandomDecalRotation = Hit.Normal.Rotation();
+		RandomDecalRotation.Roll = FMath::FRandRange(-180.0f, 180.0f);
+		auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-35.0f, 50.0f, 50.0f),
 			OtherComponent, NAME_None,
 			GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
-
-		float rand = FMath::RandRange(0.0f, 300.0f);
-
-		comp->AddRelativeRotation(FRotator(0.0f, 0.0f, rand));
-		comp->AddRelativeLocation(FVector(1.0f, 0.0f, 0.0f));
 
 		paints.Add(comp);
 
 		//눈자국 몇초 뒤에 사라지게
 		FTimerHandle timerHandle;
-		float WaitTime = 10.0f;
+		float WaitTime = 5.0f;
 		GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
 			{
 				if (paints.Num() > 0)
+				{
 					paints[0]->DestroyComponent();
-				paints.RemoveAt(0);
+					paints.RemoveAt(0);
+				}
 			}), WaitTime, false);
 	}
+
+	//눈덩이 삭제
+	Destroy();
 	
 #ifdef CHECKTRAJECTORY
 	bCheckTrajectory = false;
