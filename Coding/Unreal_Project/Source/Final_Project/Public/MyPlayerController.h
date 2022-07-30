@@ -159,6 +159,7 @@ private:
 	void UpdateNewPlayer();     // 타 플레이어 생성
 	void UpdateNewTornado();    // 토네이도 생성
 	void UpdatePlayerInfo(cCharacter& info); // 플레이어 정보 업데이트
+	void UpdatePlayerLocation();
 	void LoadReadyUI();	// ReadyUI 띄우기, UI에 대한 입력만 허용
 	void LoadCharacterUI();	// CharacterUI 띄우기, 게임에 대한 입력 허용
 	void LoadLoginUI();	// LoginUI 띄우기, UI에 대한 입력만 허용

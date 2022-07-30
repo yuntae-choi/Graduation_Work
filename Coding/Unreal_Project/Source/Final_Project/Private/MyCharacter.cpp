@@ -452,8 +452,7 @@ void AMyCharacter::BeginPlay()
 void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	MYLOG(Warning, TEXT("endplay"));
-	//AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	//PlayerController->GetSocket()->StopListen();
+	
 
 	if (iSessionId == localPlayerController->iSessionId)
 	{
@@ -599,21 +598,21 @@ void AMyCharacter::Attack()
 	if (bIsRiding) return;	// 운전 중에는 공격 x
 	// 우산 사용 중 공격 x하도록
 
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (iSessionId == PlayerController->iSessionId)
+	
+	if (iSessionId == localPlayerController->iSessionId)
 	{
 		switch (iSelectedProjectile) {
 		case Projectile::Snowball:
 			switch (iSelectedWeapon) {
 			case Weapon::Hand:
 				if (iCurrentSnowballCount <= 0) return;	// 눈덩이를 소유하고 있지 않으면 공격 x
-				PlayerController->SendPlayerInfo(COMMAND_SNOWBALL);
+				localPlayerController->SendPlayerInfo(COMMAND_SNOWBALL);
 				isAttacking = true;
 				break;
 			case Weapon::Shotgun:
 				if (!bHasShotgun) return;	// 샷건을 소유하고 있지 않으면 공격 x
 				if (iCurrentSnowballCount < 5) return;	// 눈덩이가 5개 이상 없으면 공격 x
-				PlayerController->SendPlayerInfo(COMMAND_SHOTGUN);
+				localPlayerController->SendPlayerInfo(COMMAND_SHOTGUN);
 				MYLOG(Warning, TEXT("gunattack"));
 				//ShotgunAttack();
 				isAttacking = true;
@@ -626,7 +625,7 @@ void AMyCharacter::Attack()
 			switch (iSelectedWeapon) {
 			case Weapon::Hand:
 				if (iCurrentIceballCount <= 0) return;	// 아이스볼을 소유하고 있지 않으면 공격 x
-				PlayerController->SendPlayerInfo(COMMAND_ICEBALL);
+				localPlayerController->SendPlayerInfo(COMMAND_ICEBALL);
 				//IceballAttack();
 				isAttacking = true;
 				break;
@@ -820,13 +819,34 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 #endif
 		if (iSessionId == localPlayerController->iSessionId)
 		{
+
+			auto HitSnowball = Cast<AMySnowball>(DamageCauser);
+			auto HitSnowBomb = Cast<ASnowballBomb>(DamageCauser);
+
+			if (HitSnowball)
+			{
+				localPlayerController->GetSocket()->Send_DamagePacket(HitSnowball->GetOwnerSessionId(), BULLET_SNOWBALL);
+
+			}
+			else if (HitSnowBomb)
+			{
+				localPlayerController->GetSocket()->Send_DamagePacket(HitSnowBomb->GetOwnerSessionId(), BULLET_SNOWBOMB);
+
+			}
+
+
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
-			localPlayerController->SendPlayerInfo(COMMAND_DAMAGE);
+			//localPlayerController->SendPlayerInfo(COMMAND_DAMAGE);
 		}
 	}
 	else
-	{	// 눈사람인 경우 스턴
-		StartStun(fStunTime);
+	{	
+		auto MySnowball = Cast<AMySnowball>(DamageCauser);
+		if (MySnowball)
+		{
+			// 눈사람인 경우 스턴
+			StartStun(fStunTime);
+		}
 #ifdef SINGLEPLAY_DEBUG
 		MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
 #endif
@@ -912,20 +932,20 @@ void AMyCharacter::ReleaseSnowball()
 		{
 			//공유 받은 rotatiom 값과 speed 값
 #ifdef MULTIPLAY_DEBUG
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			
 			FRotator cameraRotation;
-			cameraRotation.Yaw = PlayerController->GetCharactersInfo()->players[iSessionId].fCYaw;
-			cameraRotation.Pitch = PlayerController->GetCharactersInfo()->players[iSessionId].fCPitch;
-			cameraRotation.Roll = PlayerController->GetCharactersInfo()->players[iSessionId].fCRoll;
+			cameraRotation.Yaw = localPlayerController->GetCharactersInfo()->players[iSessionId].fCYaw;
+			cameraRotation.Pitch = localPlayerController->GetCharactersInfo()->players[iSessionId].fCPitch;
+			cameraRotation.Roll = localPlayerController->GetCharactersInfo()->players[iSessionId].fCRoll;
 
-			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
+			float speed = localPlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[release snowball] \n [x] : %f \n [y] : %f \n [z] : %f \n [speed] : %f "), cameraRotation.Vector().X, cameraRotation.Vector().Y, cameraRotation.Vector().Z, speed));
 
 			FVector SnowBallLocation;
-			SnowBallLocation.X = PlayerController->GetCharactersInfo()->players[iSessionId].fSBallX;
-			SnowBallLocation.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fSBallY;
-			SnowBallLocation.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fSBallZ;
+			SnowBallLocation.X = localPlayerController->GetCharactersInfo()->players[iSessionId].fSBallX;
+			SnowBallLocation.Y = localPlayerController->GetCharactersInfo()->players[iSessionId].fSBallY;
+			SnowBallLocation.Z = localPlayerController->GetCharactersInfo()->players[iSessionId].fSBallZ;
 			snowball->SetActorLocation(SnowBallLocation);
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector(), speed);
 			// 속도 인자 추가
@@ -934,7 +954,7 @@ void AMyCharacter::ReleaseSnowball()
 			FVector cameraLocation;
 			FRotator cameraRotation;
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			AMyPlayerController* localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 
 			II_Throwable::Execute_Throw(snowball, cameraRotation.Vector());
 #endif
@@ -962,18 +982,18 @@ void AMyCharacter::ReleaseIceball()
 
 #ifdef MULTIPLAY_DEBUG
 			//공유 받은 rotatiom 값과 speed 값
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			
 			FRotator cameraRotation;
-			cameraRotation.Yaw = PlayerController->GetCharactersInfo()->players[iSessionId].fCYaw;
-			cameraRotation.Pitch = PlayerController->GetCharactersInfo()->players[iSessionId].fCPitch;
-			cameraRotation.Roll = PlayerController->GetCharactersInfo()->players[iSessionId].fCRoll;
+			cameraRotation.Yaw = localPlayerController->GetCharactersInfo()->players[iSessionId].fCYaw;
+			cameraRotation.Pitch = localPlayerController->GetCharactersInfo()->players[iSessionId].fCPitch;
+			cameraRotation.Roll = localPlayerController->GetCharactersInfo()->players[iSessionId].fCRoll;
 
-			float speed = PlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
+			float speed = localPlayerController->GetCharactersInfo()->players[iSessionId].fSpeed;
 
 			FVector IceBallLocation;
-			IceBallLocation.X = PlayerController->GetCharactersInfo()->players[iSessionId].fIBallX;
-			IceBallLocation.Y = PlayerController->GetCharactersInfo()->players[iSessionId].fIBallY;
-			IceBallLocation.Z = PlayerController->GetCharactersInfo()->players[iSessionId].fIBallZ;
+			IceBallLocation.X = localPlayerController->GetCharactersInfo()->players[iSessionId].fIBallX;
+			IceBallLocation.Y = localPlayerController->GetCharactersInfo()->players[iSessionId].fIBallY;
+			IceBallLocation.Z = localPlayerController->GetCharactersInfo()->players[iSessionId].fIBallZ;
 			iceball->SetActorLocation(IceBallLocation);
 
 
@@ -989,7 +1009,7 @@ void AMyCharacter::ReleaseIceball()
 			FVector cameraLocation;
 			FRotator cameraRotation;
 			GetActorEyesViewPoint(cameraLocation, cameraRotation);
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+			AMyPlayerController* localPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 
 			float speed = fSnowballInitialSpeed + fAimingElapsedTime * fThrowPower;
 
@@ -1027,16 +1047,16 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 		{	// 본인 동물화(부활), 상대 캐릭터 눈사람화(사망)
 #ifdef MULTIPLAY_DEBUG
 			//bIsSnowman = false;
-			//PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
-			//PlayerController->SetCharacterHP(iSessionId, iMaxHP);
+			//localPlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
+			//localPlayerController->SetCharacterHP(iSessionId, iMaxHP);
 			//ChangeAnimal();
 			PlayerController->GetSocket()->Send_StatusPacket(ST_ANIMAL, iSessionId);
 			//UpdateTemperatureState();
 			PlayerController->GetSocket()->Send_StatusPacket(ST_SNOWMAN, otherCharacter->iSessionId);
 			
-			//PlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
+			//localPlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
 			//otherCharacter->ChangeSnowman();
-			//PlayerController->SetCharacterState(otherCharacter->iSessionId, ST_SNOWMAN);
+			//localPlayerController->SetCharacterState(otherCharacter->iSessionId, ST_SNOWMAN);
 
 #endif
 #ifdef SINGLEPLAY_DEBUG
@@ -1050,10 +1070,10 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	/*else if (!bIsSnowman && otherCharacter->GetIsSnowman())
 	{
 		bIsSnowman = true;
-		PlayerController->SetCharacterState(iSessionId, ST_SNOWMAN);
+		localPlayerController->SetCharacterState(iSessionId, ST_SNOWMAN);
 		ChangeSnowman();
-		if (iSessionId == PlayerController->iSessionId && PlayerController->IsStart())
-			PlayerController->GetSocket()->Send_StatusPacket(ST_SNOWMAN);
+		if (iSessionId == localPlayerController->iSessionId && localPlayerController->IsStart())
+			localPlayerController->GetSocket()->Send_StatusPacket(ST_SNOWMAN);
 		
 	}*/
 
@@ -1071,8 +1091,8 @@ void AMyCharacter::StartFarming()
 	if (!IsValid(farmingItem)) return;	//오버랩하면 바로 넣어줌
 	if (bIsSnowman) return;
 	if (bIsRiding) return; // 운전 중 아이템 파밍 x
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (iSessionId != PlayerController->iSessionId || !PlayerController->IsStart()) return;
+	
+	if (iSessionId != localPlayerController->iSessionId || !localPlayerController->IsStart()) return;
 	
 	if (Cast<ASnowdrift>(farmingItem))
 	{
@@ -1093,7 +1113,7 @@ void AMyCharacter::StartFarming()
 		{
 		case ItemboxState::Closed:
 			itembox->SetItemboxState(ItemboxState::Opening);
-			PlayerController->GetSocket()->Send_OpenBoxPacket(itembox->GetId());
+			localPlayerController->GetSocket()->Send_OpenBoxPacket(itembox->GetId());
 			break;
 		case ItemboxState::Opened:
 			// 아이템박스에서 내용물 파밍에 성공하면 아이템박스에서 아이템 제거 (박스는 그대로 유지시킴)
@@ -1103,7 +1123,7 @@ void AMyCharacter::StartFarming()
 				//MYLOG(Warning, TEXT("item %d"), itembox->GetItemType());
 				//아이템 파밍 시 서버 전송
 #ifdef MULTIPLAY_DEBUG
-				PlayerController->GetSocket()->Send_ItemPacket(itembox->GetItemType(), itembox->GetId());
+				localPlayerController->GetSocket()->Send_ItemPacket(itembox->GetItemType(), itembox->GetId());
 #endif
 
 				//itembox->DeleteItem(); //서버에서 패킷받았을 때 처리
@@ -1122,7 +1142,7 @@ void AMyCharacter::StartFarming()
 	else if (Cast<ASupplyBox>(farmingItem))
 	{
 		ASupplyBox* spbox = Cast<ASupplyBox>(farmingItem);
-		PlayerController->GetSocket()->Send_ItemPacket(ITEM_SPBOX, spbox->iSpBoxId);
+		localPlayerController->GetSocket()->Send_ItemPacket(ITEM_SPBOX, spbox->iSpBoxId);
 		//GetSupplyBox();
 	}
 }
@@ -1189,8 +1209,8 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 {
 	if (!bIsFarming) return;
 	if (!IsValid(farmingItem)) return;
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (iSessionId != PlayerController->iSessionId || !PlayerController->IsStart()) return;
+	
+	if (iSessionId != localPlayerController->iSessionId || !localPlayerController->IsStart()) return;
 
 	// 눈 무더기 파밍
 	ASnowdrift* snowdrift = Cast<ASnowdrift>(farmingItem);
@@ -1205,7 +1225,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 		{
 			//눈덩이 파밍 시 서버 전송
 #ifdef MULTIPLAY_DEBUG
-			PlayerController->GetSocket()->Send_ItemPacket(ITEM_SNOW, snowdrift->GetId());
+			localPlayerController->GetSocket()->Send_ItemPacket(ITEM_SNOW, snowdrift->GetId());
 #endif
 			UpdateUI(UICategory::CurSnowball);
 			bIsFarming = false;	// 눈무더기 파밍 끝나면 false로 변경 후 UI 갱신 (눈무더기 파밍 바 ui 안보이도록)
@@ -1228,7 +1248,7 @@ void AMyCharacter::UpdateFarming(float deltaTime)
 		{
 			//얼음 파밍 시 서버 전송
 #ifdef MULTIPLAY_DEBUG
-			PlayerController->GetSocket()->Send_ItemPacket(ITEM_ICE, icedrift->GetId());
+			localPlayerController->GetSocket()->Send_ItemPacket(ITEM_ICE, icedrift->GetId());
 #endif
 			//iCurrentIceballCount = FMath::Clamp<int>(iCurrentIceballCount + icedrift->iNumOfIceball, 0, iMaxIceballCount);
 			UpdateUI(UICategory::CurIceball);
@@ -1244,7 +1264,9 @@ void AMyCharacter::UpdateHP()
 {
 	if (iCurrentHP <= iMinHP)
 	{
+#ifdef SINGLEPLAY_DEBUG
 		ChangeSnowman();
+#endif
 	}
 }
 
@@ -1336,6 +1358,7 @@ void AMyCharacter::UpdateTemperatureState()
 	if (bIsSnowman) return;
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (iSessionId != PlayerController->iSessionId || !PlayerController->IsStart()) return;
+
 #ifdef SINGLEPLAY_DEBUG
 	GetWorldTimerManager().ClearTimer(temperatureHandle);	// 기존에 실행중이던 핸들러 초기화
 #endif
@@ -1671,9 +1694,9 @@ void AMyCharacter::SpawnSnowballBomb()
 			float up3 = -0.025f;
 			float up4 = -0.05f;
 			
-			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 			
-			cameraRotation.Pitch = PlayerController->GetCharactersInfo()->players[iSessionId].Pitch;
+			
+			cameraRotation.Pitch = localPlayerController->GetCharactersInfo()->players[iSessionId].Pitch;
 
 			snowballBombDirArray[0] = cameraRotation.Vector();
 			snowballBombDirArray[1] = FVector(cameraRotation.Vector() + FVector(0.0f, 0.0f, up1));
@@ -1710,7 +1733,7 @@ void AMyCharacter::SpawnSnowballBomb()
 				ASnowballBomb* snowballBomb = GetWorld()->SpawnActor<ASnowballBomb>(shotgunProjectileClass, muzzleSocketTransform, SpawnParams);
 				snowballBomb->SetOwnerSessionId(iSessionId);	// 눈덩이 폭탄에 자신을 생성한 캐릭터의 session id 저장
 
-				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[PlayerController->GetCharactersInfo()->players[iSessionId].iRandBulletArr[i]], 0.0f);
+				II_Throwable::Execute_Throw(snowballBomb, snowballBombDirArray[localPlayerController->GetCharactersInfo()->players[iSessionId].iRandBulletArr[i]], 0.0f);
 			}
 
 			if (smokeNiagara) {

@@ -287,7 +287,9 @@ public:
 	void Send_Cancel_Packet(int s_id, int bullet);
 	void Send_GunFire_Packet(int s_id, FVector MyLocation, FRotator MyRotation);
 
-	void Send_DamagePacket();
+
+	void Send_DamagePacket(int attacker, int bullet);
+
 	void Send_ItemPacket(int item_no, int destroy_obj_id);
 	void SendPutObjPacket(char cObjType, int iObjId, FVector ObjLocation, float fYaw);
 	void Send_LogoutPacket(const int& s_id);

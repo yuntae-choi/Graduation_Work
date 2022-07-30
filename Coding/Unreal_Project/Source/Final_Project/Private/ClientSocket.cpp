@@ -287,7 +287,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		sc_packet_status_change* packet = reinterpret_cast<sc_packet_status_change*>(ptr);
 		//MYLOG(Warning, TEXT("[Recv status change] id : %d, state : %d"), packet->s_id, packet->state);
 		if (ST_SNOWMAN == packet->state) {
-
+			
 			CharactersInfo.players[packet->s_id].myState = ST_SNOWMAN;
 			//MYLOG(Warning, TEXT("snowMAN !!! [ %d ] "), CharactersInfo.players[packet->s_id].HealthValue);
 		}
@@ -445,8 +445,13 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[packet->sessionID].VY = packet->vy;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].VZ = packet->vz;		// 캐릭터 정보
 		CharactersInfo.players[packet->sessionID].direction = packet->direction;		// 캐릭터 정보
-
-		//MYLOG(Warning, TEXT("[Recv move] id: %d, location: (%f,%f,%f), yaw: %f, velocity: (%f,%f,%f), dir: %f"), packet->sessionID, packet->x, packet->y, packet->z, packet->yaw, packet->vx, packet->vy, packet->vz, packet->direction);
+		break;
+	} 
+	case SC_PACKET_KILL_LOGO:
+	{
+		sc_packet_kill_logo* packet = reinterpret_cast<sc_packet_kill_logo*>(ptr);
+         
+		MyPlayerController->CallDelegateUpdateKillLog(packet->attacker, packet->victim, packet->cause);
 		break;
 	}
 	}
@@ -519,13 +524,13 @@ void ClientSocket::Send_StatusPacket(int _state, int s_id) {
 	SendPacket(&packet);
 };
 
-void ClientSocket::Send_DamagePacket() {
+void ClientSocket::Send_DamagePacket(int attacker, int bullet) {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Send_DamagePacket")));
 	cs_packet_damage packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_DAMAGE;
-
-	//MYLOG(Warning, TEXT("[Send damage]"));
+	packet.attacker = attacker;
+	packet.bullet = bullet;
 	SendPacket(&packet);
 };
 

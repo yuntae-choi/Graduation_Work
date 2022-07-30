@@ -197,7 +197,7 @@ void player_damage(int s_id)
 
 void supply_box()
 {
-    Timer_Event(Gm_id, Gm_id, SP_DROP, 60000ms);
+	Timer_Event(Gm_id, Gm_id, SP_DROP, 60000ms);
 	cout << "supply_box " << endl;
 
 }
@@ -289,7 +289,7 @@ void Disconnect(int _s_id)
 void Player_Event(int target, int player_id, COMMAND type)
 {
 	if (type == OP_OBJ_SPAWN)
-	   cout << "Player_Event " << type << endl;
+		cout << "Player_Event " << type << endl;
 	Overlap* exp_over = new Overlap;
 	exp_over->_op = type;
 	exp_over->_target = player_id;
@@ -343,20 +343,20 @@ void Accept_Player(int _s_id)
 	for (auto& other : clients) {
 		if (other._s_id == _s_id) continue;
 		if (other.pl_state == ST_TORNADO) continue;
-		if (ST_INGAME != other.cl_state)continue; 
-			sc_packet_put_object packet;
-			packet.s_id = other._s_id;
-			packet.obj_id = other.color;
-			strcpy_s(packet.name, other.name);
-			packet.size = sizeof(packet);
-			packet.type = SC_PACKET_PUT_OBJECT;
-			packet.x = other.x;
-			packet.y = other.y;
-			packet.z = other.z;
-			packet.yaw = other.Yaw;
-			packet.object_type = PLAYER;
-			strcpy_s(packet.name, other._id);
-			cl.do_send(sizeof(packet), &packet);
+		if (ST_INGAME != other.cl_state)continue;
+		sc_packet_put_object packet;
+		packet.s_id = other._s_id;
+		packet.obj_id = other.color;
+		strcpy_s(packet.name, other.name);
+		packet.size = sizeof(packet);
+		packet.type = SC_PACKET_PUT_OBJECT;
+		packet.x = other.x;
+		packet.y = other.y;
+		packet.z = other.z;
+		packet.yaw = other.Yaw;
+		packet.object_type = PLAYER;
+		strcpy_s(packet.name, other._id);
+		cl.do_send(sizeof(packet), &packet);
 	}
 	// 토네이도 생성
 	if (GA.g_tonardo) {
@@ -530,6 +530,7 @@ void process_packet(int s_id, unsigned char* p)
 
 	}
 	case CS_PACKET_DAMAGE: {
+		cs_packet_damage* packet = reinterpret_cast<cs_packet_damage*>(p);
 		if (cl.bIsSnowman) break;
 		cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
 		int current_hp = cl._hp;
@@ -567,9 +568,12 @@ void process_packet(int s_id, unsigned char* p)
 				if (ST_INGAME != other.cl_state)
 					continue;
 				other.do_send(sizeof(_packet), &_packet);
-				//cout << "눈사람" << endl;
-				//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+				if (packet->bullet == BULLET_SNOWBALL)
+					send_kill_log(other._s_id, packet->attacker, cl._s_id, DeathBySnowball);
+				else if (packet->bullet == BULLET_SNOWBOMB)
+					send_kill_log(other._s_id, packet->attacker, cl._s_id, DeathBySnowballBomb);
 			}
+			cout << "플레이어" << packet->attacker << "가 눈덩이로 플레이어 " << cl._s_id << "을 눈사람으로 만듬" << endl;
 			int cnt = 0;
 			int target_s_id;
 			for (auto& other : clients) {
@@ -830,7 +834,7 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				cout << "플레이어: [" << cl._s_id << "] 우산 파밍 성공" << endl;
 			}
-			
+
 
 			break;
 		}
@@ -862,7 +866,7 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 성공" << endl;
 			}
-		
+
 
 
 			break;
@@ -1016,7 +1020,7 @@ void process_packet(int s_id, unsigned char* p)
 
 		if (packet->state == ST_INBURN)
 		{
-			
+
 
 			if (cl.bIsSnowman) break;
 			if (false == cl.is_bone) {
@@ -1038,7 +1042,7 @@ void process_packet(int s_id, unsigned char* p)
 			}
 			cl._is_active = true;
 			player_damage(cl._s_id);
-		
+
 		}
 		else if (packet->state == ST_SNOWMAN)
 		{
@@ -1061,10 +1065,11 @@ void process_packet(int s_id, unsigned char* p)
 					if (ST_INGAME != other.cl_state)
 						continue;
 					send_state_change(packet->s_id, other._s_id, ST_SNOWMAN);
+					send_kill_log(other._s_id, s_id, packet->s_id, DeathBySnowman);
 					//cout << "눈사람" << endl;
 					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
-				
+
 				int cnt = 0;
 				int target_s_id;
 				for (auto& other : clients) {
@@ -1382,7 +1387,11 @@ void worker_thread()
 					for (auto& other : clients) {
 						if (ST_INGAME != other.cl_state) continue;
 						send_state_change(_s_id, other._s_id, ST_SNOWMAN);
+						send_kill_log(other._s_id, 0, _s_id, DeathByCold);
 					}
+
+					cout << "플레이어" << _s_id << "가 모닥불에 의해 눈사람으로 변함" << endl;
+
 					int cnt = 0;
 					int target_s_id;
 					for (auto& other : clients) {

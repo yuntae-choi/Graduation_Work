@@ -456,7 +456,7 @@ void AMyPlayerController::InitPlayerSetting()
 	localPlayerCharacter->SetCharacterMaterial(initInfo.iColor);
 	//컨트롤러의 회전
 	SetControlRotation(FRotator(0.0f, initInfo.Yaw, 0.0f));
-	
+
 	cCharacter* inputId = &charactersInfo->players[localPlayerCharacter->iSessionId];
 	localPlayerCharacter->SetUserId(inputId->userId);
 
@@ -514,8 +514,58 @@ bool AMyPlayerController::UpdateWorldInfo()
 		AMyCharacter* player_ = Cast<AMyCharacter>(Character_);
 
 		cCharacter* info = &charactersInfo->players[player_->iSessionId];
-		if (!info->IsAlive) continue;
-	
+		
+		//타플레이어 구별
+		if (!info->IsAlive)  continue;
+		if (!player_ || player_->iSessionId == -1) continue;
+		
+		if (player_->iSessionId != iSessionId)
+		{
+			FVector CharacterLocation;
+			CharacterLocation.X = info->X;
+			CharacterLocation.Y = info->Y;
+			CharacterLocation.Z = info->Z;
+
+			FRotator CharacterRotation;
+			CharacterRotation.Yaw = info->Yaw;
+			CharacterRotation.Pitch = 0.0f;
+			CharacterRotation.Roll = 0.0f;
+
+			FVector CharacterVelocity;
+			CharacterVelocity.X = info->VX;
+			CharacterVelocity.Y = info->VY;
+			CharacterVelocity.Z = info->VZ;
+
+			player_->AddMovementInput(CharacterVelocity);
+			player_->SetActorRotation(CharacterRotation);
+			player_->SetActorLocation(CharacterLocation);
+			player_->GetAnim()->SetDirection(info->direction);
+
+			if (!player_->IsSnowman())
+			{
+				if (info->myState == ST_SNOWMAN)
+				{
+					info->iCurrentSnowCount = 0;
+					Reset_Items(player_->iSessionId);
+					player_->ChangeSnowman();
+				}
+			}
+			else if (player_->IsSnowman())
+			{
+				if (info->myState == ST_ANIMAL)
+				{
+					Reset_Items(player_->iSessionId);
+					player_->ChangeAnimal();
+				}
+			}
+
+			// 캐릭터 속성 업데이트
+			if (player_->iCurrentSnowballCount != info->iCurrentSnowCount)
+			{
+				player_->iCurrentSnowballCount = info->iCurrentSnowCount;
+			}
+		}
+
 		if (info->bGetSpBox) {
 			player_->GetSupplyBox();
 			info->bGetSpBox = false;
@@ -588,62 +638,10 @@ bool AMyPlayerController::UpdateWorldInfo()
 			player_->GetOnOffJetski();
 			info->bSetJetSki = false;
 		}
-
-		//타플레이어 구별
-		if (!player_ || player_->iSessionId == -1 || player_->iSessionId == iSessionId)
-		{
-			continue;
-		}
-
-		FVector CharacterLocation;
-		CharacterLocation.X = info->X;
-		CharacterLocation.Y = info->Y;
-		CharacterLocation.Z = info->Z;
-
-		FRotator CharacterRotation;
-		CharacterRotation.Yaw = info->Yaw;
-		CharacterRotation.Pitch = 0.0f;
-		CharacterRotation.Roll = 0.0f;
-
-		FVector CharacterVelocity;
-		CharacterVelocity.X = info->VX;
-		CharacterVelocity.Y = info->VY;
-		CharacterVelocity.Z = info->VZ;
-
-		player_->AddMovementInput(CharacterVelocity);
-		player_->SetActorRotation(CharacterRotation);
-		player_->SetActorLocation(CharacterLocation);
-		player_->GetAnim()->SetDirection(info->direction);
-
-
-
-		//눈사람 변화
-		if (!player_->IsSnowman())
-		{
-			if (info->myState == ST_SNOWMAN)
-			{
-				info->iCurrentSnowCount = 0;
-				Reset_Items(player_->iSessionId);
-				player_->ChangeSnowman();
-			}
-		}
-		else if (player_->IsSnowman())
-		{
-			if (info->myState == ST_ANIMAL)
-			{
-				Reset_Items(player_->iSessionId);
-				player_->ChangeAnimal();
-			}
-		}
-		// 캐릭터 속성 업데이트
-		if (player_->iCurrentSnowballCount != info->iCurrentSnowCount)
-		{
-			player_->iCurrentSnowballCount = info->iCurrentSnowCount;
-		}
-
 	}
 	return true;
 }
+
 
 void AMyPlayerController::UpdateNewPlayer()
 {
@@ -676,7 +674,7 @@ void AMyPlayerController::UpdateNewPlayer()
 
 	SpawnCharacter->SetCharacterMaterial(newplayer.get()->iColor);
 
-	
+
 	cCharacter* inputId = &charactersInfo->players[SpawnCharacter->iSessionId];
 	SpawnCharacter->SetUserId(inputId->userId);
 
@@ -698,8 +696,8 @@ void AMyPlayerController::UpdateNewPlayer()
 		info.X = newplayer.get()->X;
 		info.Y = newplayer.get()->Y;
 		info.Z = newplayer.get()->Z;
-
 		info.Yaw = newplayer.get()->Yaw;
+		strcpy_s(info.userId, newplayer.get()->userId);
 		info.myState = ST_ANIMAL;
 
 		charactersInfo->players[newplayer.get()->SessionId] = info;
@@ -844,7 +842,7 @@ void AMyPlayerController::SendPlayerInfo(int input)
 		break;
 	}
 	case COMMAND_DAMAGE: {
-		mySocket->Send_DamagePacket();
+		//mySocket->Send_DamagePacket();
 		break;
 	}
 	case COMMAND_MATCH: {
@@ -1210,12 +1208,16 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 {	// 추위에 의한 죽음은 attacker id = -2
 	if (!characterUI) return;
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause));
+
 	char* userId;
 	if (attacker != -2)
 		userId = charactersInfo->players[attacker].userId;
 	else
 		userId = "none";
+
 	FString attackerUserId = userId;
+
 	userId = charactersInfo->players[victim].userId;
 	FString victimUserId = userId;
 
@@ -1232,6 +1234,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 
 	if (cause == CauseOfDeath::DeathBySnowman && (attacker != victim))
 		CallDelegateUpdateKillLog(attacker, attacker, cause);
+
 
 	//UE_LOG(LogTemp, Warning, TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause);
 }
