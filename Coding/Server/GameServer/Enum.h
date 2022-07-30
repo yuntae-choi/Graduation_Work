@@ -2,6 +2,7 @@
 #ifndef __ENUM_H__
 #define __ENUM_H__
 
+#pragma warning( disable : 26812 ) 
 
 enum EVENT_TYPE { CL_BONEFIRE, CL_BONEOUT, CL_MATCH, CL_END_MATCH, SP_DROP};
 enum COMMAND {
@@ -43,6 +44,14 @@ enum CHEAT_Type
 	CHEAT_HP_DOWN,
 	CHEAT_SNOW_PLUS,
 	CHEAT_ICE_PLUS
+};
+
+enum CauseOfDeath {
+	DeathBySnowball, DeathBySnowballBomb, DeathByCold, DeathBySnowman
+};
+
+enum KillLogType {
+	None, Attacker, Victim
 };
 
 

@@ -90,6 +90,8 @@ const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
 const char SC_PACKET_PLAYER_COUNT = 26;
 const char SC_PACKET_NPC_MOVE = 27;
+const char SC_PACKET_KILL_LOGO = 27;
+
 
 
 
@@ -160,6 +162,13 @@ enum OBJ_Type { PLAYER,ITEM_BOX, TONARDO, SUPPLYBOX };
 
 enum Login_fail_Type { OVERLAP_ID, WORNG_ID, WORNG_PW, OVERLAP_AC, CREATE_AC};
 
+enum CauseOfDeath {
+	DeathBySnowball, DeathBySnowballBomb, DeathByCold, DeathBySnowman
+};
+
+enum KillLogType {
+	None, Attacker, Victim
+};
 
 // 패킷
 
@@ -379,6 +388,13 @@ struct sc_packet_player_count {
 	int32   bear;
 };
 
+struct sc_packet_kill_logo {
+	unsigned char size;
+	char type;
+	int32 attacker; //공격자
+	int32   victim; //피해자
+	int32   cause; //원인
+};
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
 
