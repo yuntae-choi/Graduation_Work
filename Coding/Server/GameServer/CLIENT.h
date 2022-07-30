@@ -92,24 +92,24 @@ public:
 	
 	bool is_cl_state(CL_STATE value)
 	{
-		unique_lock<mutex> lock(cl_state_lock);
+		lock_guard<mutex> lock(cl_state_lock);		
 		return (value == cl_state);
 	}
 	bool is_pl_state(STATE_Type value)
 	{
-		unique_lock<mutex> lock(pl_state_lock);
+		lock_guard<mutex> lock(pl_state_lock);
 		return (value == pl_state);
 	}
 
 	void set_cl_state(CL_STATE value)
 	{
-		unique_lock<mutex> lock(cl_state_lock);
+		lock_guard<mutex> lock(cl_state_lock);
 	    cl_state = value;
 	}
 
 	void set_pl_state(STATE_Type value)
 	{
-		unique_lock<mutex> lock(cl_state_lock);
+		lock_guard<mutex> lock(pl_state_lock);
 		pl_state = value;
 	}
 };
