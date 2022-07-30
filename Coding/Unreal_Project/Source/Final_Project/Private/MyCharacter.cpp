@@ -661,6 +661,12 @@ void AMyCharacter::ReleaseAttack()
 		{
 			SendCancelAttack(BULLET_SNOWBALL);
 		}
+		FTimerHandle timerHandle;
+		GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+			{
+				if (snowball)
+					snowball->bTrailOn = true;
+			}), 0.2f, false);
 	}
 }
 

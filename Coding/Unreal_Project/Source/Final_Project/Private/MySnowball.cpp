@@ -77,13 +77,13 @@ AMySnowball::AMySnowball()
 	//projectileNiagara->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
 	//projectileNiagara->SetVisibility(false);
 
-	//trailNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("trailNiagaraComponent"));
-	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TRAIL(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_Trail_DryIce_Large.NS_Trail_DryIce_Large"));
-	//trailNiagara->SetAsset(NS_TRAIL.Object);
-	//trailNiagara->SetupAttachment(meshComponent);
-	//projectileNiagara->SetRelativeLocation(FVector(-30.0f, 0.0f, 0.0f));
-	//projectileNiagara->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
-	//trailNiagara->SetVisibility(false);
+	trailNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("trailNiagaraComponent"));
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TRAIL(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_Trail_DryIce_Medium.NS_Trail_DryIce_Medium"));
+	trailNiagara->SetAsset(NS_TRAIL.Object);
+	trailNiagara->SetupAttachment(meshComponent);
+	trailNiagara->SetRelativeLocation(FVector(-30.0f, 0.0f, 0.0f));
+	trailNiagara->SetRelativeScale3D(FVector(2.0f, 2.0f, 2.0f));
+	trailNiagara->SetVisibility(false);
 
 	iDamage = 10;
 	iOwnerSessionId = -1;
@@ -113,8 +113,11 @@ void AMySnowball::Tick(float DeltaTime)
 		}
 	}
 
-	if (abs((startLocation - GetActorLocation()).Size()) > 5000.0f)
+	if (abs((startLocation - GetActorLocation()).Size()) > 4000.0f)
 		Destroy();
+
+	if (bTrailOn)
+		trailNiagara->SetVisibility(true);
 
 #ifdef CHECKTRAJECTORY
 	if (bCheckTrajectory) UE_LOG(LogTemp, Warning, TEXT("%f %f %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
@@ -238,18 +241,14 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	}
 	else
 	{
-		if (paints.Num() < 5)
-		{
-			//눈자국
-	//FRotator RandomDecalRotation = UKismetMathLibrary::MakeRotFromX(Hit.Normal);
-			FRotator RandomDecalRotation = Hit.Normal.Rotation();
-			RandomDecalRotation.Roll = FMath::FRandRange(-180.0f, 180.0f);
-			auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-35.0f, 50.0f, 50.0f),
-				OtherComponent, NAME_None,
-				GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
+		//눈자국
+		FRotator RandomDecalRotation = Hit.Normal.Rotation();
+		RandomDecalRotation.Roll = FMath::FRandRange(-180.0f, 180.0f);
+		auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-35.0f, 50.0f, 50.0f),
+			OtherComponent, NAME_None,
+			GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
 
-			paints.Add(comp);
-		}
+		paints.Add(comp);
 
 		//눈자국 몇초 뒤에 사라지게
 		float WaitTime = 3.0f;
@@ -258,7 +257,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 				if (paints.Num() > 0)
 				{
 					paints[0]->SetVisibility(false);
-					trashCan.Add(paints[0]);
+					//trashCan.Add(paints[0]);
 					paints.RemoveAt(0);
 				}
 			}), WaitTime, false);
