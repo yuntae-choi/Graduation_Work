@@ -70,6 +70,7 @@ const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
 const char SC_PACKET_PLAYER_COUNT = 26;
 const char SC_PACKET_NPC_MOVE = 27;
+const char SC_PACKET_KILL_LOGO = 27;
 
 
 #pragma pack (push, 1)
@@ -298,5 +299,13 @@ struct sc_packet_player_count {
 	char type;
 	int32 snowman;
 	int32   bear;
+};
+
+struct sc_packet_kill_logo {
+	unsigned char size;
+	char type;
+	int32 attacker; //공격자
+	int32   victim; //피해자
+	int32   cause; //원인
 };
 #pragma pack(pop)

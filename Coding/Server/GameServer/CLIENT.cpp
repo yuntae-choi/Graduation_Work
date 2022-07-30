@@ -35,7 +35,7 @@ CLIENT::CLIENT() : cl_state(ST_FREE), _combat(COMBAT_END), _prev_size(0)
 	bHasUmbrella = false;
 	bIsRiding = false;
 	bHasBag = false;
-	bHasShotGun - false;
+	bHasShotGun = false;
 	bIsSnowman = false;	// 현재 캐릭터가 눈사람인지
 	b_ready = false;
 	dot_dam = false;
@@ -106,7 +106,7 @@ void CLIENT::data_init()
 	bHasUmbrella = false;
 	bIsRiding = false;
 	bHasBag = false;
-	bHasShotGun - false;
+	bHasShotGun = false;
 	bIsSnowman = false;	// 현재 캐릭터가 눈사람인지
 	b_ready = false;
 	dot_dam = false;

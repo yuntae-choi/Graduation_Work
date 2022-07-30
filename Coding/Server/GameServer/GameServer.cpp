@@ -45,6 +45,7 @@ void ev_timer();
 
 int main()
 {
+	DWORD dwBytes;
 	wcout.imbue(locale("korean"));
 	WSADATA WSAData;
 	int ret = WSAStartup(MAKEWORD(2, 2), &WSAData);
@@ -67,8 +68,7 @@ int main()
 	*(reinterpret_cast<SOCKET*>(&accept_ex._net_buf)) = c_socket;
 	ZeroMemory(&accept_ex._wsa_over, sizeof(accept_ex._wsa_over));
 	accept_ex._op = OP_ACCEPT;
-	AcceptEx(sever_socket, c_socket, accept_buf, 0, sizeof(SOCKADDR_IN) + 16,
-		sizeof(SOCKADDR_IN) + 16, NULL, &accept_ex._wsa_over);
+	AcceptEx(sever_socket, c_socket, accept_buf, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, &accept_ex._wsa_over);
 
 	g_timer = CreateEvent(NULL, FALSE, FALSE, NULL);
 	Init_Arr();
@@ -361,15 +361,16 @@ void Accept_Player(int _s_id)
 	// 토네이도 생성
 	if (GA.g_tonardo) {
 		int iMAX_USER = MAX_USER;
-		for (int32 i = 0; i < 3; i++)
+		static_cast<__int64>(iMAX_USER);
+		for (int i = 0; i < 3; i++)
 		{
 			sc_packet_put_object packet;
-			packet.s_id = clients[i + iMAX_USER]._s_id;
+			packet.s_id = clients[static_cast<__int64>(i) + iMAX_USER]._s_id;
 			packet.size = sizeof(packet);
 			packet.type = SC_PACKET_PUT_OBJECT;
-			packet.x = clients[i + iMAX_USER].x;
-			packet.y = clients[i + iMAX_USER].y;
-			packet.z = clients[i + iMAX_USER].z;
+			packet.x = clients[static_cast<__int64>(i) + iMAX_USER].x;
+			packet.y = clients[static_cast<__int64>(i) + iMAX_USER].y;
+			packet.z = clients[static_cast<__int64>(i) + iMAX_USER].z;
 			packet.yaw = 0.0f;
 			packet.object_type = TONARDO;
 			printf_s("[토네이도 생성] id : %d, location : (%f,%f,%f), yaw : %f\n", packet.s_id, packet.x, packet.y, packet.z, packet.yaw);
@@ -1253,6 +1254,7 @@ void worker_thread()
 {
 	while (1) {
 		DWORD num_byte;
+		DWORD dwBytes;
 		LONG64 iocp_key;
 		WSAOVERLAPPED* p_over;
 		BOOL ret = GetQueuedCompletionStatus(g_h_iocp, &num_byte, (PULONG_PTR)&iocp_key, &p_over, INFINITE);
@@ -1338,7 +1340,7 @@ void worker_thread()
 			c_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 			*(reinterpret_cast<SOCKET*>(exp_over->_net_buf)) = c_socket;
 			AcceptEx(sever_socket, c_socket, exp_over->_net_buf + 8, 0, sizeof(SOCKADDR_IN) + 16,
-				sizeof(SOCKADDR_IN) + 16, NULL, &exp_over->_wsa_over);
+				sizeof(SOCKADDR_IN) + 16, &dwBytes, &exp_over->_wsa_over);
 		}
 					  break;
 		case OP_PLAYER_HEAL: {

@@ -31,13 +31,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedWeapon, int32,
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDele_Dynamic_KillLog, FString, iAttacker, FString, iVictim, int32, Cause, int32, iKillLogType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_GameResult, int32, iWinnerId);
 
-enum CauseOfDeath {
-	DeathBySnowball, DeathBySnowballBomb, DeathByCold, DeathBySnowman
-};
 
-enum KillLogType {
-	None, Attacker, Victim
-};
 
 /**
  *
