@@ -62,8 +62,11 @@ public:
 	mutex vl;
 	mutex hp_lock;
 	mutex lua_lock;
-
 	mutex state_lock;
+	mutex cl_state_lock;
+	mutex pl_state_lock;
+
+
 	CL_STATE cl_state;  //  접속 상태
 	STATE_Type  pl_state;    //인게임 상태
 	atomic_bool   _is_active;
@@ -86,6 +89,28 @@ public:
 	void data_init();
 	void do_recv();
 	void do_send(int num_bytes, void* mess);
+	
+	bool is_cl_state(CL_STATE value)
+	{
+		unique_lock<mutex> lock(cl_state_lock);
+		return (value == cl_state);
+	}
+	bool is_pl_state(STATE_Type value)
+	{
+		unique_lock<mutex> lock(pl_state_lock);
+		return (value == pl_state);
+	}
 
+	void set_cl_state(CL_STATE value)
+	{
+		unique_lock<mutex> lock(cl_state_lock);
+	    cl_state = value;
+	}
+
+	void set_pl_state(STATE_Type value)
+	{
+		unique_lock<mutex> lock(cl_state_lock);
+		pl_state = value;
+	}
 };
 

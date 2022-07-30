@@ -3,6 +3,7 @@
 
 #include "SnowballBomb.h"
 #include "MyCharacter.h"
+#include "MyPlayerController.h"
 
 // Sets default values
 ASnowballBomb::ASnowballBomb()
@@ -70,7 +71,7 @@ void ASnowballBomb::Throw_Implementation(FVector Direction, float Speed)
 // Function that is called when the projectile hits something.
 void ASnowballBomb::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	auto MyCharacter = Cast<ACharacter>(OtherActor);
+	auto MyCharacter = Cast<AMyCharacter>(OtherActor);
 
 	if (nullptr != MyCharacter)
 	{

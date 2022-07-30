@@ -90,7 +90,7 @@ const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
 const char SC_PACKET_PLAYER_COUNT = 26;
 const char SC_PACKET_NPC_MOVE = 27;
-const char SC_PACKET_KILL_LOGO = 27;
+const char SC_PACKET_KILL_LOGO = 28;
 
 
 
@@ -253,7 +253,9 @@ struct cs_packet_fire {
 
 struct cs_packet_damage {
 	unsigned char size;
-	char	type;
+	char	 type;
+	int attacker;
+	int bullet;
 };
 
 struct cs_packet_match {

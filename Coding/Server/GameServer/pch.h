@@ -86,4 +86,6 @@ void send_is_bone_packet(int _id);
 void send_game_end(int s_id, int target);
 void send_state_change(int s_id, int target, int stat);
 void send_player_count(int s_id, int bear, int snowman);
+void send_kill_log(int s_id, int attacker, int victim, int cause);
+
 

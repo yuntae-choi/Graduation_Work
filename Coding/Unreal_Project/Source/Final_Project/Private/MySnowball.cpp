@@ -139,8 +139,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), em->snowSplash, GetActorLocation());
 	em->PlaySnowballCrumbleEffect(GetActorLocation());
 
-	//눈덩이 삭제
-	Destroy();
+
 
 	if (nullptr != MyCharacter)
 	{
@@ -154,7 +153,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 		{	// 캐릭터와 충돌 시 데미지
 			FDamageEvent DamageEvent;
 			MyCharacter->TakeDamage(iDamage, DamageEvent, false, this);
-
+			
 			if (!MyCharacter->GetIsSnowman())
 			{
 				auto BoneName = MyCharacter->GetMesh()->FindClosestBone(GetActorLocation());
@@ -207,29 +206,33 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	}
 	else
 	{
-		//눈자국
-		FRotator RandomDecalRotation = UKismetMathLibrary::MakeRotFromX(Hit.Normal);
-		auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-30.0f, 50.0f, 50.0f),
-			OtherComponent, NAME_None,
-			GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
+	//	//눈자국
+	//	FRotator RandomDecalRotation = UKismetMathLibrary::MakeRotFromX(Hit.Normal);
+	//	auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-30.0f, 50.0f, 50.0f),
+	//		OtherComponent, NAME_None,
+	//		GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
 
-		float rand = FMath::RandRange(0.0f, 300.0f);
+	//	float rand = FMath::RandRange(0.0f, 300.0f);
 
-		comp->AddRelativeRotation(FRotator(0.0f, 0.0f, rand));
-		comp->AddRelativeLocation(FVector(1.0f, 0.0f, 0.0f));
+	//	comp->AddRelativeRotation(FRotator(0.0f, 0.0f, rand));
+	//	comp->AddRelativeLocation(FVector(1.0f, 0.0f, 0.0f));
 
-		paints.Add(comp);
+	//	//paints.Add(comp);
 
-		//눈자국 몇초 뒤에 사라지게
-		FTimerHandle timerHandle;
-		float WaitTime = 10.0f;
-		GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
-			{
-				if (paints.Num() > 0)
-					paints[0]->DestroyComponent();
-				paints.RemoveAt(0);
-			}), WaitTime, false);
+	//	//눈자국 몇초 뒤에 사라지게
+	//	FTimerHandle timerHandle;
+	//	float WaitTime = 10.0f;
+	//	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+	//		{
+	//			if (paints.Num() > 0)
+	//				paints[0]->DestroyComponent();
+	//			paints.RemoveAt(0);
+	//		}), WaitTime, false);
+
 	}
+
+	//눈덩이 삭제
+	Destroy();
 	
 #ifdef CHECKTRAJECTORY
 	bCheckTrajectory = false;

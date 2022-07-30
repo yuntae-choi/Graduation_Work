@@ -15,7 +15,7 @@ const int32  MAX_NPC = 100;
 const int32  MAX_OBJ = 20;
 const int32  MAX_SNOWDRIFT = 1000;
 
-const int32  MAX_ITEM = 100;
+const int32  MAX_ITEM = 1000;
 const int32  MAX_BULLET_RANG = 8;
 
 const char CS_PACKET_LOGIN = 1;
@@ -70,7 +70,7 @@ const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
 const char SC_PACKET_PLAYER_COUNT = 26;
 const char SC_PACKET_NPC_MOVE = 27;
-const char SC_PACKET_KILL_LOGO = 27;
+const char SC_PACKET_KILL_LOGO = 28;
 
 
 #pragma pack (push, 1)
@@ -178,6 +178,8 @@ struct cs_packet_fire {
 struct cs_packet_damage {
 	unsigned char size;
 	char type;
+	int attacker;
+	int bullet;
 };
 
 struct sc_packet_hp_change {
