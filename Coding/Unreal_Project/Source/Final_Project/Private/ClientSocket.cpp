@@ -349,8 +349,7 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		{
 			CharactersInfo.players[packet->s_id].iCurrentSnowCount = packet->current_bullet;
 			CharactersInfo.players[packet->s_id].iCurrentIceCount = packet->current_bullet;
-			if (MyPlayerController->iSessionId == packet->s_id)
-				MyPlayerController->GetItem(packet->s_id, ITEM_SPBOX);
+			MyPlayerController->GetItem(packet->s_id, ITEM_SPBOX);
 			MyPlayerController->SetDestroySpBox(packet->destroy_obj_id);
 			break;
 		}
