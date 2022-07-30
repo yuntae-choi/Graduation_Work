@@ -80,9 +80,6 @@ int main()
 	//printf_s("[INFO] CPU 쓰레드 갯수 : %d\n", sysInfo.dwNumberOfProcessors);
 	// 적절한 작업 스레드의 갯수는 (CPU * 2) + 1
 	//int nThreadCnt = sysInfo.dwNumberOfProcessors;
-
-
-
 	int nThreadCnt = 5;
 	for (int i = 0; i < 10; ++i)
 		worker_threads.emplace_back(worker_thread);
@@ -90,7 +87,7 @@ int main()
 		th.join();
 	timer_thread.join();
 	for (auto& cl : clients) {
-		if (cl.is_cl_state(ST_INGAME))
+		if (ST_INGAME == cl.cl_state)
 			Disconnect(cl._s_id);
 	}
 	closesocket(sever_socket);
@@ -154,7 +151,7 @@ void Init_Pos(int s_id, char* _id, char* _pw, float _z)
 	CLIENT& cl = clients[s_id];
 	strcpy_s(cl._id, _id);
 	strcpy_s(cl._pw, _pw);
-	cl.set_cl_state(ST_INGAME);
+	cl.cl_state = ST_INGAME;
 	cl.x = 600.0f * cos(s_id + 45.0f);
 	cl.y = 600.0f * sin(s_id + 45.0f);
 	cl.z = _z;
@@ -200,7 +197,7 @@ void player_damage(int s_id)
 
 void supply_box()
 {
-    Timer_Event(Gm_id, Gm_id, SP_DROP, 60000ms);
+	Timer_Event(Gm_id, Gm_id, SP_DROP, 60000ms);
 	cout << "supply_box " << endl;
 
 }
@@ -212,10 +209,13 @@ int get_id()
 	static int g_id = 0;
 
 	for (int i = 0; i < MAX_USER; ++i) {
-		if (clients[i].is_cl_state(ST_FREE)) {
-			clients[i].set_cl_state(ST_ACCEPT);
+		clients[i].state_lock.lock();
+		if (ST_FREE == clients[i].cl_state) {
+			clients[i].cl_state = ST_ACCEPT;
+			clients[i].state_lock.unlock();
 			return i;
 		}
+		else clients[i].state_lock.unlock();
 	}
 	cout << "Maximum Number of Clients Overflow!!\n";
 	return -1;
@@ -225,33 +225,62 @@ int get_id()
 void Disconnect(int _s_id)
 {
 	CLIENT& cl = clients[_s_id];
+	//cl.vl.lock();
+	//unordered_set <int> my_vl = cl.viewlist;
+	//cl.vl.unlock();
 
+	strcpy_s(clients[_s_id]._id, " ");
+
+	/*for (auto& other : my_vl) {
+		CLIENT& target = clients[other];
+
+		if (ST_INGAME != target.cl_state)
+			continue;
+		target.vl.lock();
+		if (0 != target.viewlist.count(_s_id)) {
+			target.viewlist.erase(_s_id);
+			target.vl.unlock();
+			send_remove_object(other, _s_id);
+		}
+		else target.vl.unlock();
+	}*/
 	for (auto& other : clients) {
 		if (other._s_id == _s_id) continue;
-		if (!other.is_cl_state(ST_INGAME)) {
+		other.state_lock.lock();
+		if (ST_INGAME != other.cl_state) {
+			other.state_lock.unlock();
 			continue;
 		}
+		else other.state_lock.unlock();
+
+		//if (false == is_near(other._id, client_id))
+			//continue;
+
+		//other.vl.lock();
+		//other.viewlist.insert(s_id);
+		//other.vl.unlock();
 		cs_packet_logout packet;
 		packet.size = sizeof(packet);
 		packet.type = SC_PACKET_LOGOUT;
 		packet.s_id = cl._s_id;
 		other.do_send(sizeof(packet), &packet);
 	}
-
-	clients[_s_id].set_cl_state(ST_FREE);
-	clients[_s_id].data_init();
+	//clients[_s_id].state_lock.lock();
+	clients[_s_id].cl_state = ST_FREE;
 
 	struct linger stLinger = { 0, 0 };	// SO_DONTLINGER 로 설정
 										// 강제 종료 시킨다. 데이터 손실이 있을 수 있음
+
 	stLinger.l_onoff = true;
 	// _socket 소켓의 데이터 송수신을 모두 중단
 	shutdown(clients[_s_id]._socket, SD_BOTH);
 	// 소켓 옵션을 설정
 	setsockopt(clients[_s_id]._socket, SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
 	//소켓 연결을 종료
+	clients[_s_id].data_init();
 	closesocket(clients[_s_id]._socket);
 	clients[_s_id]._socket = INVALID_SOCKET;
-
+	//clients[_s_id].state_lock.unlock();
 
 	cout << "------------플레이어 " << _s_id << " 연결 종료------------" << endl;
 }
@@ -260,7 +289,7 @@ void Disconnect(int _s_id)
 void Player_Event(int target, int player_id, COMMAND type)
 {
 	if (type == OP_OBJ_SPAWN)
-	   cout << "Player_Event " << type << endl;
+		cout << "Player_Event " << type << endl;
 	Overlap* exp_over = new Overlap;
 	exp_over->_op = type;
 	exp_over->_target = player_id;
@@ -287,9 +316,14 @@ void Accept_Player(int _s_id)
 	// 새로 접속한 플레이어의 정보를 주위 플레이어에게 보낸다
 	for (auto& other : clients) {
 		if (other._s_id == _s_id) continue;
-		if (other.is_pl_state(ST_TORNADO)) continue;
-		if (other.is_cl_state(ST_INGAME)) continue;
-	
+		if (ST_TORNADO == other.pl_state) continue;
+		other.state_lock.lock();
+		if (ST_INGAME != other.cl_state) {
+			other.state_lock.unlock();
+			continue;
+		}
+		else other.state_lock.unlock();
+
 		sc_packet_put_object packet;
 		packet.s_id = cl._s_id;
 		packet.obj_id = cl.color;
@@ -308,21 +342,21 @@ void Accept_Player(int _s_id)
 	// 새로 접속한 플레이어에게 주위 객체 정보를 보낸다
 	for (auto& other : clients) {
 		if (other._s_id == _s_id) continue;
-		if (other.is_pl_state(ST_TORNADO)) continue;
-		if (!other.is_cl_state(ST_INGAME))continue;
-			sc_packet_put_object packet;
-			packet.s_id = other._s_id;
-			packet.obj_id = other.color;
-			strcpy_s(packet.name, other.name);
-			packet.size = sizeof(packet);
-			packet.type = SC_PACKET_PUT_OBJECT;
-			packet.x = other.x;
-			packet.y = other.y;
-			packet.z = other.z;
-			packet.yaw = other.Yaw;
-			packet.object_type = PLAYER;
-			strcpy_s(packet.name, other._id);
-			cl.do_send(sizeof(packet), &packet);
+		if (other.pl_state == ST_TORNADO) continue;
+		if (ST_INGAME != other.cl_state)continue;
+		sc_packet_put_object packet;
+		packet.s_id = other._s_id;
+		packet.obj_id = other.color;
+		strcpy_s(packet.name, other.name);
+		packet.size = sizeof(packet);
+		packet.type = SC_PACKET_PUT_OBJECT;
+		packet.x = other.x;
+		packet.y = other.y;
+		packet.z = other.z;
+		packet.yaw = other.Yaw;
+		packet.object_type = PLAYER;
+		strcpy_s(packet.name, other._id);
+		cl.do_send(sizeof(packet), &packet);
 	}
 	// 토네이도 생성
 	if (GA.g_tonardo) {
@@ -362,14 +396,17 @@ void process_packet(int s_id, unsigned char* p)
 				printf_s("[Recv login] ID : %s, PASSWORD : %s, z : %f\n", packet->id, packet->pw, packet->z);
 
 				for (int i = 0; i < MAX_USER; ++i) {
-					if (clients[i].is_cl_state(ST_INGAME)) {
+					clients[i].state_lock.lock();
+					if (ST_INGAME == clients[i].cl_state) {
 						if (strcmp(packet->id, clients[i]._id) == 0) {
 							cout << packet->id << "접속중인 플레이어" << endl;
 							send_login_fail_packet(s_id, OVERLAP_AC);
 							_OverLap = true;
+							clients[i].state_lock.unlock();
 							break;
 						}
 					}
+					clients[i].state_lock.unlock();
 				}
 
 				if (_OverLap == true) break;
@@ -411,7 +448,7 @@ void process_packet(int s_id, unsigned char* p)
 		else
 		{
 			GA.g_tonardo = true;
-			cl.set_pl_state(ST_TORNADO);
+			cl.pl_state = ST_TORNADO;
 			send_login_ok_packet(s_id);
 			//cout << "토네이도" << endl;
 		}
@@ -455,8 +492,10 @@ void process_packet(int s_id, unsigned char* p)
 		cl.direction = packet->direction;
 
 		for (auto& other : clients) {
-			if (other._s_id == s_id) continue;
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (other._s_id == s_id)
+				continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			send_move_packet(other._s_id, cl._s_id);
 		}
 		break;
@@ -464,7 +503,8 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_ATTACK: {
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(p);
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			packet->type = SC_PACKET_ATTACK;
 			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
 			other.do_send(sizeof(*packet), packet);
@@ -478,7 +518,7 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_GUNATTACK: {
 		cs_packet_attack* packet = reinterpret_cast<cs_packet_attack*>(p);
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME))
+			if (ST_INGAME != other.cl_state)
 				continue;
 			packet->type = SC_PACKET_GUNATTACK;
 			//cout << "플레이어[" << packet->s_id << "]가" << "플레이어[" << other._s_id << "]에게 보냄" << endl;
@@ -492,13 +532,11 @@ void process_packet(int s_id, unsigned char* p)
 	case CS_PACKET_DAMAGE: {
 		cs_packet_damage* packet = reinterpret_cast<cs_packet_damage*>(p);
 		if (cl.bIsSnowman) break;
+		cout << "플레이어 " << cl._s_id << "데미지 받음 " << endl;
 		int current_hp = cl._hp;
 		cl._hp -= 30;
 		if (cl._hp < 270) cl._hp = 270;
 		send_hp_packet(cl._s_id);
-	
-		cout << "플레이어" << packet->attacker << "가 플레이어 " << cl._s_id << "에게 눈사람 던짐" << endl;
-
 
 		if (current_hp == cl._max_hp && cl.is_bone == true)
 		{
@@ -508,6 +546,7 @@ void process_packet(int s_id, unsigned char* p)
 
 		if (cl._hp <= cl._min_hp)
 		{
+
 			cl._hp = cl._min_hp;
 			cl.iCurrentSnowballCount = 0;
 			cl.iCurrentIceballCount = 0;
@@ -525,16 +564,12 @@ void process_packet(int s_id, unsigned char* p)
 			_packet.type = SC_PACKET_STATUS_CHANGE;
 			_packet.state = ST_SNOWMAN;
 			_packet.s_id = s_id;
-
-			cout << "플레이어" << packet->attacker << "가 눈덩이로 플레이어 " << cl._s_id <<"을 눈사람으로 만듬" << endl;
-
-
 			for (auto& other : clients) {
-				if (!other.is_cl_state(ST_INGAME))
+				if (ST_INGAME != other.cl_state)
 					continue;
 				other.do_send(sizeof(_packet), &_packet);
 				if (packet->bullet == BULLET_SNOWBALL)
-				   send_kill_log(other._s_id, packet->attacker, cl._s_id, DeathBySnowball);
+					send_kill_log(other._s_id, packet->attacker, cl._s_id, DeathBySnowball);
 				else if (packet->bullet == BULLET_SNOWBOMB)
 					send_kill_log(other._s_id, packet->attacker, cl._s_id, DeathBySnowballBomb);
 			}
@@ -542,7 +577,7 @@ void process_packet(int s_id, unsigned char* p)
 			int target_s_id;
 			for (auto& other : clients) {
 				if (cl._s_id == other._s_id) continue;
-				if (!other.is_cl_state(ST_INGAME)) continue;
+				if (ST_INGAME != other.cl_state) continue;
 				if (false == other.bIsSnowman)
 				{
 					cnt++;
@@ -553,7 +588,7 @@ void process_packet(int s_id, unsigned char* p)
 			}
 			if (cnt == 1) {
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME))
+					if (ST_INGAME != other.cl_state)
 						continue;
 					send_game_end(target_s_id, other._s_id);
 				}
@@ -563,7 +598,7 @@ void process_packet(int s_id, unsigned char* p)
 				int bear_cnt = 0;
 				int snowman_cnt = 0;;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state) continue;
 					if (false == other.bIsSnowman)
 					{
 						bear_cnt++;
@@ -574,7 +609,8 @@ void process_packet(int s_id, unsigned char* p)
 					}
 				}
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					send_player_count(other._s_id, bear_cnt, snowman_cnt);
 				}
 			}
@@ -615,7 +651,8 @@ void process_packet(int s_id, unsigned char* p)
 			else
 				cout << "플레이어 " << cl._s_id << ": 우산 접기" << endl;
 			for (auto& other : clients) {
-				if (!other.is_cl_state(ST_INGAME)) continue;
+				if (ST_INGAME != other.cl_state)
+					continue;
 				packet->type = SC_PACKET_UMB;
 				other.do_send(sizeof(*packet), packet);
 			}
@@ -670,14 +707,17 @@ void process_packet(int s_id, unsigned char* p)
 				_packet.state = ST_SNOWMAN;
 				_packet.s_id = s_id;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					other.do_send(sizeof(_packet), &_packet);
+					//cout << "눈사람" << endl;
+					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
 				int cnt = 0;
 				int target_s_id;
 				for (auto& other : clients) {
 					if (cl._s_id == other._s_id) continue;
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state) continue;
 					if (false == other.bIsSnowman)
 					{
 						cnt++;
@@ -688,7 +728,8 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				if (cnt == 1) {
 					for (auto& other : clients) {
-						if (!other.is_cl_state(ST_INGAME)) continue;
+						if (ST_INGAME != other.cl_state)
+							continue;
 						send_game_end(target_s_id, other._s_id);
 					}
 					cout << "게임종료" << endl;
@@ -713,7 +754,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet.destroy_obj_id = -1;
 			packet.current_bullet = cl.iCurrentSnowballCount;
 			for (auto& other : clients) {
-				if (!other.is_cl_state(ST_INGAME)) continue;
+				if (ST_INGAME != other.cl_state) continue;
 				other.do_send(sizeof(packet), &packet);
 			}
 			break;
@@ -734,7 +775,7 @@ void process_packet(int s_id, unsigned char* p)
 			packet.destroy_obj_id = -1;
 			packet.current_bullet = cl.iCurrentIceballCount;
 			for (auto& other : clients) {
-				if (!other.is_cl_state(ST_INGAME)) continue;
+				if (ST_INGAME != other.cl_state) continue;
 				other.do_send(sizeof(packet), &packet);
 			}
 			break;
@@ -767,7 +808,8 @@ void process_packet(int s_id, unsigned char* p)
 				cl.bHasBag = true;
 				packet->type = SC_PACKET_GET_ITEM;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					packet->type = SC_PACKET_GET_ITEM;
 					other.do_send(sizeof(*packet), packet);
 				}
@@ -784,13 +826,14 @@ void process_packet(int s_id, unsigned char* p)
 				cl.bHasUmbrella = true;
 				packet->type = SC_PACKET_GET_ITEM;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					packet->type = SC_PACKET_GET_ITEM;
 					other.do_send(sizeof(*packet), packet);
 				}
 				cout << "플레이어: [" << cl._s_id << "] 우산 파밍 성공" << endl;
 			}
-			
+
 
 			break;
 		}
@@ -798,7 +841,7 @@ void process_packet(int s_id, unsigned char* p)
 		{
 			packet->type = SC_PACKET_GET_ITEM;
 			for (auto& other : clients) {
-				if (!other.is_cl_state(ST_INGAME)) continue;
+				if (ST_INGAME != other.cl_state) continue;
 				if (s_id == other._s_id) continue;
 				packet->type = SC_PACKET_GET_ITEM;
 				other.do_send(sizeof(*packet), packet);
@@ -815,13 +858,14 @@ void process_packet(int s_id, unsigned char* p)
 				cl.iCurrentMatchCount++;
 				packet->type = SC_PACKET_GET_ITEM;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					packet->type = SC_PACKET_GET_ITEM;
 					other.do_send(sizeof(*packet), packet);
 				}
 				cout << "플레이어: [" << cl._s_id << "] 성냥 파밍 성공" << endl;
 			}
-		
+
 
 
 			break;
@@ -839,7 +883,8 @@ void process_packet(int s_id, unsigned char* p)
 				packet->type = SC_PACKET_GET_ITEM;
 				packet->current_bullet = cl.iCurrentSnowballCount;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					packet->type = SC_PACKET_GET_ITEM;
 					other.do_send(sizeof(*packet), packet);
 				}
@@ -860,7 +905,8 @@ void process_packet(int s_id, unsigned char* p)
 				packet->type = SC_PACKET_GET_ITEM;
 				packet->current_bullet = cl.iCurrentIceballCount;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					packet->type = SC_PACKET_GET_ITEM;
 					other.do_send(sizeof(*packet), packet);
 				}
@@ -880,7 +926,8 @@ void process_packet(int s_id, unsigned char* p)
 
 				packet->type = SC_PACKET_GET_ITEM;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					packet->type = SC_PACKET_GET_ITEM;
 					other.do_send(sizeof(*packet), packet);
 				}
@@ -923,7 +970,8 @@ void process_packet(int s_id, unsigned char* p)
 			break;
 		}
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			packet->type = SC_PACKET_THROW_SNOW;
 			other.do_send(sizeof(*packet), packet);
 		}
@@ -934,7 +982,8 @@ void process_packet(int s_id, unsigned char* p)
 
 		cs_packet_cancel_snow* packet = reinterpret_cast<cs_packet_cancel_snow*>(p);
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			packet->type = SC_PACKET_CANCEL_SNOW;
 			other.do_send(sizeof(*packet), packet);
 		}
@@ -947,7 +996,8 @@ void process_packet(int s_id, unsigned char* p)
 		cl.iCurrentSnowballCount -= 5;
 		cs_packet_fire* packet = reinterpret_cast<cs_packet_fire*>(p);
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			packet->type = SC_PACKET_GUNFIRE;
 			rand_arr(packet->rand_int);
 			other.do_send(sizeof(*packet), packet);
@@ -969,7 +1019,7 @@ void process_packet(int s_id, unsigned char* p)
 
 		if (packet->state == ST_INBURN)
 		{
-			
+
 
 			if (cl.bIsSnowman) break;
 			if (false == cl.is_bone) {
@@ -991,7 +1041,7 @@ void process_packet(int s_id, unsigned char* p)
 			}
 			cl._is_active = true;
 			player_damage(cl._s_id);
-		
+
 		}
 		else if (packet->state == ST_SNOWMAN)
 		{
@@ -1011,16 +1061,19 @@ void process_packet(int s_id, unsigned char* p)
 				clients[packet->s_id].bIsSnowman = true;
 
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					send_state_change(packet->s_id, other._s_id, ST_SNOWMAN);
 					send_kill_log(other._s_id, s_id, packet->s_id, DeathBySnowman);
+					//cout << "눈사람" << endl;
+					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
 				}
-				cout << "플레이어" << s_id << "가 플레이어를" << packet->s_id << "를 눈사람으로 바꿈" << endl;
-				
+
 				int cnt = 0;
 				int target_s_id;
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					//if (cl._s_id == other._s_id) continue;
+					if (ST_INGAME != other.cl_state) continue;
 					if (false == other.bIsSnowman)
 					{
 						cnt++;
@@ -1031,7 +1084,8 @@ void process_packet(int s_id, unsigned char* p)
 				}
 				if (cnt == 1) {
 					for (auto& other : clients) {
-						if (!other.is_cl_state(ST_INGAME)) continue;
+						if (ST_INGAME != other.cl_state)
+							continue;
 						send_game_end(target_s_id, other._s_id);
 					}
 					cout << "게임종료" << endl;
@@ -1040,7 +1094,7 @@ void process_packet(int s_id, unsigned char* p)
 					int bear_cnt = 0;
 					int snowman_cnt = 0;;
 					for (auto& other : clients) {
-						if (!other.is_cl_state(ST_INGAME)) continue;
+						if (ST_INGAME != other.cl_state) continue;
 						if (false == other.bIsSnowman)
 						{
 							bear_cnt++;
@@ -1051,7 +1105,8 @@ void process_packet(int s_id, unsigned char* p)
 						}
 					}
 					for (auto& other : clients) {
-						if (!other.is_cl_state(ST_INGAME)) continue;
+						if (ST_INGAME != other.cl_state)
+							continue;
 						send_player_count(other._s_id, bear_cnt, snowman_cnt);
 					}
 				}
@@ -1069,7 +1124,8 @@ void process_packet(int s_id, unsigned char* p)
 				clients[packet->s_id].bIsSnowman = false;
 				//send_hp_packet(packet->s_id);
 				for (auto& other : clients) {
-					if (!other.is_cl_state(ST_INGAME)) continue;
+					if (ST_INGAME != other.cl_state)
+						continue;
 					send_state_change(packet->s_id, other._s_id, ST_ANIMAL);
 					//cout << "동물화" << endl;
 					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
@@ -1092,7 +1148,8 @@ void process_packet(int s_id, unsigned char* p)
 		for (auto& other : clients) {
 			if (s_id == other._s_id)
 				continue;
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			other.do_send(sizeof(_packet), &_packet);
 		}
 		cout << s_id << "플레이어 레디" << endl;
@@ -1100,7 +1157,8 @@ void process_packet(int s_id, unsigned char* p)
 		for (auto& other : clients) {
 			if (s_id == other._s_id)
 				continue;
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			if (other.b_ready == false)
 				return;
 		}
@@ -1110,14 +1168,15 @@ void process_packet(int s_id, unsigned char* p)
 		s_packet.type = SC_PACKET_START;
 
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			other.do_send(sizeof(s_packet), &s_packet);
 		}
 
 		int bear_cnt = 0;
 		int snowman_cnt = 0;;
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state) continue;
 			if (false == other.bIsSnowman)
 			{
 				bear_cnt++;
@@ -1128,7 +1187,8 @@ void process_packet(int s_id, unsigned char* p)
 			}
 		}
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state)
+				continue;
 			send_player_count(other._s_id, bear_cnt, snowman_cnt);
 		}
 		SetEvent(g_timer);
@@ -1142,7 +1202,7 @@ void process_packet(int s_id, unsigned char* p)
 		cs_packet_open_box* packet = reinterpret_cast<cs_packet_open_box*>(p);
 		for (auto& other : clients) {
 			if (s_id == other._s_id) continue;
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state) continue;
 			packet->type = SC_PACKET_OPEN_BOX;
 			other.do_send(sizeof(*packet), packet);
 		}
@@ -1153,7 +1213,7 @@ void process_packet(int s_id, unsigned char* p)
 		printf("SupplyBOX\n");
 		sc_packet_put_object* packet = reinterpret_cast<sc_packet_put_object*>(p);
 		for (auto& other : clients) {
-			if (!other.is_cl_state(ST_INGAME)) continue;
+			if (ST_INGAME != other.cl_state) continue;
 			packet->type = SC_PACKET_PUT_OBJECT;
 			other.do_send(sizeof(*packet), packet);
 		}
@@ -1167,8 +1227,10 @@ void process_packet(int s_id, unsigned char* p)
 			for (auto& other : clients) {
 				if (other._s_id == s_id)
 					continue;
-				if (!other.is_cl_state(ST_INGAME)) continue;
-				if (other.is_pl_state(ST_TORNADO)) continue;
+				if (ST_INGAME != other.cl_state)
+					continue;
+				if (ST_TORNADO == other.pl_state)
+					continue;
 				packet->type = SC_PACKET_NPC_MOVE;
 				other.do_send(sizeof(*packet), packet);
 			}
@@ -1262,8 +1324,10 @@ void worker_thread()
 			}
 			else {
 				CLIENT& cl = clients[n__s_id];
+				cl.state_lock.lock();
 				cl._s_id = n__s_id;
-				cl.set_cl_state(ST_ACCEPT);
+				cl.cl_state = ST_ACCEPT;
+				cl.state_lock.unlock();
 				cl._prev_size = 0;
 				cl._recv_over._op = OP_RECV;
 				cl._recv_over._wsa_buf.buf = reinterpret_cast<char*>(cl._recv_over._net_buf);
@@ -1320,17 +1384,18 @@ void worker_thread()
 					clients[_s_id]._hp -= 1;
 					send_hp_packet(_s_id);
 					for (auto& other : clients) {
-						if (!other.is_cl_state(ST_INGAME)) continue;
+						if (ST_INGAME != other.cl_state) continue;
 						send_state_change(_s_id, other._s_id, ST_SNOWMAN);
 						send_kill_log(other._s_id, 0, _s_id, DeathByCold);
 					}
+
 					cout << "플레이어" << _s_id << "가 모닥불에 의해 눈사람으로 변함" << endl;
 
 					int cnt = 0;
 					int target_s_id;
 					for (auto& other : clients) {
 						if (_s_id == other._s_id) continue;
-						if (!other.is_cl_state(ST_INGAME)) continue;
+						if (ST_INGAME != other.cl_state) continue;
 						if (false == other.bIsSnowman)
 						{
 							cnt++;
@@ -1339,7 +1404,8 @@ void worker_thread()
 					}
 					if (cnt == 1) {
 						for (auto& other : clients) {
-							if (!other.is_cl_state(ST_INGAME)) continue;
+							if (ST_INGAME != other.cl_state)
+								continue;
 							send_game_end(target_s_id, other._s_id);
 						}
 						cout << "게임종료" << endl;
@@ -1348,7 +1414,7 @@ void worker_thread()
 						int bear_cnt = 0;
 						int snowman_cnt = 0;;
 						for (auto& other : clients) {
-							if (!other.is_cl_state(ST_INGAME)) continue;
+							if (ST_INGAME != other.cl_state) continue;
 							if (false == other.bIsSnowman)
 							{
 								bear_cnt++;
@@ -1359,7 +1425,8 @@ void worker_thread()
 							}
 						}
 						for (auto& other : clients) {
-							if (!other.is_cl_state(ST_INGAME)) continue;
+							if (ST_INGAME != other.cl_state)
+								continue;
 							send_player_count(other._s_id, bear_cnt, snowman_cnt);
 						}
 					}
@@ -1377,8 +1444,8 @@ void worker_thread()
 			//printf("SupplyBOX %f, %f\n" , f_x, f_y);
 			sc_packet_put_object packet;
 			for (auto& other : clients) {
-				if (!other.is_cl_state(ST_INGAME)) continue;
-				if (!other.is_pl_state(ST_TORNADO)) continue;
+				if (ST_INGAME != other.cl_state) continue;
+				if (ST_TORNADO == other.pl_state) continue;
 				packet.size = sizeof(packet);
 				packet.type = SC_PACKET_PUT_OBJECT;
 				packet.object_type = SUPPLYBOX;
@@ -1430,7 +1497,7 @@ void ev_timer()
 		}
 		else {
 			if (false == is_player(s_id)) continue;
-		    if (!clients[s_id].is_cl_state(ST_INGAME)) continue;
+			if (clients[s_id].cl_state != ST_INGAME) continue;
 			if (clients[s_id]._is_active == false) continue;
 			if (order.start_t <= chrono::system_clock::now()) {
 				if (order.order == CL_BONEFIRE) {
