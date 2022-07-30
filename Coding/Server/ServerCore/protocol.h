@@ -40,6 +40,7 @@ const char CS_PACKET_CANCEL_SNOW = 19;
 const char CS_PACKET_PLAYER_COUNT = 20;
 const char CS_PACKET_PUT_OBJECT = 21;
 const char CS_PACKET_NPC_MOVE = 22;
+const char CS_PACKET_FREEZE = 23;
 
 
 
@@ -70,7 +71,8 @@ const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
 const char SC_PACKET_PLAYER_COUNT = 26;
 const char SC_PACKET_NPC_MOVE = 27;
-const char SC_PACKET_KILL_LOGO = 28;
+const char SC_PACKET_KILL_LOG = 28;
+const char SC_PACKET_FREEZE = 29;
 
 
 #pragma pack (push, 1)
@@ -303,11 +305,20 @@ struct sc_packet_player_count {
 	int32   bear;
 };
 
-struct sc_packet_kill_logo {
+struct sc_packet_kill_log {
 	unsigned char size;
 	char type;
 	int32 attacker; //공격자
 	int32   victim; //피해자
 	int32   cause; //원인
+};
+
+
+struct cs_packet_freeze {
+	unsigned char size;
+	char type;
+	int32 s_id; 
+	int32 boddyparts; //바디파츠
+
 };
 #pragma pack(pop)

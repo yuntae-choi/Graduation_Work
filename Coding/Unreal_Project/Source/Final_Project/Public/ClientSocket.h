@@ -160,6 +160,15 @@ public:
 	bool bGetSpBox = false;
 	bool bGetSpBag = false;
 
+	bool bFreezeHead = false;
+	bool bFreezeLHand = false;
+	bool bFreezeRHand = false;
+	bool bFreezeLLeg = false;
+	bool bFreezeRLeg = false;
+	bool bFreezeCenter = false;
+	
+
+
 
 	int iRandBulletArr[MAX_BULLET_RANG] = {};
 
@@ -297,6 +306,8 @@ public:
 	void Send_MatchPacket(); 
 	void Send_OpenBoxPacket(int open_box_id);
 	void Send_UmbPacket(bool umb_use);
+	void Send_FreezePacket(int s_id, int bobyparts);
+
 
 	// 플레이어 컨트롤러 세팅
 	void SetPlayerController(AMyPlayerController* pPlayerController);

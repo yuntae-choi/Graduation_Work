@@ -447,11 +447,17 @@ void ClientSocket::ProcessPacket(unsigned char* ptr)
 		CharactersInfo.players[packet->sessionID].direction = packet->direction;		// 캐릭터 정보
 		break;
 	} 
-	case SC_PACKET_KILL_LOGO:
+	case SC_PACKET_KILL_LOG:
 	{
-		sc_packet_kill_logo* packet = reinterpret_cast<sc_packet_kill_logo*>(ptr);
-         
+		sc_packet_kill_log* packet = reinterpret_cast<sc_packet_kill_log*>(ptr);
 		MyPlayerController->CallDelegateUpdateKillLog(packet->attacker, packet->victim, packet->cause);
+
+		break;
+	}
+	case SC_PACKET_FREEZE:
+	{
+		cs_packet_freeze* packet = reinterpret_cast<cs_packet_freeze*>(ptr);
+		MyPlayerController->SetFreeze(packet->s_id, packet->boddyparts);
 		break;
 	}
 	}
@@ -573,6 +579,14 @@ void ClientSocket::Send_UmbPacket(bool umb_use) {
 	SendPacket(&packet);
 };
 
+void ClientSocket::Send_FreezePacket(int s_id, int bobyparts) {
+	cs_packet_freeze packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_FREEZE;
+	packet.s_id = s_id;
+	packet.boddyparts = bobyparts;
+	SendPacket(&packet);
+};
 
 void ClientSocket::Send_TelePortPacket(int point_num) {
 	cs_packet_teleport packet;

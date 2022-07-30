@@ -2460,6 +2460,43 @@ void AMyCharacter::SettingRightCalf()
 	rightCalfComponent->SetVisibility(true);
 }
 
+//น฿ป็
+void AMyCharacter::SendFreeze(int iBodyParts)
+{
+	if (iSessionId != localPlayerController->iSessionId) return;
+
+	switch (iBodyParts)
+	{
+	case BODDY_HEAD: {
+		localPlayerController->GetSocket()->Send_FreezePacket(iSessionId, BODDY_HEAD);
+		break;
+	}
+	case BODDY_LEFTHAND: {
+		localPlayerController->GetSocket()->Send_FreezePacket(iSessionId, BODDY_LEFTHAND);
+		break;
+	}
+	case BODDY_RIGHTHAND: {
+		localPlayerController->GetSocket()->Send_FreezePacket(iSessionId, BODDY_RIGHTHAND);
+		break;
+	}
+	case BODDY_LEFTLEG: {
+		localPlayerController->GetSocket()->Send_FreezePacket(iSessionId, BODDY_LEFTLEG);
+		break;
+	}
+	case BODDY_RIGHTLEG: {
+		localPlayerController->GetSocket()->Send_FreezePacket(iSessionId, BODDY_RIGHTLEG);
+		break;
+	}
+	case BODDY_CENTER: {
+		localPlayerController->GetSocket()->Send_FreezePacket(iSessionId, BODDY_CENTER);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+
 void AMyCharacter::FreezeHead()
 {
 	FreezeAnimation(headHandle, iHeadFrame, bHeadAnimEnd, headComponent, headMeshes);
