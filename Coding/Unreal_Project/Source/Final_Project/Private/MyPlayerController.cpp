@@ -696,8 +696,8 @@ void AMyPlayerController::UpdateNewPlayer()
 		info.X = newplayer.get()->X;
 		info.Y = newplayer.get()->Y;
 		info.Z = newplayer.get()->Z;
-
 		info.Yaw = newplayer.get()->Yaw;
+		strcpy_s(info.userId, newplayer.get()->userId);
 		info.myState = ST_ANIMAL;
 
 		charactersInfo->players[newplayer.get()->SessionId] = info;
