@@ -1247,6 +1247,18 @@ void process_packet(int s_id, unsigned char* p)
 		}
 		break;
 	}
+	case CS_PACKET_FREEZE: {
+		if (cl.bIsSnowman) break;
+		cs_packet_freeze* packet = reinterpret_cast<cs_packet_freeze*>(p);
+		for (auto& other : clients) {
+			if (ST_INGAME != other.cl_state)
+				continue;
+			packet->type = SC_PACKET_FREEZE;
+			other.do_send(sizeof(*packet), packet);
+		}
+		break;
+
+	}
 	default:
 		cout << " 오류패킷타입" << packet_type << endl;
 		printf("Unknown PACKET type\n");

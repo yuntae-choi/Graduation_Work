@@ -157,7 +157,8 @@ public:
 	void init_Socket();
 
 	bool GetIsSnowman() { return bIsSnowman; };
-
+	
+	void SendFreeze(int iBodyParts);
 	void FreezeHead();
 	void FreezeLeftForearm();
 	void FreezeLeftUpperarm();

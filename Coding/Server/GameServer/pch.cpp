@@ -224,9 +224,9 @@ void send_player_count(int s_id, int bear, int snowman)
 
 void send_kill_log(int s_id, int attacker, int victim, int cause)
 {
-	sc_packet_kill_logo _packet;
+	sc_packet_kill_log _packet;
 	_packet.size = sizeof(_packet);
-	_packet.type = SC_PACKET_KILL_LOGO;
+	_packet.type = SC_PACKET_KILL_LOG;
 	_packet.attacker = attacker;
 	_packet.victim = victim;
 	_packet.cause = cause;
