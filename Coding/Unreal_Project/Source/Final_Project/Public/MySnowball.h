@@ -61,6 +61,11 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Component)
 	UNiagaraComponent* trailNiagara;
 
+	FTimerHandle timerHandle;
+
+	FVector startLocation;
+
+	float fElapsedTime = 0.0f;
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)
 	int32 iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
