@@ -10,6 +10,8 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Components/DecalComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "MySnowball.generated.h"
 
 UCLASS()
@@ -53,7 +55,11 @@ public:
 
 	AEditorManager* editorManager;
 
-	TArray<UDecalComponent*> paints;
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraComponent* projectileNiagara;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UNiagaraComponent* trailNiagara;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)
