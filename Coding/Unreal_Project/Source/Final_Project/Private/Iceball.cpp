@@ -52,6 +52,15 @@ AIceball::AIceball()
 			icewallClass = IceWall_Class.Class;
 		}
 	}
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> HitSoundAsset(TEXT("/Game/Audio/behavior/Hit.Hit"));
+	if (HitSoundAsset.Succeeded())
+		HitS = HitSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> BreakSoundAsset(TEXT("/Game/Audio/behavior/BreakIceWall.BreakIceWall"));
+	if (BreakSoundAsset.Succeeded())
+		BreakIceWallS = BreakSoundAsset.Object;
+
 }
 
 // Called when the game starts or when spawned
@@ -106,6 +115,9 @@ void AIceball::IceballThrow_Implementation(FRotator Rotation, float Speed)
 void AIceball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("loc :%f, %f, %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
+	
+	UGameplayStatics::PlaySoundAtLocation(this, HitS, GetActorLocation());
+
 
 	Destroy();
 
@@ -127,6 +139,7 @@ void AIceball::SpawnIceWall()
 			FRotator newRotation = FRotator(0.0f, rotation.Yaw, 0.0f);
 			FVector newLocation = FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - 20.0f);
 			FTransform transform = FTransform(newRotation, newLocation, FVector(1.0f));
+			UGameplayStatics::PlaySoundAtLocation(this, BreakIceWallS, GetActorLocation());
 			World->SpawnActor<AActor>(icewallClass, transform, SpawnParams);
 		}
 	}

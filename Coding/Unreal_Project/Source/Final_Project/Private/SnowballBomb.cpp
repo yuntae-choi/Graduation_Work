@@ -46,6 +46,10 @@ ASnowballBomb::ASnowballBomb()
 
 	explosionNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/NS_Explosion_MV.NS_Explosion_MV"), nullptr, LOAD_None, nullptr);
 
+	static ConstructorHelpers::FObjectFinder<USoundWave> BombSoundAsset(TEXT("/Game/Audio/behavior/Bomb.Bomb"));
+	if (BombSoundAsset.Succeeded())
+		BombS = BombSoundAsset.Object;
+
 	iDamage = 10;
 	iOwnerSessionId = -1;
 }
@@ -72,6 +76,9 @@ void ASnowballBomb::Throw_Implementation(FVector Direction, float Speed)
 void ASnowballBomb::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	auto MyCharacter = Cast<AMyCharacter>(OtherActor);
+
+	UGameplayStatics::PlaySoundAtLocation(this, BombS, GetActorLocation());
+
 
 	if (nullptr != MyCharacter)
 	{

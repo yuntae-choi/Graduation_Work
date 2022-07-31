@@ -102,7 +102,24 @@ AMyPlayerController::AMyPlayerController()
 	{
 		InGameCue = InGame_Cue.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<USoundWave> ThrowSoundAsset(TEXT("/Game/Audio/behavior/Throw.Throw"));
+	if (ThrowSoundAsset.Succeeded())
+		ThrowS = ThrowSoundAsset.Object;
 
+	
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> ShootSoundAsset(TEXT("/Game/Audio/behavior/Shoot.Shoot"));
+	if (ShootSoundAsset.Succeeded())
+		ShootS = ShootSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> WalkSoundAsset(TEXT("/Game/Audio/behavior/Walk.Walk"));
+	if (WalkSoundAsset.Succeeded())
+		WalkS = WalkSoundAsset.Object;
+
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> ClickSoundAsset(TEXT("/Game/Audio/behavior/Click.Click"));
+	if (ClickSoundAsset.Succeeded())
+		ClickS = ClickSoundAsset.Object;
 
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	AudioComponent->bAutoActivate = false;
@@ -673,6 +690,10 @@ bool AMyPlayerController::UpdateWorldInfo()
 			}
 		}
 
+		FVector CharacterLocation;
+		CharacterLocation.X = info->X;
+		CharacterLocation.Y = info->Y;
+		CharacterLocation.Z = info->Z;
 
 		if (info->bGetSpBox) {
 			player_->GetSupplyBox();
@@ -710,18 +731,22 @@ bool AMyPlayerController::UpdateWorldInfo()
 		}
 
 		if (info->bEndSnowBall) {
+			
+			UGameplayStatics::PlaySoundAtLocation(player_, ThrowS, CharacterLocation);
 			player_->ReleaseSnowball();
 			info->bEndSnowBall = false;
 			info->iCurrentSnowCount--;
 		}
 
 		if (info->bEndIceBall) {
+			UGameplayStatics::PlaySoundAtLocation(player_, ThrowS, CharacterLocation);
 			player_->ReleaseIceball();
 			info->bEndIceBall = false;
 			info->iCurrentIceCount--;
 		}
 
 		if (info->bEndShotGun) {
+			UGameplayStatics::PlaySoundAtLocation(player_, ShootS, CharacterLocation);
 			MYLOG(Warning, TEXT("bEndShotGun"));
 			player_->SpawnSnowballBomb();
 			info->bEndShotGun = false;

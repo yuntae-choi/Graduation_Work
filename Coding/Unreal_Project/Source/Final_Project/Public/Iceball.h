@@ -7,6 +7,9 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "I_Throwable.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 #include "Iceball.generated.h"
 
 UCLASS()
@@ -55,4 +58,9 @@ public:
 
 private:
 	FRotator rotation;
+
+	USoundBase* HitS;
+	USoundBase* BreakIceWallS;
+
+
 };

@@ -9,6 +9,9 @@
 #include "Components/SphereComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 #include "SnowballBomb.generated.h"
 
 UCLASS()
@@ -59,4 +62,7 @@ private:
 	int32 iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경
 
 	int32 iOwnerSessionId;	// 눈덩이 폭탄을 생성한 캐릭터의 session id
+
+	USoundBase* BombS;
+
 };
