@@ -15,4 +15,9 @@ AMyGameModeBase::AMyGameModeBase()
 	//DefaultPawnClass = ASnowMan::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	HUDClass = CROSSHAIR_HUD.Class;
+
+	
+
+
 }
+

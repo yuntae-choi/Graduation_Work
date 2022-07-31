@@ -10,6 +10,8 @@
 
 #include "Final_Project.h"
 #include "MyCharacter.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundCue.h"
 #include "GameFramework/PlayerController.h"
 #include "ClientSocket.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -30,7 +32,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedProjectile, in
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_SelectedWeapon, int32, NewSelectedWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDele_Dynamic_KillLog, FString, iAttacker, FString, iVictim, int32, Cause, int32, iKillLogType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_GameResult, int32, iWinnerId);
-
 
 
 /**
@@ -293,4 +294,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Class)
 	TSubclassOf<class AActor> supplyboxClass;
+
+    UAudioComponent* AudioComponent;
+	USoundCue* LoginCue;
+	USoundCue* ReadyCue;
+	USoundCue* InGameCue;
+
+
 };

@@ -13,6 +13,7 @@
 #include "SupplyBox.h"
 #include "Tornado.h"
 
+
 #pragma comment(lib, "ws2_32.lib")
 
 ClientSocket* g_socket = nullptr;
@@ -81,6 +82,32 @@ AMyPlayerController::AMyPlayerController()
 		}
 	}
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> Login_Cue(TEXT("SoundCue'/Game/Audio/login/Login_Cue.Login_Cue'"));
+	
+	if (Login_Cue.Succeeded())
+	{
+		LoginCue = Login_Cue.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> Ready_Cue(TEXT("SoundCue'/Game/Audio/ready/Ready_Cue.Ready_Cue'"));
+
+	if (Ready_Cue.Succeeded())
+	{
+		ReadyCue = Ready_Cue.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> InGame_Cue(TEXT("SoundCue'/Game/Audio/ingame/InGame_Cue.InGame_Cue'"));
+
+	if (InGame_Cue.Succeeded())
+	{
+		InGameCue = InGame_Cue.Object;
+	}
+
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	AudioComponent->bAutoActivate = false;
+
+
 	bIsReady = false;
 	loginInfoText = TEXT("LOGIN");
 }
@@ -107,6 +134,11 @@ void AMyPlayerController::BeginPlay()
 	//SetSocket();
 	//SleepEx(0, true);
 	SetSocket();
+
+	// 배경음악 재생
+	//AudioComponent->SetSound((USoundBase*)MainMusicCue);
+	//AudioComponent->Play();
+
 	//mySocket->StartListen();
 	SleepEx(0, true);
 }
@@ -1078,6 +1110,10 @@ void AMyPlayerController::LoadReadyUI()
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			SetInputMode(InputMode);
 			bShowMouseCursor = true;
+
+			// 오디오 재생
+			AudioComponent->SetSound(ReadyCue);
+			AudioComponent->Play();
 		}
 	}
 }
@@ -1113,6 +1149,10 @@ void AMyPlayerController::StartGame()
 		bShowMouseCursor = false;
 		auto m_Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 		m_Player->UpdateTemperatureState();
+
+		// 오디오 재생
+		AudioComponent->SetSound(InGameCue);
+		AudioComponent->Play();
 	}
 	// 게임 시작되면 실행시킬 코드들 작성
 }
@@ -1147,6 +1187,9 @@ void AMyPlayerController::LoadGameResultUI(int winnerSessionId)
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			SetInputMode(InputMode);
 			bShowMouseCursor = true;
+
+			AudioComponent->Stop();
+
 		}
 	}
 }
@@ -1350,6 +1393,11 @@ void AMyPlayerController::LoadLoginUI()
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			SetInputMode(InputMode);
 			bShowMouseCursor = true;
+		
+
+		    // 오디오 재생
+			AudioComponent->SetSound(LoginCue);
+			AudioComponent->Play();
 		}
 	}
 }
