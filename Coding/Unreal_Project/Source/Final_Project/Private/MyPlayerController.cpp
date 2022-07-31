@@ -1390,7 +1390,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 {	// 추위에 의한 죽음은 attacker id = -2
 	if (!characterUI) return;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause));
 
 	char* userId;
 	if (attacker != -2)
