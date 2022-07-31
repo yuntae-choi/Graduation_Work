@@ -34,7 +34,7 @@ ATornado::ATornado()
 		tornadoNiagara->SetupAttachment(collisionComponent);
 	}
 
-	static ConstructorHelpers::FObjectFinder<USoundWave> TornadoSoundAsset(TEXT("/Game/Audio/ingame/Tornado.Tornado"));
+	static ConstructorHelpers::FObjectFinder<USoundWave> TornadoSoundAsset(TEXT("/Game/Audio/ingame/Tornado_2.Tornado_2"));
 	if (TornadoSoundAsset.Succeeded())
 		TornadoS = TornadoSoundAsset.Object;
 }
@@ -65,9 +65,9 @@ void ATornado::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp
 	AMyCharacter* mycharacter = Cast<AMyCharacter>(OtherActor);
 	if (mycharacter)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, TornadoS, GetActorLocation());
 
 		if (mycharacter->iSessionId != mycharacter->localPlayerController->iSessionId) return;
+		UGameplayStatics::PlaySoundAtLocation(this, TornadoS, GetActorLocation());
 
 		mycharacter->SetIsInTornado(true);
 		mycharacter->StartStun(3.5f);
@@ -81,7 +81,6 @@ void ATornado::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 	if (mycharacter)
 	{
 		if (mycharacter->iSessionId != mycharacter->localPlayerController->iSessionId) return;
-
 		mycharacter->SetIsInTornado(false);
 		mycharacter->overlappedTornado = nullptr;
 
