@@ -1468,10 +1468,10 @@ void AMyCharacter::StartStun(float waitTime)
 		GetMesh()->bPauseAnims = false;
 	}
 
-	//스턴 이펙트
-	if (stunNiagara) {
+	//스턴 이펙트(눈사람일 때만)
+	if (stunNiagara && bIsSnowman) {
 		//UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), stunNiagara, GetActorLocation() + FVector(0.0f, -40.0f, 90.0f), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
-		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(stunNiagara, GetCapsuleComponent(), NAME_None, FVector(0.0f, -40.0f, -90.0f), FRotator(0.f), EAttachLocation::Type::KeepRelativeOffset, true);
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(stunNiagara, GetCapsuleComponent(), NAME_None, FVector(0.0f, -40.0f, 90.0f), FRotator(1), EAttachLocation::Type::KeepRelativeOffset, true);
 	}
 }
 
