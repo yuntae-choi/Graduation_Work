@@ -713,6 +713,11 @@ bool AMyPlayerController::UpdateWorldInfo()
 			{
 				player_->iCurrentIceballCount = info->iCurrentIceCount;
 			}
+
+			if (info->bGetSpBag) {
+				player_->GetBag();
+				info->bGetSpBag = false;
+			}
 		}
 
 		FVector CharacterLocation;
@@ -725,10 +730,6 @@ bool AMyPlayerController::UpdateWorldInfo()
 			info->bGetSpBox = false;
 		}
 
-		if (info->bGetSpBag) {
-			player_->GetBag();
-			info->bGetSpBag = false;
-		}
 
 		if (info->bStartSnowBall) {
 			player_->SnowBallAttack();
