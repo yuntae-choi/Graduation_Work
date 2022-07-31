@@ -148,6 +148,7 @@ void AMySnowball::Throw_Implementation(FVector Direction, float Speed)
 void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	auto MyCharacter = Cast<AMyCharacter>(OtherActor);
+	auto itemBox = Cast<AItembox>(OtherActor);
 	auto umbrella = Cast<UBoxComponent>(OtherComponent);
 	auto socketMesh = Cast<UStaticMeshComponent>(OtherComponent);
 
@@ -158,8 +159,10 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 		//UE_LOG(LogTemp, Warning, TEXT("%s"), *staticmeshName);
 	}
 
-	projectileMovementComponent->StopMovementImmediately();
-	projectileMovementComponent->StopSimulating(Hit);
+	//projectileMovementComponent->Velocity = FVector(0.0f, 0.0f, 0.0f);
+	//collisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	meshComponent->SetVisibility(false);
+
 
 	//MYLOG(Warning, TEXT("loc :%f, %f, %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("loc :%f, %f, %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
@@ -182,14 +185,19 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 
 	UGameplayStatics::PlaySoundAtLocation(this, HitS, GetActorLocation());
 
-
-	if (nullptr != MyCharacter)
+	if (MyCharacter)
 	{
-		if (umbrella
-			|| staticmeshName.Compare(FString("jetskiMeshComponent")) == 0
-			|| staticmeshName.Compare(FString("bagMeshComponent")) == 0)
-		{	// 우산 or 제트스키 or 가방 or 스노우볼과 충돌한 경우	(눈자국, 몸 어는 이펙트 재생 x 해야함)
-			//UE_LOG(LogTemp, Warning, TEXT("no damage, hit umbrella"));
+		if (umbrella)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("umbrella")));
+		}
+		else if (staticmeshName.Compare(FString("jetskiMeshComponent")) == 0)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("jetski")));
+		}
+		else if (staticmeshName.Compare(FString("bagMeshComponent")) == 0)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("bag")));
 		}
 		else
 		{	// 캐릭터와 충돌 시 데미지
@@ -242,6 +250,10 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 
 			}
 		}
+	}
+	else if (itemBox)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("itembox")));
 	}
 	else
 	{
