@@ -1411,6 +1411,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 	else
 		killLogType = KillLogType::None;
 
+	if (attacker == victim) cause = 4;
 
 	if (FuncUpdateKillLog.IsBound() == true) FuncUpdateKillLog.Broadcast(attackerUserId, victimUserId, cause, killLogType);
 
