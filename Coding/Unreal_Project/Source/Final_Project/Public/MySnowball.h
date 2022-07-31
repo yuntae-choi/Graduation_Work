@@ -42,6 +42,8 @@ public:
 	int32 GetOwnerSessionId() const { return iOwnerSessionId; };
 	void SetOwnerSessionId(int32 OwnerSessionId) { iOwnerSessionId = OwnerSessionId; };
 
+	TArray<UDecalComponent*>& Getpaints() { return paints; };
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

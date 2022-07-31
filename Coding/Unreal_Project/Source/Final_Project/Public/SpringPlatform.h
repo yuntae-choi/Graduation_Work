@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 #include "SpringPlatform.generated.h"
 
 enum SpringPlatformState {
@@ -54,4 +57,7 @@ private:
 	int iSpringPlatformState;
 	float fSpringScaleZ;
 	float fPlatformLocationZ;
+
+	USoundBase* SpringS;
+
 };

@@ -924,7 +924,7 @@ void process_packet(int s_id, unsigned char* p)
 				cl.iCurrentSnowballCount = cl.iMaxSnowballCount;	// 눈덩이 10 
 				cl.iCurrentIceballCount = cl.iMaxIceballCount;	// 얼음 10 
 				cl.iCurrentMatchCount = cl.iMaxMatchCount;	// 성냥 2 
-
+				packet->current_bullet = cl.iMaxIceballCount;
 				packet->type = SC_PACKET_GET_ITEM;
 				for (auto& other : clients) {
 					if (ST_INGAME != other.cl_state)

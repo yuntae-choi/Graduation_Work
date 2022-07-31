@@ -256,7 +256,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 
 			UDecalComponent*& tmp = comp;
 
-			paints.Add(tmp);
+			//paints.Add(tmp);
 		}
 	}
 

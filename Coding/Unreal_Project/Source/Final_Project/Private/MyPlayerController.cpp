@@ -121,6 +121,10 @@ AMyPlayerController::AMyPlayerController()
 	if (ClickSoundAsset.Succeeded())
 		ClickS = ClickSoundAsset.Object;
 
+	static ConstructorHelpers::FObjectFinder<USoundWave> FreezeSoundAsset(TEXT("/Game/Audio/behavior/Freeze.Freeze"));
+	if (FreezeSoundAsset.Succeeded())
+		FreezeS = FreezeSoundAsset.Object;
+
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	AudioComponent->bAutoActivate = false;
 
@@ -338,19 +342,30 @@ void AMyPlayerController::SetFreeze(const int s_id, int body_type)
 void AMyPlayerController::StartFreeze(AMyCharacter* player_, cCharacter* info)
 {
 
+	
+	FVector CharacterLocation;
+	CharacterLocation.X = info->X;
+	CharacterLocation.Y = info->Y;
+	CharacterLocation.Z = info->Z;
+
+
+
 	if (info->bFreezeHead)
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeHead();
 		info->bFreezeHead = false;
 	}
 	if (info->bFreezeLHand)
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeLeftForearm();
 		player_->FreezeLeftUpperarm();
 		info->bFreezeLHand = false;
 	}
 	if (info->bFreezeRHand) 
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeRightForearm();
 		player_->FreezeRightUpperarm();
 		info->bFreezeRHand = false;
@@ -358,18 +373,21 @@ void AMyPlayerController::StartFreeze(AMyCharacter* player_, cCharacter* info)
 	}
 	if (info->bFreezeLLeg) 
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeLeftThigh();
 		player_->FreezeLeftCalf();
 		info->bFreezeLLeg = false;
 	}
 	if (info->bFreezeRLeg) 
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeRightThigh();
 		player_->FreezeRightCalf();
 		info->bFreezeRLeg = false;
 	}
 	if (info->bFreezeCenter) 
 	{ 
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeCenter(); 
 		info->bFreezeCenter = false;
 	}

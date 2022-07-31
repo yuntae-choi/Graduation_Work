@@ -171,6 +171,9 @@ public:
 	void FreezeRightCalf();
 	void FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& end, UStaticMeshComponent*& bone, TArray<UStaticMesh*>& FrozenMeshes);
 	void FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end);
+	void FreezeAnimationEndCheck2(FTimerHandle& timerHandle2, bool& end2);
+	void MeltingCheck();
+	void MeltingAnimation(FTimerHandle& timerHandle, int& frame, bool& end, UStaticMeshComponent*& bone, TArray<UStaticMesh*>& FrozenMeshes);
 
 	void InitializeFreeze();
 
@@ -364,7 +367,10 @@ public:
 
 	int32 iHeadFrame = 0;
 	bool bHeadAnimEnd = false;
+	bool bHeadAnimEnd2 = false;
 	FTimerHandle headHandle;
+	FTimerHandle headHandle2;
+	bool bMeltingHead = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* leftForearmComponent;
@@ -374,7 +380,10 @@ public:
 
 	int32 iLeftForearmFrame;
 	bool bLeftForearmAnimEnd = false;
+	bool bLeftForearmAnimEnd2 = false;
 	FTimerHandle leftForearmHandle;
+	FTimerHandle leftForearmHandle2;
+	bool bMeltingLeftForearm = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* leftUpperarmComponent;
@@ -384,7 +393,10 @@ public:
 
 	int32 iLeftUpperarmFrame;
 	bool bLeftUpperarmAnimEnd = false;
+	bool bLeftUpperarmAnimEnd2 = false;
 	FTimerHandle leftUpperarmHandle;
+	FTimerHandle leftUpperarmHandle2;
+	bool bMeltingLeftUpperarm = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* rightForearmComponent;
@@ -394,7 +406,10 @@ public:
 
 	int32 iRightForearmFrame;
 	bool bRightForearmAnimEnd = false;
+	bool bRightForearmAnimEnd2 = false;
 	FTimerHandle rightForearmHandle;
+	FTimerHandle rightForearmHandle2;
+	bool bMeltingRightForearm = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* rightUpperarmComponent;
@@ -404,7 +419,10 @@ public:
 
 	int32 iRightUpperarmFrame;
 	bool bRightUpperarmAnimEnd = false;
+	bool bRightUpperarmAnimEnd2 = false;
 	FTimerHandle rightUpperarmHandle;
+	FTimerHandle rightUpperarmHandle2;
+	bool bMeltingRightUpperarm = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* centerComponent;
@@ -414,7 +432,10 @@ public:
 
 	int32 iCenterFrame;
 	bool bCenterAnimEnd = false;
+	bool bCenterAnimEnd2 = false;
 	FTimerHandle centerHandle;
+	FTimerHandle centerHandle2;
+	bool bMeltingCenter = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* leftThighComponent;
@@ -424,7 +445,10 @@ public:
 
 	int32 iLeftThighFrame;
 	bool bLeftThighAnimEnd = false;
+	bool bLeftThighAnimEnd2 = false;
 	FTimerHandle leftThighHandle;
+	FTimerHandle leftThighHandle2;
+	bool bMeltingLeftThigh = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* leftCalfComponent;
@@ -434,7 +458,10 @@ public:
 
 	int32 iLeftCalfFrame;
 	bool bLeftCalfAnimEnd = false;
+	bool bLeftCalfAnimEnd2 = false;
 	FTimerHandle leftCalfHandle;
+	FTimerHandle leftCalfHandle2;
+	bool bMeltingLeftCalf = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* rightThighComponent;
@@ -444,7 +471,10 @@ public:
 
 	int32 iRightThighFrame;
 	bool bRightThighAnimEnd = false;
+	bool bRightThighAnimEnd2 = false;
 	FTimerHandle rightThighHandle;
+	FTimerHandle rightThighHandle2;
+	bool bMeltingRightThigh = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frozen")
 	UStaticMeshComponent* rightCalfComponent;
@@ -454,7 +484,10 @@ public:
 
 	int32 iRightCalfFrame;
 	bool bRightCalfAnimEnd = false;
+	bool bRightCalfAnimEnd2 = false;
 	FTimerHandle rightCalfHandle;
+	FTimerHandle rightCalfHandle2;
+	bool bMeltingRightCalf = false;
 
 	int32 iId;
 

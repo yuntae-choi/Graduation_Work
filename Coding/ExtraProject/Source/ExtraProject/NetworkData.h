@@ -37,8 +37,6 @@ const int32  MAX_BULLET_RANG = 8;
 const int32  MAX_USER = 100;
 const int32  MAX_NPC = 100;
 const int32  MAX_OBJ = 20;
-
-
 // 소켓 통신 구조체
 
 // 패킷 정보
@@ -64,6 +62,8 @@ const char CS_PACKET_CANCEL_SNOW = 19;
 const char CS_PACKET_PLAYER_COUNT = 20;
 const char CS_PACKET_PUT_OBJECT = 21;
 const char CS_PACKET_NPC_MOVE = 22;
+const char CS_PACKET_FREEZE = 23;
+
 
 const char SC_PACKET_LOGIN_OK = 1;
 const char SC_PACKET_MOVE = 2;
@@ -92,6 +92,9 @@ const char SC_PACKET_ACCOUNT = 24;
 const char SC_PACKET_CANCEL_SNOW = 25;
 const char SC_PACKET_PLAYER_COUNT = 26;
 const char SC_PACKET_NPC_MOVE = 27;
+const char SC_PACKET_KILL_LOG = 28;
+const char SC_PACKET_FREEZE = 29;
+
 
 
 
@@ -109,7 +112,8 @@ enum COMMAND_Type
 	COMMAND_SHOTGUN,
 	COMMAND_GUNFIRE,
 	COMMAND_UMB_START,
-	COMMAND_UMB_END
+	COMMAND_UMB_END,
+	COMMAND_FREEZE
 };
 
 enum TELEPORT_Type
@@ -162,6 +166,23 @@ enum OBJ_Type { PLAYER, ITEM_BOX, TONARDO, SUPPLYBOX };
 
 enum Login_fail_Type { OVERLAP_ID, WORNG_ID, WORNG_PW, OVERLAP_AC, CREATE_AC };
 
+enum CauseOfDeath {
+	DeathBySnowball, DeathBySnowballBomb, DeathByCold, DeathBySnowman
+};
+
+enum KillLogType {
+	None, Attacker, Victim
+};
+
+enum BODDYPARTS_Type
+{
+	BODDY_HEAD = 0,
+	BODDY_LEFTHAND,
+	BODDY_RIGHTHAND,
+	BODDY_LEFTLEG,
+	BODDY_RIGHTLEG,
+	BODDY_CENTER
+};
 
 // 패킷
 
@@ -246,7 +267,9 @@ struct cs_packet_fire {
 
 struct cs_packet_damage {
 	unsigned char size;
-	char	type;
+	char	 type;
+	int attacker;
+	int bullet;
 };
 
 struct cs_packet_match {
@@ -381,6 +404,21 @@ struct sc_packet_player_count {
 	int32   bear;
 };
 
+struct sc_packet_kill_log {
+	unsigned char size;
+	char type;
+	int32 attacker; //공격자
+	int32   victim; //피해자
+	int32   cause; //원인
+};
+
+struct cs_packet_freeze {
+	unsigned char size;
+	char type;
+	int32 s_id;
+	int32 boddyparts; //바디파츠
+
+};
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
 

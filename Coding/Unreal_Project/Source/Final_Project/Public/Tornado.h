@@ -7,6 +7,9 @@
 #include "Components/CapsuleComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tornado.generated.h"
 
 UCLASS()
@@ -42,4 +45,6 @@ public:
 	class UNiagaraComponent* tornadoNiagara;
 
 	int32 iSessionId;
+	USoundBase* TornadoS;
+
 };

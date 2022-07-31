@@ -493,6 +493,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	UpdateControllerRotateByTornado();	// 토네이도로 인한 스턴상태인 경우 회전하도록
 
 	FreezeAnimationEndCheck(headHandle, bHeadAnimEnd);
+	FreezeAnimationEndCheck2(headHandle2, bHeadAnimEnd2);
 	FreezeAnimationEndCheck(leftForearmHandle, bLeftForearmAnimEnd);
 	FreezeAnimationEndCheck(leftUpperarmHandle, bLeftUpperarmAnimEnd);
 	FreezeAnimationEndCheck(rightForearmHandle, bRightForearmAnimEnd);
@@ -506,20 +507,23 @@ void AMyCharacter::Tick(float DeltaTime)
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("time : %f, num : %d"), fElapsedTime, snowball->paints.Num()));
 
 	//눈자국 삭제
-	fElapsedTime += DeltaTime;
-	if (fElapsedTime > 3.0f)
-	{
-		if (snowball)
-		{
-			if (snowball->paints.Num() > 0)
-			{
-				snowball->paints[0]->SetVisibility(false);
-				if (snowball->paints.IsValidIndex(0))
-					snowball->paints.RemoveAt(0);
-				fElapsedTime = 0.0f;
-			}
-		}
-	}
+	//fElapsedTime += DeltaTime;
+	//if (fElapsedTime > 3.0f)
+	//{
+	//	if (snowball)
+	//	{
+	//		if (snowball->Getpaints().Num() > 0)
+	//		{
+	//			snowball->Getpaints()[0]->SetVisibility(false);
+	//			if (snowball->Getpaints().IsValidIndex(0))
+	//				snowball->Getpaints().RemoveAt(0);
+	//			fElapsedTime = 0.0f;
+
+	//			if (snowball->Getpaints().Num() > 6)
+	//				snowball->Getpaints().Empty();
+	//		}
+	//	}
+	//}
 }
 
 void AMyCharacter::init_Socket()
@@ -2543,51 +2547,101 @@ void AMyCharacter::SendFreeze(int iBodyParts)
 
 void AMyCharacter::FreezeHead()
 {
+	if (bMeltingHead)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(headHandle2);
+		bMeltingHead = false;
+	}
 	FreezeAnimation(headHandle, iHeadFrame, bHeadAnimEnd, headComponent, headMeshes);
 }
 
 void AMyCharacter::FreezeLeftForearm()
 {
+	if (bMeltingLeftForearm)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(leftForearmHandle2);
+		bMeltingLeftForearm = false;
+	}
 	FreezeAnimation(leftForearmHandle, iLeftForearmFrame, bLeftForearmAnimEnd, leftForearmComponent, leftForearmMeshes);
 }
 
 void AMyCharacter::FreezeLeftUpperarm()
 {
+	if (bMeltingLeftUpperarm)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(leftUpperarmHandle2);
+		bMeltingLeftUpperarm = false;
+	}
 	FreezeAnimation(leftUpperarmHandle, iLeftUpperarmFrame, bLeftUpperarmAnimEnd, leftUpperarmComponent, leftUpperarmMeshes);
 }
 
 void AMyCharacter::FreezeRightForearm()
 {
+	if (bMeltingRightForearm)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(rightForearmHandle2);
+		bMeltingRightForearm = false;
+	}
 	FreezeAnimation(rightForearmHandle, iRightForearmFrame, bRightForearmAnimEnd, rightForearmComponent, rightForearmMeshes);
 }
 
 void AMyCharacter::FreezeRightUpperarm()
 {
+	if (bMeltingRightUpperarm)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(rightUpperarmHandle2);
+		bMeltingRightUpperarm = false;
+	}
 	FreezeAnimation(rightUpperarmHandle, iRightUpperarmFrame, bRightUpperarmAnimEnd, rightUpperarmComponent, rightUpperarmMeshes);
 }
 
 void AMyCharacter::FreezeCenter()
 {
+	if (bMeltingCenter)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(centerHandle2);
+		bMeltingCenter = false;
+	}
 	FreezeAnimation(centerHandle, iCenterFrame, bCenterAnimEnd, centerComponent, centerMeshes);
 }
 
 void AMyCharacter::FreezeLeftThigh()
 {
+	if (bMeltingLeftThigh)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(leftThighHandle2);
+		bMeltingLeftThigh = false;
+	}
 	FreezeAnimation(leftThighHandle, iLeftThighFrame, bLeftThighAnimEnd, leftThighComponent, leftThighMeshes);
 }
 
 void AMyCharacter::FreezeLeftCalf()
 {
+	if (bMeltingLeftCalf)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(leftCalfHandle2);
+		bMeltingLeftCalf = false;
+	}
 	FreezeAnimation(leftCalfHandle, iLeftCalfFrame, bLeftCalfAnimEnd, leftCalfComponent, leftCalfMeshes);
 }
 
 void AMyCharacter::FreezeRightThigh()
 {
+	if (bMeltingRightThigh)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(rightThighHandle2);
+		bMeltingRightThigh = false;
+	}
 	FreezeAnimation(rightThighHandle, iRightThighFrame, bRightThighAnimEnd, rightThighComponent, rightThighMeshes);
 }
 
 void AMyCharacter::FreezeRightCalf()
 {
+	if (bMeltingRightCalf)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(rightCalfHandle2);
+		bMeltingRightCalf = false;
+	}
 	FreezeAnimation(rightCalfHandle, iRightCalfFrame, bRightCalfAnimEnd, rightCalfComponent, rightCalfMeshes);
 }
 
@@ -2628,7 +2682,6 @@ void AMyCharacter::FreezeAnimation(FTimerHandle& timerHandle, int& frame, bool& 
 			if (iEachBoneCount - 1 == frame)
 			{
 				end = true;
-				frame = 0;
 			}
 			else
 				frame += 1;
@@ -2641,7 +2694,96 @@ void AMyCharacter::FreezeAnimationEndCheck(FTimerHandle& timerHandle, bool& end)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(timerHandle);
 		end = false;
+
+		//5초 후 녹이기
+		float WaitTime = 10.0f;
+		GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+			{
+				MeltingCheck();
+			}), WaitTime, false);
 	}
+}
+
+void AMyCharacter::FreezeAnimationEndCheck2(FTimerHandle& timerHandle2, bool& end2)
+{
+	if (end2)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(timerHandle2);
+		end2 = false;
+		bMeltingHead = false;
+	}
+}
+
+void AMyCharacter::MeltingCheck()
+{
+	if (headComponent->GetStaticMesh())
+	{
+		bMeltingHead = true;
+		MeltingAnimation(headHandle2, iHeadFrame, bHeadAnimEnd2, headComponent, headMeshes);
+	}
+	if (leftForearmComponent->GetStaticMesh())
+	{
+		bMeltingLeftForearm = true;
+		MeltingAnimation(leftForearmHandle2, iLeftForearmFrame, bLeftForearmAnimEnd2, leftForearmComponent, leftForearmMeshes);
+	}
+	if (leftUpperarmComponent->GetStaticMesh())
+	{
+		bMeltingLeftUpperarm = true;
+		MeltingAnimation(leftUpperarmHandle2, iLeftUpperarmFrame, bLeftUpperarmAnimEnd2, leftUpperarmComponent, leftUpperarmMeshes);
+	}
+	if (rightForearmComponent->GetStaticMesh())
+	{
+		bMeltingRightForearm = true;
+		MeltingAnimation(rightForearmHandle2, iRightForearmFrame, bRightForearmAnimEnd2, rightForearmComponent, rightForearmMeshes);
+	}
+	if (rightUpperarmComponent->GetStaticMesh())
+	{
+		bMeltingRightUpperarm = true;
+		MeltingAnimation(rightUpperarmHandle2, iRightUpperarmFrame, bRightUpperarmAnimEnd2, rightUpperarmComponent, rightUpperarmMeshes);
+	}
+	if (centerComponent->GetStaticMesh())
+	{
+		bMeltingCenter = true;
+		MeltingAnimation(centerHandle2, iCenterFrame, bCenterAnimEnd2, centerComponent, centerMeshes);
+	}
+	if (leftThighComponent->GetStaticMesh())
+	{
+		bMeltingLeftThigh = true;
+		MeltingAnimation(leftThighHandle2, iLeftThighFrame, bLeftThighAnimEnd2, leftThighComponent, leftThighMeshes);
+	}
+	if (leftCalfComponent->GetStaticMesh())
+	{
+		bMeltingLeftCalf = true;
+		MeltingAnimation(leftCalfHandle2, iLeftCalfFrame, bLeftCalfAnimEnd2, leftCalfComponent, leftCalfMeshes);
+	}
+	if (rightThighComponent->GetStaticMesh())
+	{
+		bMeltingRightThigh = true;
+		MeltingAnimation(rightThighHandle2, iRightThighFrame, bRightThighAnimEnd2, rightThighComponent, rightThighMeshes);
+	}
+	if (rightCalfComponent->GetStaticMesh())
+	{
+		bMeltingRightCalf = true;
+		MeltingAnimation(rightCalfHandle2, iRightCalfFrame, bRightCalfAnimEnd2, rightCalfComponent, rightCalfMeshes);
+	}
+}
+
+void AMyCharacter::MeltingAnimation(FTimerHandle& timerHandle, int& frame, bool& end, UStaticMeshComponent*& bone, TArray<UStaticMesh*>& FrozenMeshes)
+{
+	float WaitTime = 0.1f;
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%d"), iHeadFrame));
+			bone->SetStaticMesh(FrozenMeshes[frame]);
+
+			//배열 끝 판정
+			if (frame == 0)
+			{
+				end = true;
+			}
+			else
+				frame -= 1;
+		}), WaitTime, true);
 }
 
 void AMyCharacter::InitializeFreeze()
