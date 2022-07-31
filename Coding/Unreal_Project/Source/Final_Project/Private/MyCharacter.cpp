@@ -1468,7 +1468,8 @@ void AMyCharacter::StartStun(float waitTime)
 
 	//Ω∫≈œ ¿Ã∆Â∆Æ
 	if (stunNiagara) {
-		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), stunNiagara, GetActorLocation() + FVector(0.0f, -40.0f, 90.0f), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+		//UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), stunNiagara, GetActorLocation() + FVector(0.0f, -40.0f, 90.0f), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(stunNiagara, GetCapsuleComponent(), NAME_None, FVector(0.0f, -40.0f, -90.0f), FRotator(0.f), EAttachLocation::Type::KeepRelativeOffset, true);
 	}
 }
 
