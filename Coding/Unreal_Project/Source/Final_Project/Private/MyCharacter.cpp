@@ -880,13 +880,18 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		}
 	}
 	else
-	{	
+	{	// 눈사람이 눈덩이 or 아이스볼에 맞은 경우 - 스턴
 		auto MySnowball = Cast<AMySnowball>(DamageCauser);
+		auto snowballBomb = Cast<ASnowballBomb>(DamageCauser);
 		if (MySnowball)
 		{
-			// 눈사람인 경우 스턴
 			StartStun(fStunTime);
 		}
+		else if (snowballBomb)
+		{
+			StartStun(fStunTime);
+		}
+
 #ifdef SINGLEPLAY_DEBUG
 		MYLOG(Warning, TEXT("Actor : %s stunned, HP : %d"), *GetName(), iCurrentHP);
 #endif
@@ -1881,7 +1886,7 @@ void AMyCharacter::Cheat_IncreaseSnowball()
 void AMyCharacter::Cheat_SpawnSupplyBox()
 {	// 캐릭터 머리 위에 SupplyBox 생성
 	FVector vector = GetActorLocation();
-	vector.Z += 600.0f;
+	vector.Z += 1500.0f;
 
 	localPlayerController->GetSocket()->SendPutObjPacket(SUPPLYBOX, 0, vector, 0.0);
 	//localPlayerController->SpawnSupplyBox(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 600.0f);
