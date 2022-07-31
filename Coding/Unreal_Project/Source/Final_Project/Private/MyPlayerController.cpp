@@ -1244,6 +1244,7 @@ void AMyPlayerController::LoadGameResultUI(int winnerSessionId)
 
 			AudioComponent->Stop();
 
+			localPlayerCharacter->GetMovementComponent()->Deactivate();		// 캐릭터 움직이지 않도록
 		}
 	}
 }
@@ -1257,6 +1258,7 @@ void AMyPlayerController::CallDelegateUpdateAllOfUI()
 	CallDelegateUpdateMaxSnowIceballAndMatchCount();
 	CallDelegateUpdateHasUmbrella();
 	CallDelegateUpdateHasBag();
+	CallDelegateUpdateHasShotgun();
 
 	CallDelegateUpdateSelectedItem();
 	CallDelegateUpdateSelectedProjectile();
