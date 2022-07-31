@@ -69,6 +69,8 @@ public:
 	FVector startLocation;
 
 	bool bTrailOn = false;
+
+	static TArray<UDecalComponent*> paints;
 private:
 	UPROPERTY(VisibleAnywhere, Category = Projectile)
 	int32 iDamage;	// 데미지가 변경될 일이 없으면 static const float로 후에 변경

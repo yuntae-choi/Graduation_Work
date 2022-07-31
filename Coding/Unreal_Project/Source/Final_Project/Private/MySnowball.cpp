@@ -8,9 +8,7 @@
 
 //#define CHECKTRAJECTORY	// 눈덩이가 던져지는 시점에서부터 충돌할 때까지의 궤적 로그 출력
 
-TArray<UDecalComponent*> paints;
-TArray<bool> paintDeletes;
-float fElapsedTime = 0.0f;
+TArray<UDecalComponent*> AMySnowball::paints;
 
 // Sets default values
 AMySnowball::AMySnowball()
@@ -105,21 +103,6 @@ void AMySnowball::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("time : %f, num : %d"), fElapsedTime, paints.Num()));
-
-	fElapsedTime += DeltaTime;
-	if (fElapsedTime > 3.5f)
-	{
-		if (paintDeletes.Num() > 0)
-			if (paintDeletes[0])
-			{
-				paints[0]->DestroyComponent();
-				paints.RemoveAt(0);
-				paintDeletes.RemoveAt(0);
-				fElapsedTime = 0.0f;
-			}
-	}
-
 	if (abs((startLocation - GetActorLocation()).Size()) > 4000.0f)
 		Destroy();
 
@@ -190,7 +173,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	auto spawnRot = (GetActorForwardVector() * FVector(1.0f, 1.0f, 0.0f)).Rotation();
 
 	if (hitNiagara) {
-		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), hitNiagara, GetActorLocation(), spawnRot, FVector(2.0f), true, true, ENCPoolMethod::None, true);
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), hitNiagara, GetActorLocation(), spawnRot, FVector(8.0f), true, true, ENCPoolMethod::None, true);
 	}
 
 	if (nullptr != MyCharacter)
@@ -268,23 +251,13 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 
 			paints.Add(tmp);
 		}
-
-		//눈자국 몇초 뒤에 사라지게
-		float WaitTime = 3.0f;
-		GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
-			{
-				if (paints.Num() > 0)
-				{
-					paintDeletes.Add(true);
-				}
-			}), WaitTime, false);
 	}
 
-	//GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
-	//	{
-	//		//눈덩이 삭제
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			//눈덩이 삭제
 			Destroy();
-		//}), 1.0f, false);
+		}), 1.0f, false);
 	
 #ifdef CHECKTRAJECTORY
 	bCheckTrajectory = false;

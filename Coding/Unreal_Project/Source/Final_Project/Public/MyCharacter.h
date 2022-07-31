@@ -470,6 +470,8 @@ public:
 	char userId[MAX_NAME_SIZE]; // 플레이어 아이디
 	int  iColor;
 
+	float fElapsedTime = 0.0f;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;

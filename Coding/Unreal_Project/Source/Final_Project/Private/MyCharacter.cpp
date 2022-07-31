@@ -492,6 +492,24 @@ void AMyCharacter::Tick(float DeltaTime)
 	FreezeAnimationEndCheck(leftCalfHandle, bLeftCalfAnimEnd);
 	FreezeAnimationEndCheck(rightThighHandle, bRightThighAnimEnd);
 	FreezeAnimationEndCheck(rightCalfHandle, bRightCalfAnimEnd);
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("time : %f, num : %d"), fElapsedTime, snowball->paints.Num()));
+
+	//´«ÀÚ±¹ »èÁ¦
+	fElapsedTime += DeltaTime;
+	if (fElapsedTime > 3.0f)
+	{
+		if (snowball)
+		{
+			if (snowball->paints.Num() > 0)
+			{
+				snowball->paints[0]->SetVisibility(false);
+				if (snowball->paints.IsValidIndex(0))
+					snowball->paints.RemoveAt(0);
+				fElapsedTime = 0.0f;
+			}
+		}
+	}
 }
 
 void AMyCharacter::init_Socket()
