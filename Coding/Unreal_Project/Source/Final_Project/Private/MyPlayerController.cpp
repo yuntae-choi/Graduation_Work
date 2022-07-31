@@ -1424,7 +1424,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 
 void AMyPlayerController::CallDelegateUpdateGameResult(int winnerId)
 {
-	if (!gameResultUI) return;
+	if (!gameResultUI) return; 
 
 	if (FuncUpdateGameResult.IsBound() == true) FuncUpdateGameResult.Broadcast(winnerId);
 }
