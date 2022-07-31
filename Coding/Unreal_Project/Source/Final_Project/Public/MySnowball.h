@@ -12,6 +12,9 @@
 #include "Components/DecalComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 #include "MySnowball.generated.h"
 
 UCLASS()
@@ -77,4 +80,6 @@ private:
 	bool bCheckTrajectory;
 
 	int32 iOwnerSessionId;	// 눈덩이를 생성한 캐릭터의 session id
+
+	USoundBase* HitS;
 };

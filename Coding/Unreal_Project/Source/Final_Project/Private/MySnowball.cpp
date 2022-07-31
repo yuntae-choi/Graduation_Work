@@ -87,6 +87,10 @@ AMySnowball::AMySnowball()
 	trailNiagara->SetVisibility(false);
 
 	hitNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_Spike_Hit.NS_Spike_Hit"), nullptr, LOAD_None, nullptr);
+	
+	static ConstructorHelpers::FObjectFinder<USoundWave> HitSoundAsset(TEXT("/Game/Audio/behavior/Hit.Hit"));
+	if (HitSoundAsset.Succeeded())
+		HitS = HitSoundAsset.Object;
 
 	iDamage = 10;
 	iOwnerSessionId = -1;
@@ -192,6 +196,9 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	if (hitNiagara) {
 		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), hitNiagara, GetActorLocation(), spawnRot, FVector(2.0f), true, true, ENCPoolMethod::None, true);
 	}
+
+	UGameplayStatics::PlaySoundAtLocation(this, HitS, GetActorLocation());
+
 
 	if (nullptr != MyCharacter)
 	{

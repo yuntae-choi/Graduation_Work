@@ -14,6 +14,7 @@
 #include "Sound/SoundCue.h"
 #include "GameFramework/PlayerController.h"
 #include "ClientSocket.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "MyPlayerController.generated.h"
 
@@ -254,6 +255,16 @@ public:
 	ClientSocket* mySocket;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
 	bool	bInGame = false;
+
+	UAudioComponent* AudioComponent;
+	USoundCue* LoginCue;
+	USoundCue* ReadyCue;
+	USoundCue* InGameCue;
+	USoundBase* ThrowS;
+	USoundBase* ShootS;
+	USoundBase* WalkS;
+	USoundBase* ClickS;
+
 private:
 	
 	cCharacter				initInfo;
@@ -295,10 +306,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Class)
 	TSubclassOf<class AActor> supplyboxClass;
 
-    UAudioComponent* AudioComponent;
-	USoundCue* LoginCue;
-	USoundCue* ReadyCue;
-	USoundCue* InGameCue;
+ 
 
 
 };

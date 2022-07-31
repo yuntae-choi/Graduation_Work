@@ -14,6 +14,7 @@
 #include "Jetski.h"
 #include "SupplyBox.h"
 
+
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
 const int AMyCharacter::iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
@@ -566,6 +567,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AMyCharacter::UpDown(float NewAxisValue)
 {
+	
+
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
 }
 
