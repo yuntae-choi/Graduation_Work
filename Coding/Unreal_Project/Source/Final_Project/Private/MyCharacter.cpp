@@ -430,6 +430,15 @@ AMyCharacter::AMyCharacter()
 	fAimingElapsedTime = 0.0f;
 
 	bIsRiding = false;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> HandSoundAsset(TEXT("/Game/Audio/behavior/Hand.Hand"));
+	if (HandSoundAsset.Succeeded())
+		HandS = HandSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> ShotGunSoundAsset(TEXT("/Game/Audio/behavior/ShotGunChoose.ShotGunChoose"));
+	if (ShotGunSoundAsset.Succeeded())
+		ShotGunS = ShotGunSoundAsset.Object;
+
 }
 
 // Called when the game starts or when spawned
@@ -1675,6 +1684,20 @@ void AMyCharacter::ChangeWeapon()
 	if (isAttacking) return;
 
 	iSelectedWeapon = (iSelectedWeapon + 1) % iNumOfWeapons;
+
+	switch (iSelectedWeapon) {
+	case Weapon::Hand:
+		UGameplayStatics::PlaySoundAtLocation(this, HandS, GetActorLocation());
+
+		break;
+	case Weapon::Shotgun:
+		UGameplayStatics::PlaySoundAtLocation(this, ShotGunS, GetActorLocation());
+
+		break;
+	default:
+		break;
+	}
+
 	UpdateUI(UICategory::SelectedWeapon);
 }
 
