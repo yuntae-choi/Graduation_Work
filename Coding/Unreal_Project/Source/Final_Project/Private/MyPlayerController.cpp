@@ -102,7 +102,28 @@ AMyPlayerController::AMyPlayerController()
 	{
 		InGameCue = InGame_Cue.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<USoundWave> ThrowSoundAsset(TEXT("/Game/Audio/behavior/Throw.Throw"));
+	if (ThrowSoundAsset.Succeeded())
+		ThrowS = ThrowSoundAsset.Object;
 
+	
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> ShootSoundAsset(TEXT("/Game/Audio/behavior/Shoot.Shoot"));
+	if (ShootSoundAsset.Succeeded())
+		ShootS = ShootSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> WalkSoundAsset(TEXT("/Game/Audio/behavior/Walk.Walk"));
+	if (WalkSoundAsset.Succeeded())
+		WalkS = WalkSoundAsset.Object;
+
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> ClickSoundAsset(TEXT("/Game/Audio/behavior/Click.Click"));
+	if (ClickSoundAsset.Succeeded())
+		ClickS = ClickSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> FreezeSoundAsset(TEXT("/Game/Audio/behavior/Freeze.Freeze"));
+	if (FreezeSoundAsset.Succeeded())
+		FreezeS = FreezeSoundAsset.Object;
 
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	AudioComponent->bAutoActivate = false;
@@ -321,19 +342,30 @@ void AMyPlayerController::SetFreeze(const int s_id, int body_type)
 void AMyPlayerController::StartFreeze(AMyCharacter* player_, cCharacter* info)
 {
 
+	
+	FVector CharacterLocation;
+	CharacterLocation.X = info->X;
+	CharacterLocation.Y = info->Y;
+	CharacterLocation.Z = info->Z;
+
+
+
 	if (info->bFreezeHead)
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeHead();
 		info->bFreezeHead = false;
 	}
 	if (info->bFreezeLHand)
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeLeftForearm();
 		player_->FreezeLeftUpperarm();
 		info->bFreezeLHand = false;
 	}
 	if (info->bFreezeRHand) 
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeRightForearm();
 		player_->FreezeRightUpperarm();
 		info->bFreezeRHand = false;
@@ -341,18 +373,21 @@ void AMyPlayerController::StartFreeze(AMyCharacter* player_, cCharacter* info)
 	}
 	if (info->bFreezeLLeg) 
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeLeftThigh();
 		player_->FreezeLeftCalf();
 		info->bFreezeLLeg = false;
 	}
 	if (info->bFreezeRLeg) 
 	{
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeRightThigh();
 		player_->FreezeRightCalf();
 		info->bFreezeRLeg = false;
 	}
 	if (info->bFreezeCenter) 
 	{ 
+		UGameplayStatics::PlaySoundAtLocation(player_, FreezeS, CharacterLocation);
 		player_->FreezeCenter(); 
 		info->bFreezeCenter = false;
 	}
@@ -673,6 +708,10 @@ bool AMyPlayerController::UpdateWorldInfo()
 			}
 		}
 
+		FVector CharacterLocation;
+		CharacterLocation.X = info->X;
+		CharacterLocation.Y = info->Y;
+		CharacterLocation.Z = info->Z;
 
 		if (info->bGetSpBox) {
 			player_->GetSupplyBox();
@@ -710,18 +749,22 @@ bool AMyPlayerController::UpdateWorldInfo()
 		}
 
 		if (info->bEndSnowBall) {
+			
+			UGameplayStatics::PlaySoundAtLocation(player_, ThrowS, CharacterLocation);
 			player_->ReleaseSnowball();
 			info->bEndSnowBall = false;
 			info->iCurrentSnowCount--;
 		}
 
 		if (info->bEndIceBall) {
+			UGameplayStatics::PlaySoundAtLocation(player_, ThrowS, CharacterLocation);
 			player_->ReleaseIceball();
 			info->bEndIceBall = false;
 			info->iCurrentIceCount--;
 		}
 
 		if (info->bEndShotGun) {
+			UGameplayStatics::PlaySoundAtLocation(player_, ShootS, CharacterLocation);
 			MYLOG(Warning, TEXT("bEndShotGun"));
 			player_->SpawnSnowballBomb();
 			info->bEndShotGun = false;

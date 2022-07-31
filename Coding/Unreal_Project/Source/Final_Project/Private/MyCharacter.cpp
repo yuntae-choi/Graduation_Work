@@ -14,6 +14,7 @@
 #include "Jetski.h"
 #include "SupplyBox.h"
 
+
 const int AMyCharacter::iMaxHP = 390;
 const int AMyCharacter::iMinHP = 270;
 const int AMyCharacter::iBeginSlowHP = 300;	// 캐릭터가 슬로우 상태가 되기 시작하는 hp
@@ -429,6 +430,15 @@ AMyCharacter::AMyCharacter()
 	fAimingElapsedTime = 0.0f;
 
 	bIsRiding = false;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> HandSoundAsset(TEXT("/Game/Audio/behavior/Hand.Hand"));
+	if (HandSoundAsset.Succeeded())
+		HandS = HandSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> ShotGunSoundAsset(TEXT("/Game/Audio/behavior/ShotGunChoose.ShotGunChoose"));
+	if (ShotGunSoundAsset.Succeeded())
+		ShotGunS = ShotGunSoundAsset.Object;
+
 }
 
 // Called when the game starts or when spawned
@@ -588,6 +598,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AMyCharacter::UpDown(float NewAxisValue)
 {
+	
+
 	AddMovementInput(GetActorForwardVector(), NewAxisValue);
 }
 
@@ -1676,6 +1688,20 @@ void AMyCharacter::ChangeWeapon()
 	if (isAttacking) return;
 
 	iSelectedWeapon = (iSelectedWeapon + 1) % iNumOfWeapons;
+
+	switch (iSelectedWeapon) {
+	case Weapon::Hand:
+		UGameplayStatics::PlaySoundAtLocation(this, HandS, GetActorLocation());
+
+		break;
+	case Weapon::Shotgun:
+		UGameplayStatics::PlaySoundAtLocation(this, ShotGunS, GetActorLocation());
+
+		break;
+	default:
+		break;
+	}
+
 	UpdateUI(UICategory::SelectedWeapon);
 }
 

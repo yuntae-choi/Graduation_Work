@@ -505,6 +505,9 @@ public:
 
 	float fElapsedTime = 0.0f;
 
+	USoundBase* HandS; //맨손모드 선택 사운드
+	USoundBase* ShotGunS;//삿건모드 선택 사운드
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AMySnowball> projectileClass;
