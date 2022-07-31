@@ -29,8 +29,8 @@ const int iOriginMaxMatchCount = 2;	// 성냥 최대보유량 (초기, 가방x)
 const int iNumOfWeapons = 2;	// 무기 종류 수
 const int iNumOfProjectiles = 2;	// 발사체 종류 수
 const float fAimingTime = 0.2f;		// 조준하는 데 걸리는 시간 (카메라 전환만, 애니메이션은 따로)
-const float fThrowPower = 350.0f;
-const float fMaxChargingTime = 10.0f;	// 최대 차징 시간
+const float fThrowPower = 200.0f;
+const float fMaxChargingTime = 15.0f;	// 최대 차징 시간
 const float fSnowballInitialSpeed = 2500.0f;	// 눈덩이 초기 속도
 // 기존 - 2000 + (700 * 5) = 5500	/ 2500 + (350 * 10) = 6000	// 2500 + (200 * 15) = 5500
 const int iEachBoneCount = 23; //부위별 얼리는 메시 개수
