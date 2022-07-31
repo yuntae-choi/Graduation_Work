@@ -1046,7 +1046,7 @@ void process_packet(int s_id, unsigned char* p)
 		}
 		else if (packet->state == ST_SNOWMAN)
 		{
-			//cout << "플레이어" << s_id <<"가 플레이어" <<packet->s_id << "가 눈사람이라 전송함" << endl;
+			cout << "플레이어" << cl._s_id <<"가 플레이어" <<packet->s_id << "가 눈사람이라 전송함" << endl;
 
 			if (false == clients[packet->s_id].bIsSnowman) {
 				clients[packet->s_id]._hp = clients[packet->s_id]._min_hp;
@@ -1065,9 +1065,7 @@ void process_packet(int s_id, unsigned char* p)
 					if (ST_INGAME != other.cl_state)
 						continue;
 					send_state_change(packet->s_id, other._s_id, ST_SNOWMAN);
-					send_kill_log(other._s_id, s_id, packet->s_id, DeathBySnowman);
-					//cout << "눈사람" << endl;
-					//	cout <<"움직인 플레이어" << cl._s_id << "보낼 플레이어" << other._s_id << endl;
+					send_kill_log(other._s_id, cl._s_id, packet->s_id, DeathBySnowman);
 				}
 
 				int cnt = 0;
@@ -1116,7 +1114,6 @@ void process_packet(int s_id, unsigned char* p)
 			//cout << "플레이어" << packet->s_id <<" 눈사람" << endl;
 
 		}
-
 		else if (packet->state == ST_ANIMAL)
 		{
 			//cout << "플레이어" << s_id << "가 플레이어" << packet->s_id << "가 동물이라 전송함" << endl;
@@ -1133,9 +1130,6 @@ void process_packet(int s_id, unsigned char* p)
 				}
 			}
 			//cout << "플레이어" << packet->s_id << " 동물" << endl;
-
-
-
 		}
 
 		break;
@@ -1399,7 +1393,7 @@ void worker_thread()
 					for (auto& other : clients) {
 						if (ST_INGAME != other.cl_state) continue;
 						send_state_change(_s_id, other._s_id, ST_SNOWMAN);
-						send_kill_log(other._s_id, 0, _s_id, DeathByCold);
+						send_kill_log(other._s_id, -2, _s_id, DeathByCold);
 					}
 
 					cout << "플레이어" << _s_id << "가 모닥불에 의해 눈사람으로 변함" << endl;

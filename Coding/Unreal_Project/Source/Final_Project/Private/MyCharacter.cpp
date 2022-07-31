@@ -1074,7 +1074,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 {
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
 #ifdef MULTIPLAY_DEBUG
-	if (!iSessionId == PlayerController->iSessionId || !PlayerController->IsStart()) return;
+	if (iSessionId != PlayerController->iSessionId || !PlayerController->IsStart()) return;
 #endif
 
 	auto MySnowball = Cast<AMySnowball>(OtherActor);
@@ -1096,6 +1096,8 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 			//localPlayerController->SetCharacterState(iSessionId, ST_ANIMAL);
 			//localPlayerController->SetCharacterHP(iSessionId, iMaxHP);
 			//ChangeAnimal();
+
+
 			PlayerController->GetSocket()->Send_StatusPacket(ST_ANIMAL, iSessionId);
 			//UpdateTemperatureState();
 			PlayerController->GetSocket()->Send_StatusPacket(ST_SNOWMAN, otherCharacter->iSessionId);
@@ -1466,9 +1468,10 @@ void AMyCharacter::StartStun(float waitTime)
 		GetMesh()->bPauseAnims = false;
 	}
 
-	//스턴 이펙트
-	if (stunNiagara) {
-		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), stunNiagara, GetActorLocation() + FVector(0.0f, -40.0f, 90.0f), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+	//스턴 이펙트(눈사람일 때만)
+	if (stunNiagara && bIsSnowman) {
+		//UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), stunNiagara, GetActorLocation() + FVector(0.0f, -40.0f, 90.0f), FRotator(1), FVector(1), true, true, ENCPoolMethod::AutoRelease, true);
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(stunNiagara, GetCapsuleComponent(), NAME_None, FVector(0.0f, -40.0f, 90.0f), FRotator(1), EAttachLocation::Type::KeepRelativeOffset, true);
 	}
 }
 

@@ -218,8 +218,8 @@ void AMyPlayerController::Tick(float DeltaTime)
 
 void AMyPlayerController::SetSocket()
 {
-	mySocket = new ClientSocket();         // 에디터용
-	//mySocket = ClientSocket::GetSingleton(); // 패키징 용
+	//mySocket = new ClientSocket();         // 에디터용
+	mySocket = ClientSocket::GetSingleton(); // 패키징 용
 
 	mySocket->SetPlayerController(this);
 	g_socket = mySocket;
@@ -1390,7 +1390,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 {	// 추위에 의한 죽음은 attacker id = -2
 	if (!characterUI) return;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("call delegate update kill log %d %d %d"), attacker, victim, cause));
 
 	char* userId;
 	if (attacker != -2)
@@ -1411,6 +1411,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 	else
 		killLogType = KillLogType::None;
 
+	if (attacker == victim) cause = 4;
 
 	if (FuncUpdateKillLog.IsBound() == true) FuncUpdateKillLog.Broadcast(attackerUserId, victimUserId, cause, killLogType);
 
@@ -1423,7 +1424,7 @@ void AMyPlayerController::CallDelegateUpdateKillLog(int attacker, int victim, in
 
 void AMyPlayerController::CallDelegateUpdateGameResult(int winnerId)
 {
-	if (!gameResultUI) return;
+	if (!gameResultUI) return; 
 
 	if (FuncUpdateGameResult.IsBound() == true) FuncUpdateGameResult.Broadcast(winnerId);
 }
