@@ -58,6 +58,11 @@ ASpringPlatform::ASpringPlatform()
 	iSpringPlatformState = SpringPlatformState::Normal;
 	fSpringScaleZ = 1.0f;
 	fPlatformLocationZ = 74.0f;
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> SpringSoundAsset(TEXT("/Game/Audio/ingame/Spring.Spring"));
+	if (SpringSoundAsset.Succeeded())
+		SpringS = SpringSoundAsset.Object;
+
 }
 
 // Called when the game starts or when spawned
@@ -107,8 +112,11 @@ void ASpringPlatform::UpdateSpring()
 	case SpringPlatformState::Maximum:
 		break;
 	case SpringPlatformState::Increasing:
+
 		if (fSpringScaleZ < 3.0f)
-		{	// 스프링 늘리기
+		{	
+			UGameplayStatics::PlaySoundAtLocation(this, SpringS, GetActorLocation());
+			// 스프링 늘리기
 			fSpringScaleZ += fSpringScaleZInterval;
 			springMeshComponent->SetWorldScale3D(FVector(1.0f, 1.0f, fSpringScaleZ));
 			fPlatformLocationZ += fPlatformLocationZInterval;
