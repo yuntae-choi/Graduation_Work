@@ -264,6 +264,8 @@ public:
 	USoundBase* ShootS;
 	USoundBase* WalkS;
 	USoundBase* ClickS;
+	USoundBase* FreezeS;
+
 
 private:
 	
