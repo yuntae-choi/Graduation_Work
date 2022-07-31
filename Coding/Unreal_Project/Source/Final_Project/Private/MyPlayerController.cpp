@@ -687,6 +687,7 @@ bool AMyPlayerController::UpdateWorldInfo()
 			{
 				if (info->myState == ST_SNOWMAN)
 				{
+					info->iCurrentIceCount = 0;
 					info->iCurrentSnowCount = 0;
 					Reset_Items(player_->iSessionId);
 					player_->ChangeSnowman();
@@ -705,6 +706,12 @@ bool AMyPlayerController::UpdateWorldInfo()
 			if (player_->iCurrentSnowballCount != info->iCurrentSnowCount)
 			{
 				player_->iCurrentSnowballCount = info->iCurrentSnowCount;
+			}
+
+			// 캐릭터 속성 업데이트
+			if (player_->iCurrentIceballCount != info->iCurrentIceCount)
+			{
+				player_->iCurrentIceballCount = info->iCurrentIceCount;
 			}
 		}
 
@@ -1095,6 +1102,8 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 		{
 			if (info.myState == ST_ANIMAL)
 			{
+				info.iCurrentIceCount = 0;
+				info.iCurrentSnowCount = 0;
 				Reset_Items(player_->iSessionId);
 				info.HealthValue = player_->iBeginSlowHP;
 				player_->ChangeAnimal();
@@ -1104,6 +1113,8 @@ void AMyPlayerController::UpdatePlayerInfo(cCharacter& info)
 		{
 			if (info.myState == ST_SNOWMAN)
 			{
+				info.iCurrentIceCount = 0;
+				info.iCurrentSnowCount = 0;
 				Reset_Items(player_->iSessionId);
 				info.HealthValue = player_->iMinHP;
 				player_->ChangeSnowman();
