@@ -2720,6 +2720,7 @@ void AMyCharacter::MeltingCheck()
 	{
 		bMeltingHead = true;
 		MeltingAnimation(headHandle2, iHeadFrame, bHeadAnimEnd2, headComponent, headMeshes);
+		headComponent->CreateDynamicMaterialInstance(1)->SetScalarParameterValue(TEXT("Emissive"), 0.0f);
 	}
 	if (leftForearmComponent->GetStaticMesh())
 	{
@@ -2788,6 +2789,19 @@ void AMyCharacter::MeltingAnimation(FTimerHandle& timerHandle, int& frame, bool&
 
 void AMyCharacter::InitializeFreeze()
 {
+	TArray<FTimerHandle> handles = { headHandle, leftForearmHandle, leftUpperarmHandle, rightForearmHandle, rightUpperarmHandle, centerHandle, leftThighHandle, leftCalfHandle, rightThighHandle, rightCalfHandle };
+	TArray<FTimerHandle> handles2 = { headHandle2, leftForearmHandle2, leftUpperarmHandle2, rightForearmHandle2, rightUpperarmHandle2, centerHandle2, leftThighHandle2, leftCalfHandle2, rightThighHandle2, rightCalfHandle2 };
+
+	for (auto handle : handles)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(handle);
+	}
+
+	for (auto handle2 : handles2)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(handle2);
+	}
+
 	headComponent->SetStaticMesh(nullptr);
 	if (headComponent->GetStaticMesh())
 		headComponent->CreateDynamicMaterialInstance(1)->SetScalarParameterValue(TEXT("Emissive"), 0.0f);
