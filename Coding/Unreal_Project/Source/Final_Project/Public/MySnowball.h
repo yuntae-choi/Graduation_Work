@@ -55,17 +55,18 @@ public:
 
 	AEditorManager* editorManager;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UPROPERTY(VisibleDefaultsOnly, Category = Niagara)
 	UNiagaraComponent* projectileNiagara;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Component)
+	UPROPERTY(VisibleDefaultsOnly, Category = Niagara)
 	UNiagaraComponent* trailNiagara;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Niagara)
+	UNiagaraSystem* hitNiagara;
 
 	FTimerHandle timerHandle;
 
 	FVector startLocation;
-
-	float fElapsedTime = 0.0f;
 
 	bool bTrailOn = false;
 private:

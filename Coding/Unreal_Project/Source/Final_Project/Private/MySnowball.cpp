@@ -9,7 +9,8 @@
 //#define CHECKTRAJECTORY	// 눈덩이가 던져지는 시점에서부터 충돌할 때까지의 궤적 로그 출력
 
 TArray<UDecalComponent*> paints;
-TArray<UDecalComponent*> trashCan;
+TArray<bool> paintDeletes;
+float fElapsedTime = 0.0f;
 
 // Sets default values
 AMySnowball::AMySnowball()
@@ -69,13 +70,13 @@ AMySnowball::AMySnowball()
 		}
 	}
 
-	//projectileNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("projectileNiagaraComponent"));
-	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_PROJECTILE(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_FrostEnergy_Projectile.NS_FrostEnergy_Projectile"));
-	//projectileNiagara->SetAsset(NS_PROJECTILE.Object);
-	//projectileNiagara->SetupAttachment(meshComponent);
-	//projectileNiagara->SetRelativeLocation(FVector(-30.0f, 0.0f, 0.0f));
-	//projectileNiagara->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
-	//projectileNiagara->SetVisibility(false);
+	projectileNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("projectileNiagaraComponent"));
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_PROJECTILE(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_FrostEnergy_Projectile.NS_FrostEnergy_Projectile"));
+	projectileNiagara->SetAsset(NS_PROJECTILE.Object);
+	projectileNiagara->SetupAttachment(meshComponent);
+	projectileNiagara->SetRelativeLocation(FVector(-30.0f, 0.0f, 0.0f));
+	projectileNiagara->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
+	projectileNiagara->SetVisibility(false);
 
 	trailNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("trailNiagaraComponent"));
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NS_TRAIL(TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_Trail_DryIce_Medium.NS_Trail_DryIce_Medium"));
@@ -84,6 +85,8 @@ AMySnowball::AMySnowball()
 	trailNiagara->SetRelativeLocation(FVector(-30.0f, 0.0f, 0.0f));
 	trailNiagara->SetRelativeScale3D(FVector(2.0f, 2.0f, 2.0f));
 	trailNiagara->SetVisibility(false);
+
+	hitNiagara = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/AssetFolder/MagicSpells_Ice/Effects/Sistems/NS_Spike_Hit.NS_Spike_Hit"), nullptr, LOAD_None, nullptr);
 
 	iDamage = 10;
 	iOwnerSessionId = -1;
@@ -102,22 +105,29 @@ void AMySnowball::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("time : %f, num : %d"), fElapsedTime, paints.Num()));
+
 	fElapsedTime += DeltaTime;
-	if (fElapsedTime > 1.0f)
+	if (fElapsedTime > 3.5f)
 	{
-		fElapsedTime = 0.0f;
-		if (trashCan.Num() > 0)
-		{
-			trashCan[0]->DestroyComponent();
-			trashCan.RemoveAt(0);
-		}
+		if (paintDeletes.Num() > 0)
+			if (paintDeletes[0])
+			{
+				paints[0]->DestroyComponent();
+				paints.RemoveAt(0);
+				paintDeletes.RemoveAt(0);
+				fElapsedTime = 0.0f;
+			}
 	}
 
 	if (abs((startLocation - GetActorLocation()).Size()) > 4000.0f)
 		Destroy();
 
 	if (bTrailOn)
+	{
+		//projectileNiagara->SetVisibility(true);
 		trailNiagara->SetVisibility(true);
+	}
 
 #ifdef CHECKTRAJECTORY
 	if (bCheckTrajectory) UE_LOG(LogTemp, Warning, TEXT("%f %f %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
@@ -162,6 +172,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	}
 
 	projectileMovementComponent->StopMovementImmediately();
+	projectileMovementComponent->StopSimulating(Hit);
 
 	//MYLOG(Warning, TEXT("loc :%f, %f, %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("loc :%f, %f, %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
@@ -175,6 +186,12 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	if (em->snowSplash)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), em->snowSplash, GetActorLocation());
 	em->PlaySnowballCrumbleEffect(GetActorLocation());
+
+	auto spawnRot = (GetActorForwardVector() * FVector(1.0f, 1.0f, 0.0f)).Rotation();
+
+	if (hitNiagara) {
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), hitNiagara, GetActorLocation(), spawnRot, FVector(2.0f), true, true, ENCPoolMethod::None, true);
+	}
 
 	if (nullptr != MyCharacter)
 	{
@@ -238,14 +255,19 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	}
 	else
 	{
-		//눈자국
-		FRotator RandomDecalRotation = Hit.Normal.Rotation();
-		RandomDecalRotation.Roll = FMath::FRandRange(-180.0f, 180.0f);
-		auto comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-35.0f, 50.0f, 50.0f),
-			OtherComponent, NAME_None,
-			GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
+		if (paints.Num() < 7)
+		{
+			//눈자국
+			FRotator RandomDecalRotation = Hit.Normal.Rotation();
+			RandomDecalRotation.Roll = FMath::FRandRange(-180.0f, 180.0f);
+			UDecalComponent* comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-35.0f, 50.0f, 50.0f),
+				OtherComponent, NAME_None,
+				GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
 
-		paints.Add(comp);
+			UDecalComponent*& tmp = comp;
+
+			paints.Add(tmp);
+		}
 
 		//눈자국 몇초 뒤에 사라지게
 		float WaitTime = 3.0f;
@@ -253,15 +275,16 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 			{
 				if (paints.Num() > 0)
 				{
-					paints[0]->SetVisibility(false);
-					//trashCan.Add(paints[0]);
-					paints.RemoveAt(0);
+					paintDeletes.Add(true);
 				}
 			}), WaitTime, false);
 	}
 
-	//눈덩이 삭제
-	Destroy();
+	//GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([&]()
+	//	{
+	//		//눈덩이 삭제
+			Destroy();
+		//}), 1.0f, false);
 	
 #ifdef CHECKTRAJECTORY
 	bCheckTrajectory = false;
