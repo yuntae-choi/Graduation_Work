@@ -107,8 +107,8 @@ void AMySnowball::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (abs((startLocation - GetActorLocation()).Size()) > 4000.0f)
-		Destroy();
+	//if (abs((startLocation - GetActorLocation()).Size()) > 4000.0f)
+	//	Destroy();
 
 	if (bTrailOn)
 	{
@@ -160,7 +160,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	}
 
 	//projectileMovementComponent->Velocity = FVector(0.0f, 0.0f, 0.0f);
-	//collisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	collisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	meshComponent->SetVisibility(false);
 
 
