@@ -734,8 +734,8 @@ void AMyCharacter::CancelSnowBallAttack()
 void AMyCharacter::CancelIceBallAttack()
 {
 	//if (iSelectedProjectile == Projectile::Iceball)
-	//{
-		if (myAnim->bThrowing)
+		
+	if (myAnim->bThrowing)
 		{
 			myAnim->PlayAttack2MontageSectionEnd();
 		}
@@ -1458,14 +1458,15 @@ void AMyCharacter::StartStun(float waitTime)
 	// 플레이어의 입력을 무시하도록 (움직일 수 없음, 시야도 고정, 상태 - Stunned)
 	iCharacterState = bIsSnowman ? CharacterState::SnowmanStunned : CharacterState::AnimalStunned;
 	DisableInput(playerController);
-	GetMesh()->bPauseAnims = true;	// 캐릭터 애니메이션도 정지
+	if (!bIsInTornado)	GetMesh()->bPauseAnims = true;	// 캐릭터 애니메이션도 정지
 
 	EndStun(waitTime);	// waitTime이 지나면 stun이 끝나도록
 
 	if (bIsInTornado)
 	{	// 토네이도에 의한 스턴이면 캐릭터가 회전하도록, 애니메이션은 재생되도록
 		rotateCont = true;
-		GetMesh()->bPauseAnims = false;
+
+		if(GetMesh()->bPauseAnims) GetMesh()->bPauseAnims = false;
 	}
 
 	//스턴 이펙트(눈사람일 때만)
@@ -1484,7 +1485,8 @@ void AMyCharacter::EndStun(float waitTime)
 		{
 			iCharacterState = bIsSnowman ? CharacterState::SnowmanNormal : CharacterState::AnimalNormal;
 			EnableInput(playerController);
-			GetMesh()->bPauseAnims = false;
+
+			if (GetMesh()->bPauseAnims) GetMesh()->bPauseAnims = false;
 
 			rotateCont = false;		// 토네이도에 의해서 회전 중이면 멈추기
 		}), waitTime, false);
@@ -1667,7 +1669,7 @@ void AMyCharacter::UpdateZByTornado()
 	{
 		if (!(iSessionId == localPlayerController->iSessionId)) return;
 
-		LaunchCharacter(FVector(0.0f, 0.0f, 20.0f), true, false);
+		LaunchCharacter(FVector(0.0f, 0.0f, 50.0f), true, false);
 
 		// 토네이도에 휩쓸린 캐릭터의 x, y값 토네이도의 x, y값으로 설정해서 같이 움직이도록
 		if (overlappedTornado != nullptr)
