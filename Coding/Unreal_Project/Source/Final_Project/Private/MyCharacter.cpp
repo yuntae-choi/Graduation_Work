@@ -1667,7 +1667,7 @@ void AMyCharacter::UpdateZByTornado()
 	{
 		if (!(iSessionId == localPlayerController->iSessionId)) return;
 
-		LaunchCharacter(FVector(0.0f, 0.0f, 20.0f), true, false);
+		LaunchCharacter(FVector(0.0f, 0.0f, 50.0f), true, false);
 
 		// 토네이도에 휩쓸린 캐릭터의 x, y값 토네이도의 x, y값으로 설정해서 같이 움직이도록
 		if (overlappedTornado != nullptr)

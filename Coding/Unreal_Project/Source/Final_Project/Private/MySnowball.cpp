@@ -160,7 +160,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	}
 
 	//projectileMovementComponent->Velocity = FVector(0.0f, 0.0f, 0.0f);
-	//collisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	collisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	meshComponent->SetVisibility(false);
 
 
@@ -262,7 +262,7 @@ void AMySnowball::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 			//´«ÀÚ±¹
 			FRotator RandomDecalRotation = Hit.Normal.Rotation();
 			RandomDecalRotation.Roll = FMath::FRandRange(-180.0f, 180.0f);
-			UDecalComponent* comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-35.0f, 50.0f, 50.0f),
+			UDecalComponent* comp = UGameplayStatics::SpawnDecalAttached(em->snowPaint, FVector(-35.0f, 40.0f, 40.0f),
 				OtherComponent, NAME_None,
 				GetActorLocation(), RandomDecalRotation, EAttachLocation::KeepWorldPosition);
 
