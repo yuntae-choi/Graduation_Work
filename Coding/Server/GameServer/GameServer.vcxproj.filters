@@ -22,6 +22,15 @@
     <Filter Include="DB">
       <UniqueIdentifier>{77447068-13e1-4388-b0dc-4d566d79366c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IOCP">
+      <UniqueIdentifier>{08240907-04c0-42fa-bda2-f35bfaaa061c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{74498d27-d572-4e66-a1b4-6eeb981b1199}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packet_Manager">
+      <UniqueIdentifier>{5782e4d6-035b-4ca8-8ca3-d0e2cdae2518}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameServer.cpp">
@@ -45,6 +54,15 @@
     <ClCompile Include="GameDataBase.cpp">
       <Filter>DB</Filter>
     </ClCompile>
+    <ClCompile Include="InGameServer.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="IOCPServer.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="P_Manager.cpp">
+      <Filter>Packet_Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -67,6 +85,15 @@
     </ClInclude>
     <ClInclude Include="GameDataBase.h">
       <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="InGameServer.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCPServer.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="P_Manager.h">
+      <Filter>Packet_Manager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

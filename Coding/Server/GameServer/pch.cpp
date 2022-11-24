@@ -2,6 +2,8 @@
 
 global_arr GA;
 array <CLIENT, MAX_USER + MAX_NPC> clients;
+LockQueue<timer_ev> timer_q;
+
 
 void error_display(int err_no)
 {

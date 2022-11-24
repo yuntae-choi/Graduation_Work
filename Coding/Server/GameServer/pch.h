@@ -16,6 +16,8 @@
 #include<random>
 #include <sqlext.h>  
 
+using namespace std;
+
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
@@ -26,12 +28,10 @@ mutex  g_ice_mutex;
 mutex  g_item_mutex;
 mutex  g_spitem_mutex;
 
-
+const int MAX_TH = 10;
 const int RANGE = 10000;
 const int BONFIRE_RANGE = 1700;
-
 const int Tornado_id = 100;
-
 const int Gm_id = 1000;
 
 
@@ -66,6 +66,8 @@ struct global_arr {
 
 extern global_arr GA;
 extern array <CLIENT, MAX_USER + MAX_NPC> clients;
+extern condition_variable cv;
+
 
 bool is_player(int id);
 bool is_bonfire(int a);

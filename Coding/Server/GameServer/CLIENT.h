@@ -68,10 +68,10 @@ public:
 
 
 	CL_STATE cl_state;  //  접속 상태
-	STATE_Type  pl_state;    //인게임 상태
+	STATE  pl_state;    //인게임 상태
 	atomic_bool   _is_active;
 
-	COMBAT _combat;
+	ATTACK _combat;
 
 	atomic_int    _count;
 
@@ -95,7 +95,7 @@ public:
 		lock_guard<mutex> lock(cl_state_lock);		
 		return (value == cl_state);
 	}
-	bool is_pl_state(STATE_Type value)
+	bool is_pl_state(STATE value)
 	{
 		lock_guard<mutex> lock(pl_state_lock);
 		return (value == pl_state);
@@ -107,7 +107,7 @@ public:
 	    cl_state = value;
 	}
 
-	void set_pl_state(STATE_Type value)
+	void set_pl_state(STATE value)
 	{
 		lock_guard<mutex> lock(pl_state_lock);
 		pl_state = value;

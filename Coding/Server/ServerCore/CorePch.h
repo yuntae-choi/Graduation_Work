@@ -20,7 +20,7 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include <concurrent_priority_queue.h>
-
+#include <string>
 #include <windows.h>
 #include <iostream>
 using namespace std;
