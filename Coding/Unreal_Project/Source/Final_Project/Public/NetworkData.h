@@ -29,7 +29,7 @@ using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
 
-const int32  MAX_NAME_SIZE = 20;
+const int32  MAX_NAME_SIZE = 21;
 const int32  MAX_CHAT_SIZE = 100;
 const int32 BUF_SIZE = 2048;
 const int32 Tornado_id = 100;

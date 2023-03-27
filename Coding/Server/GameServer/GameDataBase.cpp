@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "GameDataBase.h"
+#include <string>
 
 SQLHENV henv;
 SQLHDBC hdbc;
-SQLHSTMT hstmt;
+SQLHSTMT hstmt = 0;
+bool DB_ON = false;
 
 void show_err() {
 	cout << "error" << endl;
@@ -53,7 +55,7 @@ void Init_DB()
 					cout << "ODBC Connection Success" << endl;
 					retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 				}
-				else{
+				else {
 					cout << "ODBC Connected Failed" << endl;
 					HandleDiagnosticRecord(hstmt, SQL_HANDLE_DBC, retcode);
 				}
@@ -74,38 +76,43 @@ void DB_Rel()
 
 
 //Login
-bool DB_Login(const char* login_id, const char* login_pw, LoginInfo& p_info)
+bool DB_Login(char* login_id, char* login_pw, LoginInfo& p_info)
 {
 	SQLRETURN retcode{};
 	SQLINTEGER p_win{}, p_lose{}; //플레이어 승리 카운트, 패배 카운트
 	SQLSMALLINT p_color{}, p_grade{};//플레이어 컬러, 등급
-	SQLLEN L_win = 0, L_lose = 0, L_color, L_grade = 0;
-	
-	wstring LoginQuery{ L"EXEC login_player " };
+	SQLLEN L_win = 0, L_lose = 0, L_color = 0, L_grade = 0;
+
+	cout << "DB_Login " << login_id << " " << login_pw << endl;
+    wstring LoginQuery{ L"EXEC login_player " };
 	USES_CONVERSION;
 	LoginQuery += A2W(login_id);
 	LoginQuery += L",";
 	LoginQuery += A2W(login_pw);
-   
 
 	retcode = SQLExecDirect(hstmt, (SQLWCHAR*)LoginQuery.c_str(), SQL_NTS);
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) 
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
 	{
 		retcode = SQLBindCol(hstmt, 1, SQL_C_LONG, &p_win, 100, &L_win);
-		retcode = SQLBindCol(hstmt, 1, SQL_C_LONG, &p_lose, 100, &L_lose);
-		retcode = SQLBindCol(hstmt, 1, SQL_C_SHORT, &p_color, 100, &L_color);
-		retcode = SQLBindCol(hstmt, 1, SQL_C_SHORT, &p_grade, 100, &L_grade);
+		retcode = SQLBindCol(hstmt, 2, SQL_C_LONG, &p_lose, 100, &L_lose);
+		retcode = SQLBindCol(hstmt, 3, SQL_C_SHORT, &p_color, 100, &L_color);
+		retcode = SQLBindCol(hstmt, 4, SQL_C_SHORT, &p_grade, 100, &L_grade);
 
 		retcode = SQLFetch(hstmt);
 		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
 		{
+			cout << "로그인 중간" << endl;
 			p_info.p_win = p_win;
 			p_info.p_lose = p_lose;
 			p_info.p_color = p_color;
 			p_info.p_grade = p_grade;
 			SQLCancel(hstmt);
-			show_err();
 			return true;
+		}
+		else {
+			SQLCancel(hstmt);
+			cout << "Search 실패" << endl;
+			return false;
 		}
 	}
 	else
@@ -115,6 +122,8 @@ bool DB_Login(const char* login_id, const char* login_pw, LoginInfo& p_info)
 		SQLCancel(hstmt);
 		return false;
 	}
+	SQLCancel(hstmt);
+	return false;
 
 }
 
@@ -130,7 +139,7 @@ bool DB_Check_Id(const char* login_id)
 	CheckIDQuery += A2W(login_id);
 
 	retcode = SQLExecDirect(hstmt, (SQLWCHAR*)CheckIDQuery.c_str(), SQL_NTS);
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) 
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
 	{
 		retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, p_name, NAME_LEN, &L_id);
 		retcode = SQLFetch(hstmt);
@@ -185,7 +194,7 @@ bool DB_SignUp(int id)
 			return false;
 		}
 	}
-	
+
 	cout << "[DB_odbc] 로그인 실패" << clients[id]._id;
 	HandleDiagnosticRecord(hstmt, SQL_HANDLE_DBC, retcode);
 	SQLCancel(hstmt);
