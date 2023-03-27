@@ -47,13 +47,6 @@ struct timer_ev {
     }
 };
 
-void error_display(int err_no);
-
-#include "Overlap.h"
-#include "CLIENT.h"
-#include "ConcurrentQueue.h"
-#include "ConcurrentStack.h"
-
 struct global_arr {
     bool g_snow_drift[MAX_SNOWDRIFT] = {};
     bool g_ice_drift[MAX_SNOWDRIFT] = {};
@@ -63,6 +56,22 @@ struct global_arr {
     atomic<int> g_color = 0;
     bool g_tonardo = false;
 };
+
+//플레이어 로그인 정보
+struct LoginInfo {
+    char p_name[21];		//id - 최대 10글자 + null문자 1
+    char p_password[21];    //pw - 최대 10글자 + null문자 1
+    int p_win;              //승리한 횟수
+    int p_lose;             //패배횟수
+    short p_color;          //캐릭터 컬러
+    short p_grade;          //플레이어 등급
+};
+void error_display(int err_no);
+
+#include "Overlap.h"
+#include "CLIENT.h"
+#include "ConcurrentQueue.h"
+#include "ConcurrentStack.h"
 
 extern global_arr GA;
 extern array <CLIENT, MAX_USER + MAX_NPC> clients;

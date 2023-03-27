@@ -134,7 +134,7 @@ bool PManager::Login()
 			}
 
 			if (bOverlap == true) return false;
-			if (DB_odbc(IdNum, packet->id, packet->pw) == true)
+			if (DB_Login(packet->id, packet->pw, cl->LogInInfo) == true)
 			{
 				strcpy_s(cl->_id, packet->id);
 				SetPos(IdNum, packet->id, packet->pw, packet->z);
@@ -145,7 +145,7 @@ bool PManager::Login()
 			}
 			else
 			{
-				if (DB_id(packet->id) == true) {
+				if (DB_Check_Id(packet->id) == true) {
 					cout << "플레이어[" << IdNum << "]" << " 잘못된 비번" << endl;
 					send_login_fail_packet(IdNum, WORNG_PW);
 					return false;
@@ -187,7 +187,7 @@ bool PManager::CreateAccount()
 
 		printf_s("[Recv login] ID : %s, PASSWORD : %s\n", packet->id, packet->pw);
 		if (_OverLap == true) return false;
-		if (DB_id(packet->id) == true) {
+		if (DB_Check_Id(packet->id) == true) {
 			cout << "플레이어[" << IdNum << "] 계정 생성 실패 - " << "중복된 아이디" << endl;
 			send_login_fail_packet(IdNum, OVERLAP_ID);
 		}
@@ -195,7 +195,7 @@ bool PManager::CreateAccount()
 		{	//DB에 계정등록 
 			strcpy_s(cl->_id, packet->id);
 			strcpy_s(cl->_pw, packet->pw);
-			DB_save(IdNum);
+			DB_SignUp(IdNum);
 			send_login_fail_packet(IdNum, CREATE_AC);
 			cout << packet->id << "DB에 계정등록" << endl;
 		}

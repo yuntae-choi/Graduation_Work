@@ -6,6 +6,7 @@
 class CLIENT
 {
 public:
+	LoginInfo LogInInfo; // 로그인 정보
 	int _s_id; //플레이어 배열 넘버
 	char name[MAX_NAME_SIZE]; //플레이어 nick
 	char _id[MAX_NAME_SIZE]; // id

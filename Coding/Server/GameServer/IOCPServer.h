@@ -8,7 +8,7 @@ class IOCPServer
 public:
 	IOCPServer();
 	virtual ~IOCPServer();
-	bool Start();
+	void Start();
 	void CreateWorker();//작업쓰레드 생성
 	bool Init(const int worker_num);
 	bool BindListen(const int port_num);

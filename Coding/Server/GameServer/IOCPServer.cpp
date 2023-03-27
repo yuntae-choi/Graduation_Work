@@ -61,9 +61,10 @@ bool IOCPServer::BindListen(const int port_num)
 	return true;
 };
 
-bool IOCPServer::Start()
+void IOCPServer::Start()
 {
 	CreateWorker();
+
 };
 
 

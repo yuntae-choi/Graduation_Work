@@ -20,6 +20,7 @@ int main()
 	server.Init(MAX_TH);
 	server.BindListen(SERVER_PORT);
 	server.Run();
+	DB_Rel();
 	server.End();
 
 	
