@@ -41,6 +41,7 @@ const char CS_PACKET_PLAYER_COUNT = 20;
 const char CS_PACKET_PUT_OBJECT = 21;
 const char CS_PACKET_NPC_MOVE = 22;
 const char CS_PACKET_FREEZE = 23;
+const char CS_PACKET_MATCHING = 24;
 
 
 

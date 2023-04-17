@@ -100,6 +100,10 @@ void PManager::ProcessPacket(int Id, unsigned char* recv)
 		Freeze();
 		break;
 	}
+	case CS_PACKET_MATCHING: {
+		MATCHING();
+		break;
+	}
 	default:
 		cout << " 오류패킷타입" << packet_type << endl;
 		printf("Unknown PACKET type\n");
@@ -700,6 +704,11 @@ bool PManager::Freeze()
 		packet->type = SC_PACKET_FREEZE;
 		other.do_send(sizeof(*packet), packet);
 	}
+	return true;
+};
+
+bool PManager::MATCHING()
+{
 	return true;
 };
 

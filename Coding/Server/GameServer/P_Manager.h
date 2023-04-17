@@ -24,6 +24,7 @@ public:
 	void DelvelopCheat();
 	void Snow(int type);
 	bool Freeze();
+	bool MATCHING();
 	bool GunFire();
 	void Ready();
 	bool SetStaus();

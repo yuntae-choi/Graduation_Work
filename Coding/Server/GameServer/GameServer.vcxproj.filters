@@ -63,6 +63,9 @@
     <ClCompile Include="P_Manager.cpp">
       <Filter>Packet_Manager</Filter>
     </ClCompile>
+    <ClCompile Include="BattleServer.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -94,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="P_Manager.h">
       <Filter>Packet_Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="BattleServer.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
