@@ -10,7 +10,10 @@ const int32  ReZone_HEIGHT = 2000;
 const int32  ReZone_WIDTH = 2000;
 const int32  MAX_NAME_SIZE = 21;
 const int32  MAX_CHAT_SIZE = 100;
+const int32  MAX_B_SERVER = 10;
 const int32  MAX_USER = 100;
+const int32  MAX_MATCH_USER = 8;
+
 const int32  MAX_NPC = 100;
 const int32  MAX_OBJ = 20;
 const int32  MAX_SNOWDRIFT = 1000;
@@ -42,7 +45,8 @@ const char CS_PACKET_PUT_OBJECT = 21;
 const char CS_PACKET_NPC_MOVE = 22;
 const char CS_PACKET_FREEZE = 23;
 const char CS_PACKET_MATCHING = 24;
-
+const char CS_PACKET_SERVER_LOGIN = 25;
+const char CS_PACKET_SERVER_LOGIN_OK = 26;
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -74,6 +78,7 @@ const char SC_PACKET_PLAYER_COUNT = 26;
 const char SC_PACKET_NPC_MOVE = 27;
 const char SC_PACKET_KILL_LOG = 28;
 const char SC_PACKET_FREEZE = 29;
+
 
 
 #pragma pack (push, 1)
@@ -321,5 +326,16 @@ struct cs_packet_freeze {
 	int32 s_id; 
 	int32 boddyparts; //¹ÙµðÆÄÃ÷
 
+};
+
+struct cs_packet_server_login {
+	unsigned char size;
+	char	type;
+};
+
+struct sc_packet_server_login_ok {
+	unsigned char size;
+	char	type;
+	short port_num;
 };
 #pragma pack(pop)

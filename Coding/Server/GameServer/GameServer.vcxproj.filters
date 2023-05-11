@@ -54,7 +54,7 @@
     <ClCompile Include="GameDataBase.cpp">
       <Filter>DB</Filter>
     </ClCompile>
-    <ClCompile Include="InGameServer.cpp">
+    <ClCompile Include="LobbyServer.cpp">
       <Filter>Server</Filter>
     </ClCompile>
     <ClCompile Include="IOCPServer.cpp">
@@ -89,7 +89,7 @@
     <ClInclude Include="GameDataBase.h">
       <Filter>DB</Filter>
     </ClInclude>
-    <ClInclude Include="InGameServer.h">
+    <ClInclude Include="LobbyServer.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="IOCPServer.h">

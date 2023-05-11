@@ -2,7 +2,7 @@
 #include "IOCPServer.h"
 
 
-IOCPServer::IOCPServer()
+IOCPServer::IOCPServer() : state(SERVER_FREE)
 {
 }
 
@@ -67,6 +67,10 @@ void IOCPServer::Start()
 
 };
 
+void IOCPServer::ReStart()
+{
+	
+};
 
 void IOCPServer::CreateWorker() 
 {
@@ -255,3 +259,21 @@ void IOCPServer::Wsa_err_display(int err_no)
 	}
 }
 
+bool IOCPServer::Set_State(SERVER_STATE st)
+{
+	state_lock.lock();
+	if (state != st) {
+		state = st;
+		state_lock.unlock();
+		return true;
+	}
+	state_lock.unlock();
+	return false;
+	
+};
+void IOCPServer::Get_State(SERVER_STATE& st)
+{
+	state_lock.lock();
+	st = state;
+	state_lock.unlock();
+};

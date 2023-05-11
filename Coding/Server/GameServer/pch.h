@@ -72,12 +72,16 @@ void error_display(int err_no);
 #include "CLIENT.h"
 #include "ConcurrentQueue.h"
 #include "ConcurrentStack.h"
+#include "IOCPServer.h"
+#include "BattleServer.h"
 
 extern global_arr GA;
 extern array <CLIENT, MAX_USER + MAX_NPC> clients;
+extern array<BattleServer, MAX_B_SERVER> BattleServers;
 extern condition_variable cv;
 
-
+void reset_server();
+void error_display(int err_no);
 bool is_player(int id);
 bool is_bonfire(int a);
 bool is_near(int a, int b);

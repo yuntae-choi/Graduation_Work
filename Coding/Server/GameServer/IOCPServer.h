@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "CorePch.h"
 
-
 class IOCPServer
 {
 public:
@@ -19,13 +18,16 @@ public:
 	void Disconnect(int _s_id);
 	void Wsa_err_display(int err_no);
 	void JoinThread();
+	bool Set_State(SERVER_STATE st);
+	void Get_State(SERVER_STATE& st);
+	virtual void ReStart();
 protected:
 	Overlap   accept_ex;
 	HANDLE g_h_iocp;
 	SOCKET sever_socket;
 	int Workerth_num;
 	vector <thread> worker_threads;
-	
-
+	SERVER_STATE state;
+	std::mutex state_lock;
 };
 

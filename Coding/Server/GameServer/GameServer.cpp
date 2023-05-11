@@ -9,14 +9,14 @@
 #include "ConcurrentQueue.h"
 #include "ConcurrentStack.h"
 #include "GameDataBase.h"
-#include "InGameServer.h"
-
+#include "LobbyServer.h"
+#include "BattleServer.h"
 
 int main()
 {
 	
 	wcout.imbue(locale("korean"));
-	InGameServer server;
+	LobbyServer server;
 	Init_DB();
 	server.Init(MAX_TH);
 	server.BindListen(SERVER_PORT);

@@ -2,8 +2,15 @@
 
 global_arr GA;
 array <CLIENT, MAX_USER + MAX_NPC> clients;
+array<BattleServer, MAX_B_SERVER> BattleServers;
 LockQueue<timer_ev> timer_q;
 
+void reset_server()
+{
+	ZeroMemory(&GA, sizeof(GA));
+	ZeroMemory(&clients, sizeof(clients));
+	ZeroMemory(&timer_q, sizeof(timer_q));
+}
 
 void error_display(int err_no)
 {

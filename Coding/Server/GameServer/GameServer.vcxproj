@@ -165,7 +165,7 @@
     <ClCompile Include="ConcurrentStack.cpp" />
     <ClCompile Include="GameDataBase.cpp" />
     <ClCompile Include="GameServer.cpp" />
-    <ClCompile Include="InGameServer.cpp" />
+    <ClCompile Include="LobbyServer.cpp" />
     <ClCompile Include="IOCPServer.cpp" />
     <ClCompile Include="Overlap.cpp" />
     <ClCompile Include="pch.cpp">
@@ -183,7 +183,7 @@
     <ClInclude Include="ConcurrentStack.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="GameDataBase.h" />
-    <ClInclude Include="InGameServer.h" />
+    <ClInclude Include="LobbyServer.h" />
     <ClInclude Include="IOCPServer.h" />
     <ClInclude Include="Overlap.h" />
     <ClInclude Include="pch.h" />

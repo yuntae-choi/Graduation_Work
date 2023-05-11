@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "P_Manager.h"
 #include "GameDataBase.h"
-#include "InGameServer.h"
+#include "LobbyServer.h"
 #include "ConcurrentQueue.h"
 
 default_random_engine dre;
@@ -102,6 +102,14 @@ void PManager::ProcessPacket(int Id, unsigned char* recv)
 	}
 	case CS_PACKET_MATCHING: {
 		MATCHING();
+		break;
+	}
+	case CS_PACKET_SERVER_LOGIN: {
+		
+		break;
+	}
+	case CS_PACKET_SERVER_LOGIN_OK: {
+
 		break;
 	}
 	default:
@@ -1171,3 +1179,16 @@ int PManager::get_id()
 	cout << "Maximum Number of Clients Overflow!!\n";
 	return -1;
 }
+
+int PManager::set_port()
+{
+	for (int i = 0; i < MAX_B_SERVER; i++)
+	{
+		SERVER_STATE st;
+		BattleServers[i].Get_State(st);
+		if (st == SERVER_FREE)
+		{
+			BattleServers[i].Set_State(SERVER_MATHCING);
+		}
+	}
+};

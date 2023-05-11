@@ -116,4 +116,5 @@ void CLIENT::data_init()
 	_recv_over = {};
 	_prev_size = {};
 	last_move_time = {};
+	//closesocket(_socket);
 }
