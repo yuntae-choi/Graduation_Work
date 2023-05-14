@@ -2,6 +2,7 @@
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
 #define _CRT_SECURE_NO_WARNINGS
+#define SERVER_IP		"127.0.0.1" //로컬IP
 
 const short SERVER_PORT = 10001;
 
@@ -46,7 +47,6 @@ const char CS_PACKET_NPC_MOVE = 22;
 const char CS_PACKET_FREEZE = 23;
 const char CS_PACKET_MATCHING = 24;
 const char CS_PACKET_SERVER_LOGIN = 25;
-const char CS_PACKET_SERVER_LOGIN_OK = 26;
 
 
 const char SC_PACKET_LOGIN_OK = 1;
@@ -78,6 +78,12 @@ const char SC_PACKET_PLAYER_COUNT = 26;
 const char SC_PACKET_NPC_MOVE = 27;
 const char SC_PACKET_KILL_LOG = 28;
 const char SC_PACKET_FREEZE = 29;
+
+const char SS_PACKET_SERVER_LOGIN = 1;
+const char SS_PACKET_SERVER_LOGIN_OK = 2;
+const char SS_PACKET_SERVER_RESTART = 3;
+const char SS_PACKET_SERVER_GAME_END = 4;
+
 
 
 
@@ -328,14 +334,22 @@ struct cs_packet_freeze {
 
 };
 
-struct cs_packet_server_login {
-	unsigned char size;
-	char	type;
-};
-
-struct sc_packet_server_login_ok {
+struct ss_packet_server_login {
 	unsigned char size;
 	char	type;
 	short port_num;
 };
+
+struct ss_packet_server_login_ok {
+	unsigned char size;
+	char	type;
+	int32 server_id;
+};
+
+struct ss_packet_server_game_end {
+	unsigned char size;
+	char	type;
+	int32 win_id;
+};
+
 #pragma pack(pop)

@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Main">
+      <UniqueIdentifier>{e471836b-b0e9-42fc-a4d1-573ab7830cb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lock">
+      <UniqueIdentifier>{d4adf8a4-30ad-4b8e-90fa-8ff799455bd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{9201500c-4786-4fbb-9177-b0dbaefa3b32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\IOCP">
+      <UniqueIdentifier>{1b5a78f8-9a19-420d-a037-78948bb1a21e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client">
+      <UniqueIdentifier>{7c40165e-0a5e-4047-a712-b964db9d73c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Exp_Over">
+      <UniqueIdentifier>{de0c8e0b-c749-4676-ba67-b6c4eddacad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Enum">
+      <UniqueIdentifier>{464dd0a3-febe-41f7-9aa5-e33b047154c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packet_Manager">
+      <UniqueIdentifier>{f6e5c332-e6ca-4189-baaa-dc0e180608e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{c43cccb1-d071-4ac1-a04e-4b895d60d76a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Battle">
+      <UniqueIdentifier>{cdf4a6e5-8b5f-48e6-8211-b664b9140376}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="P_Manager.cpp">
+      <Filter>Packet_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Overlap.cpp">
+      <Filter>Exp_Over</Filter>
+    </ClCompile>
+    <ClCompile Include="CLIENT.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="IOCPServer.cpp">
+      <Filter>Server\IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="BattleServer.cpp">
+      <Filter>Server\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="LockQueue.cpp">
+      <Filter>Lock</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="P_Manager.h">
+      <Filter>Packet_Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Enum.h">
+      <Filter>Enum</Filter>
+    </ClInclude>
+    <ClInclude Include="Overlap.h">
+      <Filter>Exp_Over</Filter>
+    </ClInclude>
+    <ClInclude Include="CLIENT.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCPServer.h">
+      <Filter>Server\IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="BattleServer.h">
+      <Filter>Server\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="LockQueue.h">
+      <Filter>Lock</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
