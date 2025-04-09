@@ -1210,6 +1210,7 @@ int PManager::set_port()
 			BattleServers[i].Set_State(SERVER_MATHCING);
 		}*/
 	}
+	return 0;
 };
 
 void PManager::server_login_ok()
